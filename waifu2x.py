@@ -22,4 +22,4 @@ class WAIFU2X:
         self.method = method
 
     def upscale(self, folderin, folderout, width, height):
-        os.system("{} -p {} -I png -i {} -e png -o {} -w {} -h {}".format(self.waifu2x_path, self.method, folderin, folderout, width, height))
+        os.system("{} -p {} -I png -i {} -e png -o {} -w {} -h {} -n 3 -m noise_scale -y photo".format(self.waifu2x_path, self.method, folderin, folderout, width, height))
