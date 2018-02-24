@@ -36,6 +36,9 @@ def processArguments():
     control_group.add_argument("-f", "--factor", help="Factor to enlarge video by", action="store", default=2)
     control_group.add_argument("-v", "--video", help="Specify video file", action="store", default=False)
     control_group.add_argument("-o", "--output", help="Specify output file", action="store", default=False)
+    control_group.add_argument("--cpu", help="Use CPU for enlarging", action="store_true", default=False)
+    control_group.add_argument("--gpu", help="Use GPU for enlarging", action="store_true", default=False)
+    control_group.add_argument("--cudnn", help="Use CUDNN for enlarging", action="store_true", default=False)
     args = parser.parse_args()
 
 
@@ -57,8 +60,15 @@ def main():
     """Main flow control function for video2x.
     This function takes care of the order of operation.
     """
+    if args.cpu:
+        method = "cpu"
+    elif args.gpu:
+        method = "gpu"
+    elif args.cudnn:
+        method = "cudnn"
+
     fm = FFMPEG("\"" + FFMPEG_PATH + "ffmpeg.exe\"", args.output)
-    w2 = WAIFU2X(WAIFU2X_PATH)
+    w2 = WAIFU2X(WAIFU2X_PATH, method)
 
     # Extract Frames
     if not os.path.isdir(FOLDERIN):
@@ -84,4 +94,15 @@ def main():
 
 
 processArguments()
+
+if not args.video:
+    print("Error: You need to specify the video to process")
+    exit(1)
+elif not args.output:
+    print("Error: You need to specify the output video name")
+    exit(1)
+elif not args.cpu and not args.gpu and not args.cudnn:
+    print("Error: You need to specify the enlarging processing unit")
+    exit(1)
+
 main()

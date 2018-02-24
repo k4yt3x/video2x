@@ -17,8 +17,9 @@ import os
 
 class WAIFU2X:
 
-    def __init__(self, waifu2x_path):
+    def __init__(self, waifu2x_path, method):
         self.waifu2x_path = waifu2x_path
+        self.method = method
 
     def upscale(self, folderin, folderout, width, height):
-        os.system("{} -p cpu -I png -i {} -e png -o {} -w {} -h {}".format(self.waifu2x_path, folderin, folderout, width, height))
+        os.system("{} -p {} -I png -i {} -e png -o {} -w {} -h {}".format(self.waifu2x_path, self.method, folderin, folderout, width, height))
