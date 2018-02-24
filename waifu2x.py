@@ -17,8 +17,8 @@ import os
 
 class WAIFU2X:
 
-    def __init__(self):
-        pass
+    def __init__(self, waifu2x_path):
+        self.waifu2x_path = waifu2x_path
 
-    def upscale(self, factor, folderin, folderout):
-        os.system("waifu2x-caffe-cui.exe -i {} -o {}".format(folderin, folderout))
+    def upscale(self, folderin, folderout, width, height):
+        os.system("{} -p cpu -I png -i {} -e png -o {} -w {} -h {}".format(self.waifu2x_path, folderin, folderout, width, height))
