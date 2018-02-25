@@ -1,14 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+
+__      __  _       _                  ___   __   __
+\ \    / / (_)     | |                |__ \  \ \ / /
+ \ \  / /   _    __| |   ___    ___      ) |  \ V /
+  \ \/ /   | |  / _` |  / _ \  / _ \    / /    > <
+   \  /    | | | (_| | |  __/ | (_) |  / /_   / . \
+    \/     |_|  \__,_|  \___|  \___/  |____| /_/ \_\
+
+
 Name: Video2x Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: Feb 24, 2018
+Last Modified: Feb 25, 2018
 
-Description: This is the main controller for Video2x
+Licensed under the GNU General Public License Version 3 (GNU GPL v3),
+    available at: https://www.gnu.org/licenses/gpl-3.0.txt
 
-Version 1.0
+(C) 2016 - 2017 K4YT3X
+
+Description: Video2X is an automation software based on
+waifu2x image enlarging engine. It extracts frames from a
+video, enlarge it by a number of times without losing any
+details or quality, keeping lines smooth and edges sharp.
+
+Version 1.1 alpha
 """
 
 from ffmpeg import FFMPEG
@@ -17,16 +34,21 @@ from waifu2x import WAIFU2X
 import argparse
 import json
 import os
+import traceback
 
+# FFMPEG bin folder. Mind that "/" at the end
 FFMPEG_PATH = "C:/Program Files (x86)/ffmpeg/bin/"
+# waifu2x executable path. Mind all the forward slashes
 WAIFU2X_PATH = "\"C:/Program Files (x86)/waifu2x-caffe/waifu2x-caffe-cui.exe\""
 
-FOLDERIN = "frames"
-FOLDEROUT = "upscaled"
+FOLDERIN = "frames"  # Folder containing extracted frames
+FOLDEROUT = "upscaled"  # Folder contaning enlarges frames
 
 
 def processArguments():
-    """This function parses all arguments
+    """Processes CLI arguments
+
+    This function parses all arguments
     This allows users to customize options
     for the output video.
     """
@@ -44,10 +66,14 @@ def processArguments():
 
 def get_vid_info():
     """Gets original video information
-    This function uses ffprobe to determine the
-    properties of the original video.
 
-    It returns a dict
+    Retrieves original video information using
+    ffprobe, then export it into json file.
+    Finally it reads, parses the json file and
+    returns a dictionary
+
+    Returns:
+        dictionary -- original video information
     """
     os.system("{} -v quiet -print_format json -show_format -show_streams {} > info.json".format("\"" + FFMPEG_PATH + "ffprobe.exe\"", args.video))
     json_file = open('info.json', 'r')
@@ -57,8 +83,10 @@ def get_vid_info():
 
 
 def main():
-    """Main flow control function for video2x.
-    This function takes care of the order of operation.
+    """Main controller for Video2X
+
+    This function controls the flow of video conversion
+    and handles all necessary functions.
     """
     if args.cpu:
         method = "cpu"
@@ -73,9 +101,10 @@ def main():
     # Extract Frames
     if not os.path.isdir(FOLDERIN):
         os.mkdir(FOLDERIN)
-    fm.strip_frames(args.video, FOLDERIN)
+    fm.extract_frames(args.video, FOLDERIN)
 
     info = get_vid_info()
+    # Framerate is read as fraction from the json dictionary
     width, height, framerate = info["streams"][0]["width"], info["streams"][0]["height"], float(Fraction(info["streams"][0]["avg_frame_rate"]))
     print("Framerate: ", framerate)
     final_resolution = str(width * int(args.factor)) + "x" + str(height * int(args.factor))
@@ -90,11 +119,13 @@ def main():
 
     # Extract and press audio in
     fm.extract_audio(args.video, FOLDEROUT)
-    fm.pressin_audio("output.mp4", FOLDEROUT)
+    fm.insert_audio_track("output.mp4", FOLDEROUT)
 
 
 processArguments()
 
+# Check if arguments are valid / all necessary argument
+# values are specified
 if not args.video:
     print("Error: You need to specify the video to process")
     exit(1)
@@ -105,4 +136,10 @@ elif not args.cpu and not args.gpu and not args.cudnn:
     print("Error: You need to specify the enlarging processing unit")
     exit(1)
 
-main()
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        # This code block is reserved for future
+        # fail-safe handlers
+        traceback.print_exc()
