@@ -30,7 +30,7 @@ class WAIFU2X:
         self.waifu2x_path = waifu2x_path
         self.method = method
 
-    def upscale(self, folderin, folderout, width, height):
+    def upscale(self, folderin, folderout, width, height, model_type):
         """This is the core function for WAIFU2X class
 
         [description]
@@ -41,5 +41,5 @@ class WAIFU2X:
             width {int} -- output video width
             height {int} -- output video height
         """
-        os.system("{} -p {} -I png -i {} -e png -o {} -w {} -h {} -n 3 -m noise_scale -y photo".format(
-            self.waifu2x_path, self.method, folderin, folderout, width, height))
+        os.system("{} -p {} -I png -i {} -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}".format(
+            self.waifu2x_path, self.method, folderin, folderout, width, height, model_type))
