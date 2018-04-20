@@ -31,6 +31,7 @@ Version 1.1 alpha
 from ffmpeg import FFMPEG
 from fractions import Fraction
 from waifu2x import WAIFU2X
+import avalon_framework as avalon
 import argparse
 import json
 import os
@@ -58,6 +59,7 @@ def processArguments():
     control_group.add_argument("-f", "--factor", help="Factor to enlarge video by", action="store", default=2)
     control_group.add_argument("-v", "--video", help="Specify video file", action="store", default=False)
     control_group.add_argument("-o", "--output", help="Specify output file", action="store", default=False)
+    control_group.add_argument("-y", "--model_type", help="Specify model to use", action="store", default="anime_style_art_rgb")
     control_group.add_argument("--cpu", help="Use CPU for enlarging", action="store_true", default=False)
     control_group.add_argument("--gpu", help="Use GPU for enlarging", action="store_true", default=False)
     control_group.add_argument("--cudnn", help="Use CUDNN for enlarging", action="store_true", default=False)
@@ -82,12 +84,26 @@ def get_vid_info():
     return json.loads(json_str)
 
 
-def main():
+def check_model_type(args):
+    models_available = ["upconv_7_anime_style_art_rgb", "upconv_7_photo",
+                        "anime_style_art_rgb", "photo", "anime_style_art_y"]
+    if args.model_type not in models_available:
+        avalon.error('Specified model type not found!')
+        avalon.info("Available models:")
+        for model in models_available:
+            print(model)
+        exit(1)
+
+
+def video2x():
     """Main controller for Video2X
 
     This function controls the flow of video conversion
     and handles all necessary functions.
     """
+
+    check_model_type(args)
+
     if args.cpu:
         method = "cpu"
     elif args.gpu:
@@ -112,7 +128,7 @@ def main():
     # Upscale Frames
     if not os.path.isdir(FOLDEROUT):
         os.mkdir(FOLDEROUT)
-    w2.upscale(FOLDERIN, FOLDEROUT, int(args.factor) * width, int(args.factor) * height)
+    w2.upscale(FOLDERIN, FOLDEROUT, int(args.factor) * width, int(args.factor) * height, args.model_type)
 
     # Frames to Video
     fm.to_vid(framerate, final_resolution, FOLDEROUT)
@@ -138,7 +154,7 @@ elif not args.cpu and not args.gpu and not args.cudnn:
 
 if __name__ == '__main__':
     try:
-        main()
+        video2x()
     except Exception as e:
         # This code block is reserved for future
         # fail-safe handlers
