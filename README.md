@@ -7,6 +7,7 @@
 1. Fixed audio issues
 1. Better CUI
 1. Now using absolute path for every file
+1. Added progress bar for showing waifu2x enlarging progress
 
 ## Description
 
@@ -18,6 +19,9 @@ Watch for the sharper edges in this screenshot around the shadows:
 ![snapshot](https://user-images.githubusercontent.com/18014964/36638068-19cdb78c-19b8-11e8-8dfb-406b7015d30c.png)
 
 **Or you can watch the YouTube video Demo: https://www.youtube.com/watch?v=PG94iPoeoZk**
+
+## Screenshot
+![screenshot](https://user-images.githubusercontent.com/21986859/40265170-39c0caae-5b01-11e8-8371-8b6c24769639.png)
 
 </br>
 
