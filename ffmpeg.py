@@ -4,15 +4,14 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: Feb 24, 2018
+Last Modified: May 19, 2018
 
 Description: This class handles all FFMPEG related
 operations.
 
-Version 1.1
+Version 2.0
 """
-
-import os
+import subprocess
 
 
 class FFMPEG:
@@ -37,8 +36,9 @@ class FFMPEG:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        os.system(
-            "{} -i {} {}/extracted_%0d.png -y".format(self.ffmpeg_path, videoin, outpath))
+        execute = "{} -i {} {}\\extracted_%0d.png -y".format(self.ffmpeg_path, videoin, outpath)
+        print(execute)
+        subprocess.call(execute)
 
     def extract_audio(self, videoin, outpath):
         """Strips audio tracks from videos
@@ -50,10 +50,11 @@ class FFMPEG:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        os.system(
-            "{} -i {} -vn -acodec copy {}/output-audio.aac -y".format(self.ffmpeg_path, videoin, outpath))
+        execute = "{} -i {} -vn -acodec copy {}\\output-audio.aac -y".format(self.ffmpeg_path, videoin, outpath)
+        print(execute)
+        subprocess.call(execute)
 
-    def to_vid(self, framerate, resolution, folder):
+    def to_vid(self, framerate, resolution, upscaled, ):
         """Converts images into videos
 
         This method converts a set of images into a
@@ -62,20 +63,22 @@ class FFMPEG:
         Arguments:
             framerate {float} -- target video framerate
             resolution {string} -- target video resolution
-            folder {string} -- source images folder
+            upscaled {string} -- source images folder
         """
-        os.system("{} -r {} -f image2 -s {} -i {}/extracted_%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p output.mp4 -y".format(
-            self.ffmpeg_path, framerate, resolution, folder))
+        execute = "{} -r {} -f image2 -s {} -i {}\\extracted_%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p {}\\no_audio.mp4 -y".format(
+            self.ffmpeg_path, framerate, resolution, upscaled, upscaled)
+        print(execute)
+        subprocess.call(execute)
 
-    def insert_audio_track(self, videoin, outpath):
+    def insert_audio_track(self, upscaled):
         """Insert audio into video
 
         Inserts the AAC audio track stripped from
         the original video into final video.
 
         Arguments:
-            videoin {string} -- input video path
-            outpath {string} -- video output folder
+            upscaled {string} -- upscaled image folder
         """
-        os.system("{} -i {} -i {}/output-audio.aac -codec copy -shortest {} -y".format(
-            self.ffmpeg_path, videoin, outpath, self.outfile))
+        execute = "{} -i {}\\no_audio.mp4 -i {}\\output-audio.aac -c copy {} -y".format(self.ffmpeg_path, upscaled, upscaled, self.outfile)
+        print(execute)
+        subprocess.call(execute)
