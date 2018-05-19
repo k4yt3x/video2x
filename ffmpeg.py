@@ -9,7 +9,7 @@ Last Modified: May 19, 2018
 Description: This class handles all FFMPEG related
 operations.
 
-Version 2.0
+Version 2.0.1
 """
 import subprocess
 
@@ -50,7 +50,7 @@ class FFMPEG:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        execute = "{} -i {} -vn -acodec copy {}\\output-audio.aac -y".format(self.ffmpeg_path, videoin, outpath)
+        execute = "{} -i {} -vn -acodec copy {}\\output-audio.wav -y".format(self.ffmpeg_path, videoin, outpath)
         print(execute)
         subprocess.call(execute)
 
@@ -73,12 +73,12 @@ class FFMPEG:
     def insert_audio_track(self, upscaled):
         """Insert audio into video
 
-        Inserts the AAC audio track stripped from
+        Inserts the WAV audio track stripped from
         the original video into final video.
 
         Arguments:
             upscaled {string} -- upscaled image folder
         """
-        execute = "{} -i {}\\no_audio.mp4 -i {}\\output-audio.aac -c copy {} -y".format(self.ffmpeg_path, upscaled, upscaled, self.outfile)
+        execute = "{} -i {}\\no_audio.mp4 -i {}\\output-audio.wav -vcodec copy {} -y".format(self.ffmpeg_path, upscaled, upscaled, self.outfile)
         print(execute)
         subprocess.call(execute)
