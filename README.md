@@ -1,13 +1,7 @@
 # Video2X Video Enlarger
 
-**Current Version: 2.0 beta**
-
-## 2.0 Beta Changes
-1. Fixed contents meant for demonstration
-1. Fixed audio issues
-1. Better CUI
-1. Now using absolute path for every file
-1. Added progress bar for showing waifu2x enlarging progress
+## 2.0.1 (Aug 1, 2018)
+- Fixed json decoding error
 
 ## Description
 
@@ -36,20 +30,29 @@ Download: https://github.com/lltcggie/waifu2x-caffe/releases
 
 
 After downloading the dependencies, clone the video2x package.
-```
+
+```bash
 $ git clone https://github.com/K4YT3X/video2x.git
 $ cd video2x
 ```
+Then you'll need to install python dependencies before start using video2x. Install simply by executing the following command.
+
+```bash
+$ sudo pip install -r requirements.txt
+```
+
 
 ## Quick Start
 
 To enlarge a video on a computer with NVIDIA GPU
-```
+
+```bash
 $ python video2x.py -v VIDEO_FILE -o OUTPUT_FILENAME -f TIMES_TO_ENLARGE --gpu
 ```
 
 To enlarge a video on a computer without NVIDIA GPU
-```
+
+```bash
 $ python video2x.py -v VIDEO_FILE -o OUTPUT_FILENAME -f TIMES_TO_ENLARGE --cpu
 ```
 
@@ -75,3 +78,7 @@ Controls:
   --gpu                 Use GPU for enlarging
   --cudnn               Use CUDNN for enlarging
 ```
+
+This project is based on the following softwares and projects.
+- [FFMPEG]('https://www.ffmpeg.org/')
+- [waifu2x caffe](https://github.com/lltcggie/waifu2x-caffe)
