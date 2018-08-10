@@ -38,7 +38,7 @@ import shutil
 import subprocess
 import traceback
 
-VERSION = '2.0.1'
+VERSION = '2.0.2'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
@@ -50,7 +50,7 @@ FFMPEG_PATH = 'C:/Program Files (x86)/ffmpeg/bin/'
 WAIFU2X_PATH = '\"C:/Program Files (x86)/waifu2x-caffe/waifu2x-caffe-cui.exe\"'
 
 
-def processArguments():
+def process_arguments():
     """Processes CLI arguments
 
     This function parses all arguments
@@ -59,8 +59,9 @@ def processArguments():
     """
     parser = argparse.ArgumentParser()
     control_group = parser.add_argument_group('Controls')
-    control_group.add_argument('-f', '--factor', help='Factor to enlarge video by', action='store', default=2)
-    control_group.add_argument('-v', '--video', help='Specify video file', action='store', default=False)
+    control_group.add_argument('--width', help='Output video width', action='store', type=int, default=False)
+    control_group.add_argument('--height', help='Output video height', action='store', type=int, default=False)
+    control_group.add_argument('-v', '--video', help='Specify source video file', action='store', default=False)
     control_group.add_argument('-o', '--output', help='Specify output file', action='store', default=False)
     control_group.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb')
     control_group.add_argument('--cpu', help='Use CPU for enlarging', action='store_true', default=False)
@@ -145,11 +146,9 @@ def video2x():
 
     info = get_vid_info()
     # Analyze original video with ffprobe and retrieve framerate
-    width, height, framerate = info['streams'][0]['width'], info['streams'][0]['height'], float(
-        Fraction(info['streams'][0]['avg_frame_rate']))
+    # width, height = info['streams'][0]['width'], info['streams'][0]['height']
+    framerate = float(Fraction(info['streams'][0]['avg_frame_rate']))
     avalon.info('Framerate: {}'.format(framerate))
-    final_resolution = str(width * int(args.factor)) + \
-        'x' + str(height * int(args.factor))
 
     # Upscale images one by one using waifu2x
     avalon.info('Starting to upscale extracted images')
@@ -160,13 +159,12 @@ def video2x():
                 image_path = '{}\\{}'.format(dirpath, file)
                 file_list.set_description('Upscaling: {}'.format(file))
                 # avalon.dbgInfo('Upscaling: {}'.format(image_path))
-                w2.upscale(image_path, UPSCALED, int(args.factor) *
-                           width, int(args.factor) * height)
+                w2.upscale(image_path, UPSCALED, args.width, args.height)
     avalon.info('Extraction complete')
 
     # Frames to Video
     avalon.info('Converting extracted frames into video')
-    fm.to_vid(framerate, final_resolution, UPSCALED)
+    fm.convert_video(framerate, '{}x{}'.format(args.width, args.height), UPSCALED)
 
     # Extract and press audio in
     avalon.info('Stripping audio track from original video')
@@ -177,12 +175,14 @@ def video2x():
 
 # /////////////////// Execution /////////////////// #
 
-args = processArguments()
+args = process_arguments()
 # Convert paths to absolute paths
 args.video = os.path.abspath(args.video)
 args.output = os.path.abspath(args.output)
 print_logo()
 
+
+# Check if FFMPEG and waifu2x are present
 if not os.path.isdir(FFMPEG_PATH):
     avalon.error('FFMPEG binaries not found')
     avalon.error('Please specify FFMPEG binaries location in source code')
@@ -199,6 +199,9 @@ if not os.path.isfile(WAIFU2X_PATH.strip('\"')):
 # values are specified
 if not args.video:
     avalon.error('You need to specify the video to process')
+    exit(1)
+elif not args.width or not args.height:
+    avalon.error('You must specify output video width and height')
     exit(1)
 elif not args.output:
     avalon.error('You need to specify the output video name')

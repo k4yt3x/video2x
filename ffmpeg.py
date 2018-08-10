@@ -9,7 +9,7 @@ Last Modified: May 19, 2018
 Description: This class handles all FFMPEG related
 operations.
 
-Version 2.0.1
+Version 2.0.2
 """
 import subprocess
 
@@ -50,11 +50,11 @@ class FFMPEG:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        execute = "{} -i {} -vn -acodec copy {}\\output-audio.wav -y".format(self.ffmpeg_path, videoin, outpath)
+        execute = "{} -i {} -vn -acodec copy {}\\output-audio.aac -y".format(self.ffmpeg_path, videoin, outpath)
         print(execute)
         subprocess.call(execute)
 
-    def to_vid(self, framerate, resolution, upscaled, ):
+    def convert_video(self, framerate, resolution, upscaled, ):
         """Converts images into videos
 
         This method converts a set of images into a
@@ -79,6 +79,6 @@ class FFMPEG:
         Arguments:
             upscaled {string} -- upscaled image folder
         """
-        execute = "{} -i {}\\no_audio.mp4 -i {}\\output-audio.wav -vcodec copy {} -y".format(self.ffmpeg_path, upscaled, upscaled, self.outfile)
+        execute = "{} -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec copy {} -y".format(self.ffmpeg_path, upscaled, upscaled, self.outfile)
         print(execute)
         subprocess.call(execute)
