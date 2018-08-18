@@ -1,7 +1,8 @@
 # Video2X Video Enlarger
 
-## 2.0.1 (Aug 1, 2018)
-- Fixed json decoding error
+## 2.0.2 (Aug 10, 2018)
+- Changed enlarging mechanism from factor to resolution
+- Fixed audio merging errors
 
 ## Description
 
@@ -47,29 +48,29 @@ $ sudo pip install -r requirements.txt
 To enlarge a video on a computer with NVIDIA GPU
 
 ```bash
-$ python video2x.py -v VIDEO_FILE -o OUTPUT_FILENAME -f TIMES_TO_ENLARGE --gpu
+$ python video2x.py -v VIDEO_FILE -o OUTPUT_FILENAME --width OUTPUT_WIDTH --height OUTPUT_HEIGHT --gpu
 ```
 
 To enlarge a video on a computer without NVIDIA GPU
 
 ```bash
-$ python video2x.py -v VIDEO_FILE -o OUTPUT_FILENAME -f TIMES_TO_ENLARGE --cpu
+$ python video2x.py -v VIDEO_FILE -o OUTPUT_FILENAME --width OUTPUT_WIDTH --height OUTPUT_HEIGHT --cpu
 ```
 
 
 ## Full Usage
 ```
-usage: video2x.py [-h] [-f FACTOR] [-v VIDEO] [-o OUTPUT] [-y MODEL_TYPE]
-                  [--cpu] [--gpu] [--cudnn]
+usage: video2x.py [-h] [--width WIDTH] [--height HEIGHT] [-v VIDEO]
+                  [-o OUTPUT] [-y MODEL_TYPE] [--cpu] [--gpu] [--cudnn]
 
 optional arguments:
   -h, --help            show this help message and exit
 
 Controls:
-  -f FACTOR, --factor FACTOR
-                        Factor to enlarge video by
+  --width WIDTH         Output video width
+  --height HEIGHT       Output video height
   -v VIDEO, --video VIDEO
-                        Specify video file
+                        Specify source video file
   -o OUTPUT, --output OUTPUT
                         Specify output file
   -y MODEL_TYPE, --model_type MODEL_TYPE
