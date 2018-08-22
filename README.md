@@ -1,5 +1,7 @@
 # Video2X Video Enlarger
 
+## This software is currently designed for Windows.
+
 ## 2.0.2 (Aug 10, 2018)
 - Changed enlarging mechanism from factor to resolution
 - Fixed audio merging errors
@@ -39,7 +41,7 @@ $ cd video2x
 Then you'll need to install python dependencies before start using video2x. Install simply by executing the following command.
 
 ```bash
-$ sudo pip install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 
