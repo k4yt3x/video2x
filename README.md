@@ -1,6 +1,6 @@
 # Video2X Video Enlarger
 
-## This software is currently designed for Windows.
+### This software is currently designed for Windows.
 
 ## 2.0.2 (Aug 10, 2018)
 - Changed enlarging mechanism from factor to resolution
