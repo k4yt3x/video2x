@@ -26,6 +26,8 @@ Watch for the sharper edges in this screenshot around the shadows:
 
 ### Prerequisites
 
+- **Python 3**  
+Download: https://www.python.org/downloads/windows/
 - **FFMPEG Windows Build**  
 Download: https://ffmpeg.org/download.html  
 - **waifu2x-caffe for Windows**  
