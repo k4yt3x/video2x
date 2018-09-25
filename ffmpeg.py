@@ -9,7 +9,7 @@ Last Modified: May 19, 2018
 Description: This class handles all FFMPEG related
 operations.
 
-Version 2.0.2
+Version 2.0.3
 """
 import subprocess
 
@@ -36,7 +36,7 @@ class FFMPEG:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        execute = "{} -i {} {}\\extracted_%0d.png -y".format(self.ffmpeg_path, videoin, outpath)
+        execute = "{} -i \"{}\" {}\\extracted_%0d.png -y".format(self.ffmpeg_path, videoin, outpath)
         print(execute)
         subprocess.call(execute)
 
@@ -50,7 +50,7 @@ class FFMPEG:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        execute = "{} -i {} -vn -acodec copy {}\\output-audio.aac -y".format(self.ffmpeg_path, videoin, outpath)
+        execute = "{} -i \"{}\" -vn -acodec copy {}\\output-audio.aac -y".format(self.ffmpeg_path, videoin, outpath)
         print(execute)
         subprocess.call(execute)
 

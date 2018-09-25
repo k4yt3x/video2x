@@ -38,7 +38,7 @@ import shutil
 import subprocess
 import traceback
 
-VERSION = '2.0.2'
+VERSION = '2.0.3'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
@@ -95,7 +95,7 @@ def get_vid_info():
         dictionary -- original video information
     """
     json_str = subprocess.check_output(
-        '{} -v quiet -print_format json -show_format -show_streams {}'.format('\"' + FFMPEG_PATH + 'ffprobe.exe\"', args.video))
+        '{} -v quiet -print_format json -show_format -show_streams \"{}\"'.format('\"' + FFMPEG_PATH + 'ffprobe.exe\"', args.video))
     return json.loads(json_str.decode('utf-8'))
 
 
