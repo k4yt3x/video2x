@@ -38,7 +38,7 @@ import shutil
 import subprocess
 import traceback
 
-VERSION = '2.0.3'
+VERSION = '2.0.4'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames

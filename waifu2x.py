@@ -9,7 +9,7 @@ Last Modified: May 19, 2018
 Description: This class controls waifu2x
 engine
 
-Version 2.0
+Version 2.0.1
 """
 import subprocess
 
