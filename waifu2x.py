@@ -28,20 +28,15 @@ class WAIFU2X:
         self.method = method
         self.model_type = model_type
 
-    def upscale(self, file, upscaled, width, height):
-        """This is the core function for WAIFU2X class
+    def upscale(self, folderin, folderout, width, height):
+            """This is the core function for WAIFU2X class
 
-        [description]
-
-        Arguments:
-            file {string} -- input image
-            upscaled {string} -- output folder path
-            width {int} -- output video width
-            height {int} -- output video height
-            model_type {string} -- model to use for upscaling
-        """
-        file_id = file.split('extracted_')[-1].split('.png')[0]
-        output_file = '{}\\{}{}{}'.format(upscaled, 'extracted_', file_id, '.png')
-        execute = "{} -p {} -I png -i {} -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}".format(
-            self.waifu2x_path, self.method, file, output_file, width, height, self.model_type)
-        subprocess.call(execute, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            Arguments:
+                folderin {string} -- source folder path
+                folderout {string} -- output folder path
+                width {int} -- output video width
+                height {int} -- output video height
+            """
+            execute = "{} -p {} -I png -i {} -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}".format(
+                self.waifu2x_path, self.method, folderin, folderout, width, height, self.model_type)
+            subprocess.call(execute)

@@ -152,15 +152,8 @@ def video2x():
 
     # Upscale images one by one using waifu2x
     avalon.info('Starting to upscale extracted images')
-    for (dirpath, dirnames, filenames) in os.walk(FRAMES):
-        file_list = tqdm(filenames, ascii=True)
-        for file in file_list:
-            if file[-4:].lower() == '.png':
-                image_path = '{}\\{}'.format(dirpath, file)
-                file_list.set_description('Upscaling: {}'.format(file))
-                # avalon.dbgInfo('Upscaling: {}'.format(image_path))
-                w2.upscale(image_path, UPSCALED, args.width, args.height)
-    avalon.info('Extraction complete')
+    w2.upscale(FRAMES, UPSCALED, args.width, args.height)
+    avalon.info('Conversion complete')
 
     # Frames to Video
     avalon.info('Converting extracted frames into video')
