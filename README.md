@@ -2,7 +2,12 @@
 
 ### This software is currently designed for Windows.
 
+## 2.0.5 (October 21, 2018)
+
+- Updated video2x for avalon framework 1.6.2
+
 ## 2.0.2 (Aug 10, 2018)
+
 - Changed enlarging mechanism from factor to resolution
 - Fixed audio merging errors
 
