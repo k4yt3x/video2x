@@ -25,12 +25,11 @@ waifu2x image enlarging engine. It extracts frames from a
 video, enlarge it by a number of times without losing any
 details or quality, keeping lines smooth and edges sharp.
 """
+from avalon_framework import Avalon
 from ffmpeg import FFMPEG
 from fractions import Fraction
-from tqdm import tqdm
 from waifu2x import WAIFU2X
 import argparse
-import avalon_framework as avalon
 import inspect
 import json
 import os
@@ -38,7 +37,7 @@ import shutil
 import subprocess
 import traceback
 
-VERSION = '2.0.4'
+VERSION = '2.0.5'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
@@ -79,8 +78,8 @@ def print_logo():
     print('    \\/     |_|  \\__,_|  \\___|  \\___/  |____| /_/ \\_\\')
     print('\n               Video2X Video Enlarger')
     spaces = ((44 - len("Version " + VERSION)) // 2) * " "
-    print(avalon.FM.BD + "\n" + spaces +
-          '    Version ' + VERSION + '\n' + avalon.FM.RST)
+    print(Avalon.FM.BD + "\n" + spaces +
+          '    Version ' + VERSION + '\n' + Avalon.FM.RST)
 
 
 def get_vid_info():
@@ -107,8 +106,8 @@ def check_model_type(args):
     models_available = ['upconv_7_anime_style_art_rgb', 'upconv_7_photo',
                         'anime_style_art_rgb', 'photo', 'anime_style_art_y']
     if args.model_type not in models_available:
-        avalon.error('Specified model type not found!')
-        avalon.info('Available models:')
+        Avalon.error('Specified model type not found!')
+        Avalon.info('Available models:')
         for model in models_available:
             print(model)
         exit(1)
@@ -148,21 +147,21 @@ def video2x():
     # Analyze original video with ffprobe and retrieve framerate
     # width, height = info['streams'][0]['width'], info['streams'][0]['height']
     framerate = float(Fraction(info['streams'][0]['avg_frame_rate']))
-    avalon.info('Framerate: {}'.format(framerate))
+    Avalon.info('Framerate: {}'.format(framerate))
 
     # Upscale images one by one using waifu2x
-    avalon.info('Starting to upscale extracted images')
+    Avalon.info('Starting to upscale extracted images')
     w2.upscale(FRAMES, UPSCALED, args.width, args.height)
-    avalon.info('Conversion complete')
+    Avalon.info('Conversion complete')
 
     # Frames to Video
-    avalon.info('Converting extracted frames into video')
+    Avalon.info('Converting extracted frames into video')
     fm.convert_video(framerate, '{}x{}'.format(args.width, args.height), UPSCALED)
 
     # Extract and press audio in
-    avalon.info('Stripping audio track from original video')
+    Avalon.info('Stripping audio track from original video')
     fm.extract_audio(args.video, UPSCALED)
-    avalon.info('Inserting audio track into new video')
+    Avalon.info('Inserting audio track into new video')
     fm.insert_audio_track(UPSCALED)
 
 
@@ -177,13 +176,13 @@ print_logo()
 
 # Check if FFMPEG and waifu2x are present
 if not os.path.isdir(FFMPEG_PATH):
-    avalon.error('FFMPEG binaries not found')
-    avalon.error('Please specify FFMPEG binaries location in source code')
+    Avalon.error('FFMPEG binaries not found')
+    Avalon.error('Please specify FFMPEG binaries location in source code')
     print('Current value: {}\n'.format(FFMPEG_PATH))
     raise FileNotFoundError('FFMPEG binaries not found')
 if not os.path.isfile(WAIFU2X_PATH.strip('\"')):
-    avalon.error('Waifu2x CUI executable not found')
-    avalon.error('Please specify Waifu2x CUI location in source code')
+    Avalon.error('Waifu2x CUI executable not found')
+    Avalon.error('Please specify Waifu2x CUI location in source code')
     print('Current value: {}\n'.format(WAIFU2X_PATH))
     raise FileNotFoundError('Waifu2x CUI executable not found')
 
@@ -191,21 +190,21 @@ if not os.path.isfile(WAIFU2X_PATH.strip('\"')):
 # Check if arguments are valid / all necessary argument
 # values are specified
 if not args.video:
-    avalon.error('You need to specify the video to process')
+    Avalon.error('You need to specify the video to process')
     exit(1)
 elif not args.width or not args.height:
-    avalon.error('You must specify output video width and height')
+    Avalon.error('You must specify output video width and height')
     exit(1)
 elif not args.output:
-    avalon.error('You need to specify the output video name')
+    Avalon.error('You need to specify the output video name')
     exit(1)
 elif not args.cpu and not args.gpu and not args.cudnn:
-    avalon.error('You need to specify the enlarging processing unit')
+    Avalon.error('You need to specify the enlarging processing unit')
     exit(1)
 
 if __name__ == '__main__':
     try:
         video2x()
     except Exception as e:
-        avalon.error('An exception occurred')
+        Avalon.error('An exception occurred')
         traceback.print_exc()
