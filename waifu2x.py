@@ -9,12 +9,14 @@ Last Modified: May 19, 2018
 Description: This class controls waifu2x
 engine
 
-Version 2.0.1
+Version 2.0.2
 """
+from avalon_framework import Avalon
 import subprocess
+import threading
 
 
-class WAIFU2X:
+class Waifu2x:
     """This class communicates with waifu2x cui engine
 
     An object will be created for this class, containing information
@@ -37,6 +39,8 @@ class WAIFU2X:
                 width {int} -- output video width
                 height {int} -- output video height
             """
-            execute = "{} -p {} -I png -i {} -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}".format(
+            Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
+            execute = '{} -p {} -I png -i {} -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}'.format(
                 self.waifu2x_path, self.method, folderin, folderout, width, height, self.model_type)
             subprocess.call(execute)
+            Avalon.debug_info('[upscaler] Thread {} exiting'.format(threading.current_thread().name))
