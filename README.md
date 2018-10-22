@@ -21,7 +21,8 @@ Video2X is an automation software based on waifu2x image enlarging engine. It ex
 For short: **Video2X enlarges your video without losing details**
 
 Watch for the sharper edges in this screenshot around the shadows:
-![snapshot](https://user-images.githubusercontent.com/18014964/36638068-19cdb78c-19b8-11e8-8dfb-406b7015d30c.png)
+
+[![preview](https://user-images.githubusercontent.com/18014964/36638068-19cdb78c-19b8-11e8-8dfb-406b7015d30c.png)](https://www.youtube.com/watch?v=PG94iPoeoZk)
 
 **Or you can watch the YouTube video Demo: https://www.youtube.com/watch?v=PG94iPoeoZk**
 
