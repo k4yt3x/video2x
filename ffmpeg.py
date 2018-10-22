@@ -14,7 +14,7 @@ Version 2.0.3
 import subprocess
 
 
-class FFMPEG:
+class Ffmpeg:
     """This class communicates with ffmpeg
 
     This class deals with ffmpeg. It handles extracitng
