@@ -1,15 +1,18 @@
 # Video2X Video Enlarger
 
+## WARNING: Version 2.1.1 might be unstable.
+
+A test is undergoing for version 2.1.1 to verify is stability. Please wait patiently for us to finish the tests. It shouldn't take longer than half a day.
+
 ### This software is currently designed for Windows.
 
-## 2.0.5 (October 21, 2018)
+## 2.1.1 (October 22, 2018)
 
-- Updated video2x for avalon framework 1.6.2
+- Fixed video stream and audio stream indexing issues.
 
-## 2.0.2 (Aug 10, 2018)
+## 2.1.0 (October 22, 2018)
 
-- Changed enlarging mechanism from factor to resolution
-- Fixed audio merging errors
+- Added multithreading.
 
 ## Description
 
