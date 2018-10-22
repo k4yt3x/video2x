@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2x Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 19, 2018
+Last Modified: October 22, 2018
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -39,7 +39,7 @@ import threading
 import time
 import traceback
 
-VERSION = '2.1.0'
+VERSION = '2.1.1'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
@@ -59,16 +59,21 @@ def process_arguments():
     for the output video.
     """
     parser = argparse.ArgumentParser()
-    control_group = parser.add_argument_group('Controls')
-    control_group.add_argument('--width', help='Output video width', action='store', type=int, default=False)
-    control_group.add_argument('--height', help='Output video height', action='store', type=int, default=False)
-    control_group.add_argument('-v', '--video', help='Specify source video file', action='store', default=False)
-    control_group.add_argument('-o', '--output', help='Specify output file', action='store', default=False)
-    control_group.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb')
-    control_group.add_argument('-t', '--threads', help='Specify model to use', action='store', type=int, default=5)
-    control_group.add_argument('--cpu', help='Use CPU for enlarging', action='store_true', default=False)
-    control_group.add_argument('--gpu', help='Use GPU for enlarging', action='store_true', default=False)
-    control_group.add_argument('--cudnn', help='Use CUDNN for enlarging', action='store_true', default=False)
+
+    # Video options
+    options_group = parser.add_argument_group('Options')
+    options_group.add_argument('--width', help='Output video width', action='store', type=int, default=False)
+    options_group.add_argument('--height', help='Output video height', action='store', type=int, default=False)
+    options_group.add_argument('-v', '--video', help='Specify source video file', action='store', default=False)
+    options_group.add_argument('-o', '--output', help='Specify output file', action='store', default=False)
+    options_group.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb')
+    options_group.add_argument('-t', '--threads', help='Specify model to use', action='store', type=int, default=5)
+
+    # Render drivers, at least one option must be specified
+    driver_group = parser.add_argument_group('Render Drivers')
+    driver_group.add_argument('--cpu', help='Use CPU for enlarging', action='store_true', default=False)
+    driver_group.add_argument('--gpu', help='Use GPU for enlarging', action='store_true', default=False)
+    driver_group.add_argument('--cudnn', help='Use CUDNN for enlarging', action='store_true', default=False)
     return parser.parse_args()
 
 
@@ -84,7 +89,7 @@ def print_logo():
     print('{}\n{}    Version {}\n{}'.format(Avalon.FM.BD, spaces, VERSION, Avalon.FM.RST))
 
 
-def get_vid_info():
+def get_video_info():
     """Gets original video information
 
     Retrieves original video information using
@@ -115,48 +120,20 @@ def check_model_type(args):
         exit(1)
 
 
-def video2x():
-    """Main controller for Video2X
+def upscale_frames(w2):
+    """ Upscale video frames with waifu2x-caffe
 
-    This function controls the flow of video conversion
-    and handles all necessary functions.
+    This function upscales all the frames extracted
+    by ffmpeg using the waifu2x-caffe binary.
+
+    Arguments:
+        w2 {Waifu2x Object} -- initialized waifu2x object
     """
 
-    check_model_type(args)
-
-    # Parse arguments for waifu2x
-    if args.cpu:
-        method = 'cpu'
-    elif args.gpu:
-        method = 'gpu'
-    elif args.cudnn:
-        method = 'cudnn'
-
-    # Initialize objects for ffmpeg and waifu2x-caffe
-    fm = Ffmpeg('\"' + FFMPEG_PATH + 'ffmpeg.exe\"', args.output)
-    w2 = Waifu2x(WAIFU2X_PATH, method, args.model_type)
-
-    # Clear and create directories
-    if os.path.isdir(FRAMES):
-        shutil.rmtree(FRAMES)
-    if os.path.isdir(UPSCALED):
-        shutil.rmtree(UPSCALED)
-    os.mkdir(FRAMES)
-    os.mkdir(UPSCALED)
-
-    # Extract frames from video
-    fm.extract_frames(args.video, FRAMES)
-
-    info = get_vid_info()
-    # Analyze original video with ffprobe and retrieve framerate
-    # width, height = info['streams'][0]['width'], info['streams'][0]['height']
-    framerate = float(Fraction(info['streams'][0]['avg_frame_rate']))
-    Avalon.info('Framerate: {}'.format(framerate))
-
-    # Upscale images one by one using waifu2x
-    Avalon.info('Starting to upscale extracted images')
-
+    # Create a container for all upscaler threads
     upscaler_threads = []
+
+    # List all images in the extracted frames
     frames = [os.path.join(FRAMES, f) for f in os.listdir(FRAMES) if os.path.isfile(os.path.join(FRAMES, f))]
 
     # If we have less images than threads,
@@ -197,6 +174,57 @@ def video2x():
     for thread in upscaler_threads:
         thread.join()
 
+
+def video2x():
+    """Main controller for Video2X
+
+    This function controls the flow of video conversion
+    and handles all necessary functions.
+    """
+
+    check_model_type(args)
+
+    # Parse arguments for waifu2x
+    if args.cpu:
+        method = 'cpu'
+    elif args.gpu:
+        method = 'gpu'
+    elif args.cudnn:
+        method = 'cudnn'
+
+    # Initialize objects for ffmpeg and waifu2x-caffe
+    fm = Ffmpeg('\"' + FFMPEG_PATH + 'ffmpeg.exe\"', args.output)
+    w2 = Waifu2x(WAIFU2X_PATH, method, args.model_type)
+
+    # Clear and create directories
+    if os.path.isdir(FRAMES):
+        shutil.rmtree(FRAMES)
+    if os.path.isdir(UPSCALED):
+        shutil.rmtree(UPSCALED)
+    os.mkdir(FRAMES)
+    os.mkdir(UPSCALED)
+
+    # Extract frames from video
+    fm.extract_frames(args.video, FRAMES)
+
+    info = get_video_info()
+    # Analyze original video with ffprobe and retrieve framerate
+    # width, height = info['streams'][0]['width'], info['streams'][0]['height']
+
+    # Find index of video stream
+    video_stream_index = None
+    for stream in info['streams']:
+        if stream['codec_type'] == 'video':
+            video_stream_index = stream['index']
+            break
+
+    # Get average frame rate of video stream
+    framerate = float(Fraction(info['streams'][video_stream_index]['avg_frame_rate']))
+    Avalon.info('Framerate: {}'.format(framerate))
+
+    # Upscale images one by one using waifu2x
+    Avalon.info('Starting to upscale extracted images')
+    upscale_frames(w2)
     Avalon.info('Upscaling complete')
 
     # Frames to Video
