@@ -26,18 +26,20 @@ video, enlarge it by a number of times without losing any
 details or quality, keeping lines smooth and edges sharp.
 """
 from avalon_framework import Avalon
-from ffmpeg import FFMPEG
+from ffmpeg import Ffmpeg
 from fractions import Fraction
-from waifu2x import WAIFU2X
+from waifu2x import Waifu2x
 import argparse
 import inspect
 import json
 import os
 import shutil
 import subprocess
+import threading
+import time
 import traceback
 
-VERSION = '2.0.5'
+VERSION = '2.1.0'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
@@ -63,6 +65,7 @@ def process_arguments():
     control_group.add_argument('-v', '--video', help='Specify source video file', action='store', default=False)
     control_group.add_argument('-o', '--output', help='Specify output file', action='store', default=False)
     control_group.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb')
+    control_group.add_argument('-t', '--threads', help='Specify model to use', action='store', type=int, default=5)
     control_group.add_argument('--cpu', help='Use CPU for enlarging', action='store_true', default=False)
     control_group.add_argument('--gpu', help='Use GPU for enlarging', action='store_true', default=False)
     control_group.add_argument('--cudnn', help='Use CUDNN for enlarging', action='store_true', default=False)
@@ -78,8 +81,7 @@ def print_logo():
     print('    \\/     |_|  \\__,_|  \\___|  \\___/  |____| /_/ \\_\\')
     print('\n               Video2X Video Enlarger')
     spaces = ((44 - len("Version " + VERSION)) // 2) * " "
-    print(Avalon.FM.BD + "\n" + spaces +
-          '    Version ' + VERSION + '\n' + Avalon.FM.RST)
+    print('{}\n{}    Version {}\n{}'.format(Avalon.FM.BD, spaces, VERSION, Avalon.FM.RST))
 
 
 def get_vid_info():
@@ -122,6 +124,7 @@ def video2x():
 
     check_model_type(args)
 
+    # Parse arguments for waifu2x
     if args.cpu:
         method = 'cpu'
     elif args.gpu:
@@ -129,8 +132,9 @@ def video2x():
     elif args.cudnn:
         method = 'cudnn'
 
-    fm = FFMPEG('\"' + FFMPEG_PATH + 'ffmpeg.exe\"', args.output)
-    w2 = WAIFU2X(WAIFU2X_PATH, method, args.model_type)
+    # Initialize objects for ffmpeg and waifu2x-caffe
+    fm = Ffmpeg('\"' + FFMPEG_PATH + 'ffmpeg.exe\"', args.output)
+    w2 = Waifu2x(WAIFU2X_PATH, method, args.model_type)
 
     # Clear and create directories
     if os.path.isdir(FRAMES):
@@ -151,8 +155,49 @@ def video2x():
 
     # Upscale images one by one using waifu2x
     Avalon.info('Starting to upscale extracted images')
-    w2.upscale(FRAMES, UPSCALED, args.width, args.height)
-    Avalon.info('Conversion complete')
+
+    upscaler_threads = []
+    frames = [os.path.join(FRAMES, f) for f in os.listdir(FRAMES) if os.path.isfile(os.path.join(FRAMES, f))]
+
+    # If we have less images than threads,
+    # create only the threads necessary
+    if len(frames) < args.threads:
+        args.threads = len(frames)
+
+    # Move an equal amount of images into separate
+    # folders for each thread
+    images_per_thread = len(frames) // args.threads
+    for thread_id in range(args.threads):
+        thread_folder = '{}\\{}'.format(FRAMES, str(thread_id))
+
+        # Delete old folders and create new folders
+        if os.path.isdir(thread_folder):
+            shutil.rmtree(thread_folder)
+        os.mkdir(thread_folder)
+
+        # Begin moving images into corresponding folders
+        for _ in range(images_per_thread):
+            try:
+                shutil.move(frames.pop(0), thread_folder)
+            except IndexError:
+                pass
+
+        # Create thread
+        thread = threading.Thread(target=w2.upscale, args=(thread_folder, UPSCALED, args.width, args.height))
+        thread.name = str(thread_id)
+
+        # Add threads into the pool
+        upscaler_threads.append(thread)
+
+    # Start all threads
+    for thread in upscaler_threads:
+        thread.start()
+
+    # Wait for threads to finish
+    for thread in upscaler_threads:
+        thread.join()
+
+    Avalon.info('Upscaling complete')
 
     # Frames to Video
     Avalon.info('Converting extracted frames into video')
@@ -204,7 +249,9 @@ elif not args.cpu and not args.gpu and not args.cudnn:
 
 if __name__ == '__main__':
     try:
+        begin_time = time.time()
         video2x()
-    except Exception as e:
+        Avalon.info('Program completed, taking {} seconds'.format(round((time.time() - begin_time), 5)))
+    except Exception:
         Avalon.error('An exception occurred')
         traceback.print_exc()
