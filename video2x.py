@@ -207,6 +207,7 @@ def video2x():
     # Extract frames from video
     fm.extract_frames(args.video, FRAMES)
 
+    Avalon.info('Reading video information')
     info = get_video_info()
     # Analyze original video with ffprobe and retrieve framerate
     # width, height = info['streams'][0]['width'], info['streams'][0]['height']
@@ -218,6 +219,10 @@ def video2x():
             video_stream_index = stream['index']
             break
 
+    # Exit if no video stream found
+    if video_stream_index is None:
+        Avalon.error('Aborting: No video stream found')
+
     # Get average frame rate of video stream
     framerate = float(Fraction(info['streams'][video_stream_index]['avg_frame_rate']))
     Avalon.info('Framerate: {}'.format(framerate))
@@ -225,11 +230,12 @@ def video2x():
     # Upscale images one by one using waifu2x
     Avalon.info('Starting to upscale extracted images')
     upscale_frames(w2)
-    Avalon.info('Upscaling complete')
+    Avalon.info('Upscaling completed')
 
     # Frames to Video
     Avalon.info('Converting extracted frames into video')
     fm.convert_video(framerate, '{}x{}'.format(args.width, args.height), UPSCALED)
+    Avalon.info('Conversion completed')
 
     # Extract and press audio in
     Avalon.info('Stripping audio track from original video')
