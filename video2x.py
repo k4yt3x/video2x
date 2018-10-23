@@ -107,7 +107,7 @@ def get_video_info():
         dictionary -- original video information
     """
     json_str = subprocess.check_output(
-        '{} -v quiet -print_format json -show_format -show_streams \"{}\"'.format('\"' + ffmpeg_path + 'ffprobe.exe\"', args.video))
+        '\"{}ffprobe.exe\" -v quiet -print_format json -show_format -show_streams \"{}\"'.format(ffmpeg_path, args.video))
     return json.loads(json_str.decode('utf-8'))
 
 
@@ -199,7 +199,7 @@ def video2x():
         method = 'cudnn'
 
     # Initialize objects for ffmpeg and waifu2x-caffe
-    fm = Ffmpeg('\"' + ffmpeg_path + 'ffmpeg.exe\"', args.output)
+    fm = Ffmpeg(ffmpeg_path, args.output, ffmpeg_arguments)
     w2 = Waifu2x(waifu2x_path, method, args.model_type)
 
     # Clear and create directories
@@ -286,7 +286,12 @@ args.output = os.path.abspath(args.output)
 config = read_config()
 waifu2x_path = config['waifu2x_path']
 ffmpeg_path = config['ffmpeg_path']
+ffmpeg_arguments = config['ffmpeg_arguments']
 
+# Add a forward slash to directory if not present
+# otherwise there will be a format error
+if ffmpeg_path[-1] != '/' and ffmpeg_path[-1] != '\\':
+    ffmpeg_path = '{}/'.format(ffmpeg_path)
 
 # Check if FFMPEG and waifu2x are present
 if not os.path.isdir(ffmpeg_path):

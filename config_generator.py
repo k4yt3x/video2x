@@ -19,6 +19,7 @@ def enroll_settings():
     settings = {}
     settings['waifu2x_path'] = Avalon.gets('waifu2x-caffe-cui.exe path: ')
     settings['ffmpeg_path'] = Avalon.gets('ffmpeg binaries directory: ')
+    settings['ffmpeg_arguments'] = Avalon.gets('Extra arguments passed to ffmpeg: ')
     return settings
 
 

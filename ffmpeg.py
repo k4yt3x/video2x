@@ -22,9 +22,10 @@ class Ffmpeg:
     and inserting audio tracks to videos.
     """
 
-    def __init__(self, ffmpeg_path, outfile):
-        self.ffmpeg_path = ffmpeg_path
+    def __init__(self, ffmpeg_path, outfile, ffmpeg_arguments):
+        self.ffmpeg_path = '{}ffmpeg.exe'.format(ffmpeg_path)
         self.outfile = outfile
+        self.ffmpeg_arguments = ffmpeg_arguments
 
     def extract_frames(self, videoin, outpath):
         """Extract every frame from original videos
@@ -36,7 +37,8 @@ class Ffmpeg:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        execute = "\"{}\" -i \"{}\" {}\\extracted_%0d.png -y".format(self.ffmpeg_path, videoin, outpath)
+        execute = '\"{}\" -i \"{}\" {}\\extracted_%0d.png -y {}'.format(
+            self.ffmpeg_path, videoin, outpath, self.ffmpeg_arguments)
         print(execute)
         subprocess.call(execute)
 
@@ -50,7 +52,8 @@ class Ffmpeg:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        execute = "\"{}\" -i \"{}\" -vn -acodec copy {}\\output-audio.aac -y".format(self.ffmpeg_path, videoin, outpath)
+        execute = '\"{}\" -i \"{}\" -vn -acodec copy {}\\output-audio.aac -y {}'.format(
+            self.ffmpeg_path, videoin, outpath, self.ffmpeg_arguments)
         print(execute)
         subprocess.call(execute)
 
@@ -65,8 +68,8 @@ class Ffmpeg:
             resolution {string} -- target video resolution
             upscaled {string} -- source images folder
         """
-        execute = "\"{}\" -r {} -f image2 -s {} -i {}\\extracted_%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p {}\\no_audio.mp4 -y".format(
-            self.ffmpeg_path, framerate, resolution, upscaled, upscaled)
+        execute = '\"{}\" -r {} -f image2 -s {} -i {}\\extracted_%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p {}\\no_audio.mp4 -y {}'.format(
+            self.ffmpeg_path, framerate, resolution, upscaled, upscaled, self.ffmpeg_arguments)
         print(execute)
         subprocess.call(execute)
 
@@ -79,6 +82,7 @@ class Ffmpeg:
         Arguments:
             upscaled {string} -- upscaled image folder
         """
-        execute = "\"{}\" -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec copy {} -y".format(self.ffmpeg_path, upscaled, upscaled, self.outfile)
+        execute = '\"{}\" -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec copy {} -y {}'.format(
+            self.ffmpeg_path, upscaled, upscaled, self.outfile, self.ffmpeg_arguments)
         print(execute)
         subprocess.call(execute)
