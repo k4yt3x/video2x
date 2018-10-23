@@ -62,7 +62,7 @@ def process_arguments():
     options_group.add_argument('-v', '--video', help='Specify source video file', action='store', default=False)
     options_group.add_argument('-o', '--output', help='Specify output file', action='store', default=False)
     options_group.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb')
-    options_group.add_argument('-t', '--threads', help='Specify model to use', action='store', type=int, default=5)
+    options_group.add_argument('-t', '--threads', help='Specify number of threads to use for upscaling', action='store', type=int, default=5)
     options_group.add_argument('-c', '--config', help='Manually specify config file', action='store', default='video2x.json')
 
     # Render drivers, at least one option must be specified
