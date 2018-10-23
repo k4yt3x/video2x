@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2x Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: October 22, 2018
+Last Modified: October 23, 2018
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -39,16 +39,11 @@ import threading
 import time
 import traceback
 
-VERSION = '2.1.1'
+VERSION = '2.1.2'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
 UPSCALED = '{}\\upscaled'.format(EXEC_PATH)  # Folder containing enlarges frames
-
-# FFMPEG bin folder. Mind that '/' at the end
-FFMPEG_PATH = 'C:/Program Files (x86)/ffmpeg/bin/'
-# waifu2x executable path. Mind all the forward slashes
-WAIFU2X_PATH = '\"C:/Program Files (x86)/waifu2x-caffe/waifu2x-caffe-cui.exe\"'
 
 
 def process_arguments():
@@ -68,6 +63,7 @@ def process_arguments():
     options_group.add_argument('-o', '--output', help='Specify output file', action='store', default=False)
     options_group.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb')
     options_group.add_argument('-t', '--threads', help='Specify model to use', action='store', type=int, default=5)
+    options_group.add_argument('-c', '--config', help='Manually specify config file', action='store', default='video2x.json')
 
     # Render drivers, at least one option must be specified
     driver_group = parser.add_argument_group('Render Drivers')
@@ -89,6 +85,16 @@ def print_logo():
     print('{}\n{}    Version {}\n{}'.format(Avalon.FM.BD, spaces, VERSION, Avalon.FM.RST))
 
 
+def read_config():
+    """ Reads configuration file
+
+    Returns a dictionary read by json.
+    """
+    with open(args.config, 'r') as raw_config:
+        config = json.load(raw_config)
+    return config
+
+
 def get_video_info():
     """Gets original video information
 
@@ -101,7 +107,7 @@ def get_video_info():
         dictionary -- original video information
     """
     json_str = subprocess.check_output(
-        '{} -v quiet -print_format json -show_format -show_streams \"{}\"'.format('\"' + FFMPEG_PATH + 'ffprobe.exe\"', args.video))
+        '{} -v quiet -print_format json -show_format -show_streams \"{}\"'.format('\"' + ffmpeg_path + 'ffprobe.exe\"', args.video))
     return json.loads(json_str.decode('utf-8'))
 
 
@@ -193,8 +199,8 @@ def video2x():
         method = 'cudnn'
 
     # Initialize objects for ffmpeg and waifu2x-caffe
-    fm = Ffmpeg('\"' + FFMPEG_PATH + 'ffmpeg.exe\"', args.output)
-    w2 = Waifu2x(WAIFU2X_PATH, method, args.model_type)
+    fm = Ffmpeg('\"' + ffmpeg_path + 'ffmpeg.exe\"', args.output)
+    w2 = Waifu2x(waifu2x_path, method, args.model_type)
 
     # Clear and create directories
     if os.path.isdir(FRAMES):
@@ -246,25 +252,16 @@ def video2x():
 
 # /////////////////// Execution /////////////////// #
 
+# This is not a library
+if __name__ != '__main__':
+    Avalon.error('This file cannot be imported')
+    exit(1)
+
+# Process cli arguments
 args = process_arguments()
-# Convert paths to absolute paths
-args.video = os.path.abspath(args.video)
-args.output = os.path.abspath(args.output)
+
+# Print video2x banner
 print_logo()
-
-
-# Check if FFMPEG and waifu2x are present
-if not os.path.isdir(FFMPEG_PATH):
-    Avalon.error('FFMPEG binaries not found')
-    Avalon.error('Please specify FFMPEG binaries location in source code')
-    print('Current value: {}\n'.format(FFMPEG_PATH))
-    raise FileNotFoundError('FFMPEG binaries not found')
-if not os.path.isfile(WAIFU2X_PATH.strip('\"')):
-    Avalon.error('Waifu2x CUI executable not found')
-    Avalon.error('Please specify Waifu2x CUI location in source code')
-    print('Current value: {}\n'.format(WAIFU2X_PATH))
-    raise FileNotFoundError('Waifu2x CUI executable not found')
-
 
 # Check if arguments are valid / all necessary argument
 # values are specified
@@ -281,11 +278,33 @@ elif not args.cpu and not args.gpu and not args.cudnn:
     Avalon.error('You need to specify the enlarging processing unit')
     exit(1)
 
-if __name__ == '__main__':
-    try:
-        begin_time = time.time()
-        video2x()
-        Avalon.info('Program completed, taking {} seconds'.format(round((time.time() - begin_time), 5)))
-    except Exception:
-        Avalon.error('An exception occurred')
-        traceback.print_exc()
+# Convert paths to absolute paths
+args.video = os.path.abspath(args.video)
+args.output = os.path.abspath(args.output)
+
+# Read configurations from config file
+config = read_config()
+waifu2x_path = config['waifu2x_path']
+ffmpeg_path = config['ffmpeg_path']
+
+
+# Check if FFMPEG and waifu2x are present
+if not os.path.isdir(ffmpeg_path):
+    Avalon.error('FFMPEG binaries not found')
+    Avalon.error('Please specify FFMPEG binaries location in config file')
+    Avalon.error('Current value: {}'.format(ffmpeg_path))
+    raise FileNotFoundError(ffmpeg_path)
+if not os.path.isfile(waifu2x_path):
+    Avalon.error('Waifu2x CUI executable not found')
+    Avalon.error('Please specify Waifu2x CUI location in config file')
+    Avalon.error('Current value: {}'.format(waifu2x_path))
+    raise FileNotFoundError(waifu2x_path)
+
+# Start execution
+try:
+    begin_time = time.time()
+    video2x()
+    Avalon.info('Program completed, taking {} seconds'.format(round((time.time() - begin_time), 5)))
+except Exception:
+    Avalon.error('An exception occurred')
+    traceback.print_exc()
