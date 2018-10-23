@@ -33,13 +33,14 @@ import argparse
 import inspect
 import json
 import os
+import psutil
 import shutil
 import subprocess
 import threading
 import time
 import traceback
 
-VERSION = '2.1.2'
+VERSION = '2.1.3'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
@@ -304,6 +305,31 @@ if not os.path.isfile(waifu2x_path):
     Avalon.error('Please specify Waifu2x CUI location in config file')
     Avalon.error('Current value: {}'.format(waifu2x_path))
     raise FileNotFoundError(waifu2x_path)
+
+# Check usable memory
+# Warn the user if insufficient memory is available for
+# the number of threads that the user have chosen. Each
+# thread might take up to 2.5 GB during initialization.
+MEM_PER_THREAD = 2.5
+memory_available = psutil.virtual_memory().available / (1024 ** 3)
+
+# If user doesn't even have enough memory to run even one thread
+if memory_available < MEM_PER_THREAD:
+    Avalon.warning('You might have an insufficient amount of memory available to run this program ({} GB)'.format(memory_available))
+    Avalon.warning('Proceed with caution')
+# If memory available is less than needed, warn the user
+elif memory_available < (MEM_PER_THREAD * args.threads):
+    Avalon.warning('Each waifu2x-caffe thread will require up to 2.5 GB during initialization')
+    Avalon.warning('You demanded {} threads to be created, but you only have {} GB memory available'.format(args.threads, round(memory_available, 4)))
+    Avalon.warning('{} GB of memory is recommended for {} threads'.format(MEM_PER_THREAD * args.threads, args.threads))
+    Avalon.warning('With your current amount of memory available, {} threads is recommended'.format(int(memory_available // MEM_PER_THREAD)))
+
+    # Ask the user if he / she wants to change to the recommended
+    # number of threads
+    if Avalon.ask('Change to the recommended value?', True):
+        args.threads = int(memory_available // MEM_PER_THREAD)
+    else:
+        Avalon.warning('Proceed with caution')
 
 # Start execution
 try:
