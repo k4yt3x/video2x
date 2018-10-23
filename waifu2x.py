@@ -9,7 +9,7 @@ Last Modified: October 22, 2018
 Description: This class controls waifu2x
 engine
 
-Version 2.0.3
+Version 2.0.4
 """
 from avalon_framework import Avalon
 import subprocess
@@ -47,7 +47,7 @@ class Waifu2x:
             self.print_lock.release()
 
             # Create string for execution
-            execute = '{} -p {} -I png -i {} -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}'.format(
+            execute = '\"{}\" -p {} -I png -i \"{}\" -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}'.format(
                 self.waifu2x_path, self.method, folderin, folderout, width, height, self.model_type)
             subprocess.call(execute)
 

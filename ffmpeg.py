@@ -9,7 +9,7 @@ Last Modified: October 22, 2018
 Description: This class handles all FFMPEG related
 operations.
 
-Version 2.0.3
+Version 2.0.4
 """
 import subprocess
 
@@ -36,7 +36,7 @@ class Ffmpeg:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        execute = "{} -i \"{}\" {}\\extracted_%0d.png -y".format(self.ffmpeg_path, videoin, outpath)
+        execute = "\"{}\" -i \"{}\" {}\\extracted_%0d.png -y".format(self.ffmpeg_path, videoin, outpath)
         print(execute)
         subprocess.call(execute)
 
@@ -50,7 +50,7 @@ class Ffmpeg:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        execute = "{} -i \"{}\" -vn -acodec copy {}\\output-audio.aac -y".format(self.ffmpeg_path, videoin, outpath)
+        execute = "\"{}\" -i \"{}\" -vn -acodec copy {}\\output-audio.aac -y".format(self.ffmpeg_path, videoin, outpath)
         print(execute)
         subprocess.call(execute)
 
@@ -65,7 +65,7 @@ class Ffmpeg:
             resolution {string} -- target video resolution
             upscaled {string} -- source images folder
         """
-        execute = "{} -r {} -f image2 -s {} -i {}\\extracted_%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p {}\\no_audio.mp4 -y".format(
+        execute = "\"{}\" -r {} -f image2 -s {} -i {}\\extracted_%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p {}\\no_audio.mp4 -y".format(
             self.ffmpeg_path, framerate, resolution, upscaled, upscaled)
         print(execute)
         subprocess.call(execute)
@@ -79,6 +79,6 @@ class Ffmpeg:
         Arguments:
             upscaled {string} -- upscaled image folder
         """
-        execute = "{} -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec copy {} -y".format(self.ffmpeg_path, upscaled, upscaled, self.outfile)
+        execute = "\"{}\" -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec copy {} -y".format(self.ffmpeg_path, upscaled, upscaled, self.outfile)
         print(execute)
         subprocess.call(execute)
