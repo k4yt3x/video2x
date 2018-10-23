@@ -9,7 +9,7 @@ Last Modified: October 22, 2018
 Description: This class controls waifu2x
 engine
 
-Version 2.0.2
+Version 2.0.3
 """
 from avalon_framework import Avalon
 import subprocess
@@ -29,6 +29,7 @@ class Waifu2x:
         self.waifu2x_path = waifu2x_path
         self.method = method
         self.model_type = model_type
+        self.print_lock = threading.Lock()
 
     def upscale(self, folderin, folderout, width, height):
             """This is the core function for WAIFU2X class
@@ -39,8 +40,18 @@ class Waifu2x:
                 width {int} -- output video width
                 height {int} -- output video height
             """
+
+            # Print thread start message
+            self.print_lock.acquire()
             Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
+            self.print_lock.release()
+
+            # Create string for execution
             execute = '{} -p {} -I png -i {} -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}'.format(
                 self.waifu2x_path, self.method, folderin, folderout, width, height, self.model_type)
             subprocess.call(execute)
+
+            # Print thread exiting message
+            self.print_lock.acquire()
             Avalon.debug_info('[upscaler] Thread {} exiting'.format(threading.current_thread().name))
+            self.print_lock.release()
