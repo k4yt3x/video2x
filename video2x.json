@@ -1,4 +1,5 @@
 {
   "waifu2x_path": "C:/Program Files (x86)/waifu2x-caffe/waifu2x-caffe-cui.exe",
-  "ffmpeg_path": "C:/Program Files (x86)/ffmpeg/bin/"
+  "ffmpeg_path": "C:/Program Files (x86)/ffmpeg/bin/",
+  "ffmpeg_arguments": ""
 }
