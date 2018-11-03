@@ -6,6 +6,10 @@ A test is undergoing for version 2.1.1 to verify is stability. Please wait patie
 
 ### This software is currently designed for Windows.
 
+## 2.1.4 (November 2, 2018)
+
+- Added hardware acceleration option for ffmpeg. Ffmpeg will use hardware acceleration (GPU, usually) if `--gpu` or `--cudnn` is given. You can customize the method to use in `video2x.json`.
+
 ## 2.1.1 (October 22, 2018)
 
 - Fixed video stream and audio stream indexing issues.
