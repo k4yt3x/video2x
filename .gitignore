@@ -4,6 +4,9 @@ frames/
 waifu2x-caffe/
 testvid.mp4
 
+# PyCharm
+.idea/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
