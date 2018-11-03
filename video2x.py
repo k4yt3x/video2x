@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2x Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: October 23, 2018
+Last Modified: November 2, 2018
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -40,7 +40,7 @@ import threading
 import time
 import traceback
 
-VERSION = '2.1.3'
+VERSION = '2.1.4'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
@@ -196,8 +196,10 @@ def video2x():
         method = 'cpu'
     elif args.gpu:
         method = 'gpu'
+        ffmpeg_arguments.append('-hwaccel {}'.format(ffmpeg_hwaccel))
     elif args.cudnn:
         method = 'cudnn'
+        ffmpeg_arguments.append('-hwaccel {}'.format(ffmpeg_hwaccel))
 
     # Initialize objects for ffmpeg and waifu2x-caffe
     fm = Ffmpeg(ffmpeg_path, args.output, ffmpeg_arguments)
@@ -288,6 +290,7 @@ config = read_config()
 waifu2x_path = config['waifu2x_path']
 ffmpeg_path = config['ffmpeg_path']
 ffmpeg_arguments = config['ffmpeg_arguments']
+ffmpeg_hwaccel = config['ffmpeg_hwaccel']
 
 # Add a forward slash to directory if not present
 # otherwise there will be a format error
