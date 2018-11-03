@@ -4,12 +4,12 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: October 23, 2018
+Last Modified: November 2, 2018
 
 Description: This class handles all FFMPEG related
 operations.
 
-Version 2.0.4
+Version 2.0.5
 """
 import subprocess
 
@@ -22,9 +22,10 @@ class Ffmpeg:
     and inserting audio tracks to videos.
     """
 
-    def __init__(self, ffmpeg_path, outfile, ffmpeg_arguments):
+    def __init__(self, ffmpeg_path, outfile, ffmpeg_arguments, hardware_acc=False):
         self.ffmpeg_path = '{}ffmpeg.exe'.format(ffmpeg_path)
         self.outfile = outfile
+        self.hardware_acc = hardware_acc
         self.ffmpeg_arguments = ffmpeg_arguments
 
     def extract_frames(self, videoin, outpath):
@@ -38,7 +39,7 @@ class Ffmpeg:
             outpath {string} -- video output folder
         """
         execute = '\"{}\" -i \"{}\" {}\\extracted_%0d.png -y {}'.format(
-            self.ffmpeg_path, videoin, outpath, self.ffmpeg_arguments)
+            self.ffmpeg_path, videoin, outpath, ' '.join(self.ffmpeg_arguments))
         print(execute)
         subprocess.call(execute)
 
@@ -53,7 +54,7 @@ class Ffmpeg:
             outpath {string} -- video output folder
         """
         execute = '\"{}\" -i \"{}\" -vn -acodec copy {}\\output-audio.aac -y {}'.format(
-            self.ffmpeg_path, videoin, outpath, self.ffmpeg_arguments)
+            self.ffmpeg_path, videoin, outpath, ' '.join(self.ffmpeg_arguments))
         print(execute)
         subprocess.call(execute)
 
@@ -69,7 +70,7 @@ class Ffmpeg:
             upscaled {string} -- source images folder
         """
         execute = '\"{}\" -r {} -f image2 -s {} -i {}\\extracted_%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p {}\\no_audio.mp4 -y {}'.format(
-            self.ffmpeg_path, framerate, resolution, upscaled, upscaled, self.ffmpeg_arguments)
+            self.ffmpeg_path, framerate, resolution, upscaled, upscaled, ' '.join(self.ffmpeg_arguments))
         print(execute)
         subprocess.call(execute)
 
@@ -83,6 +84,6 @@ class Ffmpeg:
             upscaled {string} -- upscaled image folder
         """
         execute = '\"{}\" -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec copy {} -y {}'.format(
-            self.ffmpeg_path, upscaled, upscaled, self.outfile, self.ffmpeg_arguments)
+            self.ffmpeg_path, upscaled, upscaled, self.outfile, ' '.join(self.ffmpeg_arguments))
         print(execute)
         subprocess.call(execute)
