@@ -40,7 +40,7 @@ import threading
 import time
 import traceback
 
-VERSION = '2.1.4'
+VERSION = '2.1.5'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
@@ -148,9 +148,10 @@ def upscale_frames(w2):
     if len(frames) < args.threads:
         args.threads = len(frames)
 
-    # Move an equal amount of images into separate
-    # folders for each thread
-    images_per_thread = len(frames) // args.threads
+    # Create a folder for each thread and append folder
+    # name into a list
+
+    thread_folders = []
     for thread_id in range(args.threads):
         thread_folder = '{}\\{}'.format(FRAMES, str(thread_id))
 
@@ -159,13 +160,19 @@ def upscale_frames(w2):
             shutil.rmtree(thread_folder)
         os.mkdir(thread_folder)
 
-        # Begin moving images into corresponding folders
-        for _ in range(images_per_thread):
-            try:
-                shutil.move(frames.pop(0), thread_folder)
-            except IndexError:
-                pass
+        # Append folder path into list
+        thread_folders.append(thread_folder)
 
+    # Evenly distribute images into each folder
+    # until there is none left in the folder
+    for image in frames:
+        # Move image
+        shutil.move(image, thread_folders[0])
+        # Rotate list
+        thread_folders = thread_folders[-1:] + thread_folders[:-1]
+
+    # Create threads and start them
+    for thread_folder in thread_folders:
         # Create thread
         thread = threading.Thread(target=w2.upscale, args=(thread_folder, UPSCALED, args.width, args.height))
         thread.name = str(thread_id)
