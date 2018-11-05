@@ -151,7 +151,7 @@ def upscale_frames(w2):
     # Create a folder for each thread and append folder
     # name into a list
 
-    thread_folders = []
+    thread_pool = []
     for thread_id in range(args.threads):
         thread_folder = '{}\\{}'.format(FRAMES, str(thread_id))
 
@@ -161,21 +161,21 @@ def upscale_frames(w2):
         os.mkdir(thread_folder)
 
         # Append folder path into list
-        thread_folders.append(thread_folder)
+        thread_pool.append((thread_folder, thread_id))
 
     # Evenly distribute images into each folder
     # until there is none left in the folder
     for image in frames:
         # Move image
-        shutil.move(image, thread_folders[0])
+        shutil.move(image, thread_pool[0][0])
         # Rotate list
-        thread_folders = thread_folders[-1:] + thread_folders[:-1]
+        thread_pool = thread_pool[-1:] + thread_pool[:-1]
 
     # Create threads and start them
-    for thread_folder in thread_folders:
+    for thread_info in thread_pool:
         # Create thread
-        thread = threading.Thread(target=w2.upscale, args=(thread_folder, UPSCALED, args.width, args.height))
-        thread.name = str(thread_id)
+        thread = threading.Thread(target=w2.upscale, args=(thread_info[0], UPSCALED, args.width, args.height))
+        thread.name = thread_info[1]
 
         # Add threads into the pool
         upscaler_threads.append(thread)
