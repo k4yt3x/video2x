@@ -1,22 +1,14 @@
 # Video2X Video Enlarger
 
-## WARNING: Version 2.1.1 might be unstable.
-
-A test is undergoing for version 2.1.1 to verify is stability. Please wait patiently for us to finish the tests. It shouldn't take longer than half a day.
-
 ### This software is currently designed for Windows.
+
+## 2.1.6 (November 26, 2018)
+
+- Restored the option to define a factor which the will be upscaled by, which is suggested by @wuast94 .
 
 ## 2.1.4 (November 2, 2018)
 
 - Added hardware acceleration option for ffmpeg. Ffmpeg will use hardware acceleration (GPU, usually) if `--gpu` or `--cudnn` is given. You can customize the method to use in `video2x.json`.
-
-## 2.1.1 (October 22, 2018)
-
-- Fixed video stream and audio stream indexing issues.
-
-## 2.1.0 (October 22, 2018)
-
-- Added multithreading.
 
 ## Description
 
