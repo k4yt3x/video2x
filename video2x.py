@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2x Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: November 2, 2018
+Last Modified: November 26, 2018
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -40,7 +40,7 @@ import threading
 import time
 import traceback
 
-VERSION = '2.1.5'
+VERSION = '2.1.6'
 
 EXEC_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 FRAMES = '{}\\frames'.format(EXEC_PATH)  # Folder containing extracted frames
@@ -60,6 +60,7 @@ def process_arguments():
     options_group = parser.add_argument_group('Options')
     options_group.add_argument('--width', help='Output video width', action='store', type=int, default=False)
     options_group.add_argument('--height', help='Output video height', action='store', type=int, default=False)
+    options_group.add_argument('-f', '--factor', help='Factor to upscale the videos by', action='store', type=int, default=False)
     options_group.add_argument('-v', '--video', help='Specify source video file', action='store', default=False)
     options_group.add_argument('-o', '--output', help='Specify output file', action='store', default=False)
     options_group.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb')
@@ -250,7 +251,16 @@ def video2x():
 
     # Frames to Video
     Avalon.info('Converting extracted frames into video')
-    fm.convert_video(framerate, '{}x{}'.format(args.width, args.height), UPSCALED)
+
+    # Width/height will be coded width/height x upscale factor
+    if args.factor:
+        coded_width = info['streams'][video_stream_index]['coded_width']
+        coded_height = info['streams'][video_stream_index]['coded_height']
+        fm.convert_video(framerate, '{}x{}'.format(args.factor * coded_width, args.factor * coded_height), UPSCALED)
+
+    # Use user defined output size
+    else:
+        fm.convert_video(framerate, '{}x{}'.format(args.width, args.height), UPSCALED)
     Avalon.info('Conversion completed')
 
     # Extract and press audio in
@@ -278,8 +288,8 @@ print_logo()
 if not args.video:
     Avalon.error('You need to specify the video to process')
     exit(1)
-elif not args.width or not args.height:
-    Avalon.error('You must specify output video width and height')
+elif (not args.width or not args.height) or not args.upscale_factor:
+    Avalon.error('You must specify output video width and height or upscale factor')
     exit(1)
 elif not args.output:
     Avalon.error('You need to specify the output video name')
