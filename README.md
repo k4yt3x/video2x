@@ -2,13 +2,13 @@
 
 ### This software is currently designed for Windows.
 
+## Setup Script (November 29, 2018)
+
+- Added setup script. Now you can install dependencies and generate video2x configuraiton automatically by running the `video2x_setup.py` script.
+
 ## 2.1.6 (November 26, 2018)
 
 - Restored the option to define a factor which the will be upscaled by, which is suggested by @wuast94 .
-
-## 2.1.4 (November 2, 2018)
-
-- Added hardware acceleration option for ffmpeg. Ffmpeg will use hardware acceleration (GPU, usually) if `--gpu` or `--cudnn` is given. You can customize the method to use in `video2x.json`.
 
 ## Description
 
@@ -38,6 +38,15 @@ Download: https://ffmpeg.org/download.html
 - **waifu2x-caffe for Windows**  
 Download: https://github.com/lltcggie/waifu2x-caffe/releases
 
+### Install Dependencies
+
+You can run the `video2x_setup.py` script to install and configure the depencies automatically. This script is designed and tested on Windows 10.
+
+This script will install `ffmpeg`, `waifu2x-caffe` to `%LOCALAPPDATA%\\video2x` and all python libraries.
+
+```bash
+$ python video2x_setup.py
+```
 
 After downloading the dependencies, clone the video2x package.
 
@@ -50,7 +59,6 @@ Then you'll need to install python dependencies before start using video2x. Inst
 ```bash
 $ pip install -r requirements.txt
 ```
-
 
 ## Quick Start
 
