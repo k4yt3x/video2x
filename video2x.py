@@ -288,7 +288,7 @@ print_logo()
 if not args.video:
     Avalon.error('You need to specify the video to process')
     exit(1)
-elif (not args.width or not args.height) or not args.upscale_factor:
+elif (not args.width or not args.height) and not args.factor:
     Avalon.error('You must specify output video width and height or upscale factor')
     exit(1)
 elif not args.output:
