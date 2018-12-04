@@ -18,7 +18,7 @@ For short: **Video2X enlarges your video without losing details**
 
 Watch for the sharper edges in this screenshot around the shadows:
 
-[![preview](https://user-images.githubusercontent.com/18014964/36638068-19cdb78c-19b8-11e8-8dfb-406b7015d30c.png)](https://www.youtube.com/watch?v=PG94iPoeoZk)
+[![preview](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
 
 **Or you can watch the YouTube video Demo: https://www.youtube.com/watch?v=PG94iPoeoZk**
 
