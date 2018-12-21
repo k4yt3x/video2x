@@ -1,4 +1,0 @@
-avalon_framework
-colorama
-psutil
-requests
