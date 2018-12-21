@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: December 10, 2018
+Last Modified: December 19, 2018
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -13,24 +13,19 @@ Licensed under the GNU General Public License Version 3 (GNU GPL v3),
 """
 
 from avalon_framework import Avalon
+from exceptions import *
 from ffmpeg import Ffmpeg
 from fractions import Fraction
 from waifu2x import Waifu2x
 import json
 import os
-import psutil
 import shutil
 import subprocess
 import tempfile
 import threading
 
-# Each thread might take up to 2.5 GB during initialization.
-MEM_PER_THREAD = 2.5
-
-
-class ArgumentError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
+MODELS_AVAILABLE = ['upconv_7_anime_style_art_rgb', 'upconv_7_photo',
+                    'anime_style_art_rgb', 'photo', 'anime_style_art_y']
 
 
 class Upscaler:
@@ -66,14 +61,8 @@ class Upscaler:
     def _check_model_type(self, args):
         """ Validate upscaling model
         """
-        models_available = ['upconv_7_anime_style_art_rgb', 'upconv_7_photo',
-                            'anime_style_art_rgb', 'photo', 'anime_style_art_y']
-        if self.model_type not in models_available:
-            Avalon.error('Specified model type not found!')
-            Avalon.info('Available models:')
-            for model in models_available:
-                print(model)
-            exit(1)
+        if self.model_type not in MODELS_AVAILABLE:
+            raise InvalidModelType('Specified model type not available')
 
     def _check_arguments(self):
         # Check if arguments are valid / all necessary argument
@@ -82,35 +71,10 @@ class Upscaler:
             raise ArgumentError('You need to specify the video to process')
         elif (not self.output_width or not self.output_height) and not self.factor:
             raise ArgumentError('You must specify output video width and height or upscale factor')
-        elif not self.video_output:
+        elif not self.output_video:
             raise ArgumentError('You need to specify the output video name')
         elif not self.method:
             raise ArgumentError('You need to specify the enlarging processing unit')
-
-    def _check_memory(self):
-        """ Check usable memory
-        Warn the user if insufficient memory is available for
-        the number of threads that the user have chosen.
-        """
-        memory_available = psutil.virtual_memory().available / (1024 ** 3)
-
-        # If user doesn't even have enough memory to run even one thread
-        if memory_available < MEM_PER_THREAD:
-            Avalon.warning('You might have an insufficient amount of memory available to run this program ({} GB)'.format(memory_available))
-            Avalon.warning('Proceed with caution')
-        # If memory available is less than needed, warn the user
-        elif memory_available < (MEM_PER_THREAD * self.threads):
-            Avalon.warning('Each waifu2x-caffe thread will require up to 2.5 GB during initialization')
-            Avalon.warning('You demanded {} threads to be created, but you only have {} GB memory available'.format(self.threads, round(memory_available, 4)))
-            Avalon.warning('{} GB of memory is recommended for {} threads'.format(MEM_PER_THREAD * self.threads, self.threads))
-            Avalon.warning('With your current amount of memory available, {} threads is recommended'.format(int(memory_available // MEM_PER_THREAD)))
-
-            # Ask the user if he / she wants to change to the recommended
-            # number of threads
-            if Avalon.ask('Change to the recommended value?', True):
-                self.threads = int(memory_available // MEM_PER_THREAD)
-            else:
-                Avalon.warning('Proceed with caution')
 
     def _upscale_frames(self, w2):
         """ Upscale video frames with waifu2x-caffe
@@ -159,7 +123,7 @@ class Upscaler:
         # Create threads and start them
         for thread_info in thread_pool:
             # Create thread
-            thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.width, self.height))
+            thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.output_width, self.output_height))
             thread.name = thread_info[1]
 
             # Add threads into the pool
@@ -184,7 +148,6 @@ class Upscaler:
         # Check argument sanity
         self._check_model_type(self.model_type)
         self._check_arguments()
-        self._check_memory()
 
         # Convert paths to absolute paths
         self.input_video = os.path.abspath(self.input_video)
@@ -202,7 +165,7 @@ class Upscaler:
             raise FileNotFoundError(self.waifu2x_path)
 
         # Initialize objects for ffmpeg and waifu2x-caffe
-        fm = Ffmpeg(self.ffmpeg_path, self.video_output, self.ffmpeg_arguments)
+        fm = Ffmpeg(self.ffmpeg_path, self.output_video, self.ffmpeg_arguments)
         w2 = Waifu2x(self.waifu2x_path, self.method, self.model_type)
 
         # Extract frames from video
@@ -228,6 +191,13 @@ class Upscaler:
         framerate = float(Fraction(info['streams'][video_stream_index]['avg_frame_rate']))
         Avalon.info('Framerate: {}'.format(framerate))
 
+        # Width/height will be coded width/height x upscale factor
+        if self.factor:
+            coded_width = info['streams'][video_stream_index]['coded_width']
+            coded_height = info['streams'][video_stream_index]['coded_height']
+            self.output_width = self.factor * coded_width
+            self.output_height = self.factor * coded_height
+
         # Upscale images one by one using waifu2x
         Avalon.info('Starting to upscale extracted images')
         self._upscale_frames(w2)
@@ -236,15 +206,8 @@ class Upscaler:
         # Frames to Video
         Avalon.info('Converting extracted frames into video')
 
-        # Width/height will be coded width/height x upscale factor
-        if self.factor:
-            coded_width = info['streams'][video_stream_index]['coded_width']
-            coded_height = info['streams'][video_stream_index]['coded_height']
-            fm.convert_video(framerate, '{}x{}'.format(self.factor * coded_width, self.factor * coded_height), self.upscaled_frames)
-
         # Use user defined output size
-        else:
-            fm.convert_video(framerate, '{}x{}'.format(self.width, self.height), self.upscaled_frames)
+        fm.convert_video(framerate, '{}x{}'.format(self.output_width, self.output_height), self.upscaled_frames)
         Avalon.info('Conversion completed')
 
         # Extract and press audio in
