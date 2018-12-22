@@ -2,6 +2,13 @@
 
 ### This software is currently designed for Windows.
 
+## 2.2.0 (December 21, 2018)
+
+- Rewritten main file to organize project structure. All executables have been moved into the `bin` folder.
+- Bulk enlarge videos in a folder function has been added.
+- Rewritten command line arguments parser to make arguments more clear.
+- Other minor improvements.
+
 ## Setup Script (November 29, 2018)
 
 - Added setup script. Now you can install dependencies and generate video2x configuraiton automatically by running the `video2x_setup.py` script.
@@ -45,14 +52,14 @@ You can run the `video2x_setup.py` script to install and configure the depencies
 This script will install `ffmpeg`, `waifu2x-caffe` to `%LOCALAPPDATA%\\video2x` and all python libraries.
 
 ```bash
-$ python video2x_setup.py
+$ python bin/video2x_setup.py
 ```
 
 After downloading the dependencies, clone the video2x package.
 
 ```bash
 $ git clone https://github.com/K4YT3X/video2x.git
-$ cd video2x
+$ cd video2x/bin
 ```
 Then you'll need to install python dependencies before start using video2x. Install simply by executing the following command.
 
@@ -65,36 +72,46 @@ $ pip install -r requirements.txt
 To enlarge a video on a computer with NVIDIA GPU
 
 ```bash
-$ python video2x.py -v VIDEO_FILE -o OUTPUT_FILENAME --width OUTPUT_WIDTH --height OUTPUT_HEIGHT --gpu
+$ python video2x.py -i video.mp4 -o video.mp4 -m gpu --width=1920 --height=1080
 ```
 
-To enlarge a video on a computer without NVIDIA GPU
+To enlarge a video on a computer with CPU
 
 ```bash
-$ python video2x.py -v VIDEO_FILE -o OUTPUT_FILENAME --width OUTPUT_WIDTH --height OUTPUT_HEIGHT --cpu
+$ python video2x.py -i video.mp4 -o video.mp4 -m cpu --width=1920 --height=1080
 ```
 
 
 ## Full Usage
 ```
-usage: video2x.py [-h] [--width WIDTH] [--height HEIGHT] [-v VIDEO]
-                  [-o OUTPUT] [-y MODEL_TYPE] [--cpu] [--gpu] [--cudnn]
+usage: video2x.py [-h] -i INPUT -o OUTPUT -m {cpu,gpu,cudnn}
+                  [-y {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}]
+                  [-t THREADS] [-c CONFIG] [--width WIDTH] [--height HEIGHT]
+                  [-f FACTOR]
 
 optional arguments:
   -h, --help            show this help message and exit
 
-Controls:
+Basic Options:
+  -i INPUT, --input INPUT
+                        Specify source video file/directory
+  -o OUTPUT, --output OUTPUT
+                        Specify output video file/directory
+  -m {cpu,gpu,cudnn}, --method {cpu,gpu,cudnn}
+                        Specify upscaling method
+  -y {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}, --model_type {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}
+                        Specify model to use
+  -t THREADS, --threads THREADS
+                        Specify number of threads to use for upscaling
+  -c CONFIG, --config CONFIG
+                        Manually specify config file
+
+Scaling Options:
   --width WIDTH         Output video width
   --height HEIGHT       Output video height
-  -v VIDEO, --video VIDEO
-                        Specify source video file
-  -o OUTPUT, --output OUTPUT
-                        Specify output file
-  -y MODEL_TYPE, --model_type MODEL_TYPE
-                        Specify model to use
-  --cpu                 Use CPU for enlarging
-  --gpu                 Use GPU for enlarging
-  --cudnn               Use CUDNN for enlarging
+  -f FACTOR, --factor FACTOR
+                        Factor to upscale the videos by
+
 ```
 
 This project is based on the following softwares and projects.
