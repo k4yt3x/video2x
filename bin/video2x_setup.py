@@ -113,7 +113,7 @@ class Video2xSetup:
 
         settings['waifu2x_path'] = '{}\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe'.format(os.getenv('localappdata'))
         settings['ffmpeg_path'] = '{}\\video2x\\ffmpeg-4.1-win64-static\\bin'.format(os.getenv('localappdata'))
-        settings['ffmpeg_arguments'] = ''
+        settings['ffmpeg_arguments'] = []
         settings['ffmpeg_hwaccel'] = 'cuda'
 
         with open('video2x.json', 'w') as config:

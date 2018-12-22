@@ -33,7 +33,14 @@ def enroll_settings():
 
     settings['waifu2x_path'] = get_path('waifu2x-caffe-cui.exe path: ')
     settings['ffmpeg_path'] = get_path('ffmpeg binaries directory: ')
-    settings['ffmpeg_arguments'] = Avalon.gets('Extra arguments passed to ffmpeg: ')
+
+    settings['ffmpeg_arguments'] = []
+    while True:
+        argument = Avalon.gets('Extra arguments passed to ffmpeg (empty when done): ')
+        if argument:
+            settings['ffmpeg_arguments'].append(argument)
+        else:
+            break
 
     settings['ffmpeg_hwaccel'] = Avalon.gets('ffmpeg hardware acceleration method (cuda): ')
     if settings['ffmpeg_hwaccel'] == '':
