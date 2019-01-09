@@ -9,7 +9,7 @@ Last Modified: December 19, 2018
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
 
-(C) 2018 K4YT3X
+(C) 2018-2019 K4YT3X
 """
 
 from avalon_framework import Avalon
