@@ -2,6 +2,10 @@
 
 ### This software is currently designed for Windows.
 
+## 2.2.1 (February 1, 2019)
+
+- Fixed AAC codec error discovered by @meguerreroa
+
 ## 2.2.0 (December 21, 2018)
 
 - Rewritten main file to organize project structure. All executables have been moved into the `bin` folder.
@@ -12,10 +16,6 @@
 ## Setup Script (November 29, 2018)
 
 - Added setup script. Now you can install dependencies and generate video2x configuraiton automatically by running the `video2x_setup.py` script.
-
-## 2.1.6 (November 26, 2018)
-
-- Restored the option to define a factor which the will be upscaled by, which is suggested by @wuast94 .
 
 ## Description
 
