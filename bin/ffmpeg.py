@@ -9,7 +9,7 @@ Last Modified: November 2, 2018
 Description: This class handles all FFMPEG related
 operations.
 
-Version 2.0.5
+Version 2.0.6
 """
 import subprocess
 
@@ -53,7 +53,7 @@ class Ffmpeg:
             videoin {string} -- input video path
             outpath {string} -- video output folder
         """
-        execute = '\"{}\" -i \"{}\" -vn -acodec copy {}\\output-audio.aac -y {}'.format(
+        execute = '\"{}\" -i \"{}\" -vn -acodec aac {}\\output-audio.aac -y {}'.format(
             self.ffmpeg_path, videoin, outpath, ' '.join(self.ffmpeg_arguments))
         print(execute)
         subprocess.call(execute)
@@ -83,7 +83,7 @@ class Ffmpeg:
         Arguments:
             upscaled {string} -- upscaled image folder
         """
-        execute = '\"{}\" -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec copy {} -y {}'.format(
+        execute = '\"{}\" -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec aac {} -y {}'.format(
             self.ffmpeg_path, upscaled, upscaled, self.outfile, ' '.join(self.ffmpeg_arguments))
         print(execute)
         subprocess.call(execute)
