@@ -83,7 +83,7 @@ class Ffmpeg:
         Arguments:
             upscaled {string} -- upscaled image folder
         """
-        execute = '\"{}\" -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec aac {} -y {}'.format(
+        execute = '\"{}\" -i {}\\no_audio.mp4 -i {}\\output-audio.aac -shortest -codec copy {} -y {}'.format(
             self.ffmpeg_path, upscaled, upscaled, self.outfile, ' '.join(self.ffmpeg_arguments))
         print(execute)
         subprocess.call(execute)
