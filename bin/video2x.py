@@ -35,7 +35,7 @@ import psutil
 import time
 import traceback
 
-VERSION = '2.3.0'
+VERSION = '2.4.0'
 
 # Each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -56,6 +56,7 @@ def process_arguments():
     basic_options.add_argument('-i', '--input', help='Specify source video file/directory', action='store', default=False, required=True)
     basic_options.add_argument('-o', '--output', help='Specify output video file/directory', action='store', default=False, required=True)
     basic_options.add_argument('-m', '--method', help='Specify upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'], required=True)
+    basic_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'], required=True)
     basic_options.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb', choices=MODELS_AVAILABLE)
     basic_options.add_argument('-t', '--threads', help='Specify number of threads to use for upscaling', action='store', type=int, default=5)
     basic_options.add_argument('-c', '--config', help='Manually specify config file', action='store', default='video2x.json')
@@ -65,7 +66,7 @@ def process_arguments():
     scaling_options = parser.add_argument_group('Scaling Options')  # TODO: (width & height) || (factor)
     scaling_options.add_argument('--width', help='Output video width', action='store', type=int, default=False)
     scaling_options.add_argument('--height', help='Output video height', action='store', type=int, default=False)
-    scaling_options.add_argument('-f', '--factor', help='Factor to upscale the videos by', action='store', type=int, default=False)
+    scaling_options.add_argument('-r', '--ratio', help='Scaling ratio', action='store', type=int, default=False)
 
     # Parse arguments
     return parser.parse_args()
@@ -134,6 +135,17 @@ print_logo()
 # Process CLI arguments
 args = process_arguments()
 
+# Arguments sanity check
+if args.driver == 'waifu2x_converter' and args.width and args.height:
+    Avalon.error('Waifu2x Converter CPP accepts only scaling ratio')
+    exit(1)
+if (args.width or args.height) and args.ratio:
+    Avalon.error('You can only specify either scaling ratio or output width and height')
+    exit(1)
+if (args.width and not args.height) or (not args.width and args.height):
+    Avalon.error('You must specify both width and height')
+    exit(1)
+
 # Check system available memory
 check_system_memory()
 
@@ -156,14 +168,14 @@ try:
     if os.path.isfile(args.input):
         """ Upscale single video file """
         Avalon.info('Upscaling single video file: {}'.format(args.input))
-        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, factor=args.factor, model_type=args.model_type, threads=args.threads, extracted_frames=extracted_frames, upscaled_frames=upscaled_frames)
+        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, waifu2x_driver=args.driver, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, ratio=args.ratio, model_type=args.model_type, threads=args.threads, extracted_frames=extracted_frames, upscaled_frames=upscaled_frames)
         upscaler.run()
     elif os.path.isdir(args.input):
         """ Upscale videos in a folder/directory """
         Avalon.info('Upscaling videos in folder: {}'.format(args.input))
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
             output_video = '{}\\{}'.format(args.output, input_video)
-            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, factor=args.factor, model_type=args.model_type, threads=args.threads, extracted_frames=extracted_frames, upscaled_frames=upscaled_frames)
+            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, waifu2x_driver=args.driver, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, ratio=args.ratio, model_type=args.model_type, threads=args.threads, extracted_frames=extracted_frames, upscaled_frames=upscaled_frames)
             upscaler.run()
     else:
         Avalon.error('Input path is neither a file nor a folder/directory')
