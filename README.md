@@ -1,5 +1,7 @@
 # Video2X Lossless Video Enlarger
 
+### Official Discussion Group (Telegram): https://t.me/video2x
+
 ### Prerequisites
 
 Component names that are italicized can be automatically downloaded and configured with the `video2x_setup.py` script.
