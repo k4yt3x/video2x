@@ -4,12 +4,12 @@
 Name: Video2X Setup Script
 Author: K4YT3X
 Date Created: November 28, 2018
-Last Modified: November 29, 2018
+Last Modified: February 8, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
 
-(C) 2018 K4YT3X
+(C) 2018-2019 K4YT3X
 
 Description: This script helps installing all dependencies of video2x
 and generates a configuration for it.
@@ -31,7 +31,7 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 
 class Video2xSetup:
@@ -115,6 +115,9 @@ class Video2xSetup:
         settings['ffmpeg_path'] = '{}\\video2x\\ffmpeg-4.1-win64-static\\bin'.format(os.getenv('localappdata'))
         settings['ffmpeg_arguments'] = []
         settings['ffmpeg_hwaccel'] = 'cuda'
+        settings['extracted_frames'] = False
+        settings['upscaled_frames'] = False
+        settings['preserve_frames'] = False
 
         with open('video2x.json', 'w') as config:
             json.dump(settings, config, indent=2)

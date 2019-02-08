@@ -4,7 +4,7 @@
 Name: Video2x Config Generator
 Author: K4YT3X
 Date Created: October 23, 2018
-Last Modified: November 26, 2018
+Last Modified: February 8, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -15,7 +15,7 @@ from avalon_framework import Avalon
 import json
 import os
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 
 def get_path(text):
@@ -45,6 +45,16 @@ def enroll_settings():
     settings['ffmpeg_hwaccel'] = Avalon.gets('ffmpeg hardware acceleration method (cuda): ')
     if settings['ffmpeg_hwaccel'] == '':
         settings['ffmpeg_hwaccel'] = 'cuda'
+
+    settings['extracted_frames'] = Avalon.gets('Temporary directory for extracted frames (empty for mkdtemp): ')
+    if settings['extracted_frames'] == '':
+        settings['extracted_frames'] = False
+
+    settings['upscaled_frames'] = Avalon.gets('Temporary directory for upscaled frames (empty for mkdtemp): ')
+    if settings['upscaled_frames'] == '':
+        settings['upscaled_frames'] = False
+
+    settings['preserve_frames'] = Avalon.ask('Preserve extracted or upscaled frames')
 
     return settings
 
