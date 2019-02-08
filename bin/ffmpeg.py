@@ -58,7 +58,7 @@ class Ffmpeg:
         print(execute)
         subprocess.call(execute)
 
-    def convert_video(self, framerate, resolution, upscaled, ):
+    def convert_video(self, framerate, resolution, upscaled):
         """Converts images into videos
 
         This method converts a set of images into a
