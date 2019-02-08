@@ -2,6 +2,12 @@
 
 ### This software is currently designed for Windows.
 
+## 2.3.0 (February 8, 2019)
+
+- Added the ability to specify the cache directories as required by @AusNaminator
+- Fixed the problem where if there's insufficient RAM, the warning doesn't pause the script and prompt the user to reduce the amount of threads used.
+- Some other minor adjustments.
+
 ## 2.2.1 (February 1, 2019)
 
 - Fixed AAC codec error discovered by @meguerreroa
