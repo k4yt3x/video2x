@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: December 19, 2018
+Last Modified: February 8, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -30,7 +30,7 @@ MODELS_AVAILABLE = ['upconv_7_anime_style_art_rgb', 'upconv_7_photo',
 
 class Upscaler:
 
-    def __init__(self, input_video, output_video, method, waifu2x_path, ffmpeg_path, ffmpeg_arguments=[], ffmpeg_hwaccel='gpu', output_width=False, output_height=False, factor=False, model_type='anime_style_art_rgb', threads=3):
+    def __init__(self, input_video, output_video, method, waifu2x_path, ffmpeg_path, ffmpeg_arguments=[], ffmpeg_hwaccel='gpu', output_width=False, output_height=False, factor=False, model_type='anime_style_art_rgb', threads=3, extracted_frames=False, upscaled_frames=False, preserve_frames=False):
         # Mandatory arguments
         self.input_video = input_video
         self.output_video = output_video
@@ -48,8 +48,25 @@ class Upscaler:
         self.threads = threads
 
         # Make temporary directories
-        self.extracted_frames = tempfile.mkdtemp()
-        self.upscaled_frames = tempfile.mkdtemp()
+        self.extracted_frames = extracted_frames
+        if not extracted_frames:
+            self.extracted_frames = tempfile.mkdtemp()
+        Avalon.debug_info('Extracted frames is being saved to: {}'.format(self.extracted_frames))
+
+        self.upscaled_frames = upscaled_frames
+        if not upscaled_frames:
+            self.upscaled_frames = tempfile.mkdtemp()
+        Avalon.debug_info('Upscaled frames is being saved to: {}'.format(self.upscaled_frames))
+
+        self.preserve_frames = preserve_frames
+
+    def __del__(self):
+        # Delete temp directories when done
+        if not self.preserve_frames:
+            Avalon.debug_info('Deleting cache directory: {}'.format(self.extracted_frames))
+            shutil.rmtree(self.extracted_frames)
+            Avalon.debug_info('Deleting cache directory: {}'.format(self.upscaled_frames))
+            shutil.rmtree(self.upscaled_frames)
 
     def _get_video_info(self):
         """Gets input video information
