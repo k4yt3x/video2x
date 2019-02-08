@@ -1,6 +1,14 @@
-# Video2X Video Enlarger
+# Video2X Lossless Video Enlarger
 
-### This software is currently designed for Windows.
+### Prerequisites
+
+Component names that are italicized can be automatically downloaded and configured with the `video2x_setup.py` script.
+
+1. Operating System: Windows
+1. Nvidia GPU (**AMD support is on the way**)
+1. Nvidia GPU driver / Nvidia CUDNN
+1. *FFMPEG*
+1. *Waifu2x Caffe*
 
 ## 2.3.0 (February 8, 2019)
 
@@ -31,7 +39,7 @@ For short: **Video2X enlarges your video without losing details**
 
 Watch for the sharper edges in this screenshot around the shadows:
 
-[![preview](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
+![preview](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
 
 **Or you can watch the YouTube video Demo: https://www.youtube.com/watch?v=PG94iPoeoZk**
 
@@ -53,7 +61,14 @@ Download: https://github.com/lltcggie/waifu2x-caffe/releases
 
 ### Install Dependencies
 
-You can run the `video2x_setup.py` script to install and configure the depencies automatically. This script is designed and tested on Windows 10.
+First, clone the video2x repository.
+
+```bash
+$ git clone https://github.com/K4YT3X/video2x.git
+$ cd video2x/bin
+```
+
+Then you may run the `video2x_setup.py` script to install and configure the depencies automatically. This script is designed and tested on Windows 10.
 
 This script will install `ffmpeg`, `waifu2x-caffe` to `%LOCALAPPDATA%\\video2x` and all python libraries.
 
@@ -61,12 +76,8 @@ This script will install `ffmpeg`, `waifu2x-caffe` to `%LOCALAPPDATA%\\video2x` 
 $ python bin/video2x_setup.py
 ```
 
-After downloading the dependencies, clone the video2x package.
+Alternatively, you can also install the dependencies manually. Please refer to the prerequisites section to see what's needed.
 
-```bash
-$ git clone https://github.com/K4YT3X/video2x.git
-$ cd video2x/bin
-```
 Then you'll need to install python dependencies before start using video2x. Install simply by executing the following command.
 
 ```bash
@@ -89,6 +100,7 @@ $ python video2x.py -i video.mp4 -o video.mp4 -m cpu --width=1920 --height=1080
 
 
 ## Full Usage
+
 ```
 usage: video2x.py [-h] -i INPUT -o OUTPUT -m {cpu,gpu,cudnn}
                   [-y {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}]
@@ -117,7 +129,6 @@ Scaling Options:
   --height HEIGHT       Output video height
   -f FACTOR, --factor FACTOR
                         Factor to upscale the videos by
-
 ```
 
 This project is based on the following softwares and projects.
