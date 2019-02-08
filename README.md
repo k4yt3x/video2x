@@ -4,13 +4,15 @@
 
 ### Prerequisites
 
-Component names that are italicized can be automatically downloaded and configured with the `video2x_setup.py` script.
+Component names that are **bolded** is mandatory.
+
+Component names that are *italicized* can be automatically downloaded and configured with the `video2x_setup.py` script.
 
 1. Operating System: Windows
-1. Nvidia GPU (**AMD support is on the way**)
-1. Nvidia GPU driver / Nvidia CUDNN
-1. *FFMPEG*
-1. *Waifu2x Caffe*
+1. AMD GPU / Nvidia GPU
+1. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
+1. ***FFMPEG***
+1. ***waifu2x_caffe*** / **waifu2x_converter_cpp**
 
 ## 2.4.0 (February 8, 2019)
 
