@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 1, 2019
+Last Modified: February 8, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -35,7 +35,7 @@ import psutil
 import time
 import traceback
 
-VERSION = '2.2.1'
+VERSION = '2.3.0'
 
 # Each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -94,6 +94,9 @@ def check_system_memory():
     if memory_available < MEM_PER_THREAD:
         Avalon.warning('You might have an insufficient amount of memory available to run this program ({} GB)'.format(memory_available))
         Avalon.warning('Proceed with caution')
+        if args.threads > 1:
+            if Avalon.ask('Reduce number of threads to avoid crashing?', True):
+                args.threads = 1
     # If memory available is less than needed, warn the user
     elif memory_available < (MEM_PER_THREAD * args.threads):
         Avalon.warning('Each waifu2x-caffe thread will require up to 2.5 GB during initialization')
@@ -140,6 +143,10 @@ waifu2x_path = config['waifu2x_path']
 ffmpeg_path = config['ffmpeg_path']
 ffmpeg_arguments = config['ffmpeg_arguments']
 ffmpeg_hwaccel = config['ffmpeg_hwaccel']
+extracted_frames = config['extracted_frames']
+upscaled_frames = config['upscaled_frames']
+preserve_frames = config['preserve_frames']
+
 
 # Start execution
 try:
@@ -149,14 +156,14 @@ try:
     if os.path.isfile(args.input):
         """ Upscale single video file """
         Avalon.info('Upscaling single video file: {}'.format(args.input))
-        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, factor=args.factor, model_type=args.model_type, threads=args.threads)
+        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, factor=args.factor, model_type=args.model_type, threads=args.threads, extracted_frames=extracted_frames, upscaled_frames=upscaled_frames)
         upscaler.run()
     elif os.path.isdir(args.input):
         """ Upscale videos in a folder/directory """
         Avalon.info('Upscaling videos in folder: {}'.format(args.input))
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
             output_video = '{}\\{}'.format(args.output, input_video)
-            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, factor=args.factor, model_type=args.model_type, threads=args.threads)
+            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, factor=args.factor, model_type=args.model_type, threads=args.threads, extracted_frames=extracted_frames, upscaled_frames=upscaled_frames)
             upscaler.run()
     else:
         Avalon.error('Input path is neither a file nor a folder/directory')
