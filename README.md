@@ -12,6 +12,10 @@ Component names that are italicized can be automatically downloaded and configur
 1. *FFMPEG*
 1. *Waifu2x Caffe*
 
+## 2.4.0 (February 8, 2019)
+
+- **Added AMD Support**. You can now use `-d/--driver waifu2x_converter` to specify the waifu2x driver to be `waifu2x_converter_cpp`. Note that you'll have to download and configure [waifu2x_converter_cpp](https://github.com/DeadSix27/waifu2x-converter-cpp/releases) first.
+
 ## 2.3.0 (February 8, 2019)
 
 - Added the ability to specify the cache directories as required by @AusNaminator
@@ -21,17 +25,6 @@ Component names that are italicized can be automatically downloaded and configur
 ## 2.2.1 (February 1, 2019)
 
 - Fixed AAC codec error discovered by @meguerreroa
-
-## 2.2.0 (December 21, 2018)
-
-- Rewritten main file to organize project structure. All executables have been moved into the `bin` folder.
-- Bulk enlarge videos in a folder function has been added.
-- Rewritten command line arguments parser to make arguments more clear.
-- Other minor improvements.
-
-## Setup Script (November 29, 2018)
-
-- Added setup script. Now you can install dependencies and generate video2x configuraiton automatically by running the `video2x_setup.py` script.
 
 ## Description
 
@@ -88,26 +81,47 @@ $ pip install -r requirements.txt
 
 ## Quick Start
 
-To enlarge a video on a computer with NVIDIA GPU
+### Nvidia CUDA (waifu2x_caffe)
+
+Enlarge the video to 1920x1080 using CUDA. You may also use the `-r/--ratio` option.
 
 ```bash
-$ python video2x.py -i video.mp4 -o video.mp4 -m gpu --width=1920 --height=1080
+$ python video2x.py -i video.mp4 -o video_output.mp4 -m gpu --width=1920 --height=1080
 ```
 
-To enlarge a video on a computer with CPU
+### Nvidia CNDNN
+
+Enlarge the video to 1920x1080 using CUDNN. You may also use the `-r/--ratio` option.
 
 ```bash
-$ python video2x.py -i video.mp4 -o video.mp4 -m cpu --width=1920 --height=1080
+$ python video2x.py -i video.mp4 -o video_output.mp4 -m cudnn --width=1920 --height=1080
+```
+
+### AMD or Nvidia (waifu2x_converter_cpp OpenCL)
+
+Enlarge the video by 2 times using OpenCL. Note that `waifu2x_converter_cpp` doesn't support width and height.
+
+```bash
+$ python video2x.py -i video.mp4 -o video_output.mp4 -m gpu -r 2
+```
+
+### CPU
+
+Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` option. This is potentially much slower than using a GPU.
+
+```bash
+$ python video2x.py -i video.mp4 -o video_output.mp4 -m cpu --width=1920 --height=1080
 ```
 
 
 ## Full Usage
 
 ```
-usage: video2x.py [-h] -i INPUT -o OUTPUT -m {cpu,gpu,cudnn}
+usage: video2x.py [-h] -i INPUT -o OUTPUT -m {cpu,gpu,cudnn} -d
+                  {waifu2x_caffe,waifu2x_converter}
                   [-y {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}]
                   [-t THREADS] [-c CONFIG] [--width WIDTH] [--height HEIGHT]
-                  [-f FACTOR]
+                  [-r RATIO]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -119,6 +133,8 @@ Basic Options:
                         Specify output video file/directory
   -m {cpu,gpu,cudnn}, --method {cpu,gpu,cudnn}
                         Specify upscaling method
+  -d {waifu2x_caffe,waifu2x_converter}, --driver {waifu2x_caffe,waifu2x_converter}
+                        Waifu2x driver
   -y {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}, --model_type {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}
                         Specify model to use
   -t THREADS, --threads THREADS
@@ -129,10 +145,11 @@ Basic Options:
 Scaling Options:
   --width WIDTH         Output video width
   --height HEIGHT       Output video height
-  -f FACTOR, --factor FACTOR
-                        Factor to upscale the videos by
+  -r RATIO, --ratio RATIO
+                        Scaling ratio
 ```
 
 This project is based on the following softwares and projects.
 - [FFMPEG]('https://www.ffmpeg.org/')
 - [waifu2x caffe](https://github.com/lltcggie/waifu2x-caffe)
+- [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
