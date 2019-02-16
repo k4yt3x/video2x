@@ -56,7 +56,7 @@ def process_arguments():
     basic_options.add_argument('-i', '--input', help='Specify source video file/directory', action='store', default=False, required=True)
     basic_options.add_argument('-o', '--output', help='Specify output video file/directory', action='store', default=False, required=True)
     basic_options.add_argument('-m', '--method', help='Specify upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'], required=True)
-    basic_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'], required=True)
+    basic_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
     basic_options.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb', choices=MODELS_AVAILABLE)
     basic_options.add_argument('-t', '--threads', help='Specify number of threads to use for upscaling', action='store', type=int, default=5)
     basic_options.add_argument('-c', '--config', help='Manually specify config file', action='store', default='video2x.json')
