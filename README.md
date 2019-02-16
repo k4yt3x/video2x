@@ -38,7 +38,9 @@ Watch for the sharper edges in this screenshot around the shadows:
 
 ![preview](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
 
-**Or you can watch the YouTube video Demo: https://www.youtube.com/watch?v=PG94iPoeoZk**
+**You can also watch the YouTube video Demo: https://www.youtube.com/watch?v=PG94iPoeoZk**
+
+Clip is from trailer of animated movie "千と千尋の神隠し". Copyright belongs to "株式会社スタジオジブリ (STUDIO GHIBLI INC.)". Will delete immediately if use of clip is in violation of copyright.
 
 ## Screenshot
 ![screenshot](https://user-images.githubusercontent.com/21986859/40265170-39c0caae-5b01-11e8-8371-8b6c24769639.png)
@@ -93,6 +95,8 @@ If you can't find a video clip to begin with, or if you want to see a before-aft
 
 - [Sample Video Original (240P) 1.7MB](https://files.flexio.org/Resources/Videos/sample_input.mp4)
 - [Sample Video Upscaled (1080P) 4.8MB](https://files.flexio.org/Resources/Videos/sample_output.mp4)
+
+Clip is from anime "さくら荘のペットな彼女". Copyright belongs to "株式会社アニプレックス (Aniplex Inc.)". Will delete immediately if use of clip is in violation of copyright.
 
 ### For Command Line Beginners
 
