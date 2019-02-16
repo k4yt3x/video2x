@@ -4,15 +4,15 @@
 
 ### Prerequisites
 
-Component names that are **bolded** is mandatory.
+Component names that are **bolded** are mandatory.
 
 Component names that are *italicized* can be automatically downloaded and configured with the `video2x_setup.py` script.
 
 1. Operating System: Windows
 1. AMD GPU / Nvidia GPU
 1. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
-1. ***FFMPEG***
-1. ***waifu2x_caffe*** / **waifu2x_converter_cpp**
+1. [***FFMPEG***](https://ffmpeg.zeranoe.com/builds/)
+1. [***waifu2x_caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x_converter_cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases) 
 
 ## 2.4.0 (February 8, 2019)
 
@@ -53,8 +53,10 @@ Watch for the sharper edges in this screenshot around the shadows:
 Download: https://www.python.org/downloads/windows/
 - **FFMPEG Windows Build**  
 Download: https://ffmpeg.org/download.html  
-- **waifu2x-caffe for Windows**  
+- **waifu2x_caffe for Windows**  
 Download: https://github.com/lltcggie/waifu2x-caffe/releases
+- **waifu2x_converter_cpp**  
+Download: https://github.com/DeadSix27/waifu2x-converter-cpp/releases
 
 ### Install Dependencies
 
@@ -70,7 +72,7 @@ Then you may run the `video2x_setup.py` script to install and configure the depe
 This script will install `ffmpeg`, `waifu2x-caffe` to `%LOCALAPPDATA%\\video2x` and all python libraries.
 
 ```bash
-$ python bin/video2x_setup.py
+$ python video2x_setup.py
 ```
 
 Alternatively, you can also install the dependencies manually. Please refer to the prerequisites section to see what's needed.
@@ -83,12 +85,29 @@ $ pip install -r requirements.txt
 
 ## Quick Start
 
+### Sample Videos
+
+If you can't find a video clip to begin with, or if you want to see a before-after comparison, we have prepared some sample clips for you. The quick start guide down below will also be based on the name of the sample clips.
+
+![sample_video](https://user-images.githubusercontent.com/21986859/52905766-d5512b00-3236-11e9-9aea-077636539679.png)
+
+- [Sample Video Original (240P) 1.7MB](https://files.flexio.org/Resources/Videos/sample_input.mp4)
+- [Sample Video Upscaled (1080P) 4.8MB](https://files.flexio.org/Resources/Videos/sample_output.mp4)
+
+### For Command Line Beginners
+
+If you're unfamiliar of directories in command lines, then here's a short section that might help you to get started.
+
+For example, if you downloaded the sample input video to `C:\Users\[YourUsername]\Downloads`, then the full path of your input video will be `C:\Users\[YourUsername]\Downloads\sample_input.mp4`, vice versa. The output path is also relative. If you want to export the output video to the current directory, just specify the output video name such as `output.mp4`. However, if you want to put the output video in a different directory, you should use relative or absolute path, such as `C:\Users\[YourUsername]\Desktop\output.mp4`.
+
+If you're tired typing everything in, you can also drag the video file directly into the command line window, and Windows will fill in the full path of the video for you.
+
 ### Nvidia CUDA (waifu2x_caffe)
 
 Enlarge the video to 1920x1080 using CUDA. You may also use the `-r/--ratio` option.
 
 ```bash
-$ python video2x.py -i video.mp4 -o video_output.mp4 -m gpu --width=1920 --height=1080
+$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu --width=1920 --height=1080
 ```
 
 ### Nvidia CNDNN
@@ -96,7 +115,7 @@ $ python video2x.py -i video.mp4 -o video_output.mp4 -m gpu --width=1920 --heigh
 Enlarge the video to 1920x1080 using CUDNN. You may also use the `-r/--ratio` option.
 
 ```bash
-$ python video2x.py -i video.mp4 -o video_output.mp4 -m cudnn --width=1920 --height=1080
+$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cudnn --width=1920 --height=1080
 ```
 
 ### AMD or Nvidia (waifu2x_converter_cpp OpenCL)
@@ -104,7 +123,7 @@ $ python video2x.py -i video.mp4 -o video_output.mp4 -m cudnn --width=1920 --hei
 Enlarge the video by 2 times using OpenCL. Note that `waifu2x_converter_cpp` doesn't support width and height.
 
 ```bash
-$ python video2x.py -i video.mp4 -o video_output.mp4 -m gpu -r 2
+$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2
 ```
 
 ### CPU
@@ -112,7 +131,7 @@ $ python video2x.py -i video.mp4 -o video_output.mp4 -m gpu -r 2
 Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` option. This is potentially much slower than using a GPU.
 
 ```bash
-$ python video2x.py -i video.mp4 -o video_output.mp4 -m cpu --width=1920 --height=1080
+$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 --height=1080
 ```
 
 
