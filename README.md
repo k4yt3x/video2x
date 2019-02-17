@@ -138,17 +138,22 @@ Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` 
 $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 --height=1080
 ```
 
+# Full Usage
 
-## Full Usage
+## General Options
 
 ### -h, --help
     show this help message and exit
+
+## File Input and Output
 
 ### -i INPUT, --input INPUT
     Specify source video file/directory
 
 ### -o OUTPUT, --output OUTPUT
     Specify output video file/directory
+
+## Upscaler Options
 
 ### -m {cpu,gpu,cudnn}, --method {cpu,gpu,cudnn}
     Specify upscaling method
@@ -174,7 +179,10 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920
 ### -r RATIO, --ratio RATIO
     Scaling ratio
 
-This project is based on the following softwares and projects.
+## Credits
+
+This project is based on the following software and projects.
+
 - [FFMPEG]('https://www.ffmpeg.org/')
 - [waifu2x caffe](https://github.com/lltcggie/waifu2x-caffe)
 - [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
