@@ -141,38 +141,38 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920
 
 ## Full Usage
 
-```
-usage: video2x.py [-h] -i INPUT -o OUTPUT -m {cpu,gpu,cudnn} -d
-                  {waifu2x_caffe,waifu2x_converter}
-                  [-y {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}]
-                  [-t THREADS] [-c CONFIG] [--width WIDTH] [--height HEIGHT]
-                  [-r RATIO]
+### -h, --help
+    show this help message and exit
 
-optional arguments:
-  -h, --help            show this help message and exit
+### -i INPUT, --input INPUT
+    Specify source video file/directory
 
-Basic Options:
-  -i INPUT, --input INPUT
-                        Specify source video file/directory
-  -o OUTPUT, --output OUTPUT
-                        Specify output video file/directory
-  -m {cpu,gpu,cudnn}, --method {cpu,gpu,cudnn}
-                        Specify upscaling method
-  -d {waifu2x_caffe,waifu2x_converter}, --driver {waifu2x_caffe,waifu2x_converter}
-                        Waifu2x driver
-  -y {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}, --model_type {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}
-                        Specify model to use
-  -t THREADS, --threads THREADS
-                        Specify number of threads to use for upscaling
-  -c CONFIG, --config CONFIG
-                        Manually specify config file
+### -o OUTPUT, --output OUTPUT
+    Specify output video file/directory
 
-Scaling Options:
-  --width WIDTH         Output video width
-  --height HEIGHT       Output video height
-  -r RATIO, --ratio RATIO
-                        Scaling ratio
-```
+### -m {cpu,gpu,cudnn}, --method {cpu,gpu,cudnn}
+    Specify upscaling method
+
+### -d {waifu2x_caffe,waifu2x_converter}, --driver {waifu2x_caffe,waifu2x_converter}
+    Waifu2x driver
+
+### -y {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}, --model_type {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}
+    Specify model to use
+
+### -t THREADS, --threads THREADS
+    Specify number of threads to use for upscaling
+
+### -c CONFIG, --config CONFIG
+    Manually specify config file
+
+### --width WIDTH
+    Output video width
+
+### --height HEIGHT
+    Output video height
+
+### -r RATIO, --ratio RATIO
+    Scaling ratio
 
 This project is based on the following softwares and projects.
 - [FFMPEG]('https://www.ffmpeg.org/')
