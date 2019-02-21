@@ -35,7 +35,7 @@ import psutil
 import time
 import traceback
 
-VERSION = '2.4.0'
+VERSION = '2.4.1'
 
 # Each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
