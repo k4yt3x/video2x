@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: February 8, 2019
+Last Modified: February 21, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -18,11 +18,9 @@ from ffmpeg import Ffmpeg
 from fractions import Fraction
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
-import json
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 import threading
 
@@ -76,13 +74,6 @@ class Upscaler:
             shutil.rmtree(self.extracted_frames)
             print('Deleting cache directory: {}'.format(self.upscaled_frames))
             shutil.rmtree(self.upscaled_frames)
-
-    def _get_video_info(self):
-        """Gets input video information
-        returns input video information using ffprobe in dictionary.
-        """
-        json_str = subprocess.check_output('\"{}ffprobe.exe\" -v quiet -print_format json -show_format -show_streams \"{}\"'.format(self.ffmpeg_path, self.input_video))
-        return json.loads(json_str.decode('utf-8'))
 
     def _check_model_type(self, args):
         """ Validate upscaling model
@@ -200,7 +191,7 @@ class Upscaler:
             raise FileNotFoundError(self.waifu2x_path)
 
         # Initialize objects for ffmpeg and waifu2x-caffe
-        fm = Ffmpeg(self.ffmpeg_path, self.output_video, self.ffmpeg_arguments)
+        fm = Ffmpeg(self.ffmpeg_path, self.ffmpeg_arguments)
 
         # Initialize waifu2x driver
         if self.waifu2x_driver == 'waifu2x_caffe':
@@ -214,13 +205,13 @@ class Upscaler:
         fm.extract_frames(self.input_video, self.extracted_frames)
 
         Avalon.info('Reading video information')
-        info = self._get_video_info()
+        video_info = fm.get_video_info(self.input_video)
         # Analyze original video with ffprobe and retrieve framerate
         # width, height = info['streams'][0]['width'], info['streams'][0]['height']
 
         # Find index of video stream
         video_stream_index = None
-        for stream in info['streams']:
+        for stream in video_info['streams']:
             if stream['codec_type'] == 'video':
                 video_stream_index = stream['index']
                 break
@@ -228,15 +219,16 @@ class Upscaler:
         # Exit if no video stream found
         if video_stream_index is None:
             Avalon.error('Aborting: No video stream found')
+            exit(1)
 
         # Get average frame rate of video stream
-        framerate = float(Fraction(info['streams'][video_stream_index]['avg_frame_rate']))
+        framerate = float(Fraction(video_info['streams'][video_stream_index]['avg_frame_rate']))
         Avalon.info('Framerate: {}'.format(framerate))
 
         # Width/height will be coded width/height x upscale factor
         if self.ratio:
-            coded_width = info['streams'][video_stream_index]['coded_width']
-            coded_height = info['streams'][video_stream_index]['coded_height']
+            coded_width = video_info['streams'][video_stream_index]['coded_width']
+            coded_height = video_info['streams'][video_stream_index]['coded_height']
             self.output_width = self.ratio * coded_width
             self.output_height = self.ratio * coded_height
 
@@ -252,8 +244,6 @@ class Upscaler:
         fm.convert_video(framerate, '{}x{}'.format(self.output_width, self.output_height), self.upscaled_frames)
         Avalon.info('Conversion completed')
 
-        # Extract and press audio in
-        Avalon.info('Stripping audio track from original video')
-        fm.extract_audio(self.input_video, self.upscaled_frames)
-        Avalon.info('Inserting audio track into new video')
-        fm.insert_audio_track(self.upscaled_frames)
+        # Migrate audio tracks and subtitles
+        Avalon.info('Migrating audio tracks and subtitles to upscaled video')
+        fm.migrate_audio_tracks_subtitles(self.input_video, self.output_video, self.upscaled_frames)
