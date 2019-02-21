@@ -12,7 +12,11 @@ Component names that are *italicized* can be automatically downloaded and config
 1. AMD GPU / Nvidia GPU
 1. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
 1. [***FFMPEG***](https://ffmpeg.zeranoe.com/builds/)
-1. [***waifu2x_caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x_converter_cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases) 
+1. [***waifu2x_caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x_converter_cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
+
+## 2.4.1 (February 21, 2019)
+
+- Video2X will now migrate all the audio tracks and subtitles to the output video.
 
 ## 2.4.0 (February 8, 2019)
 
