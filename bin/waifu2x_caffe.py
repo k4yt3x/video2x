@@ -8,8 +8,6 @@ Last Modified: February 8, 2019
 
 Description: This class controls waifu2x
 engine
-
-Version 2.0.5
 """
 from avalon_framework import Avalon
 import subprocess
