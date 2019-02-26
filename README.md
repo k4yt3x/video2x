@@ -12,7 +12,13 @@ Component names that are *italicized* can be automatically downloaded and config
 1. AMD GPU / Nvidia GPU
 1. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
 1. [***FFMPEG***](https://ffmpeg.zeranoe.com/builds/)
-1. [***waifu2x_caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x_converter_cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
+1. [***waifu2x-caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
+
+## 2.4.2 (February 26, 2019)
+
+- Added the function to detect insufficient GPU memory
+- Added the function to create temporary folders automatically
+- Fixed configuration file path error
 
 ## 2.4.1 (February 21, 2019)
 
@@ -20,17 +26,13 @@ Component names that are *italicized* can be automatically downloaded and config
 
 ## 2.4.0 (February 8, 2019)
 
-- **Added AMD Support**. You can now use `-d/--driver waifu2x_converter` to specify the waifu2x driver to be `waifu2x_converter_cpp`. Note that you'll have to download and configure [waifu2x_converter_cpp](https://github.com/DeadSix27/waifu2x-converter-cpp/releases) first.
+- **Added AMD Support**. You can now use `-d/--driver waifu2x_converter` to specify the waifu2x driver to be `waifu2x-converter-cpp`. Note that you'll have to download and configure [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp/releases) first.
 
 ## 2.3.0 (February 8, 2019)
 
 - Added the ability to specify the cache directories as required by @AusNaminator
 - Fixed the problem where if there's insufficient RAM, the warning doesn't pause the script and prompt the user to reduce the amount of threads used.
 - Some other minor adjustments.
-
-## 2.2.1 (February 1, 2019)
-
-- Fixed AAC codec error discovered by @meguerreroa
 
 ## Description
 
@@ -59,9 +61,9 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 Download: https://www.python.org/downloads/windows/
 - **FFMPEG Windows Build**  
 Download: https://ffmpeg.org/download.html  
-- **waifu2x_caffe for Windows**  
+- **waifu2x-caffe for Windows**  
 Download: https://github.com/lltcggie/waifu2x-caffe/releases
-- **waifu2x_converter_cpp**  
+- **waifu2x-converter-cpp**  
 Download: https://github.com/DeadSix27/waifu2x-converter-cpp/releases
 
 ### Install Dependencies
@@ -110,7 +112,7 @@ For example, if you downloaded the sample input video to `C:\Users\[YourUsername
 
 If you're tired typing everything in, you can also drag the video file directly into the command line window, and Windows will fill in the full path of the video for you.
 
-### Nvidia CUDA (waifu2x_caffe)
+### Nvidia CUDA (waifu2x-caffe)
 
 Enlarge the video to 1920x1080 using CUDA. You may also use the `-r/--ratio` option.
 
@@ -126,9 +128,9 @@ Enlarge the video to 1920x1080 using CUDNN. You may also use the `-r/--ratio` op
 $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cudnn --width=1920 --height=1080
 ```
 
-### AMD or Nvidia (waifu2x_converter_cpp OpenCL)
+### AMD or Nvidia (waifu2x-converter-cpp OpenCL)
 
-Enlarge the video by 2 times using OpenCL. Note that `waifu2x_converter_cpp` doesn't support width and height.
+Enlarge the video by 2 times using OpenCL. Note that `waifu2x-converter-cpp` doesn't support width and height.
 
 ```bash
 $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2
