@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 8, 2019
+Last Modified: February 26, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -29,17 +29,19 @@ from avalon_framework import Avalon
 from upscaler import Upscaler
 from upscaler import MODELS_AVAILABLE
 import argparse
+import GPUtil
 import json
 import os
 import psutil
 import time
 import traceback
 
-VERSION = '2.4.1'
+VERSION = '2.4.2'
 
 # Each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
-MEM_PER_THREAD = 2.5
+SYS_MEM_PER_THREAD = 2.5
+GPU_MEM_PER_THREAD = 3.5
 
 
 def process_arguments():
@@ -59,7 +61,7 @@ def process_arguments():
     basic_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
     basic_options.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb', choices=MODELS_AVAILABLE)
     basic_options.add_argument('-t', '--threads', help='Specify number of threads to use for upscaling', action='store', type=int, default=5)
-    basic_options.add_argument('-c', '--config', help='Manually specify config file', action='store', default='video2x.json')
+    basic_options.add_argument('-c', '--config', help='Manually specify config file', action='store', default='{}\\video2x.json'.format(os.path.dirname(os.path.abspath(__file__))))
 
     # Scaling options
     # scaling_options = parser.add_argument_group('Scaling Options', required=True)  # TODO: (width & height) || (factor)
@@ -84,33 +86,57 @@ def print_logo():
     print('{}\n{}    Version {}\n{}'.format(Avalon.FM.BD, spaces, VERSION, Avalon.FM.RST))
 
 
-def check_system_memory():
+def check_memory():
     """ Check usable system memory
     Warn the user if insufficient memory is available for
     the number of threads that the user have chosen.
     """
-    memory_available = psutil.virtual_memory().available / (1024 ** 3)
 
-    # If user doesn't even have enough memory to run even one thread
-    if memory_available < MEM_PER_THREAD:
-        Avalon.warning('You might have an insufficient amount of memory available to run this program ({} GB)'.format(memory_available))
-        Avalon.warning('Proceed with caution')
-        if args.threads > 1:
-            if Avalon.ask('Reduce number of threads to avoid crashing?', True):
-                args.threads = 1
-    # If memory available is less than needed, warn the user
-    elif memory_available < (MEM_PER_THREAD * args.threads):
-        Avalon.warning('Each waifu2x-caffe thread will require up to 2.5 GB during initialization')
-        Avalon.warning('You demanded {} threads to be created, but you only have {} GB memory available'.format(args.threads, round(memory_available, 4)))
-        Avalon.warning('{} GB of memory is recommended for {} threads'.format(MEM_PER_THREAD * args.threads, args.threads))
-        Avalon.warning('With your current amount of memory available, {} threads is recommended'.format(int(memory_available // MEM_PER_THREAD)))
+    memory_status = []
+    # Get system available memory
+    system_memory_available = psutil.virtual_memory().available / (1024 ** 3)
+    memory_status.append(('system', system_memory_available))
 
-        # Ask the user if he / she wants to change to the recommended
-        # number of threads
-        if Avalon.ask('Change to the recommended value?', True):
-            args.threads = int(memory_available // MEM_PER_THREAD)
+    # Check if Nvidia-smi is available
+    # GPUtil requires nvidia-smi.exe to interact with GPU
+    if args.method == 'gpu' or args.method == 'cudnn':
+        if not os.path.isfile('C:\\Program Files\\NVIDIA Corporation\\NVSMI\\nvidia-smi.exe'):
+            # Nvidia System Management Interface not available
+            Avalon.warning('Nvidia-smi not available, skipping available memory check')
+            Avalon.warning('If you experience error \"cudaSuccess  out of memory, try reducing number of threads you\'re using\"')
         else:
+            # "0" is GPU ID. Both waifu2x drivers use the first GPU available, therefore only 0 makes sense
+            gpu_memory_available = (GPUtil.getGPUs()[0].memoryTotal - GPUtil.getGPUs()[0].memoryUsed) / 1024
+            memory_status.append(('GPU', gpu_memory_available))
+
+    # Go though each checkable memory type and check availability
+    for memory_type, memory_available in memory_status:
+
+        if memory_type == 'system':
+            mem_per_thread = SYS_MEM_PER_THREAD
+        else:
+            mem_per_thread = GPU_MEM_PER_THREAD
+
+        # If user doesn't even have enough memory to run even one thread
+        if memory_available < mem_per_thread:
+            Avalon.warning('You might have insufficient amount of {} memory available to run this program ({} GB)'.format(memory_type, memory_available))
             Avalon.warning('Proceed with caution')
+            if args.threads > 1:
+                if Avalon.ask('Reduce number of threads to avoid crashing?', True):
+                    args.threads = 1
+        # If memory available is less than needed, warn the user
+        elif memory_available < (mem_per_thread * args.threads):
+            Avalon.warning('Each waifu2x-caffe thread will require up to 2.5 GB of system memory')
+            Avalon.warning('You demanded {} threads to be created, but you only have {} GB {} memory available'.format(args.threads, round(memory_available, 4), memory_type))
+            Avalon.warning('{} GB of {} memory is recommended for {} threads'.format(mem_per_thread * args.threads, memory_type, args.threads))
+            Avalon.warning('With your current amount of {} memory available, {} threads is recommended'.format(memory_type, int(memory_available // mem_per_thread)))
+
+            # Ask the user if he / she wants to change to the recommended
+            # number of threads
+            if Avalon.ask('Change to the recommended value?', True):
+                args.threads = int(memory_available // mem_per_thread)
+            else:
+                Avalon.warning('Proceed with caution')
 
 
 def read_config(config_file):
@@ -146,8 +172,8 @@ if (args.width and not args.height) or (not args.width and args.height):
     Avalon.error('You must specify both width and height')
     exit(1)
 
-# Check system available memory
-check_system_memory()
+# Check available memory
+check_memory()
 
 # Read configurations from JSON
 config = read_config(args.config)
@@ -158,6 +184,23 @@ ffmpeg_hwaccel = config['ffmpeg_hwaccel']
 extracted_frames = config['extracted_frames']
 upscaled_frames = config['upscaled_frames']
 preserve_frames = config['preserve_frames']
+
+# Create temp directories if they don't exist
+for directory in [extracted_frames, upscaled_frames]:
+    if directory and not os.path.isdir(directory):
+        if not os.path.isfile(directory) and not os.path.islink(directory):
+            Avalon.warning('Specified temporary folder/directory {} does not exist'.format(directory))
+            if Avalon.ask('Create folder/directory?'):
+                if os.mkdir(directory) == 0:
+                    Avalon.info('{} created'.format(directory))
+                else:
+                    Avalon.error('Unable to create {}'.format(directory))
+                    Avalon.error('Aborting...')
+                    exit(1)
+        else:
+            Avalon.error('Specified temporary folder/directory is a file/link')
+            Avalon.error('Unable to continue, exiting...')
+            exit(1)
 
 
 # Start execution
@@ -172,7 +215,7 @@ try:
         upscaler.run()
     elif os.path.isdir(args.input):
         """ Upscale videos in a folder/directory """
-        Avalon.info('Upscaling videos in folder: {}'.format(args.input))
+        Avalon.info('Upscaling videos in folder/directory: {}'.format(args.input))
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
             output_video = '{}\\{}'.format(args.output, input_video)
             upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, waifu2x_driver=args.driver, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, ratio=args.ratio, model_type=args.model_type, threads=args.threads, extracted_frames=extracted_frames, upscaled_frames=upscaled_frames)
