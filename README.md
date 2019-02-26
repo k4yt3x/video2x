@@ -190,5 +190,5 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920
 This project is based on the following software and projects.
 
 - [FFMPEG]('https://www.ffmpeg.org/')
-- [waifu2x caffe](https://github.com/lltcggie/waifu2x-caffe)
+- [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)
 - [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
