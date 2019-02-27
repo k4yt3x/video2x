@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: February 21, 2019
+Last Modified: February 26, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -30,7 +30,7 @@ MODELS_AVAILABLE = ['upconv_7_anime_style_art_rgb', 'upconv_7_photo',
 
 class Upscaler:
 
-    def __init__(self, input_video, output_video, method, waifu2x_path, ffmpeg_path, waifu2x_driver='waifu2x_caffe', ffmpeg_arguments=[], ffmpeg_hwaccel='gpu', output_width=False, output_height=False, ratio=False, model_type='anime_style_art_rgb', threads=3, extracted_frames=False, upscaled_frames=False, preserve_frames=False):
+    def __init__(self, input_video, output_video, method, waifu2x_path, ffmpeg_path, waifu2x_driver='waifu2x_caffe', ffmpeg_arguments=[], ffmpeg_hwaccel='auto', output_width=False, output_height=False, ratio=False, model_type='anime_style_art_rgb', threads=3, extracted_frames=False, upscaled_frames=False, preserve_frames=False):
         # Mandatory arguments
         self.input_video = input_video
         self.output_video = output_video
@@ -64,6 +64,10 @@ class Upscaler:
         Avalon.debug_info('Upscaled frames is being saved to: {}'.format(self.upscaled_frames))
 
         self.preserve_frames = preserve_frames
+
+        # If hardware acceleration enabled, append arguments
+        if self.ffmpeg_hwaccel:
+            self.ffmpeg_arguments.append('-hwaccel {}'.format(self.ffmpeg_hwaccel))
 
     def __del__(self):
         # Delete temp directories when done
