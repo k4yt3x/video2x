@@ -14,6 +14,10 @@ Component names that are *italicized* can be automatically downloaded and config
 1. [***FFMPEG***](https://ffmpeg.zeranoe.com/builds/)
 1. [***waifu2x-caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
 
+## 2.4.3 (February 26, 2019)
+
+- Fixed the bug where ffmpeg arguments (hwaccel) are not passed on to ffmpeg
+
 ## 2.4.2 (February 26, 2019)
 
 - Added the function to detect insufficient GPU memory
@@ -27,12 +31,6 @@ Component names that are *italicized* can be automatically downloaded and config
 ## 2.4.0 (February 8, 2019)
 
 - **Added AMD Support**. You can now use `-d/--driver waifu2x_converter` to specify the waifu2x driver to be `waifu2x-converter-cpp`. Note that you'll have to download and configure [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp/releases) first.
-
-## 2.3.0 (February 8, 2019)
-
-- Added the ability to specify the cache directories as required by @AusNaminator
-- Fixed the problem where if there's insufficient RAM, the warning doesn't pause the script and prompt the user to reduce the amount of threads used.
-- Some other minor adjustments.
 
 ## Description
 
