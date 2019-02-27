@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Author: K4YT3X
 Date Created: November 28, 2018
-Last Modified: February 8, 2019
+Last Modified: February 26, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -31,7 +31,7 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 
 
 class Video2xSetup:
@@ -114,7 +114,7 @@ class Video2xSetup:
         settings['waifu2x_path'] = '{}\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe'.format(os.getenv('localappdata'))
         settings['ffmpeg_path'] = '{}\\video2x\\ffmpeg-4.1-win64-static\\bin'.format(os.getenv('localappdata'))
         settings['ffmpeg_arguments'] = []
-        settings['ffmpeg_hwaccel'] = 'cuda'
+        settings['ffmpeg_hwaccel'] = 'auto'
         settings['extracted_frames'] = False
         settings['upscaled_frames'] = False
         settings['preserve_frames'] = False
