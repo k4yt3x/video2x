@@ -183,9 +183,19 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920
 ### -r RATIO, --ratio RATIO
     Scaling ratio
 
+## License
+
+Licensed under the GNU General Public License Version 3 (GNU GPL v3)
+https://www.gnu.org/licenses/gpl-3.0.txt
+
+![GPLv3 Icon](https://www.gnu.org/graphics/gplv3-127x51.png)
+
+(C) 2018-2019 K4YT3X
+
+
 ## Credits
 
-This project is based on the following software and projects.
+This project relies on the following software and projects.
 
 - [FFMPEG]('https://www.ffmpeg.org/')
 - [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)
