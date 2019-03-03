@@ -152,7 +152,7 @@ If you would like to interrupt process of video enlarging use CTRL+C.
 
 Use \[TAB\] for command-line completion. This may be useful for avoiding incorrect paths or commands.
 
-If your command is too long and you would like go to new line and continue there just complete it with "\" symbol at the end (without double quotes), press \[ENTER\] and continue to type your command.
+If your command is too long and you would like go to new line and continue there just complete it with "\\" symbol at the end (without double quotes), press \[ENTER\] and continue to type your command.
 
 ### Nvidia CUDA (waifu2x-caffe)
 
