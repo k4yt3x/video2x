@@ -89,6 +89,42 @@ Then you'll need to install python dependencies before start using video2x. Inst
 $ pip install -r requirements.txt
 ```
 
+### Step-by-Step Installation
+
+First of all, you need Python to be installed on your OS. Go to [python.org](https://www.python.org/downloads/) and get it. Installer may ask you about putting python into your PATH, you should agree. After installation run command prompt and type:
+
+```python```
+
+Press \[ENTER\] to submit your input. If you did everything right you'll see output like that:
+
+```
+Python 3.7.2 (tags/v3.7.2:9a3ffc0492, Dec 23 2018, 22:20:52) [MSC v.1916 32 bit (Intel)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+```
+
+Tripple angle brackets means that python interpreter awaits your input. We don't need it now, so exit it by typing:
+
+```exit()```
+
+Now you should be return in command prompt. Next step is installing video2x and its dependesies. If you not familiar with command-line interface of git (I suppose you are) just download as zip archive from green button at the top of this page. Unpack it in somewhere you want to. For example, at your HOME directory (C:\Users\[your_username]\). Next, return to the command prompt. Change your working directory to that place where you unpack video2x before.
+
+for HOME directory:
+```cd  video2x\bin```
+
+for any other location:
+```cd [absolute_path_to_unpacked_video2x]\bin```
+
+As you can see, we changed directory to bin\ sub-folder in video2x. To be sure that you did it right, type:
+
+```dir```
+
+This command lists files and folders in current working directory. If everything is OK and you see such files as "video2x.py" or "video2x_setup.py", you can continue:
+
+```python video2x_setup.py```
+
+Wait while python installed all needed components. Some issues may appear in installation process. If it completed with failure run command prompt with administrator rights and repeat previos steps (except Python installation). If it succesed, my congratulations - you may start to use video2x.
+
 ## Quick Start
 
 ### Sample Videos
@@ -109,6 +145,12 @@ If you're unfamiliar of directories in command lines, then here's a short sectio
 For example, if you downloaded the sample input video to `C:\Users\[YourUsername]\Downloads`, then the full path of your input video will be `C:\Users\[YourUsername]\Downloads\sample_input.mp4`, vice versa. The output path is also relative. If you want to export the output video to the current directory, just specify the output video name such as `output.mp4`. However, if you want to put the output video in a different directory, you should use relative or absolute path, such as `C:\Users\[YourUsername]\Desktop\output.mp4`.
 
 If you're tired typing everything in, you can also drag the video file directly into the command line window, and Windows will fill in the full path of the video for you.
+
+If you would like to interrupt process of video enlarging use CTRL+C.
+
+Use \[TAB\] for command-line completion. This may be useful for avoiding incorrect paths or commands.
+
+If your command is too long and you would like go to new line and continue there just complete it with "\" symbol at the end (without double quotes), press \[ENTER\] and continue to type your command.
 
 ### Nvidia CUDA (waifu2x-caffe)
 
