@@ -107,7 +107,7 @@ Tripple angle brackets means that python interpreter awaits your input. We don't
 
 ```exit()```
 
-Now you should be return in command prompt. Next step is installing video2x and its dependesies. If you not familiar with command-line interface of git (I suppose you are) just download as zip archive from green button at the top of this page. Unpack it in somewhere you want to. For example, at your HOME directory (C:\Users\[your_username]\). Next, return to the command prompt. Change your working directory to that place where you unpack video2x before.
+Now you should be return in command prompt. Next step is installing video2x and its dependesies. If you not familiar with command-line interface of git (I suppose you are) just download as zip archive from green button at the top of this page. Unpack it in somewhere you want to. For example, at your HOME directory (`C:\Users\[your_username]\`). Next, return to the command prompt. Change your working directory to that place where you unpack video2x before.
 
 for HOME directory:
 ```cd  video2x\bin```
