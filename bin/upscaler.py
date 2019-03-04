@@ -24,8 +24,8 @@ import shutil
 import tempfile
 import threading
 
-MODELS_AVAILABLE = ['upconv_7_anime_style_art_rgb', 'upconv_7_photo',
-                    'anime_style_art_rgb', 'photo', 'anime_style_art_y']
+MODELS_AVAILABLE = ['upconv_7_anime_style_art_rgb', 'upconv_7_photo', 'anime_style_art_rgb', 'photo',
+                    'anime_style_art_y', 'upresnet10', 'cunet']
 
 
 class Upscaler:
