@@ -4,7 +4,7 @@
 Name: Video2x Config Generator
 Author: K4YT3X
 Date Created: October 23, 2018
-Last Modified: February 26, 2019
+Last Modified: March 4, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -15,7 +15,7 @@ from avalon_framework import Avalon
 import json
 import os
 
-VERSION = '1.0.2'
+VERSION = '1.0.3'
 
 
 def get_path(text):
@@ -25,7 +25,7 @@ def get_path(text):
         path = Avalon.gets(text)
         if os.path.isdir(path):
             return path
-        Avalon.error('{} id not a directory / folder'.format(path))
+        Avalon.error('{} id not a directory/folder'.format(path))
 
 
 def enroll_settings():
@@ -36,23 +36,19 @@ def enroll_settings():
 
     settings['ffmpeg_arguments'] = []
     while True:
-        argument = Avalon.gets('Extra arguments passed to ffmpeg (empty when done): ')
+        argument = Avalon.gets('Extra arguments passed to ffmpeg (empty=none): ')
         if argument:
             settings['ffmpeg_arguments'].append(argument)
         else:
             break
 
-    settings['ffmpeg_hwaccel'] = Avalon.gets('ffmpeg hardware acceleration method (auto): ')
+    settings['ffmpeg_hwaccel'] = Avalon.gets('ffmpeg hardware acceleration method (empty=auto): ')
     if settings['ffmpeg_hwaccel'] == '':
         settings['ffmpeg_hwaccel'] = 'auto'
 
-    settings['extracted_frames'] = Avalon.gets('Temporary directory for extracted frames (empty for mkdtemp): ')
-    if settings['extracted_frames'] == '':
-        settings['extracted_frames'] = False
-
-    settings['upscaled_frames'] = Avalon.gets('Temporary directory for upscaled frames (empty for mkdtemp): ')
-    if settings['upscaled_frames'] == '':
-        settings['upscaled_frames'] = False
+    settings['video2x_cache_folder'] = Avalon.gets('Video2X cache folder (empty=system default): ')
+    if settings['video2x_cache_folder'] == '':
+        settings['video2x_cache_folder'] = False
 
     settings['preserve_frames'] = Avalon.ask('Preserve extracted or upscaled frames')
 
