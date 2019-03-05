@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 8, 2019
+Last Modified: March 4, 2019
 
 Description: This class controls waifu2x
 engine
@@ -45,9 +45,11 @@ class Waifu2xCaffe:
         self.print_lock.release()
 
         # Create string for execution
+        # execute = ['{}'.format(self.waifu2x_path), '-p', self.method, '-I', 'png', '-i', '\"{}\"'.format(folderin), '-e', 'png', '-o', folderout, '-w', str(width), '-h', str(height), '-n', '3', '-m', 'noise_scale', '-y', self.model_type]
         execute = '\"{}\" -p {} -I png -i \"{}\" -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}'.format(
             self.waifu2x_path, self.method, folderin, folderout, width, height, self.model_type)
-        subprocess.call(execute)
+        print('Executing: {}'.format(execute))
+        subprocess.run(execute, shell=True, check=True)
 
         # Print thread exiting message
         self.print_lock.acquire()

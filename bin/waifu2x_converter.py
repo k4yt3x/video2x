@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: February 8, 2019
+Last Modified: March 4, 2019
 
 Description: This class controls waifu2x
 engine
@@ -44,9 +44,10 @@ class Waifu2xConverter:
         self.print_lock.release()
 
         # Create string for execution
-        execute = '\"{}\\waifu2x-converter-cpp.exe\" -i \"{}\" -o {} --scale_ratio {} --noise_level 3 -m noise_scale -j {} --model_dir {}\\models_rgb'.format(
+        execute = '\"{}\\waifu2x-converter-cpp.exe\" -q -i \"{}\" -o {} --scale_ratio {} --noise_level 3 -m noise_scale -j {} --model_dir {}\\models_rgb'.format(
             self.waifu2x_path, folderin, folderout, scale_ratio, threads, self.waifu2x_path)
-        subprocess.call(execute)
+        print('Executing: {}'.format(execute))
+        subprocess.run(execute, check=True)
 
         # Print thread exiting message
         self.print_lock.acquire()
