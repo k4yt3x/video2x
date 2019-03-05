@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 26, 2019
+Last Modified: March 4, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -28,15 +28,17 @@ details or quality, keeping lines smooth and edges sharp.
 from avalon_framework import Avalon
 from upscaler import Upscaler
 from upscaler import MODELS_AVAILABLE
-import argparse
 import GPUtil
+import argparse
 import json
 import os
 import psutil
+import shutil
+import tempfile
 import time
 import traceback
 
-VERSION = '2.4.3'
+VERSION = '2.5.0'
 
 # Each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -181,26 +183,27 @@ waifu2x_path = config['waifu2x_path']
 ffmpeg_path = config['ffmpeg_path']
 ffmpeg_arguments = config['ffmpeg_arguments']
 ffmpeg_hwaccel = config['ffmpeg_hwaccel']
-extracted_frames = config['extracted_frames']
-upscaled_frames = config['upscaled_frames']
+video2x_cache_folder = config['video2x_cache_folder']
 preserve_frames = config['preserve_frames']
 
 # Create temp directories if they don't exist
-for directory in [extracted_frames, upscaled_frames]:
-    if directory and not os.path.isdir(directory):
-        if not os.path.isfile(directory) and not os.path.islink(directory):
-            Avalon.warning('Specified temporary folder/directory {} does not exist'.format(directory))
-            if Avalon.ask('Create folder/directory?'):
-                if os.mkdir(directory) == 0:
-                    Avalon.info('{} created'.format(directory))
-                else:
-                    Avalon.error('Unable to create {}'.format(directory))
-                    Avalon.error('Aborting...')
-                    exit(1)
-        else:
-            Avalon.error('Specified temporary folder/directory is a file/link')
-            Avalon.error('Unable to continue, exiting...')
-            exit(1)
+if not video2x_cache_folder:
+    video2x_cache_folder = '{}\\video2x'.format(tempfile.gettempdir())
+
+if video2x_cache_folder and not os.path.isdir(video2x_cache_folder):
+    if not os.path.isfile(video2x_cache_folder) and not os.path.islink(video2x_cache_folder):
+        Avalon.warning('Specified cache folder/directory {} does not exist'.format(video2x_cache_folder))
+        if Avalon.ask('Create folder/directory?', True):
+            if os.mkdir(video2x_cache_folder) is None:
+                Avalon.info('{} created'.format(video2x_cache_folder))
+            else:
+                Avalon.error('Unable to create {}'.format(video2x_cache_folder))
+                Avalon.error('Aborting...')
+                exit(1)
+    else:
+        Avalon.error('Specified cache folder/directory is a file/link')
+        Avalon.error('Unable to continue, exiting...')
+        exit(1)
 
 
 # Start execution
@@ -211,20 +214,29 @@ try:
     if os.path.isfile(args.input):
         """ Upscale single video file """
         Avalon.info('Upscaling single video file: {}'.format(args.input))
-        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, waifu2x_driver=args.driver, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, ratio=args.ratio, model_type=args.model_type, threads=args.threads, extracted_frames=extracted_frames, upscaled_frames=upscaled_frames)
+        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, waifu2x_driver=args.driver, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, ratio=args.ratio, model_type=args.model_type, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
         upscaler.run()
+        upscaler.cleanup()
     elif os.path.isdir(args.input):
         """ Upscale videos in a folder/directory """
         Avalon.info('Upscaling videos in folder/directory: {}'.format(args.input))
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
             output_video = '{}\\{}'.format(args.output, input_video)
-            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, waifu2x_driver=args.driver, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, ratio=args.ratio, model_type=args.model_type, threads=args.threads, extracted_frames=extracted_frames, upscaled_frames=upscaled_frames)
+            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, waifu2x_driver=args.driver, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, ratio=args.ratio, model_type=args.model_type, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
             upscaler.run()
+            upscaler.cleanup()
     else:
         Avalon.error('Input path is neither a file nor a folder/directory')
         raise FileNotFoundError('{} is neither file nor folder/directory'.format(args.input))
 
     Avalon.info('Program completed, taking {} seconds'.format(round((time.time() - begin_time), 5)))
 except Exception:
-    Avalon.error('An exception occurred')
+    Avalon.error('An exception has occurred')
     traceback.print_exc()
+finally:
+    # Remove Video2X Cache folder
+    try:
+        if not preserve_frames:
+            shutil.rmtree(video2x_cache_folder)
+    except FileNotFoundError:
+        pass
