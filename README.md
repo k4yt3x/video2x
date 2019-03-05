@@ -2,7 +2,7 @@
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
 
-### Prerequisites
+## Prerequisites
 
 Component names that are **bolded** are mandatory.
 
@@ -14,23 +14,25 @@ Component names that are *italicized* can be automatically downloaded and config
 1. [***FFMPEG***](https://ffmpeg.zeranoe.com/builds/)
 1. [***waifu2x-caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
 
-## 2.4.3 (February 26, 2019)
+## Recent Changes
 
-- Fixed the bug where ffmpeg arguments (hwaccel) are not passed on to ffmpeg
+### 2.5.0 (March 4, 2019)
 
-## 2.4.2 (February 26, 2019)
+- Added progress bar according to @ArmandBernard 's suggestion.
+- Cache folders are now created under `'{}\\video2x'.format(tempfile.gettempdir())` by default, and the default key for cache folder location in configuration file has been changed to `video2x_cache_folder`. This makes it easier to manage cache folders.
+- Cache folders are now more likely to be deleted successfully even if the program crashes. This is made possible with more try-catch blocks.
+- Updated FFMPEG stream migration grammar according to @cr08 's suggestions. All streams (including attachment streams) will now be copied over to the new video.
+- A lot of minor upgrades and adjustments.
 
-- Added the function to detect insufficient GPU memory
-- Added the function to create temporary folders automatically
-- Fixed configuration file path error
+### 2.4.3 (February 26, 2019)
 
-## 2.4.1 (February 21, 2019)
+- Fixed the bug where ffmpeg arguments (hwaccel) are not passed on to ffmpeg.
 
-- Video2X will now migrate all the audio tracks and subtitles to the output video.
+### 2.4.2 (February 26, 2019)
 
-## 2.4.0 (February 8, 2019)
-
-- **Added AMD Support**. You can now use `-d/--driver waifu2x_converter` to specify the waifu2x driver to be `waifu2x-converter-cpp`. Note that you'll have to download and configure [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp/releases) first.
+- Added the function to detect insufficient GPU memory.
+- Added the function to create temporary folders automatically.
+- Fixed configuration file path error.
 
 ## Description
 
@@ -48,8 +50,6 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 
 ## Screenshot
 ![screenshot](https://user-images.githubusercontent.com/21986859/40265170-39c0caae-5b01-11e8-8371-8b6c24769639.png)
-
-</br>
 
 ## Installation
 
