@@ -3,7 +3,6 @@
   "ffmpeg_path": "C:/Program Files (x86)/ffmpeg/bin/",
   "ffmpeg_arguments": [],
   "ffmpeg_hwaccel": "auto",
-  "extracted_frames": false,
-  "upscaled_frames": false,
+  "video2x_cache_folder": false,
   "preserve_frames": false
 }
