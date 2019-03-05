@@ -4,7 +4,7 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 21, 2019
+Last Modified: March 4, 2019
 
 Description: This class handles all FFMPEG related
 operations.
@@ -55,7 +55,7 @@ class Ffmpeg:
         execute = '{} -i \"{}\" \"{}\"\\extracted_%0d.png -y {}'.format(
             self.ffmpeg_binary, input_video, extracted_frames, ' '.join(self.ffmpeg_arguments))
         print('Executing: {}'.format(execute))
-        subprocess.call(execute)
+        subprocess.run(execute, shell=True, check=True)
 
     def convert_video(self, framerate, resolution, upscaled_frames):
         """Converts images into videos
@@ -71,7 +71,7 @@ class Ffmpeg:
         execute = '{} -r {} -f image2 -s {} -i \"{}\"\\extracted_%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p \"{}\"\\no_audio.mp4 -y {}'.format(
             self.ffmpeg_binary, framerate, resolution, upscaled_frames, upscaled_frames, ' '.join(self.ffmpeg_arguments))
         print('Executing: {}'.format(execute))
-        subprocess.call(execute)
+        subprocess.run(execute, shell=True, check=True)
 
     def migrate_audio_tracks_subtitles(self, input_video, output_video, upscaled_frames):
         """ Migrates audio tracks and subtitles from input video to output video
@@ -81,7 +81,9 @@ class Ffmpeg:
             output_video {string} -- output video file path
             upscaled_frames {string} -- directory containing upscaled frames
         """
-        execute = '{} -i \"{}\"\\no_audio.mp4 -i \"{}\" -c:a copy -c:v copy -c:s copy -map 0:v? -map 1:a? -map 1:s? \"{}\" -y {}'.format(
+        execute = '{} -i \"{}\"\\no_audio.mp4 -i \"{}\" -map 0:v:0? -map 1? -c copy -map -1:v? \"{}\" -y {}'.format(
             self.ffmpeg_binary, upscaled_frames, input_video, output_video, ' '.join(self.ffmpeg_arguments))
+        # execute = '{} -i \"{}\"\\no_audio.mp4 -i \"{}\" -c:a copy -c:v copy -c:s copy -map 0:v? -map 1:a? -map 1:s? \"{}\" -y {}'.format(
+            # self.ffmpeg_binary, upscaled_frames, input_video, output_video, ' '.join(self.ffmpeg_arguments))
         print('Executing: {}'.format(execute))
-        subprocess.call(execute)
+        subprocess.run(execute, shell=True, check=True)
