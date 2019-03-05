@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: February 26, 2019
+Last Modified: March 4, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -16,6 +16,7 @@ from avalon_framework import Avalon
 from exceptions import *
 from ffmpeg import Ffmpeg
 from fractions import Fraction
+from tqdm import tqdm
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
 import os
@@ -23,6 +24,7 @@ import re
 import shutil
 import tempfile
 import threading
+import time
 
 MODELS_AVAILABLE = ['upconv_7_anime_style_art_rgb', 'upconv_7_photo', 'anime_style_art_rgb', 'photo',
                     'anime_style_art_y', 'upresnet10', 'cunet']
@@ -30,7 +32,7 @@ MODELS_AVAILABLE = ['upconv_7_anime_style_art_rgb', 'upconv_7_photo', 'anime_sty
 
 class Upscaler:
 
-    def __init__(self, input_video, output_video, method, waifu2x_path, ffmpeg_path, waifu2x_driver='waifu2x_caffe', ffmpeg_arguments=[], ffmpeg_hwaccel='auto', output_width=False, output_height=False, ratio=False, model_type='anime_style_art_rgb', threads=3, extracted_frames=False, upscaled_frames=False, preserve_frames=False):
+    def __init__(self, input_video, output_video, method, waifu2x_path, ffmpeg_path, waifu2x_driver='waifu2x_caffe', ffmpeg_arguments=[], ffmpeg_hwaccel='auto', output_width=False, output_height=False, ratio=False, model_type='anime_style_art_rgb', threads=3, video2x_cache_folder='{}\\video2x'.format(tempfile.gettempdir()), preserve_frames=False):
         # Mandatory arguments
         self.input_video = input_video
         self.output_video = output_video
@@ -52,16 +54,15 @@ class Upscaler:
         self.model_type = model_type
         self.threads = threads
 
-        # Make temporary directories
-        self.extracted_frames = extracted_frames
-        if not extracted_frames:
-            self.extracted_frames = tempfile.mkdtemp()
-        Avalon.debug_info('Extracted frames is being saved to: {}'.format(self.extracted_frames))
+        # Create temporary folder/directories
+        self.video2x_cache_folder = video2x_cache_folder
+        self.extracted_frames_object = tempfile.TemporaryDirectory(dir=self.video2x_cache_folder)
+        self.extracted_frames = self.extracted_frames_object.name
+        Avalon.debug_info('Extracted frames are being saved to: {}'.format(self.extracted_frames))
 
-        self.upscaled_frames = upscaled_frames
-        if not upscaled_frames:
-            self.upscaled_frames = tempfile.mkdtemp()
-        Avalon.debug_info('Upscaled frames is being saved to: {}'.format(self.upscaled_frames))
+        self.upscaled_frames_object = tempfile.TemporaryDirectory(dir=self.video2x_cache_folder)
+        self.upscaled_frames = self.upscaled_frames_object.name
+        Avalon.debug_info('Upscaled frames are being saved to: {}'.format(self.upscaled_frames))
 
         self.preserve_frames = preserve_frames
 
@@ -69,15 +70,15 @@ class Upscaler:
         if self.ffmpeg_hwaccel:
             self.ffmpeg_arguments.append('-hwaccel {}'.format(self.ffmpeg_hwaccel))
 
-    def __del__(self):
+    def cleanup(self):
         # Delete temp directories when done
         # Avalon framework cannot be used if python is shutting down
         # Therefore, plain print is used
         if not self.preserve_frames:
-            print('Deleting cache directory: {}'.format(self.extracted_frames))
-            shutil.rmtree(self.extracted_frames)
-            print('Deleting cache directory: {}'.format(self.upscaled_frames))
-            shutil.rmtree(self.upscaled_frames)
+            print('Cleaning up cache directory: {}'.format(self.extracted_frames))
+            self.extracted_frames_object.cleanup()
+            print('Cleaning up cache directory: {}'.format(self.upscaled_frames))
+            self.upscaled_frames_object.cleanup()
 
     def _check_model_type(self, args):
         """ Validate upscaling model
@@ -97,6 +98,43 @@ class Upscaler:
         elif not self.method:
             raise ArgumentError('You need to specify the enlarging processing unit')
 
+    def _progress_bar(self, extracted_frames_folders):
+        """ This method prints a progress bar
+
+        This method prints a progress bar by keeping track
+        of the amount of frames in the input directory/folder
+        and the output directory/folder. This is originally
+        suggested by @ArmandBernard.
+        """
+        # Get number of extracted frames
+        total_frames = 0
+        for folder in extracted_frames_folders:
+            total_frames += len([f for f in os.listdir(folder) if f[-4:] == '.png'])
+
+        with tqdm(total=total_frames, ascii=True, desc='Upscaling Progress') as progress_bar:
+
+            # tqdm update method adds the value to the progress
+            # bar instead of setting the value. Therefore, a delta
+            # needs to be calculated.
+            previous_cycle_frames = 0
+            while not self.progress_bar_exit_signal:
+
+                try:
+                    total_frames_upscaled = len([f for f in os.listdir(self.upscaled_frames) if f[-4:] == '.png'])
+                    delta = total_frames_upscaled - previous_cycle_frames
+                    previous_cycle_frames = total_frames_upscaled
+
+                    # If upscaling is finished
+                    if total_frames_upscaled >= total_frames:
+                        return
+
+                    # Adds the detla into the progress bar
+                    progress_bar.update(delta)
+                except FileNotFoundError:
+                    pass
+
+                time.sleep(1)
+
     def _upscale_frames(self, w2):
         """ Upscale video frames with waifu2x-caffe
 
@@ -107,13 +145,23 @@ class Upscaler:
             w2 {Waifu2x Object} -- initialized waifu2x object
         """
 
+        # Progress bar thread exit signal
+        self.progress_bar_exit_signal = False
+
         # It's easier to do multi-threading with waifu2x_converter
         # The number of threads can be passed directly to waifu2x_converter
         if self.waifu2x_driver == 'waifu2x_converter':
+
+            progress_bar = threading.Thread(target=self._progress_bar, args=([self.extracted_frames],))
+            progress_bar.start()
+
             w2.upscale(self.extracted_frames, self.upscaled_frames, self.ratio, self.threads)
             for image in [f for f in os.listdir(self.upscaled_frames) if os.path.isfile(os.path.join(self.upscaled_frames, f))]:
                 renamed = re.sub('_\[.*-.*\]\[x(\d+(\.\d+)?)\]\.png', '.png', image)
                 shutil.move('{}\\{}'.format(self.upscaled_frames, image), '{}\\{}'.format(self.upscaled_frames, renamed))
+            
+            self.progress_bar_exit_signal = True
+            progress_bar.join()
             return
 
         # Create a container for all upscaler threads
@@ -131,8 +179,10 @@ class Upscaler:
         # name into a list
 
         thread_pool = []
+        thread_folders = []
         for thread_id in range(self.threads):
             thread_folder = '{}\\{}'.format(self.extracted_frames, str(thread_id))
+            thread_folders.append(thread_folder)
 
             # Delete old folders and create new folders
             if os.path.isdir(thread_folder):
@@ -159,6 +209,10 @@ class Upscaler:
             # Add threads into the pool
             upscaler_threads.append(thread)
 
+        # Start progress bar in a different thread
+        progress_bar = threading.Thread(target=self._progress_bar, args=(thread_folders,))
+        progress_bar.start()
+
         # Start all threads
         for thread in upscaler_threads:
             thread.start()
@@ -166,6 +220,8 @@ class Upscaler:
         # Wait for threads to finish
         for thread in upscaler_threads:
             thread.join()
+        
+        self.progress_bar_exit_signal = True
 
     def run(self):
         """Main controller for Video2X
