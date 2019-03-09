@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Author: K4YT3X
 Date Created: November 28, 2018
-Last Modified: March 4, 2019
+Last Modified: March 9, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -31,7 +31,7 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.0.3'
+VERSION = '1.1.0'
 
 
 class Video2xSetup:
@@ -109,17 +109,21 @@ class Video2xSetup:
     def _generate_config(self):
         """ Generate video2x config
         """
-        settings = {}
+        # Open current video2x.json file as template
+        with open('video2x.json', 'r') as template:
+            template_dict = json.load(template)
+            template.close()
+            
+        template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = '{}\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe'.format(os.getenv('localappdata'))
+        template_dict['ffmpeg']['ffmpeg_path'] = '{}\\video2x\\ffmpeg-4.1-win64-static\\bin'.format(os.getenv('localappdata'))
+        template_dict['ffmpeg']['ffmpeg_hwaccel'] = 'auto'
+        template_dict['ffmpeg']['extra_arguments'] = []
+        template_dict['video2x']['video2x_cache_folder'] = False
+        template_dict['video2x']['preserve_frames'] = False
 
-        settings['waifu2x_path'] = '{}\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe'.format(os.getenv('localappdata'))
-        settings['ffmpeg_path'] = '{}\\video2x\\ffmpeg-4.1-win64-static\\bin'.format(os.getenv('localappdata'))
-        settings['ffmpeg_arguments'] = []
-        settings['ffmpeg_hwaccel'] = 'auto'
-        settings['video2x_cache_folder'] = False
-        settings['preserve_frames'] = False
-
+        # Write configuration into file
         with open('video2x.json', 'w') as config:
-            json.dump(settings, config, indent=2)
+            json.dump(template_dict, config, indent=2)
             config.close()
 
 
