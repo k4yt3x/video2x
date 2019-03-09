@@ -115,6 +115,8 @@ For example, if you downloaded the sample input video to `C:\Users\[YourUsername
 
 If you're tired typing everything in, you can also drag the video file directly into the command line window, and Windows will fill in the full path of the video for you.
 
+**Note that all command line arguments/options overwrite configuration file settings.**
+
 ### Nvidia CUDA (waifu2x-caffe)
 
 Enlarge the video to 1920x1080 using CUDA. You may also use the `-r/--ratio` option.
