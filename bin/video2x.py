@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 4, 2019
+Last Modified: March 9, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -38,7 +38,7 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.5.0'
+VERSION = '2.6.0'
 
 # Each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -53,7 +53,7 @@ def process_arguments():
     This allows users to customize options
     for the output video.
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Video options
     basic_options = parser.add_argument_group('Basic Options')
@@ -61,7 +61,7 @@ def process_arguments():
     basic_options.add_argument('-o', '--output', help='Specify output video file/directory', action='store', default=False, required=True)
     basic_options.add_argument('-m', '--method', help='Specify upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'], required=True)
     basic_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
-    basic_options.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='anime_style_art_rgb', choices=MODELS_AVAILABLE)
+    basic_options.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='models/cunet', choices=MODELS_AVAILABLE)
     basic_options.add_argument('-t', '--threads', help='Specify number of threads to use for upscaling', action='store', type=int, default=5)
     basic_options.add_argument('-c', '--config', help='Manually specify config file', action='store', default='{}\\video2x.json'.format(os.path.dirname(os.path.abspath(__file__))))
 
@@ -179,12 +179,19 @@ check_memory()
 
 # Read configurations from JSON
 config = read_config(args.config)
-waifu2x_path = config['waifu2x_path']
-ffmpeg_path = config['ffmpeg_path']
-ffmpeg_arguments = config['ffmpeg_arguments']
-ffmpeg_hwaccel = config['ffmpeg_hwaccel']
-video2x_cache_folder = config['video2x_cache_folder']
-preserve_frames = config['preserve_frames']
+
+# load waifu2x configuration
+if args.driver == 'waifu2x_caffe':
+    waifu2x_settings = config['waifu2x_caffe']
+elif args.driver == 'waifu2x_converter':
+    waifu2x_settings = config['waifu2x_converter']
+
+# read FFMPEG configuration
+ffmpeg_settings = config['ffmpeg']
+
+# load video2x settings
+video2x_cache_folder = config['video2x']['video2x_cache_folder']
+preserve_frames = config['video2x']['preserve_frames']
 
 # Create temp directories if they don't exist
 if not video2x_cache_folder:
@@ -214,7 +221,7 @@ try:
     if os.path.isfile(args.input):
         """ Upscale single video file """
         Avalon.info('Upscaling single video file: {}'.format(args.input))
-        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, waifu2x_driver=args.driver, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, ratio=args.ratio, model_type=args.model_type, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
+        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings, waifu2x_driver=args.driver, scale_width=args.width, scale_height=args.height, scale_ratio=args.ratio, model_type=args.model_type, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
         upscaler.run()
         upscaler.cleanup()
     elif os.path.isdir(args.input):
@@ -222,7 +229,7 @@ try:
         Avalon.info('Upscaling videos in folder/directory: {}'.format(args.input))
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
             output_video = '{}\\{}'.format(args.output, input_video)
-            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_path=waifu2x_path, ffmpeg_path=ffmpeg_path, waifu2x_driver=args.driver, ffmpeg_arguments=ffmpeg_arguments, ffmpeg_hwaccel=ffmpeg_hwaccel, output_width=args.width, output_height=args.height, ratio=args.ratio, model_type=args.model_type, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
+            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings, waifu2x_driver=args.driver, scale_width=args.width, scale_height=args.height, scale_ratio=args.ratio, model_type=args.model_type, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
             upscaler.run()
             upscaler.cleanup()
     else:
