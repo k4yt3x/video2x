@@ -16,6 +16,11 @@ Component names that are *italicized* can be automatically downloaded and config
 
 ## Recent Changes
 
+### 2.6.0 (March 9, 2019)
+
+- Complete redesign of configuration file format. The configuration file is now much more flexible and easy to look at.
+- Various modifications done to the rest of the program to adapt to the changes made in the configuration file. This eliminated some problems existed in the previous version.
+
 ### 2.5.0 (March 4, 2019)
 
 - Added progress bar according to @ArmandBernard 's suggestion.
@@ -118,6 +123,31 @@ Enlarge the video to 1920x1080 using CUDA. You may also use the `-r/--ratio` opt
 $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu --width=1920 --height=1080
 ```
 
+Corresponding sample configuration:
+
+```json
+"waifu2x_caffe": {
+  "waifu2x_caffe_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe",
+  "mode": "noise_scale",
+  "scale_ratio": null,
+  "scale_width": null,
+  "scale_height": null,
+  "noise_level": 3,
+  "process": "gpu",
+  "crop_size": 128,
+  "output_quality": -1,
+  "output_depth": 8,
+  "batch_size": 1,
+  "gpu": 0,
+  "tta": 0,
+  "input_path": null,
+  "output_path": null,
+  "model_dir": "models/cunet",
+  "crop_w": null,
+  "crop_h": null
+}
+```
+
 ### Nvidia CNDNN
 
 Enlarge the video to 1920x1080 using CUDNN. You may also use the `-r/--ratio` option.
@@ -128,19 +158,54 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cudnn --width=19
 
 ### AMD or Nvidia (waifu2x-converter-cpp OpenCL)
 
-Enlarge the video by 2 times using OpenCL. Note that `waifu2x-converter-cpp` doesn't support width and height.
+Enlarge the video by 2 times using OpenCL. Note that `waifu2x-converter-cpp` doesn't support width and height. You'll also have to explicitly specify that the driver to be used is `waifu2x_converter`.
 
 ```bash
-$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2
+$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2x_converter
+```
+
+Corresponding sample configuration is shown below. Note that the `waifu2x_path` is different from the configuration for `waifu2x-caffe`. Instead of the binary path, folder containing extracted `waifu2x-converter-cpp.exe` should be specified.
+
+```json
+"waifu2x_converter": {
+  "waifu2x_converter_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-converter-cpp",
+  "block_size": null,
+  "disable-gpu": null,
+  "force-OpenCL": null,
+  "processor": null,
+  "jobs": null,
+  "model_dir": null,
+  "scale_ratio": null,
+  "noise_level": 3,
+  "mode": "noise_scale",
+  "quiet": true,
+  "output": null,
+  "input": null
+}
 ```
 
 ### CPU
 
-Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` option. This is potentially much slower than using a GPU.
+Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` option. This is potentially much slower than using a GPU. The configuration file for this method is similar to the previous methods.
 
 ```bash
 $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 --height=1080
 ```
+
+### Configuration File Format
+
+Video2X converts the configuration file keys and values directly into options or arguments. For example, in the following sample config, `--scale_width 1920` will be passed to waifu2x.
+
+```json
+"waifu2x_caffe": {
+  ...
+  "scale_width": null,
+  ...
+}
+```
+
+- Keys having a value of `null` (or `false`, not recommended as it can mean different things in the future) means to ignore this key, thus ignoring both the key and the value.
+- Keys having a value of `true` means that this is an option. Only the key will be passed to waifu2x, not the value (e.g. `--quiet`).
 
 # Full Usage
 
