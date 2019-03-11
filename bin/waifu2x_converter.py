@@ -41,6 +41,13 @@ class Waifu2xConverter:
         # overwrite config file settings
         self.waifu2x_settings['input'] = input_folder
         self.waifu2x_settings['output'] = output_folder
+
+        # Temporary fix for https://github.com/DeadSix27/waifu2x-converter-cpp/issues/109
+        self.waifu2x_settings['i'] = input_folder
+        self.waifu2x_settings['o'] = output_folder
+        self.waifu2x_settings['input'] = None
+        self.waifu2x_settings['output'] = None
+
         self.waifu2x_settings['scale_ratio'] = scale_ratio
         self.waifu2x_settings['jobs'] = jobs
 
