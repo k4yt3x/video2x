@@ -94,6 +94,10 @@ Then you'll need to install python dependencies before start using video2x. Inst
 $ pip install -r requirements.txt
 ```
 
+## [Step-By-Step Tutorial (Nvidia GPUs)](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial)
+
+For those who want a detailed walk-through of how to use `Video2X`, you can head to the [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video. This tutorial currently only includes instructions for Nvidia GPUs, since AMD GPUs (OpenCL) requires installation of `waifu2x-converter-cpp` which cannot be installed automatically with Python at the moment due to its 7z compression format.
+
 ## Quick Start
 
 ### Sample Videos
