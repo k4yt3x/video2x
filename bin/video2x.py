@@ -38,7 +38,7 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.6.0'
+VERSION = '2.6.1'
 
 # Each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -64,6 +64,7 @@ def process_arguments():
     basic_options.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='models/cunet', choices=MODELS_AVAILABLE)
     basic_options.add_argument('-t', '--threads', help='Specify number of threads to use for upscaling', action='store', type=int, default=5)
     basic_options.add_argument('-c', '--config', help='Manually specify config file', action='store', default='{}\\video2x.json'.format(os.path.dirname(os.path.abspath(__file__))))
+    basic_options.add_argument('-b', '--batch', help='Enable batch mode (select all default values to questions)', action='store_true', default=False)
 
     # Scaling options
     # scaling_options = parser.add_argument_group('Scaling Options', required=True)  # TODO: (width & height) || (factor)
@@ -124,7 +125,7 @@ def check_memory():
             Avalon.warning('You might have insufficient amount of {} memory available to run this program ({} GB)'.format(memory_type, memory_available))
             Avalon.warning('Proceed with caution')
             if args.threads > 1:
-                if Avalon.ask('Reduce number of threads to avoid crashing?', True):
+                if Avalon.ask('Reduce number of threads to avoid crashing?', default=True, batch=args.batch):
                     args.threads = 1
         # If memory available is less than needed, warn the user
         elif memory_available < (mem_per_thread * args.threads):
@@ -135,7 +136,7 @@ def check_memory():
 
             # Ask the user if he / she wants to change to the recommended
             # number of threads
-            if Avalon.ask('Change to the recommended value?', True):
+            if Avalon.ask('Change to the recommended value?', default=True, batch=args.batch):
                 args.threads = int(memory_available // mem_per_thread)
             else:
                 Avalon.warning('Proceed with caution')
@@ -200,7 +201,7 @@ if not video2x_cache_folder:
 if video2x_cache_folder and not os.path.isdir(video2x_cache_folder):
     if not os.path.isfile(video2x_cache_folder) and not os.path.islink(video2x_cache_folder):
         Avalon.warning('Specified cache folder/directory {} does not exist'.format(video2x_cache_folder))
-        if Avalon.ask('Create folder/directory?', True):
+        if Avalon.ask('Create folder/directory?', default=True, batch=args.batch):
             if os.mkdir(video2x_cache_folder) is None:
                 Avalon.info('{} created'.format(video2x_cache_folder))
             else:
