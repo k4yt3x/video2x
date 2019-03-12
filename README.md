@@ -16,6 +16,11 @@ Component names that are *italicized* can be automatically downloaded and config
 
 ## Recent Changes
 
+### 2.6.1 (March 12, 2019)
+
+- Added `-b, --batch` option which selects applies all default values for questions automatically.
+- **This new version will now require `avalon_framework>=1.6.3`**. Please run `pip install -U avalon_framework` to update the existing framework.
+
 ### 2.6.0 (March 9, 2019)
 
 - Complete redesign of configuration file format. The configuration file is now much more flexible and easy to look at.
@@ -28,16 +33,6 @@ Component names that are *italicized* can be automatically downloaded and config
 - Cache folders are now more likely to be deleted successfully even if the program crashes. This is made possible with more try-catch blocks.
 - Updated FFMPEG stream migration grammar according to @cr08 's suggestions. All streams (including attachment streams) will now be copied over to the new video.
 - A lot of minor upgrades and adjustments.
-
-### 2.4.3 (February 26, 2019)
-
-- Fixed the bug where ffmpeg arguments (hwaccel) are not passed on to ffmpeg.
-
-### 2.4.2 (February 26, 2019)
-
-- Added the function to detect insufficient GPU memory.
-- Added the function to create temporary folders automatically.
-- Fixed configuration file path error.
 
 ## Description
 
@@ -191,6 +186,9 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920
 
 ### -r RATIO, --ratio RATIO
     Scaling ratio
+
+### -b, --batch
+    Enable batch mode (select all default values to questions)
 
 ## License
 
