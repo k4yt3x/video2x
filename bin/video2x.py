@@ -105,7 +105,7 @@ def check_memory():
         if not os.path.isfile('C:\\Program Files\\NVIDIA Corporation\\NVSMI\\nvidia-smi.exe'):
             # Nvidia System Management Interface not available
             Avalon.warning('Nvidia-smi not available, skipping available memory check')
-            Avalon.warning('If you experience error \"cudaSuccess  out of memory, try reducing number of threads you\'re using\"')
+            Avalon.warning('If you experience error \"cudaSuccess  out of memory\", try reducing number of threads you\'re using')
         else:
             # "0" is GPU ID. Both waifu2x drivers use the first GPU available, therefore only 0 makes sense
             gpu_memory_available = (GPUtil.getGPUs()[0].memoryTotal - GPUtil.getGPUs()[0].memoryUsed) / 1024
