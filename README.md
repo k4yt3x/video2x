@@ -98,7 +98,13 @@ $ pip install -r requirements.txt
 
 For those who want a detailed walk-through of how to use `Video2X`, you can head to the [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video. This tutorial currently only includes instructions for Nvidia GPUs, since AMD GPUs (OpenCL) requires installation of `waifu2x-converter-cpp` which cannot be installed automatically with Python at the moment due to its 7z compression format.
 
+## [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers)
+
+Go to the [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers) wiki page if you want to see a detailed description on the different types of `waifu2x` drivers implemented by `Video2X`. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for `Video2X`.
+
 ## Quick Start
+
+**Note that all command line arguments/options overwrite configuration file settings.**
 
 ### Sample Videos
 
@@ -111,47 +117,12 @@ If you can't find a video clip to begin with, or if you want to see a before-aft
 
 Clip is from anime "さくら荘のペットな彼女". Copyright belongs to "株式会社アニプレックス (Aniplex Inc.)". Will delete immediately if use of clip is in violation of copyright.
 
-### For Command Line Beginners
-
-If you're unfamiliar of directories in command lines, then here's a short section that might help you to get started.
-
-For example, if you downloaded the sample input video to `C:\Users\[YourUsername]\Downloads`, then the full path of your input video will be `C:\Users\[YourUsername]\Downloads\sample_input.mp4`, vice versa. The output path is also relative. If you want to export the output video to the current directory, just specify the output video name such as `output.mp4`. However, if you want to put the output video in a different directory, you should use relative or absolute path, such as `C:\Users\[YourUsername]\Desktop\output.mp4`.
-
-If you're tired typing everything in, you can also drag the video file directly into the command line window, and Windows will fill in the full path of the video for you.
-
-**Note that all command line arguments/options overwrite configuration file settings.**
-
 ### Nvidia CUDA (waifu2x-caffe)
 
 Enlarge the video to 1920x1080 using CUDA. You may also use the `-r/--ratio` option.
 
 ```bash
 $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu --width=1920 --height=1080
-```
-
-Corresponding sample configuration:
-
-```json
-"waifu2x_caffe": {
-  "waifu2x_caffe_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe",
-  "mode": "noise_scale",
-  "scale_ratio": null,
-  "scale_width": null,
-  "scale_height": null,
-  "noise_level": 3,
-  "process": "gpu",
-  "crop_size": 128,
-  "output_quality": -1,
-  "output_depth": 8,
-  "batch_size": 1,
-  "gpu": 0,
-  "tta": 0,
-  "input_path": null,
-  "output_path": null,
-  "model_dir": "models/cunet",
-  "crop_w": null,
-  "crop_h": null
-}
 ```
 
 ### Nvidia CNDNN
@@ -172,24 +143,6 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waif
 
 Corresponding sample configuration is shown below. Note that the `waifu2x_path` is different from the configuration for `waifu2x-caffe`. Instead of the binary path, folder containing extracted `waifu2x-converter-cpp.exe` should be specified.
 
-```json
-"waifu2x_converter": {
-  "waifu2x_converter_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-converter-cpp",
-  "block_size": null,
-  "disable-gpu": null,
-  "force-OpenCL": null,
-  "processor": null,
-  "jobs": null,
-  "model_dir": null,
-  "scale_ratio": null,
-  "noise_level": 3,
-  "mode": "noise_scale",
-  "quiet": true,
-  "output": null,
-  "input": null
-}
-```
-
 ### CPU
 
 Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` option. This is potentially much slower than using a GPU. The configuration file for this method is similar to the previous methods.
@@ -197,21 +150,6 @@ Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` 
 ```bash
 $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 --height=1080
 ```
-
-### Configuration File Format
-
-Video2X converts the configuration file keys and values directly into options or arguments. For example, in the following sample config, `--scale_width 1920` will be passed to waifu2x.
-
-```json
-"waifu2x_caffe": {
-  ...
-  "scale_width": null,
-  ...
-}
-```
-
-- Keys having a value of `null` (or `false`, not recommended as it can mean different things in the future) means to ignore this key, thus ignoring both the key and the value.
-- Keys having a value of `true` means that this is an option. Only the key will be passed to waifu2x, not the value (e.g. `--quiet`).
 
 # Full Usage
 
