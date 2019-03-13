@@ -51,7 +51,19 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 ## Screenshot
 ![screenshot](https://user-images.githubusercontent.com/21986859/40265170-39c0caae-5b01-11e8-8371-8b6c24769639.png)
 
-## Installation
+## [Video2X Wiki](https://github.com/K4YT3X/video2x/wiki)
+
+You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/K4YT3X/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
+
+## [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) (Nvidia GPUs)
+
+For those who want a detailed walk-through of how to use `Video2X`, you can head to the [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video. This tutorial currently only includes instructions for Nvidia GPUs, since AMD GPUs (OpenCL) requires installation of `waifu2x-converter-cpp` which cannot be installed automatically with Python at the moment due to its 7z compression format.
+
+## [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers)
+
+Go to the [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers) wiki page if you want to see a detailed description on the different types of `waifu2x` drivers implemented by `Video2X`. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for `Video2X`.
+
+## Quick Start
 
 ### Prerequisites
 
@@ -59,12 +71,12 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 Download: https://www.python.org/downloads/windows/
 - **FFMPEG Windows Build**  
 Download: https://ffmpeg.org/download.html  
-- **waifu2x-caffe for Windows**  
+- **waifu2x-caffe** (for Nvidia CUDA/CUDNN)  
 Download: https://github.com/lltcggie/waifu2x-caffe/releases
-- **waifu2x-converter-cpp**  
+- **waifu2x-converter-cpp** (required for AMD, OpenCL and OpenGL processing)  
 Download: https://github.com/DeadSix27/waifu2x-converter-cpp/releases
 
-### Install Dependencies
+### Installing Dependencies
 
 First, clone the video2x repository.
 
@@ -77,6 +89,8 @@ Then you may run the `video2x_setup.py` script to install and configure the depe
 
 This script will install `ffmpeg`, `waifu2x-caffe` to `%LOCALAPPDATA%\\video2x` and all python libraries.
 
+**`waifu2x-converter-cpp` cannot be installed automatically with this script.** Please follow the [`waifu2x-converter-cpp` installation instructions](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers#waifu2x-converter-cpp) to install it.
+
 ```bash
 $ python video2x_setup.py
 ```
@@ -88,16 +102,6 @@ Then you'll need to install python dependencies before start using video2x. Inst
 ```bash
 $ pip install -r requirements.txt
 ```
-
-## [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) (Nvidia GPUs)
-
-For those who want a detailed walk-through of how to use `Video2X`, you can head to the [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video. This tutorial currently only includes instructions for Nvidia GPUs, since AMD GPUs (OpenCL) requires installation of `waifu2x-converter-cpp` which cannot be installed automatically with Python at the moment due to its 7z compression format.
-
-## [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers)
-
-Go to the [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers) wiki page if you want to see a detailed description on the different types of `waifu2x` drivers implemented by `Video2X`. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for `Video2X`.
-
-## Quick Start
 
 **Note that all command line arguments/options overwrite configuration file settings.**
 
