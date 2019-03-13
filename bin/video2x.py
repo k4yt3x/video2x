@@ -26,10 +26,10 @@ video, enlarge it by a number of times without losing any
 details or quality, keeping lines smooth and edges sharp.
 """
 from avalon_framework import Avalon
-from upscaler import Upscaler
 from upscaler import MODELS_AVAILABLE
-import GPUtil
+from upscaler import Upscaler
 import argparse
+import GPUtil
 import json
 import os
 import psutil
