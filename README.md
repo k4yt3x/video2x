@@ -213,7 +213,6 @@ https://www.gnu.org/licenses/gpl-3.0.txt
 
 (C) 2018-2019 K4YT3X
 
-
 ## Credits
 
 This project relies on the following software and projects.
@@ -221,3 +220,7 @@ This project relies on the following software and projects.
 - [FFMPEG]('https://www.ffmpeg.org/')
 - [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)
 - [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
+
+## Related Resources
+
+- [Dandere2x](https://github.com/CardinalPanda/dandere2x): `Dandere2x` is a lossy video upscaler also built around `waifu2x`, but with video compression techniques to shorten the time needed to process a video.
