@@ -4,10 +4,10 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 9, 2019
+Last Modified: March 19, 2019
 
-Description: This class controls waifu2x
-engine
+Description: This class is a high-level wrapper
+for waifu2x-caffe.
 """
 from avalon_framework import Avalon
 import subprocess
@@ -53,28 +53,23 @@ class Waifu2xCaffe:
             self.waifu2x_settings['scale_width'] = scale_width
             self.waifu2x_settings['scale_height'] = scale_height
 
-        # Print thread start message
+        # print thread start message
         self.print_lock.acquire()
         Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
         self.print_lock.release()
 
-        """
-        # Create string for execution
-        execute = '\"{}\" -p {} -I png -i \"{}\" -e png -o {} -w {} -h {} -n 3 -m noise_scale -y {}'.format(
-            self.waifu2x_path, self.process, input_folder, output_folder, width, height, self.model_dir)
-        """
-
+        # list to be executed
         execute = []
 
         for key in self.waifu2x_settings.keys():
 
             value = self.waifu2x_settings[key]
 
-            # The key doesn't need to be passed in this case
+            # the key doesn't need to be passed in this case
             if key == 'waifu2x_caffe_path':
                 execute.append(str(value))
 
-            # Null or None means that leave this option out (keep default)
+            # null or None means that leave this option out (keep default)
             elif value is None or value is False:
                 continue
 
@@ -86,9 +81,12 @@ class Waifu2xCaffe:
                 execute.append(str(value))
         
         Avalon.debug_info('Executing: {}'.format(execute))
-        subprocess.run(execute, check=True)
+        completed_command = subprocess.run(execute, check=True)
 
-        # Print thread exiting message
+        # print thread exiting message
         self.print_lock.acquire()
         Avalon.debug_info('[upscaler] Thread {} exiting'.format(threading.current_thread().name))
         self.print_lock.release()
+
+        # return command execution return code
+        return completed_command.returncode
