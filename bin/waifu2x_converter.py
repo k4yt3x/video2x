@@ -4,10 +4,10 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: March 9, 2019
+Last Modified: March 19, 2019
 
-Description: This class controls waifu2x
-engine
+Description: This class is a high-level wrapper
+for waifu2x-converter-cpp.
 """
 from avalon_framework import Avalon
 import subprocess
@@ -23,8 +23,9 @@ class Waifu2xConverter:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings):
+    def __init__(self, waifu2x_settings, model_dir):
         self.waifu2x_settings = waifu2x_settings
+        self.waifu2x_settings['model_dir'] = model_dir
         self.print_lock = threading.Lock()
 
     def upscale(self, input_folder, output_folder, scale_ratio, jobs):
@@ -42,7 +43,7 @@ class Waifu2xConverter:
         self.waifu2x_settings['input'] = input_folder
         self.waifu2x_settings['output'] = output_folder
 
-        # Temporary fix for https://github.com/DeadSix27/waifu2x-converter-cpp/issues/109
+        # temporary fix for https://github.com/DeadSix27/waifu2x-converter-cpp/issues/109
         self.waifu2x_settings['i'] = input_folder
         self.waifu2x_settings['o'] = output_folder
         self.waifu2x_settings['input'] = None
@@ -51,26 +52,28 @@ class Waifu2xConverter:
         self.waifu2x_settings['scale_ratio'] = scale_ratio
         self.waifu2x_settings['jobs'] = jobs
 
-        # models_rgb must be specified manually
-        self.waifu2x_settings['model_dir'] = '{}\\models_rgb'.format(self.waifu2x_settings['waifu2x_converter_path'])
+        # models_rgb must be specified manually for waifu2x-converter-cpp
+        # if it's not specified in the arguments, create automatically
+        if self.waifu2x_settings['model_dir'] is None:
+            self.waifu2x_settings['model_dir'] = '{}\\models_rgb'.format(self.waifu2x_settings['waifu2x_converter_path'])
 
-        # Print thread start message
+        # print thread start message
         self.print_lock.acquire()
         Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
         self.print_lock.release()
 
-        # Create list for execution
+        # list to be executed
         execute = []
 
         for key in self.waifu2x_settings.keys():
 
             value = self.waifu2x_settings[key]
 
-            # The key doesn't need to be passed in this case
+            # the key doesn't need to be passed in this case
             if key == 'waifu2x_converter_path':
                 execute.append('{}\\waifu2x-converter-cpp.exe'.format(str(value)))
 
-            # Null or None means that leave this option out (keep default)
+            # null or None means that leave this option out (keep default)
             elif value is None or value is False:
                 continue
             else:
@@ -79,16 +82,12 @@ class Waifu2xConverter:
                 else:
                     execute.append('--{}'.format(key))
 
-                # True means key is an option
+                # true means key is an option
                 if value is True:
                     continue
 
                 execute.append(str(value))
         
         Avalon.debug_info('Executing: {}'.format(execute))
-        subprocess.run(execute, check=True)
+        return subprocess.run(execute, check=True).returncode
 
-        # Print thread exiting message
-        self.print_lock.acquire()
-        Avalon.debug_info('[upscaler] Thread {} exiting'.format(threading.current_thread().name))
-        self.print_lock.release()
