@@ -13,20 +13,32 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 9, 2019
+Last Modified: March 19, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
 
 (C) 2018-2019 K4YT3X
 
-Description: Video2X is an automation software based on
-waifu2x image enlarging engine. It extracts frames from a
-video, enlarge it by a number of times without losing any
-details or quality, keeping lines smooth and edges sharp.
+Video2X is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Video2X is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Description: Video2X is an automation software based on waifu2x image
+enlarging engine. It extracts frames from a video, enlarge it by a
+number of times without losing any details or quality, keeping lines
+smooth and edges sharp.
 """
 from avalon_framework import Avalon
-from upscaler import MODELS_AVAILABLE
 from upscaler import Upscaler
 import argparse
 import GPUtil
@@ -38,9 +50,9 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.6.1'
+VERSION = '2.6.2'
 
-# Each thread might take up to 2.5 GB during initialization.
+# each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
 SYS_MEM_PER_THREAD = 2.5
 GPU_MEM_PER_THREAD = 3.5
@@ -55,25 +67,25 @@ def process_arguments():
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # Video options
+    # video options
     basic_options = parser.add_argument_group('Basic Options')
-    basic_options.add_argument('-i', '--input', help='Specify source video file/directory', action='store', default=False, required=True)
-    basic_options.add_argument('-o', '--output', help='Specify output video file/directory', action='store', default=False, required=True)
+    basic_options.add_argument('-i', '--input', help='Specify source video file/directory', action='store', required=True)
+    basic_options.add_argument('-o', '--output', help='Specify output video file/directory', action='store', required=True)
     basic_options.add_argument('-m', '--method', help='Specify upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'], required=True)
     basic_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
-    basic_options.add_argument('-y', '--model_type', help='Specify model to use', action='store', default='models/cunet', choices=MODELS_AVAILABLE)
+    basic_options.add_argument('-y', '--model_dir', help='Specify model to use', action='store', default=None)
     basic_options.add_argument('-t', '--threads', help='Specify number of threads to use for upscaling', action='store', type=int, default=5)
     basic_options.add_argument('-c', '--config', help='Manually specify config file', action='store', default='{}\\video2x.json'.format(os.path.dirname(os.path.abspath(__file__))))
     basic_options.add_argument('-b', '--batch', help='Enable batch mode (select all default values to questions)', action='store_true', default=False)
 
-    # Scaling options
-    # scaling_options = parser.add_argument_group('Scaling Options', required=True)  # TODO: (width & height) || (factor)
-    scaling_options = parser.add_argument_group('Scaling Options')  # TODO: (width & height) || (factor)
+    # scaling options
+    # scaling_options = parser.add_argument_group('Scaling Options', required=True)
+    scaling_options = parser.add_argument_group('Scaling Options')
     scaling_options.add_argument('--width', help='Output video width', action='store', type=int, default=False)
     scaling_options.add_argument('--height', help='Output video height', action='store', type=int, default=False)
     scaling_options.add_argument('-r', '--ratio', help='Scaling ratio', action='store', type=int, default=False)
 
-    # Parse arguments
+    # parse arguments
     return parser.parse_args()
 
 
@@ -96,11 +108,11 @@ def check_memory():
     """
 
     memory_status = []
-    # Get system available memory
+    # get system available memory
     system_memory_available = psutil.virtual_memory().available / (1024 ** 3)
     memory_status.append(('system', system_memory_available))
 
-    # Check if Nvidia-smi is available
+    # check if Nvidia-smi is available
     # GPUtil requires nvidia-smi.exe to interact with GPU
     if args.method == 'gpu' or args.method == 'cudnn':
         if not os.path.isfile('C:\\Program Files\\NVIDIA Corporation\\NVSMI\\nvidia-smi.exe'):
@@ -115,7 +127,7 @@ def check_memory():
             except ValueError:
                 pass
 
-    # Go though each checkable memory type and check availability
+    # go though each checkable memory type and check availability
     for memory_type, memory_available in memory_status:
 
         if memory_type == 'system':
@@ -123,21 +135,21 @@ def check_memory():
         else:
             mem_per_thread = GPU_MEM_PER_THREAD
 
-        # If user doesn't even have enough memory to run even one thread
+        # if user doesn't even have enough memory to run even one thread
         if memory_available < mem_per_thread:
             Avalon.warning('You might have insufficient amount of {} memory available to run this program ({} GB)'.format(memory_type, memory_available))
             Avalon.warning('Proceed with caution')
             if args.threads > 1:
                 if Avalon.ask('Reduce number of threads to avoid crashing?', default=True, batch=args.batch):
                     args.threads = 1
-        # If memory available is less than needed, warn the user
+        # if memory available is less than needed, warn the user
         elif memory_available < (mem_per_thread * args.threads):
             Avalon.warning('Each waifu2x-caffe thread will require up to 2.5 GB of system memory')
             Avalon.warning('You demanded {} threads to be created, but you only have {} GB {} memory available'.format(args.threads, round(memory_available, 4), memory_type))
             Avalon.warning('{} GB of {} memory is recommended for {} threads'.format(mem_per_thread * args.threads, memory_type, args.threads))
             Avalon.warning('With your current amount of {} memory available, {} threads is recommended'.format(memory_type, int(memory_available // mem_per_thread)))
 
-            # Ask the user if he / she wants to change to the recommended
+            # ask the user if he / she wants to change to the recommended
             # number of threads
             if Avalon.ask('Change to the recommended value?', default=True, batch=args.batch):
                 args.threads = int(memory_available // mem_per_thread)
@@ -157,17 +169,17 @@ def read_config(config_file):
 
 # /////////////////// Execution /////////////////// #
 
-# This is not a library
+# this is not a library
 if __name__ != '__main__':
     Avalon.error('This file cannot be imported')
     raise ImportError('{} cannot be imported'.format(__file__))
 
 print_logo()
 
-# Process CLI arguments
+# process CLI arguments
 args = process_arguments()
 
-# Arguments sanity check
+# arguments sanity check
 if args.driver == 'waifu2x_converter' and args.width and args.height:
     Avalon.error('Waifu2x Converter CPP accepts only scaling ratio')
     exit(1)
@@ -178,10 +190,10 @@ if (args.width and not args.height) or (not args.width and args.height):
     Avalon.error('You must specify both width and height')
     exit(1)
 
-# Check available memory
+# check available memory
 check_memory()
 
-# Read configurations from JSON
+# read configurations from JSON
 config = read_config(args.config)
 
 # load waifu2x configuration
@@ -197,7 +209,7 @@ ffmpeg_settings = config['ffmpeg']
 video2x_cache_folder = config['video2x']['video2x_cache_folder']
 preserve_frames = config['video2x']['preserve_frames']
 
-# Create temp directories if they don't exist
+# create temp directories if they don't exist
 if not video2x_cache_folder:
     video2x_cache_folder = '{}\\video2x'.format(tempfile.gettempdir())
 
@@ -217,15 +229,15 @@ if video2x_cache_folder and not os.path.isdir(video2x_cache_folder):
         exit(1)
 
 
-# Start execution
+# start execution
 try:
-    # Start timer
+    # start timer
     begin_time = time.time()
 
     if os.path.isfile(args.input):
         """ Upscale single video file """
         Avalon.info('Upscaling single video file: {}'.format(args.input))
-        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings, waifu2x_driver=args.driver, scale_width=args.width, scale_height=args.height, scale_ratio=args.ratio, model_type=args.model_type, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
+        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings, waifu2x_driver=args.driver, scale_width=args.width, scale_height=args.height, scale_ratio=args.ratio, model_dir=args.model_dir, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
         upscaler.run()
         upscaler.cleanup()
     elif os.path.isdir(args.input):
@@ -233,7 +245,7 @@ try:
         Avalon.info('Upscaling videos in folder/directory: {}'.format(args.input))
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
             output_video = '{}\\{}'.format(args.output, input_video)
-            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings, waifu2x_driver=args.driver, scale_width=args.width, scale_height=args.height, scale_ratio=args.ratio, model_type=args.model_type, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
+            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings, waifu2x_driver=args.driver, scale_width=args.width, scale_height=args.height, scale_ratio=args.ratio, model_dir=args.model_dir, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
             upscaler.run()
             upscaler.cleanup()
     else:
@@ -245,7 +257,7 @@ except Exception:
     Avalon.error('An exception has occurred')
     traceback.print_exc()
 finally:
-    # Remove Video2X Cache folder
+    # remove Video2X Cache folder
     try:
         if not preserve_frames:
             shutil.rmtree(video2x_cache_folder)
