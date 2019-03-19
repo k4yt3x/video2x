@@ -15,7 +15,7 @@
     "tta": 0,
     "input_path": null,
     "output_path": null,
-    "model_dir": "models/cunet",
+    "model_dir": null,
     "crop_w": null,
     "crop_h": null
   },
