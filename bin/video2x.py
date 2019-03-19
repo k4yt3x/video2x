@@ -68,18 +68,20 @@ def process_arguments():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # video options
-    basic_options = parser.add_argument_group('Basic Options')
-    basic_options.add_argument('-i', '--input', help='Specify source video file/directory', action='store', required=True)
-    basic_options.add_argument('-o', '--output', help='Specify output video file/directory', action='store', required=True)
-    basic_options.add_argument('-m', '--method', help='Specify upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'], required=True)
-    basic_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
-    basic_options.add_argument('-y', '--model_dir', help='Specify model to use', action='store', default=None)
-    basic_options.add_argument('-t', '--threads', help='Specify number of threads to use for upscaling', action='store', type=int, default=5)
-    basic_options.add_argument('-c', '--config', help='Manually specify config file', action='store', default='{}\\video2x.json'.format(os.path.dirname(os.path.abspath(__file__))))
-    basic_options.add_argument('-b', '--batch', help='Enable batch mode (select all default values to questions)', action='store_true', default=False)
+    file_options = parser.add_argument_group('File Options')
+    file_options.add_argument('-i', '--input', help='Source video file/directory', action='store', required=True)
+    file_options.add_argument('-o', '--output', help='Output video file/directory', action='store', required=True)
+
+    # upscaler options
+    upscaler_options = parser.add_argument_group('Upscaler Options')
+    upscaler_options.add_argument('-m', '--method', help='Upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'], required=True)
+    upscaler_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
+    upscaler_options.add_argument('-y', '--model_dir', help='Folder containing model JSON files', action='store', default=None)
+    upscaler_options.add_argument('-t', '--threads', help='Number of threads to use for upscaling', action='store', type=int, default=5)
+    upscaler_options.add_argument('-c', '--config', help='Video2X config file location', action='store', default='{}\\video2x.json'.format(os.path.dirname(os.path.abspath(__file__))))
+    upscaler_options.add_argument('-b', '--batch', help='Enable batch mode (select all default values to questions)', action='store_true', default=False)
 
     # scaling options
-    # scaling_options = parser.add_argument_group('Scaling Options', required=True)
     scaling_options = parser.add_argument_group('Scaling Options')
     scaling_options.add_argument('--width', help='Output video width', action='store', type=int, default=False)
     scaling_options.add_argument('--height', help='Output video height', action='store', type=int, default=False)
