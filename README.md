@@ -16,6 +16,12 @@ Component names that are *italicized* can be automatically downloaded and config
 
 ## Recent Changes
 
+### 2.6.2 (March 19, 2019)
+
+- Removed `--model_dir` verification due to the rapidly evolving number of models added.
+- Fixed model specifying bug. Users should now specify model using `--model_dir [path to folder containing model JSON files]`.
+- Enhanced command execution method.
+
 ### 2.6.1 (March 12, 2019)
 
 - Added `-b, --batch` option which selects applies all default values for questions automatically.
@@ -25,14 +31,6 @@ Component names that are *italicized* can be automatically downloaded and config
 
 - Complete redesign of configuration file format. The configuration file is now much more flexible and easy to look at.
 - Various modifications done to the rest of the program to adapt to the changes made in the configuration file. This eliminated some problems existed in the previous version.
-
-### 2.5.0 (March 4, 2019)
-
-- Added progress bar according to @ArmandBernard 's suggestion.
-- Cache folders are now created under `'{}\\video2x'.format(tempfile.gettempdir())` by default, and the default key for cache folder location in configuration file has been changed to `video2x_cache_folder`. This makes it easier to manage cache folders.
-- Cache folders are now more likely to be deleted successfully even if the program crashes. This is made possible with more try-catch blocks.
-- Updated FFMPEG stream migration grammar according to @cr08 's suggestions. All streams (including attachment streams) will now be copied over to the new video.
-- A lot of minor upgrades and adjustments.
 
 ## Description
 
@@ -49,6 +47,7 @@ Watch for the sharper edges in this screenshot around the shadows:
 Clip is from trailer of animated movie "千と千尋の神隠し". Copyright belongs to "株式会社スタジオジブリ (STUDIO GHIBLI INC.)". Will delete immediately if use of clip is in violation of copyright.
 
 ## Screenshot
+
 ![screenshot](https://user-images.githubusercontent.com/21986859/40265170-39c0caae-5b01-11e8-8371-8b6c24769639.png)
 
 ---
@@ -165,42 +164,44 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920
 ### -h, --help
     show this help message and exit
 
-## File Input and Output
+## File Options
 
 ### -i INPUT, --input INPUT
-    Specify source video file/directory
+    Source video file/directory (default: None)
 
 ### -o OUTPUT, --output OUTPUT
-    Specify output video file/directory
+    Output video file/directory (default: None)
 
-## Upscaler Options
+## Upscaling Options
 
 ### -m {cpu,gpu,cudnn}, --method {cpu,gpu,cudnn}
-    Specify upscaling method
+    Upscaling method (default: gpu)
 
 ### -d {waifu2x_caffe,waifu2x_converter}, --driver {waifu2x_caffe,waifu2x_converter}
-    Waifu2x driver
+    Waifu2x driver (default: waifu2x_caffe)
 
-### -y {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}, --model_type {upconv_7_anime_style_art_rgb,upconv_7_photo,anime_style_art_rgb,photo,anime_style_art_y}
-    Specify model to use
+### -y MODEL_DIR, --model_dir MODEL_DIR
+    Folder containing model JSON files (default: None)
 
 ### -t THREADS, --threads THREADS
-    Specify number of threads to use for upscaling
+    Number of threads to use for upscaling (default: 5)
 
 ### -c CONFIG, --config CONFIG
-    Manually specify config file
-
-### --width WIDTH
-    Output video width
-
-### --height HEIGHT
-    Output video height
-
-### -r RATIO, --ratio RATIO
-    Scaling ratio
+    Video2X config file location (default: video2x\bin\video2x.json)
 
 ### -b, --batch
-    Enable batch mode (select all default values to questions)
+    Enable batch mode (select all default values to questions) (default: False)
+
+## Scaling Options
+
+### --width WIDTH
+    Output video width (default: False)
+
+### --height HEIGHT
+    Output video height (default: False)
+
+### -r RATIO, --ratio RATIO
+    Scaling ratio (default: False)
 
 ---
 
