@@ -4,7 +4,7 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 9, 2019
+Last Modified: March 19, 2019
 
 Description: This class handles all FFMPEG related
 operations.
@@ -30,12 +30,12 @@ class Ffmpeg:
         """ Parse ffmpeg settings
         """
         self.ffmpeg_path = self.ffmpeg_settings['ffmpeg_path']
-        # Add a forward slash to directory if not present
+        # add a forward slash to directory if not present
         # otherwise there will be a format error
         if self.ffmpeg_path[-1] != '/' and self.ffmpeg_path[-1] != '\\':
-            self.ffmpeg_path = '{}/'.format(self.ffmpeg_path)
+            self.ffmpeg_path = '{}\\'.format(self.ffmpeg_path)
 
-        self.ffmpeg_binary = '\"{}ffmpeg.exe\"'.format(self.ffmpeg_path)
+        self.ffmpeg_binary = '{}ffmpeg.exe'.format(self.ffmpeg_path)
         self.ffmpeg_hwaccel = self.ffmpeg_settings['ffmpeg_hwaccel']
         self.extra_arguments = self.ffmpeg_settings['extra_arguments']
 
@@ -51,9 +51,20 @@ class Ffmpeg:
         Returns:
             dictionary -- JSON text of input video information
         """
-        execute = '\"{}ffprobe.exe\" -v quiet -print_format json -show_format -show_streams \"{}\"'.format(self.ffmpeg_path, input_video)
-        Avalon.debug_info('Executing: {}'.format(execute))
-        json_str = subprocess.check_output(execute)
+        execute = [
+            '{}ffprobe.exe'.format(self.ffmpeg_path),
+            '-v',
+            'quiet',
+            '-print_format',
+            'json',
+            '-show_format',
+            '-show_streams',
+            '-i',
+            '{}'.format(input_video)
+        ]
+
+        Avalon.debug_info('Executing: {}'.format(' '.join(execute)))
+        json_str = subprocess.run(execute, check=True, stdout=subprocess.PIPE).stdout
         return json.loads(json_str.decode('utf-8'))
 
     def extract_frames(self, input_video, extracted_frames):
@@ -66,9 +77,16 @@ class Ffmpeg:
             input_video {string} -- input video path
             extracted_frames {string} -- video output folder
         """
-        execute = '{} -i \"{}\" \"{}\"\\extracted_%0d.png -y {}'.format(
-            self.ffmpeg_binary, input_video, extracted_frames, ' '.join(self.extra_arguments))
-        Avalon.debug_info('Executing: {}'.format(execute))
+        execute = [
+            self.ffmpeg_binary,
+            '-i',
+            '{}'.format(input_video),
+            '{}\\extracted_%0d.png'.format(extracted_frames),
+            '-y'
+        ]
+        execute += self.extra_arguments
+
+        Avalon.debug_info('Executing: {}'.format(' '.join(execute)))
         subprocess.run(execute, shell=True, check=True)
 
     def convert_video(self, framerate, resolution, upscaled_frames):
@@ -82,9 +100,28 @@ class Ffmpeg:
             resolution {string} -- target video resolution
             upscaled_frames {string} -- source images folder
         """
-        execute = '{} -r {} -f image2 -s {} -i \"{}\"\\extracted_%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p \"{}\"\\no_audio.mp4 -y {}'.format(
-            self.ffmpeg_binary, framerate, resolution, upscaled_frames, upscaled_frames, ' '.join(self.extra_arguments))
-        Avalon.debug_info('Executing: {}'.format(execute))
+        execute = [
+            self.ffmpeg_binary,
+            '-r',
+            str(framerate),
+            '-f',
+            'image2',
+            '-s',
+            resolution,
+            '-i',
+            '{}\\extracted_%d.png'.format(upscaled_frames),
+            '-vcodec',
+            'libx264',
+            '-crf',
+            '25',
+            '-pix_fmt',
+            'yuv420p',
+            '{}\\no_audio.mp4'.format(upscaled_frames),
+            '-y'
+        ]
+        execute += self.extra_arguments
+
+        Avalon.debug_info('Executing: {}'.format(' '.join(execute)))
         subprocess.run(execute, shell=True, check=True)
 
     def migrate_audio_tracks_subtitles(self, input_video, output_video, upscaled_frames):
@@ -95,9 +132,24 @@ class Ffmpeg:
             output_video {string} -- output video file path
             upscaled_frames {string} -- directory containing upscaled frames
         """
-        execute = '{} -i \"{}\"\\no_audio.mp4 -i \"{}\" -map 0:v:0? -map 1? -c copy -map -1:v? \"{}\" -y {}'.format(
-            self.ffmpeg_binary, upscaled_frames, input_video, output_video, ' '.join(self.extra_arguments))
-        # execute = '{} -i \"{}\"\\no_audio.mp4 -i \"{}\" -c:a copy -c:v copy -c:s copy -map 0:v? -map 1:a? -map 1:s? \"{}\" -y {}'.format(
-            # self.ffmpeg_binary, upscaled_frames, input_video, output_video, ' '.join(self.ffmpeg_arguments))
-        Avalon.debug_info('Executing: {}'.format(execute))
+        execute = [
+            self.ffmpeg_binary,
+            '-i',
+            '{}\\no_audio.mp4'.format(upscaled_frames),
+            '-i',
+            '{}'.format(input_video),
+            '-map',
+            '0:v:0?',
+            '-map',
+            '1?',
+            '-c',
+            'copy',
+            '-map',
+            '-1:v?',
+            '{}'.format(output_video),
+            '-y'
+        ]
+        execute += self.extra_arguments
+
+        Avalon.debug_info('Executing: {}'.format(' '.join(execute)))
         subprocess.run(execute, shell=True, check=True)
