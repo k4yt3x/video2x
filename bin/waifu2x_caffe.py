@@ -61,18 +61,14 @@ class Waifu2xCaffe:
         # list to be executed
         execute = []
 
+        execute.append(self.waifu2x_settings['waifu2x_caffe_path'])
         for key in self.waifu2x_settings.keys():
 
             value = self.waifu2x_settings[key]
 
-            # the key doesn't need to be passed in this case
-            if key == 'waifu2x_caffe_path':
-                execute.append(str(value))
-
-            # null or None means that leave this option out (keep default)
-            elif value is None or value is False:
+            #is executable key or null or None means that leave this option out (keep default)
+            if key == 'waifu2x_caffe_path' or value is None or value is False:
                 continue
-
             else:
                 if len(key) == 1:
                     execute.append('-{}'.format(key))
