@@ -19,6 +19,7 @@ from fractions import Fraction
 from tqdm import tqdm
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
+from clear_image import ClearImage
 import os
 import re
 import shutil
@@ -208,6 +209,11 @@ class Upscaler:
         progress_bar = threading.Thread(target=self._progress_bar, args=(thread_folders,))
         progress_bar.start()
 
+        #Create the clearer and start it
+        Avalon.debug_info('Starting image clearer...')
+        image_clear = ClearImage(self.extracted_frames,self.upscaled_frames,len(upscaler_threads))
+        image_clear.start()
+        
         # start all threads
         for thread in upscaler_threads:
             thread.start()
@@ -215,6 +221,10 @@ class Upscaler:
         # wait for threads to finish
         for thread in upscaler_threads:
             thread.join()
+  
+        #upscaling done... kill the clearer
+        Avalon.debug_info('Stoping image clearer...')
+        image_clear.stop()
 
         self.progress_bar_exit_signal = True
 
@@ -290,3 +300,5 @@ class Upscaler:
         # migrate audio tracks and subtitles
         Avalon.info('Migrating audio tracks and subtitles to upscaled video')
         fm.migrate_audio_tracks_subtitles(self.input_video, self.output_video, self.upscaled_frames)
+
+
