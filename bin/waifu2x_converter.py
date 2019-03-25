@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: March 19, 2019
+Last Modified: March 24, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
@@ -28,7 +28,7 @@ class Waifu2xConverter:
         self.waifu2x_settings['model_dir'] = model_dir
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_folder, output_folder, scale_ratio, jobs):
+    def upscale(self, input_folder, output_folder, scale_ratio, jobs, threads_exceptions):
         """ Waifu2x Converter Driver Upscaler
         This method executes the upscaling of extracted frames.
 
@@ -39,55 +39,58 @@ class Waifu2xConverter:
             threads {int} -- number of threads
         """
 
-        # overwrite config file settings
-        self.waifu2x_settings['input'] = input_folder
-        self.waifu2x_settings['output'] = output_folder
+        try:
+            # overwrite config file settings
+            self.waifu2x_settings['input'] = input_folder
+            self.waifu2x_settings['output'] = output_folder
 
-        # temporary fix for https://github.com/DeadSix27/waifu2x-converter-cpp/issues/109
-        self.waifu2x_settings['i'] = input_folder
-        self.waifu2x_settings['o'] = output_folder
-        self.waifu2x_settings['input'] = None
-        self.waifu2x_settings['output'] = None
+            # temporary fix for https://github.com/DeadSix27/waifu2x-converter-cpp/issues/109
+            self.waifu2x_settings['i'] = input_folder
+            self.waifu2x_settings['o'] = output_folder
+            self.waifu2x_settings['input'] = None
+            self.waifu2x_settings['output'] = None
 
-        self.waifu2x_settings['scale_ratio'] = scale_ratio
-        self.waifu2x_settings['jobs'] = jobs
+            self.waifu2x_settings['scale_ratio'] = scale_ratio
+            self.waifu2x_settings['jobs'] = jobs
 
-        # models_rgb must be specified manually for waifu2x-converter-cpp
-        # if it's not specified in the arguments, create automatically
-        if self.waifu2x_settings['model_dir'] is None:
-            self.waifu2x_settings['model_dir'] = '{}\\models_rgb'.format(self.waifu2x_settings['waifu2x_converter_path'])
+            # models_rgb must be specified manually for waifu2x-converter-cpp
+            # if it's not specified in the arguments, create automatically
+            if self.waifu2x_settings['model_dir'] is None:
+                self.waifu2x_settings['model_dir'] = '{}\\models_rgb'.format(self.waifu2x_settings['waifu2x_converter_path'])
 
-        # print thread start message
-        self.print_lock.acquire()
-        Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
-        self.print_lock.release()
+            # print thread start message
+            self.print_lock.acquire()
+            Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
+            self.print_lock.release()
 
-        # list to be executed
-        execute = []
+            # list to be executed
+            execute = []
 
-        for key in self.waifu2x_settings.keys():
+            for key in self.waifu2x_settings.keys():
 
-            value = self.waifu2x_settings[key]
+                value = self.waifu2x_settings[key]
 
-            # the key doesn't need to be passed in this case
-            if key == 'waifu2x_converter_path':
-                execute.append('{}\\waifu2x-converter-cpp.exe'.format(str(value)))
+                # the key doesn't need to be passed in this case
+                if key == 'waifu2x_converter_path':
+                    execute.append('{}\\waifu2x-converter-cpp.exe'.format(str(value)))
 
-            # null or None means that leave this option out (keep default)
-            elif value is None or value is False:
-                continue
-            else:
-                if len(key) == 1:
-                    execute.append('-{}'.format(key))
-                else:
-                    execute.append('--{}'.format(key))
-
-                # true means key is an option
-                if value is True:
+                # null or None means that leave this option out (keep default)
+                elif value is None or value is False:
                     continue
+                else:
+                    if len(key) == 1:
+                        execute.append('-{}'.format(key))
+                    else:
+                        execute.append('--{}'.format(key))
 
-                execute.append(str(value))
-        
-        Avalon.debug_info('Executing: {}'.format(execute))
-        return subprocess.run(execute, check=True).returncode
+                    # true means key is an option
+                    if value is True:
+                        continue
 
+                    execute.append(str(value))
+
+            Avalon.debug_info('Executing: {}'.format(execute))
+            return subprocess.run(execute, check=True).returncode
+
+        except Exception as e:
+            threads_exceptions.append(e)
