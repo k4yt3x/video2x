@@ -85,7 +85,7 @@ def process_arguments():
     scaling_options = parser.add_argument_group('Scaling Options')
     scaling_options.add_argument('--width', help='Output video width', action='store', type=int, default=False)
     scaling_options.add_argument('--height', help='Output video height', action='store', type=int, default=False)
-    scaling_options.add_argument('-r', '--ratio', help='Scaling ratio', action='store', type=int, default=False)
+    scaling_options.add_argument('-r', '--ratio', help='Scaling ratio', action='store', type=float, default=False)
 
     # parse arguments
     return parser.parse_args()
