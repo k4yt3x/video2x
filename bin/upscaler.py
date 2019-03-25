@@ -13,13 +13,13 @@ Licensed under the GNU General Public License Version 3 (GNU GPL v3),
 """
 
 from avalon_framework import Avalon
+from image_cleaner import ImageCleaner
 from exceptions import *
 from ffmpeg import Ffmpeg
 from fractions import Fraction
 from tqdm import tqdm
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
-from clear_image import ClearImage
 import os
 import re
 import shutil
@@ -74,10 +74,13 @@ class Upscaler:
         # avalon framework cannot be used if python is shutting down
         # therefore, plain print is used
         if not self.preserve_frames:
-            print('Cleaning up cache directory: {}'.format(self.extracted_frames))
-            self.extracted_frames_object.cleanup()
-            print('Cleaning up cache directory: {}'.format(self.upscaled_frames))
-            self.upscaled_frames_object.cleanup()
+            try:
+                print('Cleaning up cache directory: {}'.format(self.extracted_frames))
+                self.extracted_frames_object.cleanup()
+                print('Cleaning up cache directory: {}'.format(self.upscaled_frames))
+                self.upscaled_frames_object.cleanup()
+            except (OSError, FileNotFoundError):
+                pass
 
     def _check_arguments(self):
         # check if arguments are valid / all necessary argument
@@ -209,11 +212,11 @@ class Upscaler:
         progress_bar = threading.Thread(target=self._progress_bar, args=(thread_folders,))
         progress_bar.start()
 
-        #Create the clearer and start it
-        Avalon.debug_info('Starting image clearer...')
-        image_clear = ClearImage(self.extracted_frames,self.upscaled_frames,len(upscaler_threads))
-        image_clear.start()
-        
+        # create the clearer and start it
+        Avalon.debug_info('Starting upscaled image cleaner')
+        image_cleaner = ImageCleaner(self.extracted_frames, self.upscaled_frames, len(upscaler_threads))
+        image_cleaner.start()
+
         # start all threads
         for thread in upscaler_threads:
             thread.start()
@@ -221,10 +224,10 @@ class Upscaler:
         # wait for threads to finish
         for thread in upscaler_threads:
             thread.join()
-  
-        #upscaling done... kill the clearer
-        Avalon.debug_info('Stoping image clearer...')
-        image_clear.stop()
+
+        # upscaling done, kill the clearer
+        Avalon.debug_info('Killing upscaled image cleaner')
+        image_cleaner.stop()
 
         self.progress_bar_exit_signal = True
 
@@ -300,5 +303,3 @@ class Upscaler:
         # migrate audio tracks and subtitles
         Avalon.info('Migrating audio tracks and subtitles to upscaled video')
         fm.migrate_audio_tracks_subtitles(self.input_video, self.output_video, self.upscaled_frames)
-
-
