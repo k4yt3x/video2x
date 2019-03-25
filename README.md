@@ -16,6 +16,12 @@ Component names that are *italicized* can be automatically downloaded and config
 
 ## Recent Changes
 
+### 2.6.3 (March 24, 2019)
+
+- Added image cleaner by @BrianPetkovsek which removes upscaled frames.
+- Fixed some PEP8 issues.
+- Exceptions in waifu2x are now caught, and script will now stop on waifu2x error instead of keep going on to FFMPEG.
+
 ### 2.6.2 (March 19, 2019)
 
 - Removed `--model_dir` verification due to the rapidly evolving number of models added.

@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 19, 2019
+Last Modified: March 24, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -50,7 +50,7 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.6.2'
+VERSION = '2.6.3'
 
 # each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -120,7 +120,7 @@ def check_memory():
         if not os.path.isfile('C:\\Program Files\\NVIDIA Corporation\\NVSMI\\nvidia-smi.exe'):
             # Nvidia System Management Interface not available
             Avalon.warning('Nvidia-smi not available, skipping available memory check')
-            Avalon.warning('If you experience error \"cudaSuccess  out of memory\", try reducing number of threads you\'re using')
+            Avalon.warning('If you experience error \"cudaSuccess out of memory\", try reducing number of threads you\'re using')
         else:
             try:
                 # "0" is GPU ID. Both waifu2x drivers use the first GPU available, therefore only 0 makes sense
@@ -201,8 +201,19 @@ config = read_config(args.config)
 # load waifu2x configuration
 if args.driver == 'waifu2x_caffe':
     waifu2x_settings = config['waifu2x_caffe']
+    if not os.path.isfile(waifu2x_settings['waifu2x_caffe_path']):
+        Avalon.error('Specified waifu2x-caffe directory doesn\'t exist')
+        Avalon.error('Please check the configuration file settings')
+        raise FileNotFoundError(waifu2x_settings['waifu2x_caffe_path'])
 elif args.driver == 'waifu2x_converter':
     waifu2x_settings = config['waifu2x_converter']
+    if not os.path.isdir(waifu2x_settings['waifu2x_converter_path']):
+        Avalon.error('Specified waifu2x-conver-cpp directory doesn\'t exist')
+        Avalon.error('Please check the configuration file settings')
+        raise FileNotFoundError(waifu2x_settings['waifu2x_converter_path'])
+
+# check if waifu2x path is valid
+
 
 # read FFMPEG configuration
 ffmpeg_settings = config['ffmpeg']
@@ -258,6 +269,7 @@ try:
 except Exception:
     Avalon.error('An exception has occurred')
     traceback.print_exc()
+    Avalon.warning('If you experience error \"cudaSuccess out of memory\", try reducing number of threads you\'re using')
 finally:
     # remove Video2X Cache folder
     try:

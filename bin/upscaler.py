@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: March 19, 2019
+Last Modified: March 24, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -13,13 +13,13 @@ Licensed under the GNU General Public License Version 3 (GNU GPL v3),
 """
 
 from avalon_framework import Avalon
+from image_cleaner import ImageCleaner
 from exceptions import *
 from ffmpeg import Ffmpeg
 from fractions import Fraction
 from tqdm import tqdm
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
-from clear_image import ClearImage
 import os
 import re
 import shutil
@@ -59,12 +59,10 @@ class Upscaler:
 
         # create temporary folder/directories
         self.video2x_cache_folder = video2x_cache_folder
-        self.extracted_frames_object = tempfile.TemporaryDirectory(dir=self.video2x_cache_folder)
-        self.extracted_frames = self.extracted_frames_object.name
+        self.extracted_frames = tempfile.mkdtemp(dir=self.video2x_cache_folder)
         Avalon.debug_info('Extracted frames are being saved to: {}'.format(self.extracted_frames))
 
-        self.upscaled_frames_object = tempfile.TemporaryDirectory(dir=self.video2x_cache_folder)
-        self.upscaled_frames = self.upscaled_frames_object.name
+        self.upscaled_frames = tempfile.mkdtemp(dir=self.video2x_cache_folder)
         Avalon.debug_info('Upscaled frames are being saved to: {}'.format(self.upscaled_frames))
 
         self.preserve_frames = preserve_frames
@@ -74,10 +72,13 @@ class Upscaler:
         # avalon framework cannot be used if python is shutting down
         # therefore, plain print is used
         if not self.preserve_frames:
-            print('Cleaning up cache directory: {}'.format(self.extracted_frames))
-            self.extracted_frames_object.cleanup()
-            print('Cleaning up cache directory: {}'.format(self.upscaled_frames))
-            self.upscaled_frames_object.cleanup()
+
+            for directory in [self.extracted_frames, self.upscaled_frames]:
+                try:
+                    print('Cleaning up cache directory: {}'.format())
+                    shutil.rmtree(directory)
+                except (OSError, FileNotFoundError):
+                    pass
 
     def _check_arguments(self):
         # check if arguments are valid / all necessary argument
@@ -160,6 +161,10 @@ class Upscaler:
         # create a container for all upscaler threads
         upscaler_threads = []
 
+        # create a container for exceptions in threads
+        # if this thread is not empty, then an exception has occured
+        self.threads_exceptions = []
+
         # list all images in the extracted frames
         frames = [os.path.join(self.extracted_frames, f) for f in os.listdir(self.extracted_frames) if os.path.isfile(os.path.join(self.extracted_frames, f))]
 
@@ -197,9 +202,9 @@ class Upscaler:
         for thread_info in thread_pool:
             # create thread
             if self.scale_ratio:
-                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.scale_ratio, False, False))
+                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.scale_ratio, False, False, self.threads_exceptions))
             else:
-                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, False, self.scale_width, self.scale_height))
+                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, False, self.scale_width, self.scale_height, self.threads_exceptions))
             thread.name = thread_info[1]
 
             # add threads into the pool
@@ -209,11 +214,11 @@ class Upscaler:
         progress_bar = threading.Thread(target=self._progress_bar, args=(thread_folders,))
         progress_bar.start()
 
-        #Create the clearer and start it
-        Avalon.debug_info('Starting image clearer...')
-        image_clear = ClearImage(self.extracted_frames,self.upscaled_frames,len(upscaler_threads))
-        image_clear.start()
-        
+        # create the clearer and start it
+        Avalon.debug_info('Starting upscaled image cleaner')
+        image_cleaner = ImageCleaner(self.extracted_frames, self.upscaled_frames, len(upscaler_threads))
+        image_cleaner.start()
+
         # start all threads
         for thread in upscaler_threads:
             thread.start()
@@ -221,12 +226,15 @@ class Upscaler:
         # wait for threads to finish
         for thread in upscaler_threads:
             thread.join()
-  
-        #upscaling done... kill the clearer
-        Avalon.debug_info('Stoping image clearer...')
-        image_clear.stop()
+
+        # upscaling done, kill the clearer
+        Avalon.debug_info('Killing upscaled image cleaner')
+        image_cleaner.stop()
 
         self.progress_bar_exit_signal = True
+
+        if len(self.threads_exceptions) != 0:
+            raise(self.threads_exceptions[0])
 
     def run(self):
         """Main controller for Video2X
@@ -300,5 +308,3 @@ class Upscaler:
         # migrate audio tracks and subtitles
         Avalon.info('Migrating audio tracks and subtitles to upscaled video')
         fm.migrate_audio_tracks_subtitles(self.input_video, self.output_video, self.upscaled_frames)
-
-

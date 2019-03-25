@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 19, 2019
+Last Modified: March 24, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -33,7 +33,7 @@ class Waifu2xCaffe:
         self.model_dir = model_dir
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_folder, output_folder, scale_ratio, scale_width, scale_height):
+    def upscale(self, input_folder, output_folder, scale_ratio, scale_width, scale_height, threads_exceptions):
         """This is the core function for WAIFU2X class
 
         Arguments:
@@ -43,46 +43,49 @@ class Waifu2xCaffe:
             height {int} -- output video height
         """
 
-        # overwrite config file settings
-        self.waifu2x_settings['input_path'] = input_folder
-        self.waifu2x_settings['output_path'] = output_folder
+        try:
+            # overwrite config file settings
+            self.waifu2x_settings['input_path'] = input_folder
+            self.waifu2x_settings['output_path'] = output_folder
 
-        if scale_ratio:
-            self.waifu2x_settings['scale_ratio'] = scale_ratio
-        elif scale_width and scale_height:
-            self.waifu2x_settings['scale_width'] = scale_width
-            self.waifu2x_settings['scale_height'] = scale_height
+            if scale_ratio:
+                self.waifu2x_settings['scale_ratio'] = scale_ratio
+            elif scale_width and scale_height:
+                self.waifu2x_settings['scale_width'] = scale_width
+                self.waifu2x_settings['scale_height'] = scale_height
 
-        # print thread start message
-        self.print_lock.acquire()
-        Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
-        self.print_lock.release()
+            # print thread start message
+            self.print_lock.acquire()
+            Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
+            self.print_lock.release()
 
-        # list to be executed
-        execute = []
+            # list to be executed
+            execute = []
 
-        execute.append(self.waifu2x_settings['waifu2x_caffe_path'])
-        for key in self.waifu2x_settings.keys():
+            execute.append(self.waifu2x_settings['waifu2x_caffe_path'])
+            for key in self.waifu2x_settings.keys():
 
-            value = self.waifu2x_settings[key]
+                value = self.waifu2x_settings[key]
 
-            #is executable key or null or None means that leave this option out (keep default)
-            if key == 'waifu2x_caffe_path' or value is None or value is False:
-                continue
-            else:
-                if len(key) == 1:
-                    execute.append('-{}'.format(key))
+                # is executable key or null or None means that leave this option out (keep default)
+                if key == 'waifu2x_caffe_path' or value is None or value is False:
+                    continue
                 else:
-                    execute.append('--{}'.format(key))
-                execute.append(str(value))
-        
-        Avalon.debug_info('Executing: {}'.format(execute))
-        completed_command = subprocess.run(execute, check=True)
+                    if len(key) == 1:
+                        execute.append('-{}'.format(key))
+                    else:
+                        execute.append('--{}'.format(key))
+                    execute.append(str(value))
 
-        # print thread exiting message
-        self.print_lock.acquire()
-        Avalon.debug_info('[upscaler] Thread {} exiting'.format(threading.current_thread().name))
-        self.print_lock.release()
+            Avalon.debug_info('Executing: {}'.format(execute))
+            completed_command = subprocess.run(execute, check=True)
 
-        # return command execution return code
-        return completed_command.returncode
+            # print thread exiting message
+            self.print_lock.acquire()
+            Avalon.debug_info('[upscaler] Thread {} exiting'.format(threading.current_thread().name))
+            self.print_lock.release()
+
+            # return command execution return code
+            return completed_command.returncode
+        except Exception as e:
+            threads_exceptions.append(e)
