@@ -33,7 +33,7 @@ class Waifu2xCaffe:
         self.model_dir = model_dir
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_folder, output_folder, scale_ratio, scale_width, scale_height, threads_exceptions):
+    def upscale(self, input_folder, output_folder, scale_ratio, scale_width, scale_height, upscaler_exceptions):
         """This is the core function for WAIFU2X class
 
         Arguments:
@@ -88,4 +88,4 @@ class Waifu2xCaffe:
             # return command execution return code
             return completed_command.returncode
         except Exception as e:
-            threads_exceptions.append(e)
+            upscaler_exceptions.append(e)

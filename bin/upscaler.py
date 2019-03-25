@@ -142,6 +142,10 @@ class Upscaler:
         # progress bar thread exit signal
         self.progress_bar_exit_signal = False
 
+        # create a container for exceptions in threads
+        # if this thread is not empty, then an exception has occured
+        self.upscaler_exceptions = []
+
         # it's easier to do multi-threading with waifu2x_converter
         # the number of threads can be passed directly to waifu2x_converter
         if self.waifu2x_driver == 'waifu2x_converter':
@@ -149,7 +153,7 @@ class Upscaler:
             progress_bar = threading.Thread(target=self._progress_bar, args=([self.extracted_frames],))
             progress_bar.start()
 
-            w2.upscale(self.extracted_frames, self.upscaled_frames, self.scale_ratio, self.threads)
+            w2.upscale(self.extracted_frames, self.upscaled_frames, self.scale_ratio, self.threads, self.upscaler_exceptions)
             for image in [f for f in os.listdir(self.upscaled_frames) if os.path.isfile(os.path.join(self.upscaled_frames, f))]:
                 renamed = re.sub('_\[.*-.*\]\[x(\d+(\.\d+)?)\]\.png', '.png', image)
                 shutil.move('{}\\{}'.format(self.upscaled_frames, image), '{}\\{}'.format(self.upscaled_frames, renamed))
@@ -160,10 +164,6 @@ class Upscaler:
 
         # create a container for all upscaler threads
         upscaler_threads = []
-
-        # create a container for exceptions in threads
-        # if this thread is not empty, then an exception has occured
-        self.threads_exceptions = []
 
         # list all images in the extracted frames
         frames = [os.path.join(self.extracted_frames, f) for f in os.listdir(self.extracted_frames) if os.path.isfile(os.path.join(self.extracted_frames, f))]
@@ -202,9 +202,9 @@ class Upscaler:
         for thread_info in thread_pool:
             # create thread
             if self.scale_ratio:
-                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.scale_ratio, False, False, self.threads_exceptions))
+                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.scale_ratio, False, False, self.upscaler_exceptions))
             else:
-                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, False, self.scale_width, self.scale_height, self.threads_exceptions))
+                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, False, self.scale_width, self.scale_height, self.upscaler_exceptions))
             thread.name = thread_info[1]
 
             # add threads into the pool
@@ -233,8 +233,8 @@ class Upscaler:
 
         self.progress_bar_exit_signal = True
 
-        if len(self.threads_exceptions) != 0:
-            raise(self.threads_exceptions[0])
+        if len(self.upscaler_exceptions) != 0:
+            raise(self.upscaler_exceptions[0])
 
     def run(self):
         """Main controller for Video2X

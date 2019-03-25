@@ -28,7 +28,7 @@ class Waifu2xConverter:
         self.waifu2x_settings['model_dir'] = model_dir
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_folder, output_folder, scale_ratio, jobs, threads_exceptions):
+    def upscale(self, input_folder, output_folder, scale_ratio, jobs, upscaler_exceptions):
         """ Waifu2x Converter Driver Upscaler
         This method executes the upscaling of extracted frames.
 
@@ -93,4 +93,4 @@ class Waifu2xConverter:
             return subprocess.run(execute, check=True).returncode
 
         except Exception as e:
-            threads_exceptions.append(e)
+            upscaler_exceptions.append(e)
