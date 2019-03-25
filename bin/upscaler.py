@@ -31,12 +31,11 @@ import time
 class Upscaler:
     """ An instance of this class is a upscaler that will
     upscale all images in the given folder.
-    
+
     Raises:
         Exception -- all exceptions
         ArgumentError -- if argument is not valid
     """
-
 
     def __init__(self, input_video, output_video, method, waifu2x_settings, ffmpeg_settings, waifu2x_driver='waifu2x_caffe', scale_width=False, scale_height=False, scale_ratio=False, model_dir=None, threads=5, video2x_cache_folder='{}\\video2x'.format(tempfile.gettempdir()), preserve_frames=False):
         # mandatory arguments
@@ -153,7 +152,7 @@ class Upscaler:
             for image in [f for f in os.listdir(self.upscaled_frames) if os.path.isfile(os.path.join(self.upscaled_frames, f))]:
                 renamed = re.sub('_\[.*-.*\]\[x(\d+(\.\d+)?)\]\.png', '.png', image)
                 shutil.move('{}\\{}'.format(self.upscaled_frames, image), '{}\\{}'.format(self.upscaled_frames, renamed))
-            
+
             self.progress_bar_exit_signal = True
             progress_bar.join()
             return
@@ -198,9 +197,9 @@ class Upscaler:
         for thread_info in thread_pool:
             # create thread
             if self.scale_ratio:
-                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, False, self.scale_width, self.scale_height))
-            else:
                 thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.scale_ratio, False, False))
+            else:
+                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, False, self.scale_width, self.scale_height))
             thread.name = thread_info[1]
 
             # add threads into the pool
@@ -222,11 +221,11 @@ class Upscaler:
         # wait for threads to finish
         for thread in upscaler_threads:
             thread.join()
-        
+  
         #upscaling done... kill the clearer
         Avalon.debug_info('Stoping image clearer...')
         image_clear.stop()
-        
+
         self.progress_bar_exit_signal = True
 
     def run(self):
