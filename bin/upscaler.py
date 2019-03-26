@@ -13,10 +13,10 @@ Licensed under the GNU General Public License Version 3 (GNU GPL v3),
 """
 
 from avalon_framework import Avalon
-from image_cleaner import ImageCleaner
 from exceptions import *
 from ffmpeg import Ffmpeg
 from fractions import Fraction
+from image_cleaner import ImageCleaner
 from tqdm import tqdm
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
