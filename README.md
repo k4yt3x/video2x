@@ -12,9 +12,14 @@ Component names that are *italicized* can be automatically downloaded and config
 1. AMD GPU / Nvidia GPU
 1. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
 1. [***FFMPEG***](https://ffmpeg.zeranoe.com/builds/)
-1. [***waifu2x-caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
+1. [***waifu2x-caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [***waifu2x-converter-cpp***](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
 
 ## Recent Changes
+
+### Setup Script 1.2.0 (March 26, 2019)
+
+- `video2x_setup.py` script can now automatically download and configure `waifu2x-converter-cpp`.
+- replaced old progress indicator with progress bar.
 
 ### 2.6.3 (March 24, 2019)
 
@@ -32,11 +37,6 @@ Component names that are *italicized* can be automatically downloaded and config
 
 - Added `-b, --batch` option which selects applies all default values for questions automatically.
 - **This new version will now require `avalon_framework>=1.6.3`**. Please run `pip install -U avalon_framework` to update the existing framework.
-
-### 2.6.0 (March 9, 2019)
-
-- Complete redesign of configuration file format. The configuration file is now much more flexible and easy to look at.
-- Various modifications done to the rest of the program to adapt to the changes made in the configuration file. This eliminated some problems existed in the previous version.
 
 ## Description
 
@@ -66,7 +66,7 @@ You can find all detailed user-facing and developer-facing documentations in the
 
 ### [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) (Nvidia GPUs)
 
-For those who want a detailed walk-through of how to use `Video2X`, you can head to the [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video. This tutorial currently only includes instructions for Nvidia GPUs, since AMD GPUs (OpenCL) requires installation of `waifu2x-converter-cpp` which cannot be installed automatically with Python at the moment due to its 7z compression format.
+For those who want a detailed walk-through of how to use `Video2X`, you can head to the [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
 
 ### [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers)
 
@@ -91,27 +91,25 @@ Download: https://github.com/DeadSix27/waifu2x-converter-cpp/releases
 
 First, clone the video2x repository.
 
-```bash
-$ git clone https://github.com/K4YT3X/video2x.git
-$ cd video2x/bin
+```shell
+git clone https://github.com/K4YT3X/video2x.git
+cd video2x/bin
 ```
 
-Then you may run the `video2x_setup.py` script to install and configure the depencies automatically. This script is designed and tested on Windows 10.
+Then you may run the `video2x_setup.py` script to install and configure the dependencies automatically. This script is designed and tested on Windows 10.
 
-This script will install `ffmpeg`, `waifu2x-caffe` to `%LOCALAPPDATA%\\video2x` and all python libraries.
+This script will install the newest version of `ffmpeg`, either or both of `waifu2x-caffe` and `waifu2x-converter-cpp` to `%LOCALAPPDATA%\\video2x` and all required python libraries.
 
-**`waifu2x-converter-cpp` cannot be installed automatically with this script.** Please follow the [`waifu2x-converter-cpp` installation instructions](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers#waifu2x-converter-cpp) to install it.
-
-```bash
-$ python video2x_setup.py
+```shell
+python video2x_setup.py
 ```
 
 Alternatively, you can also install the dependencies manually. Please refer to the prerequisites section to see what's needed.
 
 Then you'll need to install python dependencies before start using video2x. Install simply by executing the following command.
 
-```bash
-$ pip install -r requirements.txt
+```shell
+pip install -r requirements.txt
 ```
 
 **Note that all command line arguments/options overwrite configuration file settings.**
@@ -131,34 +129,32 @@ Clip is from anime "さくら荘のペットな彼女". Copyright belongs to "�
 
 Enlarge the video to 1920x1080 using CUDA. You may also use the `-r/--ratio` option.
 
-```bash
-$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu --width=1920 --height=1080
+```shell
+python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu --width=1920 --height=1080
 ```
 
 ### Nvidia CNDNN
 
 Enlarge the video to 1920x1080 using CUDNN. You may also use the `-r/--ratio` option.
 
-```bash
-$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cudnn --width=1920 --height=1080
+```shell
+python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cudnn --width=1920 --height=1080
 ```
 
 ### AMD or Nvidia (waifu2x-converter-cpp OpenCL)
 
 Enlarge the video by 2 times using OpenCL. Note that `waifu2x-converter-cpp` doesn't support width and height. You'll also have to explicitly specify that the driver to be used is `waifu2x_converter`.
 
-```bash
-$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2x_converter
+```shell
+python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2x_converter
 ```
-
-Corresponding sample configuration is shown below. Note that the `waifu2x_path` is different from the configuration for `waifu2x-caffe`. Instead of the binary path, folder containing extracted `waifu2x-converter-cpp.exe` should be specified.
 
 ### CPU
 
 Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` option. This is potentially much slower than using a GPU. The configuration file for this method is similar to the previous methods.
 
-```bash
-$ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 --height=1080
+```shell
+python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 --height=1080
 ```
 
 ---
@@ -187,7 +183,7 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920
     Waifu2x driver (default: waifu2x_caffe)
 
 ### -y MODEL_DIR, --model_dir MODEL_DIR
-    Folder containing model JSON files (default: None)
+    Folder containing model JSON files
 
 ### -t THREADS, --threads THREADS
     Number of threads to use for upscaling (default: 5)
@@ -196,18 +192,18 @@ $ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920
     Video2X config file location (default: video2x\bin\video2x.json)
 
 ### -b, --batch
-    Enable batch mode (select all default values to questions) (default: False)
+    Enable batch mode (select all default values to questions)
 
 ## Scaling Options
 
 ### --width WIDTH
-    Output video width (default: False)
+    Output video width
 
 ### --height HEIGHT
-    Output video height (default: False)
+    Output video height
 
 ### -r RATIO, --ratio RATIO
-    Scaling ratio (default: False)
+    Scaling ratio
 
 ---
 
