@@ -19,29 +19,29 @@
     "crop_w": null,
     "crop_h": null
   },
-
   "waifu2x_converter": {
     "waifu2x_converter_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-converter-cpp",
-    "block_size": null,
+    "output-format": "png",
+    "png-compression": null,
+    "image_quality": null,
+    "block-size": null,
     "disable-gpu": null,
     "force-OpenCL": null,
     "processor": null,
     "jobs": null,
-    "model_dir": null,
-    "scale_ratio": null,
-    "noise_level": 3,
-    "mode": "noise_scale",
-    "quiet": true,
+    "model-dir": null,
+    "scale-ratio": null,
+    "noise-level": 3,
+    "mode": "noise-scale",
+    "silent": true,
     "output": null,
     "input": null
   },
-
-  "ffmpeg":{
-    "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-4.1-win64-static\\bin",
+  "ffmpeg": {
+    "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
     "ffmpeg_hwaccel": "auto",
     "extra_arguments": []
   },
-
   "video2x": {
     "video2x_cache_folder": false,
     "preserve_frames": false
