@@ -75,7 +75,7 @@ class Upscaler:
 
             for directory in [self.extracted_frames, self.upscaled_frames]:
                 try:
-                    print('Cleaning up cache directory: {}'.format())
+                    print('Cleaning up cache directory: {}'.format(directory))
                     shutil.rmtree(directory)
                 except (OSError, FileNotFoundError):
                     pass
@@ -290,8 +290,8 @@ class Upscaler:
         if self.scale_ratio:
             coded_width = video_info['streams'][video_stream_index]['coded_width']
             coded_height = video_info['streams'][video_stream_index]['coded_height']
-            self.scale_width = self.scale_ratio * coded_width
-            self.scale_height = self.scale_ratio * coded_height
+            self.scale_width = int(self.scale_ratio * coded_width)
+            self.scale_height = int(self.scale_ratio * coded_height)
 
         # upscale images one by one using waifu2x
         Avalon.info('Starting to upscale extracted images')
