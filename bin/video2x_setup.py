@@ -42,7 +42,7 @@ def process_arguments():
 
     # video options
     general_options = parser.add_argument_group('General Options')
-    general_options.add_argument('-d', '--driver', help='driver to download and configure', action='store', choices=['all', 'waifu2x_caffe', 'waifu2x_converter'], required=True)
+    general_options.add_argument('-d', '--driver', help='driver to download and configure', action='store', choices=['all', 'waifu2x_caffe', 'waifu2x_converter'], default='all')
 
     # parse arguments
     return parser.parse_args()
