@@ -45,18 +45,20 @@ class Waifu2xConverter:
             self.waifu2x_settings['output'] = output_folder
 
             # temporary fix for https://github.com/DeadSix27/waifu2x-converter-cpp/issues/109
+            """
             self.waifu2x_settings['i'] = input_folder
             self.waifu2x_settings['o'] = output_folder
             self.waifu2x_settings['input'] = None
             self.waifu2x_settings['output'] = None
+            """
 
-            self.waifu2x_settings['scale_ratio'] = scale_ratio
+            self.waifu2x_settings['scale-ratio'] = scale_ratio
             self.waifu2x_settings['jobs'] = jobs
 
             # models_rgb must be specified manually for waifu2x-converter-cpp
             # if it's not specified in the arguments, create automatically
-            if self.waifu2x_settings['model_dir'] is None:
-                self.waifu2x_settings['model_dir'] = '{}\\models_rgb'.format(self.waifu2x_settings['waifu2x_converter_path'])
+            if self.waifu2x_settings['model-dir'] is None:
+                self.waifu2x_settings['model-dir'] = '{}\\models_rgb'.format(self.waifu2x_settings['waifu2x_converter_path'])
 
             # print thread start message
             self.print_lock.acquire()
