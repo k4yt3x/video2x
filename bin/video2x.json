@@ -1,6 +1,8 @@
 {
   "waifu2x_caffe": {
     "waifu2x_caffe_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe",
+    "input_extention_list": null,
+    "output_extention": null,
     "mode": "noise_scale",
     "scale_ratio": null,
     "scale_width": null,
@@ -21,9 +23,9 @@
   },
   "waifu2x_converter": {
     "waifu2x_converter_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-converter-cpp",
-    "output-format": "png",
+    "output-format": null,
     "png-compression": null,
-    "image_quality": null,
+    "image-quality": null,
     "block-size": null,
     "disable-gpu": null,
     "force-OpenCL": null,
@@ -39,11 +41,33 @@
   },
   "ffmpeg": {
     "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
-    "ffmpeg_hwaccel": "auto",
-    "extra_arguments": []
+    "video_to_frames": {
+        "-qscale:v": null,
+        "-hwaccel": "auto",
+        "-y": true
+    },
+    "frames_to_video": {
+        "-qscale:v": null,
+        "-qscale:a": null,
+        "-f": "image2",
+        "-vcodec": "libx264",
+        "-crf": 25,
+        "-pix_fmt": "yuv420p",
+        "-hwaccel": "auto",
+        "-y": true
+    },
+    "migrating_tracks": {
+        "-map": "0:v:0?",
+        "-map": "1?",
+        "-c": "copy",
+        "-map": "-1:v?",
+        "-hwaccel": "auto",
+        "-y": true
+    }
   },
   "video2x": {
-    "video2x_cache_folder": false,
+    "video2x_cache_folder": null,
+    "image_format": "png",
     "preserve_frames": false
   }
 }
