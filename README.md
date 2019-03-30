@@ -16,6 +16,12 @@ Component names that are *italicized* can be automatically downloaded and config
 
 ## Recent Changes
 
+### 2.7.0 (March 30, 2019)
+
+- Added support for different extracted image formats.
+- Redesigned FFMPEG wrapper, FFMPEG settings are now customizable in the `video2x.json` config file.
+- Other minor enhancements and adjustments (e.g. argument -> method variable)
+
 ### Setup Script 1.2.0 (March 26, 2019)
 
 - `video2x_setup.py` script can now automatically download and configure `waifu2x-converter-cpp`.
@@ -26,17 +32,6 @@ Component names that are *italicized* can be automatically downloaded and config
 - Added image cleaner by @BrianPetkovsek which removes upscaled frames.
 - Fixed some PEP8 issues.
 - Exceptions in waifu2x are now caught, and script will now stop on waifu2x error instead of keep going on to FFMPEG.
-
-### 2.6.2 (March 19, 2019)
-
-- Removed `--model_dir` verification due to the rapidly evolving number of models added.
-- Fixed model specifying bug. Users should now specify model using `--model_dir [path to folder containing model JSON files]`.
-- Enhanced command execution method.
-
-### 2.6.1 (March 12, 2019)
-
-- Added `-b, --batch` option which selects applies all default values for questions automatically.
-- **This new version will now require `avalon_framework>=1.6.3`**. Please run `pip install -U avalon_framework` to update the existing framework.
 
 ## Description
 
