@@ -4,7 +4,7 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 19, 2019
+Last Modified: March 30, 2019
 
 Description: This class handles all FFMPEG related
 operations.
@@ -22,13 +22,9 @@ class Ffmpeg:
     and inserting audio tracks to videos.
     """
 
-    def __init__(self, ffmpeg_settings):
+    def __init__(self, ffmpeg_settings, image_format):
         self.ffmpeg_settings = ffmpeg_settings
-        self._parse_settings()
-    
-    def _parse_settings(self):
-        """ Parse ffmpeg settings
-        """
+
         self.ffmpeg_path = self.ffmpeg_settings['ffmpeg_path']
         # add a forward slash to directory if not present
         # otherwise there will be a format error
@@ -36,8 +32,8 @@ class Ffmpeg:
             self.ffmpeg_path = '{}\\'.format(self.ffmpeg_path)
 
         self.ffmpeg_binary = '{}ffmpeg.exe'.format(self.ffmpeg_path)
-        self.ffmpeg_hwaccel = self.ffmpeg_settings['ffmpeg_hwaccel']
-        self.extra_arguments = self.ffmpeg_settings['extra_arguments']
+        self.ffmpeg_probe_binary = '{}ffprobe.exe'.format(self.ffmpeg_path)
+        self.image_format = image_format
 
     def get_video_info(self, input_video):
         """ Gets input video information
@@ -51,8 +47,11 @@ class Ffmpeg:
         Returns:
             dictionary -- JSON text of input video information
         """
+
+        # this execution command needs to be hard-coded
+        # since video2x only strictly recignizes this one format
         execute = [
-            '{}ffprobe.exe'.format(self.ffmpeg_path),
+            self.ffmpeg_probe_binary,
             '-v',
             'quiet',
             '-print_format',
@@ -80,14 +79,10 @@ class Ffmpeg:
         execute = [
             self.ffmpeg_binary,
             '-i',
-            '{}'.format(input_video),
-            '{}\\extracted_%0d.png'.format(extracted_frames),
-            '-y'
+            input_video,
+            '{}\\extracted_%0d.{}'.format(extracted_frames, self.image_format)
         ]
-        execute += self.extra_arguments
-
-        Avalon.debug_info('Executing: {}'.format(' '.join(execute)))
-        subprocess.run(execute, shell=True, check=True)
+        self._execute(execute=execute, phase='video_to_frames')
 
     def convert_video(self, framerate, resolution, upscaled_frames):
         """Converts images into videos
@@ -104,25 +99,13 @@ class Ffmpeg:
             self.ffmpeg_binary,
             '-r',
             str(framerate),
-            '-f',
-            'image2',
             '-s',
             resolution,
             '-i',
-            '{}\\extracted_%d.png'.format(upscaled_frames),
-            '-vcodec',
-            'libx264',
-            '-crf',
-            '25',
-            '-pix_fmt',
-            'yuv420p',
-            '{}\\no_audio.mp4'.format(upscaled_frames),
-            '-y'
+            '{}\\extracted_%d.{}'.format(upscaled_frames, self.image_format),
+            '{}\\no_audio.mp4'.format(upscaled_frames)
         ]
-        execute += self.extra_arguments
-
-        Avalon.debug_info('Executing: {}'.format(' '.join(execute)))
-        subprocess.run(execute, shell=True, check=True)
+        self._execute(execute=execute, phase='frames_to_video')
 
     def migrate_audio_tracks_subtitles(self, input_video, output_video, upscaled_frames):
         """ Migrates audio tracks and subtitles from input video to output video
@@ -137,19 +120,28 @@ class Ffmpeg:
             '-i',
             '{}\\no_audio.mp4'.format(upscaled_frames),
             '-i',
-            '{}'.format(input_video),
-            '-map',
-            '0:v:0?',
-            '-map',
-            '1?',
-            '-c',
-            'copy',
-            '-map',
-            '-1:v?',
-            '{}'.format(output_video),
-            '-y'
+            input_video,
+            output_video
         ]
-        execute += self.extra_arguments
+        self._execute(execute=execute, phase='migrating_tracks')
 
-        Avalon.debug_info('Executing: {}'.format(' '.join(execute)))
-        subprocess.run(execute, shell=True, check=True)
+    def _execute(self, execute, phase):
+
+        for key in self.ffmpeg_settings[phase].keys():
+
+            value = self.ffmpeg_settings[phase][key]
+
+            # null or None means that leave this option out (keep default)
+            if value is None or value is False:
+                continue
+            else:
+                execute.append(key)
+
+                # true means key is an option
+                if value is True:
+                    continue
+
+                execute.append(str(value))
+
+        Avalon.debug_info('Executing: {}'.format(execute))
+        return subprocess.run(execute, shell=True, check=True).returncode
