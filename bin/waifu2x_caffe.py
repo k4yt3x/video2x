@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 24, 2019
+Last Modified: March 30, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -33,7 +33,7 @@ class Waifu2xCaffe:
         self.model_dir = model_dir
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_folder, output_folder, scale_ratio, scale_width, scale_height, upscaler_exceptions):
+    def upscale(self, input_folder, output_folder, scale_ratio, scale_width, scale_height, image_format, upscaler_exceptions):
         """This is the core function for WAIFU2X class
 
         Arguments:
@@ -53,6 +53,8 @@ class Waifu2xCaffe:
             elif scale_width and scale_height:
                 self.waifu2x_settings['scale_width'] = scale_width
                 self.waifu2x_settings['scale_height'] = scale_height
+
+            self.waifu2x_settings['output_extention'] = image_format
 
             # print thread start message
             self.print_lock.acquire()

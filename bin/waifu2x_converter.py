@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: March 24, 2019
+Last Modified: March 30, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
@@ -28,7 +28,7 @@ class Waifu2xConverter:
         self.waifu2x_settings['model_dir'] = model_dir
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_folder, output_folder, scale_ratio, jobs, upscaler_exceptions):
+    def upscale(self, input_folder, output_folder, scale_ratio, jobs, image_format, upscaler_exceptions):
         """ Waifu2x Converter Driver Upscaler
         This method executes the upscaling of extracted frames.
 
@@ -54,6 +54,7 @@ class Waifu2xConverter:
 
             self.waifu2x_settings['scale-ratio'] = scale_ratio
             self.waifu2x_settings['jobs'] = jobs
+            self.waifu2x_settings['output-format'] = image_format
 
             # models_rgb must be specified manually for waifu2x-converter-cpp
             # if it's not specified in the arguments, create automatically
