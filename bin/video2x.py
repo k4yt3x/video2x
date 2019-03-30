@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 24, 2019
+Last Modified: March 30, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -50,7 +50,7 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.6.3'
+VERSION = '2.7.0'
 
 # each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -220,6 +220,7 @@ ffmpeg_settings = config['ffmpeg']
 
 # load video2x settings
 video2x_cache_folder = config['video2x']['video2x_cache_folder']
+image_format = config['video2x']['image_format'].lower()
 preserve_frames = config['video2x']['preserve_frames']
 
 # create temp directories if they don't exist
@@ -250,7 +251,20 @@ try:
     if os.path.isfile(args.input):
         """ Upscale single video file """
         Avalon.info('Upscaling single video file: {}'.format(args.input))
-        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings, waifu2x_driver=args.driver, scale_width=args.width, scale_height=args.height, scale_ratio=args.ratio, model_dir=args.model_dir, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
+        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+
+        # set optional options
+        upscaler.waifu2x_driver = args.driver
+        upscaler.scale_width = args.width
+        upscaler.scale_height = args.height
+        upscaler.scale_ratio = args.ratio
+        upscaler.model_dir = args.model_dir
+        upscaler.threads = args.threads
+        upscaler.video2x_cache_folder = video2x_cache_folder
+        upscaler.image_format = image_format
+        upscaler.preserve_frames = preserve_frames
+
+        # run upscaler-
         upscaler.run()
         upscaler.cleanup()
     elif os.path.isdir(args.input):
@@ -258,7 +272,20 @@ try:
         Avalon.info('Upscaling videos in folder/directory: {}'.format(args.input))
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
             output_video = '{}\\{}'.format(args.output, input_video)
-            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings, waifu2x_driver=args.driver, scale_width=args.width, scale_height=args.height, scale_ratio=args.ratio, model_dir=args.model_dir, threads=args.threads, video2x_cache_folder=video2x_cache_folder)
+            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+
+            # set optional options
+            upscaler.waifu2x_driver = args.driver
+            upscaler.scale_width = args.width
+            upscaler.scale_height = args.height
+            upscaler.scale_ratio = args.ratio
+            upscaler.model_dir = args.model_dir
+            upscaler.threads = args.threads
+            upscaler.video2x_cache_folder = video2x_cache_folder
+            upscaler.image_format = image_format
+            upscaler.preserve_frames = preserve_frames
+
+            # run upscaler
             upscaler.run()
             upscaler.cleanup()
     else:
