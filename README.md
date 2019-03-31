@@ -2,24 +2,30 @@
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
 
+## Download Builds (beta)
+
+You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest builds of `Video2X`. The exe files will require no Python or Python module installation.
+
+The **`full`** package provides all packages that will possibly be needed by `Video2X`, including `FFmpeg`, `waifu2x-caffe` and `waifu2x-converter-cpp`. The config file (`video2x.json`) is also already configured for the environment. All you need to do is just to launch `video2x.exe`.
+
+The **`light`** package provides only the most basic functions of `Video2X`. Only `video2x.exe`, `video2x_setup.exe` and `video2x.json` are included. To setup `FFmpeg`, `waifu2x-caffe` or `waifu2x-converter-cpp` automatically, simply launch `video2x_setup.exe`.
+
 ## Prerequisites
 
-Component names that are **bolded** are mandatory.
-
-Component names that are *italicized* can be automatically downloaded and configured with the `video2x_setup.py` script.
+Component names that are **bolded** can be automatically downloaded and configured with the `video2x_setup.py` script.
 
 1. Operating System: Windows
-1. AMD GPU / Nvidia GPU
-1. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
-1. [***FFMPEG***](https://ffmpeg.zeranoe.com/builds/)
-1. [***waifu2x-caffe***](https://github.com/lltcggie/waifu2x-caffe/releases) / [***waifu2x-converter-cpp***](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
+2. AMD GPU / Nvidia GPU
+3. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
+4. [**FFmpeg**](https://ffmpeg.zeranoe.com/builds/)
+5. [**waifu2x-caffe**](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
 
 ## Recent Changes
 
 ### 2.7.0 (March 30, 2019)
 
 - Added support for different extracted image formats.
-- Redesigned FFMPEG wrapper, FFMPEG settings are now customizable in the `video2x.json` config file.
+- Redesigned FFmpeg wrapper, FFmpeg settings are now customizable in the `video2x.json` config file.
 - Other minor enhancements and adjustments (e.g. argument -> method variable)
 
 ### Setup Script 1.2.0 (March 26, 2019)
@@ -31,7 +37,7 @@ Component names that are *italicized* can be automatically downloaded and config
 
 - Added image cleaner by @BrianPetkovsek which removes upscaled frames.
 - Fixed some PEP8 issues.
-- Exceptions in waifu2x are now caught, and script will now stop on waifu2x error instead of keep going on to FFMPEG.
+- Exceptions in waifu2x are now caught, and script will now stop on waifu2x error instead of keep going on to FFmpeg.
 
 ## Description
 
@@ -75,7 +81,7 @@ Go to the [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drive
 
 - **Python 3**  
 Download: https://www.python.org/downloads/windows/
-- **FFMPEG Windows Build**  
+- **FFmpeg Windows Build**  
 Download: https://ffmpeg.org/download.html  
 - **waifu2x-caffe** (for Nvidia CUDA/CUDNN)  
 Download: https://github.com/lltcggie/waifu2x-caffe/releases
@@ -215,7 +221,7 @@ https://www.gnu.org/licenses/gpl-3.0.txt
 
 This project relies on the following software and projects.
 
-- [FFMPEG]('https://www.ffmpeg.org/')
+- [FFmpeg]('https://www.ffmpeg.org/')
 - [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)
 - [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
 
