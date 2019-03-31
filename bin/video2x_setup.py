@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Author: K4YT3X
 Date Created: November 28, 2018
-Last Modified: March 26, 2019
+Last Modified: March 31, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -23,6 +23,7 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import traceback
 import zipfile
@@ -32,7 +33,7 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.2.0'
+VERSION = '1.2.1'
 
 
 def process_arguments():
@@ -55,14 +56,15 @@ class Video2xSetup:
     script. All files will be installed under %LOCALAPPDATA%\\video2x.
     """
 
-    def __init__(self, driver):
+    def __init__(self, driver, download_python_modules):
         self.driver = driver
+        self.download_python_modules = download_python_modules
         self.trash = []
 
     def run(self):
-
-        print('\nInstalling Python libraries')
-        self._install_python_requirements()
+        if self.download_python_modules:
+            print('\nInstalling Python libraries')
+            self._install_python_requirements()
 
         print('\nInstalling FFMPEG')
         self._install_ffmpeg()
@@ -165,12 +167,12 @@ class Video2xSetup:
         template_dict['ffmpeg']['ffmpeg_path'] = '{}\\video2x\\ffmpeg-latest-win64-static\\bin'.format(os.getenv('localappdata'))
         template_dict['ffmpeg']['ffmpeg_hwaccel'] = 'auto'
         template_dict['ffmpeg']['extra_arguments'] = []
-        template_dict['video2x']['video2x_cache_folder'] = False
+        template_dict['video2x']['video2x_cache_folder'] = None
         template_dict['video2x']['preserve_frames'] = False
 
         # Write configuration into file
         with open('video2x.json', 'w') as config:
-            json.dump(template_dict, config, indent=2)
+            json.dump(template_dict, config, indent=4)
             config.close()
 
 
@@ -211,11 +213,19 @@ def pip_install(package):
 if __name__ == "__main__":
     try:
         args = process_arguments()
-        print('Video2x Setup Script')
+        print('Video2X Setup Script')
         print('Version: {}'.format(VERSION))
-        setup = Video2xSetup(args.driver)
+
+        # do not install pip modules if script
+        # is packaged in exe format
+        download_python_modules = True
+        if sys.argv[0].endswith('.exe'):
+            print('\nScript is packaged as exe, skipping pip module download')
+            download_python_modules = False
+
+        setup = Video2xSetup(args.driver, download_python_modules)
         setup.run()
-        print('\n Script finished successfully')
+        print('\nScript finished successfully')
     except Exception:
         traceback.print_exc()
         print('An error has occurred')
