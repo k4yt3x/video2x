@@ -45,6 +45,7 @@ import GPUtil
 import json
 import os
 import psutil
+import re
 import shutil
 import sys
 import tempfile
@@ -170,6 +171,40 @@ def read_config(config_file):
         return config
 
 
+def absolutify_paths(config):
+    """ Check to see if paths to binaries are absolute
+
+    This function checks if paths to binary files are absolute.
+    If not, then absolutify the path.
+
+    Arguments:
+        config {dict} -- configuration file dictionary
+
+    Returns:
+        dict -- configuration file dictionary
+    """
+    current_folder = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+    # check waifu2x-caffe path
+    if not re.match('^[a-z]:', config['waifu2x_caffe']['waifu2x_caffe_path'], re.IGNORECASE):
+        config['waifu2x_caffe']['waifu2x_caffe_path'] = '{}\\{}'.format(current_folder, config['waifu2x_caffe']['waifu2x_caffe_path'])
+
+    # check waifu2x-converter-cpp path
+    if not re.match('^[a-z]:', config['waifu2x_converter']['waifu2x_converter_path'], re.IGNORECASE):
+        config['waifu2x_converter']['waifu2x_converter_path'] = '{}\\{}'.format(current_folder, config['waifu2x_converter']['waifu2x_converter_path'])
+
+    # check ffmpeg path
+    if not re.match('^[a-z]:', config['ffmpeg']['ffmpeg_path'], re.IGNORECASE):
+        config['ffmpeg']['ffmpeg_path'] = '{}\\{}'.format(current_folder, config['ffmpeg']['ffmpeg_path'])
+
+    # check video2x cache path
+    if config['video2x']['video2x_cache_folder']:
+        if not re.match('^[a-z]:', config['video2x']['video2x_cache_folder'], re.IGNORECASE):
+            config['video2x']['video2x_cache_folder'] = '{}\\{}'.format(current_folder, config['video2x']['video2x_cache_folder'])
+
+    return config
+
+
 # /////////////////// Execution /////////////////// #
 
 # this is not a library
@@ -198,6 +233,7 @@ check_memory()
 
 # read configurations from JSON
 config = read_config(args.config)
+config = absolutify_paths(config)
 
 # load waifu2x configuration
 if args.driver == 'waifu2x_caffe':
@@ -249,6 +285,7 @@ try:
     # start timer
     begin_time = time.time()
 
+    # if input specified is a single file
     if os.path.isfile(args.input):
         """ Upscale single video file """
         Avalon.info('Upscaling single video file: {}'.format(args.input))
@@ -268,6 +305,8 @@ try:
         # run upscaler-
         upscaler.run()
         upscaler.cleanup()
+
+    # if input specified is a folder
     elif os.path.isdir(args.input):
         """ Upscale videos in a folder/directory """
         Avalon.info('Upscaling videos in folder/directory: {}'.format(args.input))
