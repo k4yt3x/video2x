@@ -51,7 +51,8 @@
         "-qscale:a": null,
         "-f": "image2",
         "-vcodec": "libx264",
-        "-crf": 25,
+        "-crf": 17,
+        "-b:v": null,
         "-pix_fmt": "yuv420p",
         "-hwaccel": "auto",
         "-y": true
