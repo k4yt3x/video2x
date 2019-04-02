@@ -283,10 +283,10 @@ class Upscaler:
 
         # width/height will be coded width/height x upscale factor
         if self.scale_ratio:
-            coded_width = video_info['streams'][video_stream_index]['coded_width']
-            coded_height = video_info['streams'][video_stream_index]['coded_height']
-            self.scale_width = int(self.scale_ratio * coded_width)
-            self.scale_height = int(self.scale_ratio * coded_height)
+            original_width = video_info['streams'][video_stream_index]['width']
+            original_height = video_info['streams'][video_stream_index]['height']
+            self.scale_width = int(self.scale_ratio * original_width)
+            self.scale_height = int(self.scale_ratio * original_height)
 
         # upscale images one by one using waifu2x
         Avalon.info('Starting to upscale extracted images')
