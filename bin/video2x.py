@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 30, 2019
+Last Modified: April 11, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -289,6 +289,17 @@ try:
     if os.path.isfile(args.input):
         """ Upscale single video file """
         Avalon.info('Upscaling single video file: {}'.format(args.input))
+
+        # check for input output format mismatch
+        if os.path.isdir(args.output):
+            Avalon.error('Input and output path type mismatch')
+            Avalon.error('Input is single file but output is folder')
+            raise Exception('input output path type mismatch')
+        elif not re.search('.*\..*$', args.input):
+            Avalon.error('No suffix found in output file path')
+            Avalon.error('Suffix must be specified for FFmpeg')
+            raise Exception('No suffix specified')
+
         upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
 
         # set optional options
