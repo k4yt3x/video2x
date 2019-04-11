@@ -295,7 +295,7 @@ try:
             Avalon.error('Input and output path type mismatch')
             Avalon.error('Input is single file but output is folder')
             raise Exception('input output path type mismatch')
-        elif not re.search('.*\..*$', args.input):
+        if not re.search('.*\..*$', args.output):
             Avalon.error('No suffix found in output file path')
             Avalon.error('Suffix must be specified for FFmpeg')
             raise Exception('No suffix specified')
