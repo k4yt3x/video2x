@@ -56,20 +56,22 @@ class Upscaler:
         self.image_format = 'png'
         self.preserve_frames = False
 
-        # create temporary folder/directories
+    def create_temp_folders(self):
+        """create temporary folder/directories
+        """
         self.extracted_frames = tempfile.mkdtemp(dir=self.video2x_cache_folder)
         Avalon.debug_info('Extracted frames are being saved to: {}'.format(self.extracted_frames))
         self.upscaled_frames = tempfile.mkdtemp(dir=self.video2x_cache_folder)
         Avalon.debug_info('Upscaled frames are being saved to: {}'.format(self.upscaled_frames))
 
     def cleanup(self):
-        # delete temp directories when done
-        # avalon framework cannot be used if python is shutting down
-        # therefore, plain print is used
+        """delete temp directories when done
+        """
         if not self.preserve_frames:
-
             for directory in [self.extracted_frames, self.upscaled_frames]:
                 try:
+                    # avalon framework cannot be used if python is shutting down
+                    # therefore, plain print is used
                     print('Cleaning up cache directory: {}'.format(directory))
                     shutil.rmtree(directory)
                 except (OSError, FileNotFoundError):

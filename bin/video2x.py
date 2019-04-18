@@ -52,7 +52,7 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.7.0'
+VERSION = '2.7.1'
 
 # each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -313,7 +313,8 @@ try:
         upscaler.image_format = image_format
         upscaler.preserve_frames = preserve_frames
 
-        # run upscaler-
+        # run upscaler
+        upscaler.create_temp_folders()
         upscaler.run()
         upscaler.cleanup()
 
@@ -337,6 +338,7 @@ try:
             upscaler.preserve_frames = preserve_frames
 
             # run upscaler
+            upscaler.create_temp_folders()
             upscaler.run()
             upscaler.cleanup()
     else:
