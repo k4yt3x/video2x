@@ -22,6 +22,10 @@ Component names that are **bolded** can be automatically downloaded and configur
 
 ## Recent Changes
 
+### 2.7.1 (April 18, 2019)
+
+- Fixed video2x custom temp folder bug found by @cr08 .
+
 ### 2.7.0 (March 30, 2019)
 
 - Added support for different extracted image formats.
@@ -32,12 +36,6 @@ Component names that are **bolded** can be automatically downloaded and configur
 
 - `video2x_setup.py` script can now automatically download and configure `waifu2x-converter-cpp`.
 - replaced old progress indicator with progress bar.
-
-### 2.6.3 (March 24, 2019)
-
-- Added image cleaner by @BrianPetkovsek which removes upscaled frames.
-- Fixed some PEP8 issues.
-- Exceptions in waifu2x are now caught, and script will now stop on waifu2x error instead of keep going on to FFmpeg.
 
 ## Description
 
@@ -224,6 +222,12 @@ This project relies on the following software and projects.
 - [FFmpeg]('https://www.ffmpeg.org/')
 - [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)
 - [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
+
+## Special Thanks
+
+Appreciations given to the following contributors:
+
+- @BrianPetkovsek
 
 ## Related Resources
 
