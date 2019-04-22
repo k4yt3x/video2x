@@ -4,7 +4,7 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 30, 2019
+Last Modified: April 21, 2019
 
 Description: This class handles all FFMPEG related
 operations.
@@ -29,10 +29,10 @@ class Ffmpeg:
         # add a forward slash to directory if not present
         # otherwise there will be a format error
         if self.ffmpeg_path[-1] != '/' and self.ffmpeg_path[-1] != '\\':
-            self.ffmpeg_path = '{}\\'.format(self.ffmpeg_path)
+            self.ffmpeg_path = f'{self.ffmpeg_path}\\'
 
-        self.ffmpeg_binary = '{}ffmpeg.exe'.format(self.ffmpeg_path)
-        self.ffmpeg_probe_binary = '{}ffprobe.exe'.format(self.ffmpeg_path)
+        self.ffmpeg_binary = f'{self.ffmpeg_path}ffmpeg.exe'
+        self.ffmpeg_probe_binary = f'{self.ffmpeg_path}ffprobe.exe'
         self.image_format = image_format
 
     def get_video_info(self, input_video):
@@ -59,10 +59,10 @@ class Ffmpeg:
             '-show_format',
             '-show_streams',
             '-i',
-            '{}'.format(input_video)
+            input_video
         ]
 
-        Avalon.debug_info('Executing: {}'.format(' '.join(execute)))
+        Avalon.debug_info(f'Executing: {" ".join(execute)}')
         json_str = subprocess.run(execute, check=True, stdout=subprocess.PIPE).stdout
         return json.loads(json_str.decode('utf-8'))
 
@@ -80,7 +80,7 @@ class Ffmpeg:
             self.ffmpeg_binary,
             '-i',
             input_video,
-            '{}\\extracted_%0d.{}'.format(extracted_frames, self.image_format)
+            f'{extracted_frames}\\extracted_%0d.{self.image_format}'
         ]
         self._execute(execute=execute, phase='video_to_frames')
 
@@ -102,8 +102,8 @@ class Ffmpeg:
             '-s',
             resolution,
             '-i',
-            '{}\\extracted_%d.{}'.format(upscaled_frames, self.image_format),
-            '{}\\no_audio.mp4'.format(upscaled_frames)
+            f'{upscaled_frames}\\extracted_%d.{self.image_format}',
+            f'{upscaled_frames}\\no_audio.mp4'
         ]
         self._execute(execute=execute, phase='frames_to_video')
 
@@ -118,7 +118,7 @@ class Ffmpeg:
         execute = [
             self.ffmpeg_binary,
             '-i',
-            '{}\\no_audio.mp4'.format(upscaled_frames),
+            f'{upscaled_frames}\\no_audio.mp4',
             '-i',
             input_video,
             output_video
@@ -143,5 +143,5 @@ class Ffmpeg:
 
                 execute.append(str(value))
 
-        Avalon.debug_info('Executing: {}'.format(execute))
+        Avalon.debug_info(f'Executing: {execute}')
         return subprocess.run(execute, shell=True, check=True).returncode

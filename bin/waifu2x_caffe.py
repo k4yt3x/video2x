@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 30, 2019
+Last Modified: April 21, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -58,7 +58,7 @@ class Waifu2xCaffe:
 
             # print thread start message
             self.print_lock.acquire()
-            Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
+            Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} started')
             self.print_lock.release()
 
             # list to be executed
@@ -74,17 +74,17 @@ class Waifu2xCaffe:
                     continue
                 else:
                     if len(key) == 1:
-                        execute.append('-{}'.format(key))
+                        execute.append(f'-{key}')
                     else:
-                        execute.append('--{}'.format(key))
+                        execute.append(f'--{key}')
                     execute.append(str(value))
 
-            Avalon.debug_info('Executing: {}'.format(execute))
+            Avalon.debug_info(f'Executing: {execute}')
             completed_command = subprocess.run(execute, check=True)
 
             # print thread exiting message
             self.print_lock.acquire()
-            Avalon.debug_info('[upscaler] Thread {} exiting'.format(threading.current_thread().name))
+            Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} exiting')
             self.print_lock.release()
 
             # return command execution return code

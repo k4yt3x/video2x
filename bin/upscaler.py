@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: March 30, 2019
+Last Modified: April 21, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -52,7 +52,7 @@ class Upscaler:
         self.scale_ratio = None
         self.model_dir = None
         self.threads = 5
-        self.video2x_cache_folder = '{}\\video2x'.format(tempfile.gettempdir())
+        self.video2x_cache_folder = f'{tempfile.gettempdir()}\\video2x'
         self.image_format = 'png'
         self.preserve_frames = False
 
@@ -60,9 +60,9 @@ class Upscaler:
         """create temporary folder/directories
         """
         self.extracted_frames = tempfile.mkdtemp(dir=self.video2x_cache_folder)
-        Avalon.debug_info('Extracted frames are being saved to: {}'.format(self.extracted_frames))
+        Avalon.debug_info(f'Extracted frames are being saved to: {self.extracted_frames}')
         self.upscaled_frames = tempfile.mkdtemp(dir=self.video2x_cache_folder)
-        Avalon.debug_info('Upscaled frames are being saved to: {}'.format(self.upscaled_frames))
+        Avalon.debug_info(f'Upscaled frames are being saved to: {self.upscaled_frames}')
 
     def cleanup(self):
         """delete temp directories when done
@@ -72,7 +72,7 @@ class Upscaler:
                 try:
                     # avalon framework cannot be used if python is shutting down
                     # therefore, plain print is used
-                    print('Cleaning up cache directory: {}'.format(directory))
+                    print(f'Cleaning up cache directory: {directory}')
                     shutil.rmtree(directory)
                 except (OSError, FileNotFoundError):
                     pass
@@ -152,8 +152,8 @@ class Upscaler:
 
             w2.upscale(self.extracted_frames, self.upscaled_frames, self.scale_ratio, self.threads, self.image_format, self.upscaler_exceptions)
             for image in [f for f in os.listdir(self.upscaled_frames) if os.path.isfile(os.path.join(self.upscaled_frames, f))]:
-                renamed = re.sub('_\[.*-.*\]\[x(\d+(\.\d+)?)\]\.{}'.format(self.image_format), '.{}'.format(self.image_format), image)
-                shutil.move('{}\\{}'.format(self.upscaled_frames, image), '{}\\{}'.format(self.upscaled_frames, renamed))
+                renamed = re.sub(f'_\[.*-.*\]\[x(\d+(\.\d+)?)\]\.{self.image_format}', f'.{self.image_format}', image)
+                shutil.move(f'{self.upscaled_frames}\\{image}', f'{self.upscaled_frames}\\{renamed}')
 
             self.progress_bar_exit_signal = True
             progress_bar.join()
@@ -176,7 +176,7 @@ class Upscaler:
         thread_pool = []
         thread_folders = []
         for thread_id in range(self.threads):
-            thread_folder = '{}\\{}'.format(self.extracted_frames, str(thread_id))
+            thread_folder = f'{self.extracted_frames}\\{str(thread_id)}'
             thread_folders.append(thread_folder)
 
             # delete old folders and create new folders
@@ -257,7 +257,7 @@ class Upscaler:
         elif self.waifu2x_driver == 'waifu2x_converter':
             w2 = Waifu2xConverter(self.waifu2x_settings, self.model_dir)
         else:
-            raise Exception('Unrecognized waifu2x driver: {}'.format(self.waifu2x_driver))
+            raise Exception(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
 
         # extract frames from video
         fm.extract_frames(self.input_video, self.extracted_frames)
@@ -281,7 +281,7 @@ class Upscaler:
 
         # get average frame rate of video stream
         framerate = float(Fraction(video_info['streams'][video_stream_index]['avg_frame_rate']))
-        Avalon.info('Framerate: {}'.format(framerate))
+        Avalon.info(f'Framerate: {framerate}')
 
         # width/height will be coded width/height x upscale factor
         if self.scale_ratio:
@@ -299,7 +299,7 @@ class Upscaler:
         Avalon.info('Converting extracted frames into video')
 
         # use user defined output size
-        fm.convert_video(framerate, '{}x{}'.format(self.scale_width, self.scale_height), self.upscaled_frames)
+        fm.convert_video(framerate, f'{self.scale_width}x{self.scale_height}', self.upscaled_frames)
         Avalon.info('Conversion completed')
 
         # migrate audio tracks and subtitles
