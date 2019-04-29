@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: April 21, 2019
+Last Modified: April 28, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -33,20 +33,20 @@ class Waifu2xCaffe:
         self.model_dir = model_dir
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_folder, output_folder, scale_ratio, scale_width, scale_height, image_format, upscaler_exceptions):
+    def upscale(self, input_directory, output_directory, scale_ratio, scale_width, scale_height, image_format, upscaler_exceptions):
         """This is the core function for WAIFU2X class
 
         Arguments:
-            input_folder {string} -- source folder path
-            output_folder {string} -- output folder path
+            input_directory {string} -- source directory path
+            output_directory {string} -- output directory path
             width {int} -- output video width
             height {int} -- output video height
         """
 
         try:
             # overwrite config file settings
-            self.waifu2x_settings['input_path'] = input_folder
-            self.waifu2x_settings['output_path'] = output_folder
+            self.waifu2x_settings['input_path'] = input_directory
+            self.waifu2x_settings['output_path'] = output_directory
 
             if scale_ratio:
                 self.waifu2x_settings['scale_ratio'] = scale_ratio

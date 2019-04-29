@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Author: K4YT3X
 Date Created: November 28, 2018
-Last Modified: April 21, 2019
+Last Modified: April 28, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -167,9 +167,7 @@ class Video2xSetup:
             template_dict['waifu2x_converter']['waifu2x_converter_path'] = f'{local_app_data}\\video2x\\waifu2x-converter-cpp'
 
         template_dict['ffmpeg']['ffmpeg_path'] = f'{local_app_data}\\video2x\\ffmpeg-latest-win64-static\\bin'
-        template_dict['ffmpeg']['ffmpeg_hwaccel'] = 'auto'
-        template_dict['ffmpeg']['extra_arguments'] = []
-        template_dict['video2x']['video2x_cache_folder'] = None
+        template_dict['video2x']['video2x_cache_directory'] = None
         template_dict['video2x']['preserve_frames'] = False
 
         # Write configuration into file

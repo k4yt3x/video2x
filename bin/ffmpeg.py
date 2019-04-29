@@ -4,7 +4,7 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: April 21, 2019
+Last Modified: April 28, 2019
 
 Description: This class handles all FFMPEG related
 operations.
@@ -74,7 +74,7 @@ class Ffmpeg:
 
         Arguments:
             input_video {string} -- input video path
-            extracted_frames {string} -- video output folder
+            extracted_frames {string} -- video output directory
         """
         execute = [
             self.ffmpeg_binary,
@@ -93,7 +93,7 @@ class Ffmpeg:
         Arguments:
             framerate {float} -- target video framerate
             resolution {string} -- target video resolution
-            upscaled_frames {string} -- source images folder
+            upscaled_frames {string} -- source images directory
         """
         execute = [
             self.ffmpeg_binary,

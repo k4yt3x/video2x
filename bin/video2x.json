@@ -62,12 +62,13 @@
         "-map": "1?",
         "-c": "copy",
         "-map": "-1:v?",
+        "-pix_fmt": "yuv420p",
         "-hwaccel": "auto",
         "-y": true
     }
   },
   "video2x": {
-    "video2x_cache_folder": null,
+    "video2x_cache_directory": null,
     "image_format": "png",
     "preserve_frames": false
   }

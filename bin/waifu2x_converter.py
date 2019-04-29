@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: April 21, 2019
+Last Modified: April 28, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
@@ -28,26 +28,26 @@ class Waifu2xConverter:
         self.waifu2x_settings['model_dir'] = model_dir
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_folder, output_folder, scale_ratio, jobs, image_format, upscaler_exceptions):
+    def upscale(self, input_directory, output_directory, scale_ratio, jobs, image_format, upscaler_exceptions):
         """ Waifu2x Converter Driver Upscaler
         This method executes the upscaling of extracted frames.
 
         Arguments:
-            input_folder {string} -- source folder path
-            output_folder {string} -- output folder path
+            input_directory {string} -- source directory path
+            output_directory {string} -- output directory path
             scale_ratio {int} -- frames' scale ratio
             threads {int} -- number of threads
         """
 
         try:
             # overwrite config file settings
-            self.waifu2x_settings['input'] = input_folder
-            self.waifu2x_settings['output'] = output_folder
+            self.waifu2x_settings['input'] = input_directory
+            self.waifu2x_settings['output'] = output_directory
 
             # temporary fix for https://github.com/DeadSix27/waifu2x-converter-cpp/issues/109
             """
-            self.waifu2x_settings['i'] = input_folder
-            self.waifu2x_settings['o'] = output_folder
+            self.waifu2x_settings['i'] = input_directory
+            self.waifu2x_settings['o'] = output_directory
             self.waifu2x_settings['input'] = None
             self.waifu2x_settings['output'] = None
             """

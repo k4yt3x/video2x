@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: April 21, 2019
+Last Modified: April 28, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -30,7 +30,7 @@ import time
 
 class Upscaler:
     """ An instance of this class is a upscaler that will
-    upscale all images in the given folder.
+    upscale all images in the given directory.
 
     Raises:
         Exception -- all exceptions
@@ -52,19 +52,19 @@ class Upscaler:
         self.scale_ratio = None
         self.model_dir = None
         self.threads = 5
-        self.video2x_cache_folder = f'{tempfile.gettempdir()}\\video2x'
+        self.video2x_cache_directory = f'{tempfile.gettempdir()}\\video2x'
         self.image_format = 'png'
         self.preserve_frames = False
 
-    def create_temp_folders(self):
-        """create temporary folder/directories
+    def create_temp_directories(self):
+        """create temporary directory
         """
-        self.extracted_frames = tempfile.mkdtemp(dir=self.video2x_cache_folder)
+        self.extracted_frames = tempfile.mkdtemp(dir=self.video2x_cache_directory)
         Avalon.debug_info(f'Extracted frames are being saved to: {self.extracted_frames}')
-        self.upscaled_frames = tempfile.mkdtemp(dir=self.video2x_cache_folder)
+        self.upscaled_frames = tempfile.mkdtemp(dir=self.video2x_cache_directory)
         Avalon.debug_info(f'Upscaled frames are being saved to: {self.upscaled_frames}')
 
-    def cleanup(self):
+    def cleanup_temp_directories(self):
         """delete temp directories when done
         """
         if not self.preserve_frames:
@@ -89,18 +89,18 @@ class Upscaler:
         elif not self.method:
             raise ArgumentError('You need to specify the enlarging processing unit')
 
-    def _progress_bar(self, extracted_frames_folders):
+    def _progress_bar(self, extracted_frames_directories):
         """ This method prints a progress bar
 
         This method prints a progress bar by keeping track
-        of the amount of frames in the input directory/folder
-        and the output directory/folder. This is originally
+        of the amount of frames in the input directory
+        and the output directory. This is originally
         suggested by @ArmandBernard.
         """
         # get number of extracted frames
         total_frames = 0
-        for folder in extracted_frames_folders:
-            total_frames += len([f for f in os.listdir(folder) if f[-4:] == '.png'])
+        for directory in extracted_frames_directories:
+            total_frames += len([f for f in os.listdir(directory) if f[-4:] == '.png'])
 
         with tqdm(total=total_frames, ascii=True, desc='Upscaling Progress') as progress_bar:
 
@@ -170,25 +170,25 @@ class Upscaler:
         if len(frames) < self.threads:
             self.threads = len(frames)
 
-        # create a folder for each thread and append folder
+        # create a directory for each thread and append directory
         # name into a list
 
         thread_pool = []
-        thread_folders = []
+        thread_directories = []
         for thread_id in range(self.threads):
-            thread_folder = f'{self.extracted_frames}\\{str(thread_id)}'
-            thread_folders.append(thread_folder)
+            thread_directory = f'{self.extracted_frames}\\{str(thread_id)}'
+            thread_directories.append(thread_directory)
 
-            # delete old folders and create new folders
-            if os.path.isdir(thread_folder):
-                shutil.rmtree(thread_folder)
-            os.mkdir(thread_folder)
+            # delete old directories and create new directories
+            if os.path.isdir(thread_directory):
+                shutil.rmtree(thread_directory)
+            os.mkdir(thread_directory)
 
-            # append folder path into list
-            thread_pool.append((thread_folder, thread_id))
+            # append directory path into list
+            thread_pool.append((thread_directory, thread_id))
 
-        # evenly distribute images into each folder
-        # until there is none left in the folder
+        # evenly distribute images into each directory
+        # until there is none left in the directory
         for image in frames:
             # move image
             shutil.move(image, thread_pool[0][0])
@@ -208,7 +208,7 @@ class Upscaler:
             upscaler_threads.append(thread)
 
         # start progress bar in a different thread
-        progress_bar = threading.Thread(target=self._progress_bar, args=(thread_folders,))
+        progress_bar = threading.Thread(target=self._progress_bar, args=(thread_directories,))
         progress_bar.start()
 
         # create the clearer and start it
