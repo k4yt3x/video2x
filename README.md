@@ -59,21 +59,21 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 
 ## Documentations
 
-### [Video2X Wiki](https://github.com/K4YT3X/video2x/wiki)
+### [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki)
 
-You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/K4YT3X/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
+You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
 
-### [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) (Nvidia GPUs)
+### [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial)
 
-For those who want a detailed walk-through of how to use `Video2X`, you can head to the [Step-By-Step Tutorial](https://github.com/K4YT3X/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
+For those who want a detailed walk-through of how to use `Video2X`, you can head to the [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
 
-### [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers)
+### [Waifu2X Drivers](https://github.com/k4yt3x/video2x/wiki/Waifu2X-Drivers)
 
-Go to the [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers) wiki page if you want to see a detailed description on the different types of `waifu2x` drivers implemented by `Video2X`. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for `Video2X`.
+Go to the [Waifu2X Drivers](https://github.com/k4yt3x/video2x/wiki/Waifu2X-Drivers) wiki page if you want to see a detailed description on the different types of `waifu2x` drivers implemented by `Video2X`. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for `Video2X`.
 
-### [Q&A](https://github.com/K4YT3X/video2x/wiki/Q&A)
+### [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A)
 
-If you have any questions, first try visiting our [Q&A](https://github.com/K4YT3X/video2x/wiki/Q&A) page to see if your question is answered there. If not, open an issue and we will respond to your questions ASAP.
+If you have any questions, first try visiting our [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A) page to see if your question is answered there. If not, open an issue and we will respond to your questions ASAP.
 
 ---
 
@@ -95,7 +95,7 @@ Download: https://github.com/DeadSix27/waifu2x-converter-cpp/releases
 First, clone the video2x repository.
 
 ```shell
-git clone https://github.com/K4YT3X/video2x.git
+git clone https://github.com/k4yt3x/video2x.git
 cd video2x/bin
 ```
 
