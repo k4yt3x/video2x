@@ -71,6 +71,10 @@ For those who want a detailed walk-through of how to use `Video2X`, you can head
 
 Go to the [Waifu2X Drivers](https://github.com/K4YT3X/video2x/wiki/Waifu2X-Drivers) wiki page if you want to see a detailed description on the different types of `waifu2x` drivers implemented by `Video2X`. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for `Video2X`.
 
+### [Q&A](https://github.com/K4YT3X/video2x/wiki/Q&A)
+
+If you have any questions, first try visiting our [Q&A](https://github.com/K4YT3X/video2x/wiki/Q&A) page to see if your question is answered there. If not, open an issue and we will respond to your questions ASAP.
+
 ---
 
 ## Quick Start
