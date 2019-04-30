@@ -79,7 +79,7 @@ def process_arguments():
     upscaler_options.add_argument('-m', '--method', help='Upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'], required=True)
     upscaler_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
     upscaler_options.add_argument('-y', '--model_dir', help='directory containing model JSON files', action='store')
-    upscaler_options.add_argument('-t', '--threads', help='Number of threads to use for upscaling', action='store', type=int, default=5)
+    upscaler_options.add_argument('-t', '--threads', help='Number of threads to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', help='Video2X config file location', action='store', default=f'{os.path.dirname(os.path.abspath(sys.argv[0]))}\\video2x.json')
     upscaler_options.add_argument('-b', '--batch', help='Enable batch mode (select all default values to questions)', action='store_true')
 
