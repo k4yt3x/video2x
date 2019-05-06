@@ -47,23 +47,27 @@
         "-y": true
     },
     "frames_to_video": {
-        "-qscale:v": null,
-        "-qscale:a": null,
-        "-f": "image2",
-        "-vcodec": "libx264",
-        "-crf": 17,
-        "-b:v": null,
-        "-pix_fmt": "yuv420p",
-        "-hwaccel": "auto",
+        "input_options":{
+            "-qscale:v": null,
+            "-qscale:a": null,
+            "-f": "image2"
+        },
+        "output_options":{
+            "-vcodec": "libx264",
+            "-crf": 17,
+            "-b:v": null,
+            "-pix_fmt": "yuv420p"
+        },
         "-y": true
     },
     "migrating_tracks": {
-        "-map": "0:v:0?",
-        "-map": "1?",
-        "-c": "copy",
-        "-map": "-1:v?",
-        "-pix_fmt": "yuv420p",
-        "-hwaccel": "auto",
+        "output_options":{
+            "-map": "0:v:0?",
+            "-map": "1?",
+            "-c": "copy",
+            "-map": "-1:v?",
+            "-pix_fmt": "yuv420p"
+        },
         "-y": true
     }
   },
