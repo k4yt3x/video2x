@@ -82,11 +82,24 @@ class Ffmpeg:
 
         execute.extend(self._read_configuration(phase='video_to_frames'))
 
-        execute.extend([
-            '-i',
-            input_video,
-            f'{extracted_frames}\\extracted_%0d.{self.image_format}'
-        ])
+        # By default, extracting frames using jpg from ffmpeg
+        # will output the lowest jpg quality possible.
+        # The added arguments ensures the highest quality jpg possible.
+        if self.image_format == 'jpg':
+            execute.extend([
+                '-i',
+                input_video,
+                '-qscale:v',
+                '2',
+                f'{extracted_frames}\\extracted_%0d.{self.image_format}'
+            ])
+
+        else:
+            execute.extend([
+                '-i',
+                input_video,
+                f'{extracted_frames}\\extracted_%0d.{self.image_format}'
+            ])
 
         self._execute(execute)
 

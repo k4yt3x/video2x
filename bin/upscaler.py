@@ -37,7 +37,7 @@ class Upscaler:
         ArgumentError -- if argument is not valid
     """
 
-    def __init__(self, input_video, output_video, method, waifu2x_settings, ffmpeg_settings):
+    def __init__(self, input_video, output_video, method, waifu2x_settings, ffmpeg_settings, image_format):
         # mandatory arguments
         self.input_video = input_video
         self.output_video = output_video
@@ -53,7 +53,7 @@ class Upscaler:
         self.model_dir = None
         self.threads = 5
         self.video2x_cache_directory = f'{tempfile.gettempdir()}\\video2x'
-        self.image_format = 'png'
+        self.image_format = image_format
         self.preserve_frames = False
 
     def create_temp_directories(self):
@@ -100,10 +100,9 @@ class Upscaler:
         # get number of extracted frames
         total_frames = 0
         for directory in extracted_frames_directories:
-            total_frames += len([f for f in os.listdir(directory) if f[-4:] == '.png'])
+            total_frames += len([f for f in os.listdir(directory) if f[-4:] == '.' + self.image_format])
 
         with tqdm(total=total_frames, ascii=True, desc='Upscaling Progress') as progress_bar:
-
             # tqdm update method adds the value to the progress
             # bar instead of setting the value. Therefore, a delta
             # needs to be calculated.
@@ -111,7 +110,7 @@ class Upscaler:
             while not self.progress_bar_exit_signal:
 
                 try:
-                    total_frames_upscaled = len([f for f in os.listdir(self.upscaled_frames) if f[-4:] == '.png'])
+                    total_frames_upscaled = len([f for f in os.listdir(self.upscaled_frames) if f[-4:] == '.' + self.image_format])
                     delta = total_frames_upscaled - previous_cycle_frames
                     previous_cycle_frames = total_frames_upscaled
 

@@ -300,7 +300,7 @@ try:
             Avalon.error('Suffix must be specified for FFmpeg')
             raise Exception('No suffix specified')
 
-        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings, image_format = image_format)
 
         # set optional options
         upscaler.waifu2x_driver = args.driver
