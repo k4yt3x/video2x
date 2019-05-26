@@ -100,7 +100,7 @@ class Upscaler:
         # get number of extracted frames
         total_frames = 0
         for directory in extracted_frames_directories:
-            total_frames += len([f for f in os.listdir(directory) if f[-4:] == '.png'])
+            total_frames += len([f for f in os.listdir(directory) if f[-4:] == f'.{self.image_format}'])
 
         with tqdm(total=total_frames, ascii=True, desc='Upscaling Progress') as progress_bar:
 
@@ -111,7 +111,7 @@ class Upscaler:
             while not self.progress_bar_exit_signal:
 
                 try:
-                    total_frames_upscaled = len([f for f in os.listdir(self.upscaled_frames) if f[-4:] == '.png'])
+                    total_frames_upscaled = len([f for f in os.listdir(self.upscaled_frames) if f[-4:] == f'.{self.image_format}'])
                     delta = total_frames_upscaled - previous_cycle_frames
                     previous_cycle_frames = total_frames_upscaled
 
