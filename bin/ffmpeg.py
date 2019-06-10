@@ -82,11 +82,14 @@ class Ffmpeg:
 
         execute.extend([
             '-i',
-            input_video,
-            f'{extracted_frames}\\extracted_%0d.{self.image_format}'
+            input_video
         ])
 
         execute.extend(self._read_configuration(phase='video_to_frames', section='output_options'))
+
+        execute.extend([
+            f'{extracted_frames}\\extracted_%0d.{self.image_format}'
+        ])
 
         execute.extend(self._read_configuration(phase='video_to_frames'))
 
