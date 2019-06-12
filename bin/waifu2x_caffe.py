@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 24, 2019
+Last Modified: April 28, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -33,20 +33,20 @@ class Waifu2xCaffe:
         self.model_dir = model_dir
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_folder, output_folder, scale_ratio, scale_width, scale_height, threads_exceptions):
+    def upscale(self, input_directory, output_directory, scale_ratio, scale_width, scale_height, image_format, upscaler_exceptions):
         """This is the core function for WAIFU2X class
 
         Arguments:
-            input_folder {string} -- source folder path
-            output_folder {string} -- output folder path
+            input_directory {string} -- source directory path
+            output_directory {string} -- output directory path
             width {int} -- output video width
             height {int} -- output video height
         """
 
         try:
             # overwrite config file settings
-            self.waifu2x_settings['input_path'] = input_folder
-            self.waifu2x_settings['output_path'] = output_folder
+            self.waifu2x_settings['input_path'] = input_directory
+            self.waifu2x_settings['output_path'] = output_directory
 
             if scale_ratio:
                 self.waifu2x_settings['scale_ratio'] = scale_ratio
@@ -54,9 +54,11 @@ class Waifu2xCaffe:
                 self.waifu2x_settings['scale_width'] = scale_width
                 self.waifu2x_settings['scale_height'] = scale_height
 
+            self.waifu2x_settings['output_extention'] = image_format
+
             # print thread start message
             self.print_lock.acquire()
-            Avalon.debug_info('[upscaler] Thread {} started'.format(threading.current_thread().name))
+            Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} started')
             self.print_lock.release()
 
             # list to be executed
@@ -72,20 +74,20 @@ class Waifu2xCaffe:
                     continue
                 else:
                     if len(key) == 1:
-                        execute.append('-{}'.format(key))
+                        execute.append(f'-{key}')
                     else:
-                        execute.append('--{}'.format(key))
+                        execute.append(f'--{key}')
                     execute.append(str(value))
 
-            Avalon.debug_info('Executing: {}'.format(execute))
+            Avalon.debug_info(f'Executing: {execute}')
             completed_command = subprocess.run(execute, check=True)
 
             # print thread exiting message
             self.print_lock.acquire()
-            Avalon.debug_info('[upscaler] Thread {} exiting'.format(threading.current_thread().name))
+            Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} exiting')
             self.print_lock.release()
 
             # return command execution return code
             return completed_command.returncode
         except Exception as e:
-            threads_exceptions.append(e)
+            upscaler_exceptions.append(e)

@@ -1,6 +1,8 @@
 {
   "waifu2x_caffe": {
     "waifu2x_caffe_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe",
+    "input_extention_list": null,
+    "output_extention": null,
     "mode": "noise_scale",
     "scale_ratio": null,
     "scale_width": null,
@@ -19,31 +21,61 @@
     "crop_w": null,
     "crop_h": null
   },
-
   "waifu2x_converter": {
     "waifu2x_converter_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-converter-cpp",
-    "block_size": null,
+    "output-format": null,
+    "png-compression": null,
+    "image-quality": null,
+    "block-size": null,
     "disable-gpu": null,
     "force-OpenCL": null,
     "processor": null,
     "jobs": null,
-    "model_dir": null,
-    "scale_ratio": null,
-    "noise_level": 3,
-    "mode": "noise_scale",
-    "quiet": true,
+    "model-dir": null,
+    "scale-ratio": null,
+    "noise-level": 3,
+    "mode": "noise-scale",
+    "silent": true,
     "output": null,
     "input": null
   },
-
-  "ffmpeg":{
-    "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-4.1-win64-static\\bin",
-    "ffmpeg_hwaccel": "auto",
-    "extra_arguments": []
+  "ffmpeg": {
+    "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
+    "video_to_frames": {
+        "output_options":{
+            "-qscale:v": null
+        },
+        "-hwaccel": "auto",
+        "-y": true
+    },
+    "frames_to_video": {
+        "input_options":{
+            "-qscale:v": null,
+            "-qscale:a": null,
+            "-f": "image2"
+        },
+        "output_options":{
+            "-vcodec": "libx264",
+            "-crf": 17,
+            "-b:v": null,
+            "-pix_fmt": "yuv420p"
+        },
+        "-y": true
+    },
+    "migrating_tracks": {
+        "output_options":{
+            "-map": "0:v:0?",
+            "-map": "1?",
+            "-c": "copy",
+            "-map": "-1:v?",
+            "-pix_fmt": "yuv420p"
+        },
+        "-y": true
+    }
   },
-
   "video2x": {
-    "video2x_cache_folder": false,
+    "video2x_cache_directory": null,
+    "image_format": "png",
     "preserve_frames": false
   }
 }
