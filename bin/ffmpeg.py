@@ -152,7 +152,7 @@ class Ffmpeg:
             input_video
         ]
 
-        execute.extend(self._read_configuration(phase='frames_to_video', section='output_options'))
+        execute.extend(self._read_configuration(phase='migrating_tracks', section='output_options'))
 
         execute.extend([
             output_video
