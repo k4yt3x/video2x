@@ -12,6 +12,7 @@ operations.
 from avalon_framework import Avalon
 import json
 import subprocess
+import os
 
 
 class Ffmpeg:
@@ -26,13 +27,9 @@ class Ffmpeg:
         self.ffmpeg_settings = ffmpeg_settings
 
         self.ffmpeg_path = self.ffmpeg_settings['ffmpeg_path']
-        # add a forward slash to directory if not present
-        # otherwise there will be a format error
-        if self.ffmpeg_path[-1] != '/' and self.ffmpeg_path[-1] != '\\':
-            self.ffmpeg_path = f'{self.ffmpeg_path}\\'
 
-        self.ffmpeg_binary = f'{self.ffmpeg_path}ffmpeg.exe'
-        self.ffmpeg_probe_binary = f'{self.ffmpeg_path}ffprobe.exe'
+        self.ffmpeg_binary = os.path.join(self.ffmpeg_path, 'ffmpeg.exe')
+        self.ffmpeg_probe_binary = os.path.join(self.ffmpeg_path, 'ffprobe.exe')
         self.image_format = image_format
 
     def get_video_info(self, input_video):
@@ -88,7 +85,7 @@ class Ffmpeg:
         execute.extend(self._read_configuration(phase='video_to_frames', section='output_options'))
 
         execute.extend([
-            f'{extracted_frames}\\extracted_%0d.{self.image_format}'
+            os.path.join(extracted_frames, f'extracted_%0d.{self.image_format}')
         ])
 
         execute.extend(self._read_configuration(phase='video_to_frames'))
@@ -120,7 +117,7 @@ class Ffmpeg:
         # append input frames path into command
         execute.extend([
             '-i',
-            f'{upscaled_frames}\\extracted_%d.{self.image_format}'
+            os.path.join(upscaled_frames, f'extracted_%d.{self.image_format}')
         ])
 
         # read FFmpeg output options
@@ -131,7 +128,7 @@ class Ffmpeg:
 
         # specify output file location
         execute.extend([
-            f'{upscaled_frames}\\no_audio.mp4'
+            os.path.join(upscaled_frames, 'no_audio.mp4')
         ])
 
         self._execute(execute)
@@ -147,7 +144,7 @@ class Ffmpeg:
         execute = [
             self.ffmpeg_binary,
             '-i',
-            f'{upscaled_frames}\\no_audio.mp4',
+            os.path.join(upscaled_frames, 'no_audio.mp4'),
             '-i',
             input_video
         ]

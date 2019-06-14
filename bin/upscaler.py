@@ -53,7 +53,7 @@ class Upscaler:
         self.scale_ratio = None
         self.model_dir = None
         self.threads = 5
-        self.video2x_cache_directory = f'{tempfile.gettempdir()}\\video2x'
+        self.video2x_cache_directory = os.path.join(tempfile.gettempdir(), 'video2x')
         self.image_format = 'png'
         self.preserve_frames = False
 
@@ -144,7 +144,7 @@ class Upscaler:
         # if this thread is not empty, then an exception has occured
         self.upscaler_exceptions = []
 
-                # initialize waifu2x driver
+        # initialize waifu2x driver
         if self.waifu2x_driver != 'waifu2x_caffe' and self.waifu2x_driver != 'waifu2x_converter':
             raise Exception(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
 
@@ -159,7 +159,7 @@ class Upscaler:
             w2.upscale(self.extracted_frames, self.upscaled_frames, self.scale_ratio, self.threads, self.image_format, self.upscaler_exceptions)
             for image in [f for f in os.listdir(self.upscaled_frames) if os.path.isfile(os.path.join(self.upscaled_frames, f))]:
                 renamed = re.sub(f'_\[.*-.*\]\[x(\d+(\.\d+)?)\]\.{self.image_format}', f'.{self.image_format}', image)
-                shutil.move(f'{self.upscaled_frames}\\{image}', f'{self.upscaled_frames}\\{renamed}')
+                shutil.move(os.path.join(self.upscaled_frames, image), os.path.join(self.upscaled_frames, renamed))
 
             self.progress_bar_exit_signal = True
             progress_bar.join()
@@ -182,7 +182,7 @@ class Upscaler:
         thread_pool = []
         thread_directories = []
         for thread_id in range(self.threads):
-            thread_directory = f'{self.extracted_frames}\\{str(thread_id)}'
+            thread_directory = os.path.join(self.extracted_frames, str(thread_id))
             thread_directories.append(thread_directory)
 
             # delete old directories and create new directories

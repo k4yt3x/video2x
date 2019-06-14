@@ -110,7 +110,7 @@ class Video2xSetup:
         self.trash.append(ffmpeg_zip)
 
         with zipfile.ZipFile(ffmpeg_zip) as zipf:
-            zipf.extractall(f'{os.getenv("localappdata")}\\video2x')
+            zipf.extractall(os.path.join(os.getenv('localappdata'), 'video2x'))
 
     def _install_waifu2x_caffe(self):
         """ Install waifu2x_caffe
@@ -127,7 +127,7 @@ class Video2xSetup:
                 self.trash.append(waifu2x_caffe_zip)
 
         with zipfile.ZipFile(waifu2x_caffe_zip) as zipf:
-            zipf.extractall(f'{os.getenv("localappdata")}\\video2x')
+            zipf.extractall(os.path.join(os.getenv('localappdata'), 'video2x'))
 
     def _install_waifu2x_converter_cpp(self):
         """ Install waifu2x_caffe
@@ -145,7 +145,7 @@ class Video2xSetup:
                 self.trash.append(waifu2x_converter_cpp_zip)
 
         with zipfile.ZipFile(waifu2x_converter_cpp_zip) as zipf:
-            zipf.extractall(f'{os.getenv("localappdata")}\\video2x\\waifu2x-converter-cpp')
+            zipf.extractall(os.path.join(os.getenv('localappdata'), 'video2x', 'waifu2x-converter-cpp'))
 
     def _generate_config(self):
         """ Generate video2x config
@@ -159,14 +159,19 @@ class Video2xSetup:
 
         # configure only the specified drivers
         if self.driver == 'all':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = f'{local_app_data}\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe'
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = f'{local_app_data}\\video2x\\waifu2x-converter-cpp'
+            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x',
+                                                                                'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
+            template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x',
+                                                                                        'waifu2x-converter-cpp')
         elif self.driver == 'waifu2x_caffe':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = f'{local_app_data}\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe'
+            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x',
+                                                                                'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
         elif self.driver == 'waifu2x_converter':
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = f'{local_app_data}\\video2x\\waifu2x-converter-cpp'
+            template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x',
+                                                                                        'waifu2x-converter-cpp')
 
-        template_dict['ffmpeg']['ffmpeg_path'] = f'{local_app_data}\\video2x\\ffmpeg-latest-win64-static\\bin'
+        template_dict['ffmpeg']['ffmpeg_path'] = os.path.join(local_app_data, 'video2x',
+                                                              'ffmpeg-latest-win64-static', 'bin')
         template_dict['video2x']['video2x_cache_directory'] = None
         template_dict['video2x']['preserve_frames'] = False
 
@@ -182,7 +187,7 @@ def download(url, save_path, chunk_size=4096):
     from tqdm import tqdm
     import requests
 
-    output_file = f'{save_path}\\{url.split("/")[-1]}'
+    output_file = os.path.join(save_path, url.split("/")[-1])
     print(f'Downloading: {url}')
     print(f'Chunk size: {chunk_size}')
     print(f'Saving to: {output_file}')

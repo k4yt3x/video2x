@@ -12,6 +12,7 @@ for waifu2x-converter-cpp.
 from avalon_framework import Avalon
 import subprocess
 import threading
+import os
 
 
 class Waifu2xConverter:
@@ -59,7 +60,8 @@ class Waifu2xConverter:
             # models_rgb must be specified manually for waifu2x-converter-cpp
             # if it's not specified in the arguments, create automatically
             if self.waifu2x_settings['model-dir'] is None:
-                self.waifu2x_settings['model-dir'] = f'{self.waifu2x_settings["waifu2x_converter_path"]}\\models_rgb'
+                self.waifu2x_settings['model-dir'] = os.path.join(self.waifu2x_settings['waifu2x_converter_path'],
+                                                                  'models_rgb')
 
             # print thread start message
             self.print_lock.acquire()
@@ -75,7 +77,7 @@ class Waifu2xConverter:
 
                 # the key doesn't need to be passed in this case
                 if key == 'waifu2x_converter_path':
-                    execute.append(f'{str(value)}\\waifu2x-converter-cpp.exe')
+                    execute.append(os.path.join(str(value), 'waifu2x-converter-cpp.exe'))
 
                 # null or None means that leave this option out (keep default)
                 elif value is None or value is False:
