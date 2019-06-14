@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: April 28, 2019
+Last Modified: June 13, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -20,6 +20,7 @@ from image_cleaner import ImageCleaner
 from tqdm import tqdm
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
+import copy
 import os
 import re
 import shutil
@@ -126,7 +127,7 @@ class Upscaler:
 
                 time.sleep(1)
 
-    def _upscale_frames(self, w2):
+    def _upscale_frames(self):
         """ Upscale video frames with waifu2x-caffe
 
         This function upscales all the frames extracted
@@ -143,9 +144,14 @@ class Upscaler:
         # if this thread is not empty, then an exception has occured
         self.upscaler_exceptions = []
 
+                # initialize waifu2x driver
+        if self.waifu2x_driver != 'waifu2x_caffe' and self.waifu2x_driver != 'waifu2x_converter':
+            raise Exception(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
+
         # it's easier to do multi-threading with waifu2x_converter
         # the number of threads can be passed directly to waifu2x_converter
         if self.waifu2x_driver == 'waifu2x_converter':
+            w2 = Waifu2xConverter(self.waifu2x_settings, self.model_dir)
 
             progress_bar = threading.Thread(target=self._progress_bar, args=([self.extracted_frames],))
             progress_bar.start()
@@ -197,6 +203,10 @@ class Upscaler:
 
         # create threads and start them
         for thread_info in thread_pool:
+
+            # create a separate w2 instance for each thread
+            w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir)
+
             # create thread
             if self.scale_ratio:
                 thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.scale_ratio, False, False, self.image_format, self.upscaler_exceptions))
@@ -251,14 +261,6 @@ class Upscaler:
         # initialize objects for ffmpeg and waifu2x-caffe
         fm = Ffmpeg(self.ffmpeg_settings, self.image_format)
 
-        # initialize waifu2x driver
-        if self.waifu2x_driver == 'waifu2x_caffe':
-            w2 = Waifu2xCaffe(self.waifu2x_settings, self.method, self.model_dir)
-        elif self.waifu2x_driver == 'waifu2x_converter':
-            w2 = Waifu2xConverter(self.waifu2x_settings, self.model_dir)
-        else:
-            raise Exception(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
-
         # extract frames from video
         fm.extract_frames(self.input_video, self.extracted_frames)
 
@@ -292,7 +294,7 @@ class Upscaler:
 
         # upscale images one by one using waifu2x
         Avalon.info('Starting to upscale extracted images')
-        self._upscale_frames(w2)
+        self._upscale_frames()
         Avalon.info('Upscaling completed')
 
         # frames to Video
