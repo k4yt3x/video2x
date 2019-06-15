@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Author: K4YT3X
 Date Created: November 28, 2018
-Last Modified: April 28, 2019
+Last Modified: June 15, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -159,19 +159,14 @@ class Video2xSetup:
 
         # configure only the specified drivers
         if self.driver == 'all':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x',
-                                                                                'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x',
-                                                                                        'waifu2x-converter-cpp')
+            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
+            template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-converter-cpp')
         elif self.driver == 'waifu2x_caffe':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x',
-                                                                                'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
+            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
         elif self.driver == 'waifu2x_converter':
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x',
-                                                                                        'waifu2x-converter-cpp')
+            template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-converter-cpp')
 
-        template_dict['ffmpeg']['ffmpeg_path'] = os.path.join(local_app_data, 'video2x',
-                                                              'ffmpeg-latest-win64-static', 'bin')
+        template_dict['ffmpeg']['ffmpeg_path'] = os.path.join(local_app_data, 'video2x', 'ffmpeg-latest-win64-static', 'bin')
         template_dict['video2x']['video2x_cache_directory'] = None
         template_dict['video2x']['preserve_frames'] = False
 
@@ -187,7 +182,7 @@ def download(url, save_path, chunk_size=4096):
     from tqdm import tqdm
     import requests
 
-    output_file = os.path.join(save_path, url.split("/")[-1])
+    output_file = os.path.join(save_path, url.split('/')[-1])
     print(f'Downloading: {url}')
     print(f'Chunk size: {chunk_size}')
     print(f'Saving to: {output_file}')
@@ -215,7 +210,7 @@ def pip_install(package):
     return subprocess.run(['python', '-m', 'pip', 'install', '-U', package]).returncode
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     try:
         args = process_arguments()
         print('Video2X Setup Script')

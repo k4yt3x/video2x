@@ -4,7 +4,7 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 5, 2019
+Last Modified: June 15, 2019
 
 Description: This class handles all FFMPEG related
 operations.

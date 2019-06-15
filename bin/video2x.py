@@ -13,7 +13,10 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 13, 2019
+Last Modified: June 15, 2019
+
+Dev: BrianPetkovsek
+Dev: SAT3LL
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -192,13 +195,11 @@ def absolutify_paths(config):
 
     # check waifu2x-caffe path
     if not re.match('^[a-z]:', config['waifu2x_caffe']['waifu2x_caffe_path'], re.IGNORECASE):
-        config['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(current_directory,
-                                                                     config['waifu2x_caffe']['waifu2x_caffe_path'])
+        config['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(current_directory, config['waifu2x_caffe']['waifu2x_caffe_path'])
 
     # check waifu2x-converter-cpp path
     if not re.match('^[a-z]:', config['waifu2x_converter']['waifu2x_converter_path'], re.IGNORECASE):
-        config['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(current_directory,
-                                                                             config['waifu2x_converter']['waifu2x_converter_path'])
+        config['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(current_directory, config['waifu2x_converter']['waifu2x_converter_path'])
 
     # check ffmpeg path
     if not re.match('^[a-z]:', config['ffmpeg']['ffmpeg_path'], re.IGNORECASE):
@@ -207,8 +208,7 @@ def absolutify_paths(config):
     # check video2x cache path
     if config['video2x']['video2x_cache_directory']:
         if not re.match('^[a-z]:', config['video2x']['video2x_cache_directory'], re.IGNORECASE):
-            config['video2x']['video2x_cache_directory'] = os.path.join(current_directory,
-                                                                        config['video2x']['video2x_cache_directory'])
+            config['video2x']['video2x_cache_directory'] = os.path.join(current_directory, config['video2x']['video2x_cache_directory'])
 
     return config
 

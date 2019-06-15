@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: April 28, 2019
+Last Modified: June 15, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.

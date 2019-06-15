@@ -4,15 +4,15 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: April 28, 2019
+Last Modified: June 15, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
 """
 from avalon_framework import Avalon
+import os
 import subprocess
 import threading
-import os
 
 
 class Waifu2xConverter:
