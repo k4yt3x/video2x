@@ -3,8 +3,9 @@
 """
 Name: Video2X Setup Script
 Author: K4YT3X
+Author: BrianPetkovsek
 Date Created: November 28, 2018
-Last Modified: April 28, 2019
+Last Modified: June 14, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -86,10 +87,7 @@ class Video2xSetup:
     def _install_python_requirements(self):
         """ Read requirements.txt and return its content
         """
-        with open('requirements.txt', 'r') as req:
-            for line in req:
-                package = line.split('==')[0]
-                pip_install(package)
+        pip_install('requirements.txt')
 
     def _cleanup(self):
         """ Cleanup all the temp files downloaded
@@ -201,13 +199,13 @@ def download(url, save_path, chunk_size=4096):
     return output_file
 
 
-def pip_install(package):
+def pip_install(file):
     """ Install python package via python pip module
 
     pip.main() is not available after pip 9.0.1, thus
     pip module is not used in this case.
     """
-    return subprocess.run(['python', '-m', 'pip', 'install', '-U', package]).returncode
+    return subprocess.run([sys.executable, '-m', 'pip', 'install', '-U', '-r', file]).returncode
 
 
 if __name__ == "__main__":
