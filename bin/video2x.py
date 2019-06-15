@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: April 28, 2019
+Last Modified: June 13, 2019
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -52,7 +52,7 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.7.1'
+VERSION = '2.7.2'
 
 # each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -71,23 +71,27 @@ def process_arguments():
 
     # video options
     file_options = parser.add_argument_group('File Options')
-    file_options.add_argument('-i', '--input', help='Source video file/directory', action='store', required=True)
-    file_options.add_argument('-o', '--output', help='Output video file/directory', action='store', required=True)
+    file_options.add_argument('-i', '--input', help='source video file/directory', action='store')
+    file_options.add_argument('-o', '--output', help='output video file/directory', action='store')
 
     # upscaler options
     upscaler_options = parser.add_argument_group('Upscaler Options')
-    upscaler_options.add_argument('-m', '--method', help='Upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'], required=True)
-    upscaler_options.add_argument('-d', '--driver', help='Waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
+    upscaler_options.add_argument('-m', '--method', help='upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'])
+    upscaler_options.add_argument('-d', '--driver', help='waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
     upscaler_options.add_argument('-y', '--model_dir', help='directory containing model JSON files', action='store')
-    upscaler_options.add_argument('-t', '--threads', help='Number of threads to use for upscaling', action='store', type=int, default=1)
-    upscaler_options.add_argument('-c', '--config', help='Video2X config file location', action='store', default=f'{os.path.dirname(os.path.abspath(sys.argv[0]))}\\video2x.json')
-    upscaler_options.add_argument('-b', '--batch', help='Enable batch mode (select all default values to questions)', action='store_true')
+    upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
+    upscaler_options.add_argument('-c', '--config', help='video2x config file location', action='store', default=f'{os.path.dirname(os.path.abspath(sys.argv[0]))}\\video2x.json')
+    upscaler_options.add_argument('-b', '--batch', help='enable batch mode (select all default values to questions)', action='store_true')
 
     # scaling options
     scaling_options = parser.add_argument_group('Scaling Options')
-    scaling_options.add_argument('--width', help='Output video width', action='store', type=int)
-    scaling_options.add_argument('--height', help='Output video height', action='store', type=int)
-    scaling_options.add_argument('-r', '--ratio', help='Scaling ratio', action='store', type=float)
+    scaling_options.add_argument('--width', help='output video width', action='store', type=int)
+    scaling_options.add_argument('--height', help='output video height', action='store', type=int)
+    scaling_options.add_argument('-r', '--ratio', help='scaling ratio', action='store', type=float)
+
+    # extra options
+    extra_options = parser.add_argument_group('Extra Options')
+    extra_options.add_argument('-v', '--version', help='display version, lawful information and exit', action='store_true')
 
     # parse arguments
     return parser.parse_args()
@@ -212,12 +216,28 @@ if __name__ != '__main__':
     Avalon.error('This file cannot be imported')
     raise ImportError(f'{__file__} cannot be imported')
 
+# print video2x logo
 print_logo()
 
 # process CLI arguments
 args = process_arguments()
 
+# display version and lawful informaition
+if args.version:
+    print(f'Video2X Version: {VERSION}')
+    print('Author: K4YT3X')
+    print('License: GNU GPL v3')
+    print('Github Page: https://github.com/k4yt3x/video2x')
+    print('Contact: k4yt3x@k4yt3x.com')
+    exit(0)
+
 # arguments sanity check
+if not args.input:
+    Avalon.error('You must specify input video file/directory path')
+    exit(1)
+if not args.output:
+    Avalon.error('You must specify output video file/directory path')
+    exit(1)
 if args.driver == 'waifu2x_converter' and args.width and args.height:
     Avalon.error('Waifu2x Converter CPP accepts only scaling ratio')
     exit(1)
@@ -249,10 +269,7 @@ elif args.driver == 'waifu2x_converter':
         Avalon.error('Please check the configuration file settings')
         raise FileNotFoundError(waifu2x_settings['waifu2x_converter_path'])
 
-# check if waifu2x path is valid
-
-
-# read FFMPEG configuration
+# read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']
 
 # load video2x settings
@@ -287,7 +304,8 @@ try:
 
     # if input specified is a single file
     if os.path.isfile(args.input):
-        """ Upscale single video file """
+
+        # upscale single video file
         Avalon.info(f'Upscaling single video file: {args.input}')
 
         # check for input output format mismatch
@@ -320,7 +338,7 @@ try:
 
     # if input specified is a directory
     elif os.path.isdir(args.input):
-        """ Upscale videos in a directory """
+        # upscale videos in a directory
         Avalon.info(f'Upscaling videos in directory: {args.input}')
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
             output_video = f'{args.output}\\{input_video}'
@@ -350,7 +368,7 @@ except Exception:
     Avalon.error('An exception has occurred')
     traceback.print_exc()
 finally:
-    # remove Video2X Cache directory
+    # remove Video2X cache directory
     try:
         if not preserve_frames:
             shutil.rmtree(video2x_cache_directory)
