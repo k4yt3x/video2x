@@ -3,6 +3,7 @@
 """
 Name: Video2X Setup Script
 Author: K4YT3X
+Author: BrianPetkovsek
 Date Created: November 28, 2018
 Last Modified: June 15, 2019
 
@@ -86,17 +87,14 @@ class Video2xSetup:
     def _install_python_requirements(self):
         """ Read requirements.txt and return its content
         """
-        with open('requirements.txt', 'r') as req:
-            for line in req:
-                package = line.split('==')[0]
-                pip_install(package)
+        pip_install('requirements.txt')
 
     def _cleanup(self):
         """ Cleanup all the temp files downloaded
         """
         for file in self.trash:
             try:
-                print(f'Deleting: {file}')
+                print('Deleting: {}'.format(file))
                 os.remove(file)
             except FileNotFoundError:
                 pass
@@ -119,7 +117,7 @@ class Video2xSetup:
         import requests
 
         # Get latest release of waifu2x-caffe via GitHub API
-        latest_release = json.loads(requests.get('https://api.github.com/repos/lltcggie/waifu2x-caffe/releases/latest').content)
+        latest_release = json.loads(requests.get('https://api.github.com/repos/lltcggie/waifu2x-caffe/releases/latest').content.decode('utf-8'))
 
         for a in latest_release['assets']:
             if 'waifu2x-caffe.zip' in a['browser_download_url']:
@@ -137,7 +135,7 @@ class Video2xSetup:
         import requests
 
         # Get latest release of waifu2x-caffe via GitHub API
-        latest_release = json.loads(requests.get('https://api.github.com/repos/DeadSix27/waifu2x-converter-cpp/releases/latest').content)
+        latest_release = json.loads(requests.get('https://api.github.com/repos/DeadSix27/waifu2x-converter-cpp/releases/latest').content.decode('utf-8'))
 
         for a in latest_release['assets']:
             if re.search(r'waifu2x-DeadSix27-win64_v[0-9]*\.zip', a['browser_download_url']):
@@ -183,9 +181,9 @@ def download(url, save_path, chunk_size=4096):
     import requests
 
     output_file = os.path.join(save_path, url.split('/')[-1])
-    print(f'Downloading: {url}')
-    print(f'Chunk size: {chunk_size}')
-    print(f'Saving to: {output_file}')
+    print('Downloading: {}'.format(url))
+    print('Chunk size: {}'.format(chunk_size))
+    print('Saving to: {}'.format(output_file))
 
     stream = requests.get(url, stream=True)
     total_size = int(stream.headers['content-length'])
@@ -201,20 +199,20 @@ def download(url, save_path, chunk_size=4096):
     return output_file
 
 
-def pip_install(package):
+def pip_install(file):
     """ Install python package via python pip module
 
     pip.main() is not available after pip 9.0.1, thus
     pip module is not used in this case.
     """
-    return subprocess.run(['python', '-m', 'pip', 'install', '-U', package]).returncode
+    return subprocess.run([sys.executable, '-m', 'pip', 'install', '-U', '-r', file]).returncode
 
 
 if __name__ == '__main__':
     try:
         args = process_arguments()
         print('Video2X Setup Script')
-        print(f'Version: {VERSION}')
+        print('Version: {}'.format(VERSION))
 
         # do not install pip modules if script
         # is packaged in exe format

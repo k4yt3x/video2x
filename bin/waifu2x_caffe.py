@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -*- coding: future_fstrings -*-
 """
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
