@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: future_fstrings -*-
-
-
 """
 Name: Video2X Upscaler
 Author: K4YT3X

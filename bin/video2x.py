@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: future_fstrings -*-
-
-
 """
 
 __      __  _       _                  ___   __   __
