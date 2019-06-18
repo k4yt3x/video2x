@@ -87,7 +87,6 @@ class Video2xSetup:
     def _install_python_requirements(self):
         """ Read requirements.txt and return its content
         """
-        pip_uninstall('requirements.txt')
         pip_install('requirements.txt')
 
     def _cleanup(self):
@@ -202,19 +201,12 @@ def download(url, save_path, chunk_size=4096):
 
 def pip_install(file):
     """ Install python package via python pip module
-    
+
     pip.main() is not available after pip 9.0.1, thus
     pip module is not used in this case.
     """
     return subprocess.run([sys.executable, '-m', 'pip', 'install', '-U', '-r', file]).returncode
 
-def pip_uninstall(file):
-    """ Uninstall python package via python pip module
-    
-    pip.main() is not available after pip 9.0.1, thus
-    pip module is not used in this case.
-    """
-    return subprocess.run([sys.executable, '-m', 'pip', 'uninstall', '-r', file, '-y']).returncode
 
 if __name__ == '__main__':
     try:
