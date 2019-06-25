@@ -150,7 +150,8 @@ class Upscaler:
         self.upscaler_exceptions = []
 
         # initialize waifu2x driver
-        if self.waifu2x_driver != 'waifu2x_caffe' and self.waifu2x_driver != 'waifu2x_converter' and self.waifu2x_driver != 'waifu2x-ncnn-vulkan':
+        drivers = ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']
+        if self.waifu2x_driver not in drivers:
             raise Exception(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
 
         # it's easier to do multi-threading with waifu2x_converter
@@ -247,7 +248,7 @@ class Upscaler:
 
             if len(self.upscaler_exceptions) != 0:
                 raise(self.upscaler_exceptions[0])
-        elif self.waifu2x_driver == 'waifu2x-ncnn-vulkan':
+        elif self.waifu2x_driver == 'waifu2x_ncnn_vulkan':
             # create a container for all upscaler threads
             upscaler_threads = []
 

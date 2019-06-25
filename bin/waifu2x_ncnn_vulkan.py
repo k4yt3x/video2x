@@ -7,7 +7,7 @@ Name: Waifu2x NCNN Vulkan Driver
 Author: K4YT3X, SAT3LL
 
 Description: This class is a high-level wrapper
-for waifu2x-ncnn-vulkan.
+for waifu2x_ncnn_vulkan.
 """
 from avalon_framework import Avalon
 import subprocess
@@ -28,9 +28,9 @@ class Waifu2xNcnnVulkan:
 
         # arguments passed through command line overwrites config file values
 
-        # waifu2x-ncnn-vulkan can't find its own model directory if its not in the current dir
+        # waifu2x_ncnn_vulkan can't find its own model directory if its not in the current dir
         #   so change to it
-        os.chdir(os.path.join(self.waifu2x_settings['waifu2x-ncnn-vulkan_path'], '..'))
+        os.chdir(os.path.join(self.waifu2x_settings['waifu2x_ncnn_vulkan_path'], '..'))
 
         self.print_lock = threading.Lock()
 
@@ -53,14 +53,14 @@ class Waifu2xNcnnVulkan:
             Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} started')
             self.print_lock.release()
 
-            # waifu2x-ncnn-vulkan accepts arguments in a positional manner
-            # See: https://github.com/nihui/waifu2x-ncnn-vulkan#usage
-            # waifu2x-ncnn-vulkan.exe [input image] [output png] [noise=-1/0/1/2/3] [scale=1/2] [blocksize=400]
+            # waifu2x_ncnn_vulkan accepts arguments in a positional manner
+            # See: https://github.com/nihui/waifu2x_ncnn_vulkan#usage
+            # waifu2x_ncnn_vulkan.exe [input image] [output png] [noise=-1/0/1/2/3] [scale=1/2] [blocksize=400]
             #     noise = noise level, large value means strong denoise effect, -1=no effect
             #     scale = scale level, 1=no scale, 2=upscale 2x
             #     blocksize = tile size, use smaller value to reduce GPU memory usage, default is 400
 
-            # waifu2x-ncnn-vulkan does not accept an arbitrary scale ratio, max is 2
+            # waifu2x_ncnn_vulkan does not accept an arbitrary scale ratio, max is 2
             if scale_ratio == 1:
                 for raw_frame in os.listdir(input_directory):
                     command = [
@@ -70,7 +70,7 @@ class Waifu2xNcnnVulkan:
                         '1',
                         str(self.waifu2x_settings['block-size'])
                     ]
-                    execute = [self.waifu2x_settings['waifu2x-ncnn-vulkan_path']]
+                    execute = [self.waifu2x_settings['waifu2x_ncnn_vulkan_path']]
                     execute.extend(command)
 
                     Avalon.debug_info(f'Executing: {execute}')
@@ -84,7 +84,7 @@ class Waifu2xNcnnVulkan:
                         '2',
                         str(self.waifu2x_settings['block-size'])
                     ]
-                    execute = [self.waifu2x_settings['waifu2x-ncnn-vulkan_path']]
+                    execute = [self.waifu2x_settings['waifu2x_ncnn_vulkan_path']]
                     execute.extend(command)
 
                     Avalon.debug_info(f'Executing: {execute}')

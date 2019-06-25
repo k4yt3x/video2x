@@ -23,7 +23,7 @@ Installation Details:
 - ffmpeg: %LOCALAPPDATA%\\video2x\\ffmpeg
 - waifu2x-caffe: %LOCALAPPDATA%\\video2x\\waifu2x-caffe
 - waifu2x-cpp-converter: %LOCALAPPDATA%\\video2x\\waifu2x-converter-cpp
-- waifu2x-ncnn-vulkan: %LOCALAPPDATA%\\video2x\\waifu2x-ncnn-vulkan
+- waifu2x_ncnn_vulkan: %LOCALAPPDATA%\\video2x\\waifu2x-ncnn-vulkan
 
 """
 import argparse
@@ -50,7 +50,7 @@ def process_arguments():
 
     # video options
     general_options = parser.add_argument_group('General Options')
-    general_options.add_argument('-d', '--driver', help='driver to download and configure', action='store', choices=['all', 'waifu2x_caffe', 'waifu2x_converter', 'waifu2x-ncnn-vulkan'], default='all')
+    general_options.add_argument('-d', '--driver', help='driver to download and configure', action='store', choices=['all', 'waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'], default='all')
 
     # parse arguments
     return parser.parse_args()
@@ -84,7 +84,7 @@ class Video2xSetup:
             self._install_waifu2x_caffe()
         elif self.driver == 'waifu2x_converter':
             self._install_waifu2x_converter_cpp()
-        elif self.driver == 'waifu2x-ncnn-vulkan':
+        elif self.driver == 'waifu2x_ncnn_vulkan':
             self._install_waifu2x_ncnn_vulkan()
 
         print('\nGenerating Video2X configuration file')
@@ -197,14 +197,14 @@ class Video2xSetup:
             template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
             template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-converter-cpp')
             # TODO: after version 20190611 executable changes to waifu2x-ncnn-vulkan so rename this when it breaks
-            template_dict['waifu2x-ncnn-vulkan']['waifu2x-ncnn-vulkan_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-ncnn-vulkan', 'waifu2x.exe')
+            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-ncnn-vulkan', 'waifu2x.exe')
         elif self.driver == 'waifu2x_caffe':
             template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
         elif self.driver == 'waifu2x_converter':
             template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-converter-cpp')
-        elif self.driver == 'waifu2x-ncnn-vulkan':
+        elif self.driver == 'waifu2x_ncnn_vulkan':
             # TODO: after version 20190611 executable changes to waifu2x-ncnn-vulkan so rename this when it breaks
-            template_dict['waifu2x-ncnn-vulkan']['waifu2x-ncnn-vulkan_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-ncnn-vulkan', 'waifu2x.exe')
+            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-ncnn-vulkan', 'waifu2x.exe')
 
         template_dict['ffmpeg']['ffmpeg_path'] = os.path.join(local_app_data, 'video2x', 'ffmpeg-latest-win64-static', 'bin')
         template_dict['video2x']['video2x_cache_directory'] = None

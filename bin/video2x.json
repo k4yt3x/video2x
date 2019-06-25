@@ -39,8 +39,8 @@
     "output": null,
     "input": null
   },
-  "waifu2x-ncnn-vulkan": {
-    "waifu2x-ncnn-vulkan_path": "C:\\Users\\kobalt\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x.exe",
+  "waifu2x_ncnn_vulkan": {
+    "waifu2x_ncnn_vulkan_path": "C:\\Users\\kobalt\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x.exe",
     "block-size": 400,
     "scale-ratio": null,
     "noise-level": 2,
