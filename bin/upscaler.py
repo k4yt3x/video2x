@@ -6,7 +6,9 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: June 15, 2019
+Last Modified: June 26, 2019
+
+Dev: SAT3LL
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -22,6 +24,7 @@ from image_cleaner import ImageCleaner
 from tqdm import tqdm
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
+from waifu2x_ncnn_vulkan import Waifu2xNcnnVulkan
 import copy
 import os
 import re
@@ -147,7 +150,7 @@ class Upscaler:
         self.upscaler_exceptions = []
 
         # initialize waifu2x driver
-        if self.waifu2x_driver != 'waifu2x_caffe' and self.waifu2x_driver != 'waifu2x_converter':
+        if self.waifu2x_driver != 'waifu2x_caffe' and self.waifu2x_driver != 'waifu2x_converter' and self.waifu2x_driver != 'waifu2x-ncnn-vulkan':
             raise Exception(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
 
         # it's easier to do multi-threading with waifu2x_converter
@@ -166,84 +169,159 @@ class Upscaler:
             self.progress_bar_exit_signal = True
             progress_bar.join()
             return
+        elif self.waifu2x_driver == 'waifu2x_caffe':
+            # create a container for all upscaler threads
+            upscaler_threads = []
 
-        # create a container for all upscaler threads
-        upscaler_threads = []
+            # list all images in the extracted frames
+            frames = [os.path.join(self.extracted_frames, f) for f in os.listdir(self.extracted_frames) if os.path.isfile(os.path.join(self.extracted_frames, f))]
 
-        # list all images in the extracted frames
-        frames = [os.path.join(self.extracted_frames, f) for f in os.listdir(self.extracted_frames) if os.path.isfile(os.path.join(self.extracted_frames, f))]
+            # if we have less images than threads,
+            # create only the threads necessary
+            if len(frames) < self.threads:
+                self.threads = len(frames)
 
-        # if we have less images than threads,
-        # create only the threads necessary
-        if len(frames) < self.threads:
-            self.threads = len(frames)
+            # create a directory for each thread and append directory
+            # name into a list
 
-        # create a directory for each thread and append directory
-        # name into a list
+            thread_pool = []
+            thread_directories = []
+            for thread_id in range(self.threads):
+                thread_directory = os.path.join(self.extracted_frames, str(thread_id))
+                thread_directories.append(thread_directory)
 
-        thread_pool = []
-        thread_directories = []
-        for thread_id in range(self.threads):
-            thread_directory = os.path.join(self.extracted_frames, str(thread_id))
-            thread_directories.append(thread_directory)
+                # delete old directories and create new directories
+                if os.path.isdir(thread_directory):
+                    shutil.rmtree(thread_directory)
+                os.mkdir(thread_directory)
 
-            # delete old directories and create new directories
-            if os.path.isdir(thread_directory):
-                shutil.rmtree(thread_directory)
-            os.mkdir(thread_directory)
+                # append directory path into list
+                thread_pool.append((thread_directory, thread_id))
 
-            # append directory path into list
-            thread_pool.append((thread_directory, thread_id))
+            # evenly distribute images into each directory
+            # until there is none left in the directory
+            for image in frames:
+                # move image
+                shutil.move(image, thread_pool[0][0])
+                # rotate list
+                thread_pool = thread_pool[-1:] + thread_pool[:-1]
 
-        # evenly distribute images into each directory
-        # until there is none left in the directory
-        for image in frames:
-            # move image
-            shutil.move(image, thread_pool[0][0])
-            # rotate list
-            thread_pool = thread_pool[-1:] + thread_pool[:-1]
+            # create threads and start them
+            for thread_info in thread_pool:
 
-        # create threads and start them
-        for thread_info in thread_pool:
+                # create a separate w2 instance for each thread
+                w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir)
 
-            # create a separate w2 instance for each thread
-            w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir)
+                # create thread
+                if self.scale_ratio:
+                    thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.scale_ratio, False, False, self.image_format, self.upscaler_exceptions))
+                else:
+                    thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, False, self.scale_width, self.scale_height, self.image_format, self.upscaler_exceptions))
+                thread.name = thread_info[1]
 
-            # create thread
-            if self.scale_ratio:
-                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.scale_ratio, False, False, self.image_format, self.upscaler_exceptions))
-            else:
-                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, False, self.scale_width, self.scale_height, self.image_format, self.upscaler_exceptions))
-            thread.name = thread_info[1]
+                # add threads into the pool
+                upscaler_threads.append(thread)
 
-            # add threads into the pool
-            upscaler_threads.append(thread)
+            # start progress bar in a different thread
+            progress_bar = threading.Thread(target=self._progress_bar, args=(thread_directories,))
+            progress_bar.start()
 
-        # start progress bar in a different thread
-        progress_bar = threading.Thread(target=self._progress_bar, args=(thread_directories,))
-        progress_bar.start()
+            # create the clearer and start it
+            Avalon.debug_info('Starting upscaled image cleaner')
+            image_cleaner = ImageCleaner(self.extracted_frames, self.upscaled_frames, len(upscaler_threads))
+            image_cleaner.start()
 
-        # create the clearer and start it
-        Avalon.debug_info('Starting upscaled image cleaner')
-        image_cleaner = ImageCleaner(self.extracted_frames, self.upscaled_frames, len(upscaler_threads))
-        image_cleaner.start()
+            # start all threads
+            for thread in upscaler_threads:
+                thread.start()
 
-        # start all threads
-        for thread in upscaler_threads:
-            thread.start()
+            # wait for threads to finish
+            for thread in upscaler_threads:
+                thread.join()
 
-        # wait for threads to finish
-        for thread in upscaler_threads:
-            thread.join()
+            # upscaling done, kill the clearer
+            Avalon.debug_info('Killing upscaled image cleaner')
+            image_cleaner.stop()
 
-        # upscaling done, kill the clearer
-        Avalon.debug_info('Killing upscaled image cleaner')
-        image_cleaner.stop()
+            self.progress_bar_exit_signal = True
 
-        self.progress_bar_exit_signal = True
+            if len(self.upscaler_exceptions) != 0:
+                raise(self.upscaler_exceptions[0])
+        elif self.waifu2x_driver == 'waifu2x-ncnn-vulkan':
+            # create a container for all upscaler threads
+            upscaler_threads = []
 
-        if len(self.upscaler_exceptions) != 0:
-            raise(self.upscaler_exceptions[0])
+            # list all images in the extracted frames
+            frames = [os.path.join(self.extracted_frames, f) for f in os.listdir(self.extracted_frames) if os.path.isfile(os.path.join(self.extracted_frames, f))]
+
+            # if we have less images than threads,
+            # create only the threads necessary
+            if len(frames) < self.threads:
+                self.threads = len(frames)
+
+            # create a directory for each thread and append directory
+            # name into a list
+
+            thread_pool = []
+            thread_directories = []
+            for thread_id in range(self.threads):
+                thread_directory = os.path.join(self.extracted_frames, str(thread_id))
+                thread_directories.append(thread_directory)
+
+                # delete old directories and create new directories
+                if os.path.isdir(thread_directory):
+                    shutil.rmtree(thread_directory)
+                os.mkdir(thread_directory)
+
+                # append directory path into list
+                thread_pool.append((thread_directory, thread_id))
+
+            # evenly distribute images into each directory
+            # until there is none left in the directory
+            for image in frames:
+                # move image
+                shutil.move(image, thread_pool[0][0])
+                # rotate list
+                thread_pool = thread_pool[-1:] + thread_pool[:-1]
+
+            # create threads and start them
+            for thread_info in thread_pool:
+
+                # create a separate w2 instance for each thread
+                w2 = Waifu2xNcnnVulkan(copy.deepcopy(self.waifu2x_settings))
+
+                # create thread
+                thread = threading.Thread(target=w2.upscale, args=(thread_info[0], self.upscaled_frames, self.scale_ratio, self.upscaler_exceptions))
+                thread.name = thread_info[1]
+
+                # add threads into the pool
+                upscaler_threads.append(thread)
+
+            # start progress bar in a different thread
+            progress_bar = threading.Thread(target=self._progress_bar, args=(thread_directories,))
+            progress_bar.start()
+
+            # create the clearer and start it
+            Avalon.debug_info('Starting upscaled image cleaner')
+            image_cleaner = ImageCleaner(self.extracted_frames, self.upscaled_frames, len(upscaler_threads))
+            image_cleaner.start()
+
+            # start all threads
+            for thread in upscaler_threads:
+                thread.start()
+
+            # wait for threads to finish
+            for thread in upscaler_threads:
+                thread.join()
+
+            # upscaling done, kill the clearer
+            Avalon.debug_info('Killing upscaled image cleaner')
+            image_cleaner.stop()
+
+            self.progress_bar_exit_signal = True
+
+            if len(self.upscaler_exceptions) != 0:
+                raise(self.upscaler_exceptions[0])
 
     def run(self):
         """Main controller for Video2X
