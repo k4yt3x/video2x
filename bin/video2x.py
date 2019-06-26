@@ -57,7 +57,7 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.7.2'
+VERSION = '2.8.0'
 
 # each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
