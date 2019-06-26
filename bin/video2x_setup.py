@@ -29,6 +29,7 @@ Installation Details:
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -40,7 +41,7 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.2.1'
+VERSION = '1.3.0'
 
 
 def process_arguments():
@@ -108,7 +109,7 @@ class Video2xSetup:
                     os.remove(file)
                 else:
                     print('Deleting: {}'.format(file))
-                    os.rmdir(file)
+                    shutil.rmtree(file)
             except FileNotFoundError:
                 pass
 
@@ -164,7 +165,6 @@ class Video2xSetup:
         print('\nInstalling waifu2x-ncnn-vulkan')
         import re
         import requests
-        import shutil
 
         # Get latest release of waifu2x-ncnn-vulkan via Github API
         latest_release = json.loads(requests.get('https://api.github.com/repos/nihui/waifu2x-ncnn-vulkan/releases/latest').content.decode('utf-8'))
