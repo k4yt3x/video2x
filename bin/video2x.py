@@ -15,7 +15,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 15, 2019
+Last Modified: June 26, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -82,7 +82,7 @@ def process_arguments():
     # upscaler options
     upscaler_options = parser.add_argument_group('Upscaler Options')
     upscaler_options.add_argument('-m', '--method', help='upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'])
-    upscaler_options.add_argument('-d', '--driver', help='waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter'])
+    upscaler_options.add_argument('-d', '--driver', help='waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'])
     upscaler_options.add_argument('-y', '--model_dir', help='directory containing model JSON files', action='store')
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', help='video2x config file location', action='store', default=os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'video2x.json'))
@@ -203,6 +203,10 @@ def absolutify_paths(config):
     if not re.match('^[a-z]:', config['waifu2x_converter']['waifu2x_converter_path'], re.IGNORECASE):
         config['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(current_directory, config['waifu2x_converter']['waifu2x_converter_path'])
 
+    # check waifu2x_ncnn_vulkan path
+    if not re.match('^[a-z]:', config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'], re.IGNORECASE):
+        config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = os.path.join(current_directory, config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'])
+
     # check ffmpeg path
     if not re.match('^[a-z]:', config['ffmpeg']['ffmpeg_path'], re.IGNORECASE):
         config['ffmpeg']['ffmpeg_path'] = os.path.join(current_directory, config['ffmpeg']['ffmpeg_path'])
@@ -244,8 +248,11 @@ if not args.input:
 if not args.output:
     Avalon.error('You must specify output video file/directory path')
     exit(1)
-if args.driver == 'waifu2x_converter' and args.width and args.height:
-    Avalon.error('Waifu2x Converter CPP accepts only scaling ratio')
+if (args.driver == 'waifu2x_converter' or args.driver == 'waifu2x_ncnn_vulkan') and args.width and args.height:
+    Avalon.error('Waifu2x Converter CPP/NCNN accepts only scaling ratio')
+    exit(1)
+if args.driver == 'waifu2x_ncnn_vulkan' and (args.ratio > 2 or not args.ratio.is_integer()):
+    Avalon.error('Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
     exit(1)
 if (args.width or args.height) and args.ratio:
     Avalon.error('You can only specify either scaling ratio or output width and height')
@@ -271,9 +278,15 @@ if args.driver == 'waifu2x_caffe':
 elif args.driver == 'waifu2x_converter':
     waifu2x_settings = config['waifu2x_converter']
     if not os.path.isdir(waifu2x_settings['waifu2x_converter_path']):
-        Avalon.error('Specified waifu2x-conver-cpp directory doesn\'t exist')
+        Avalon.error('Specified waifu2x-converter-cpp directory doesn\'t exist')
         Avalon.error('Please check the configuration file settings')
         raise FileNotFoundError(waifu2x_settings['waifu2x_converter_path'])
+elif args.driver == 'waifu2x_ncnn_vulkan':
+    waifu2x_settings = config['waifu2x_ncnn_vulkan']
+    if not os.path.isfile(waifu2x_settings['waifu2x_ncnn_vulkan_path']):
+        Avalon.error('Specified waifu2x_ncnn_vulkan directory doesn\'t exist')
+        Avalon.error('Please check the configuration file settings')
+        raise FileNotFoundError(waifu2x_settings['waifu2x_ncnn_vulkan_path'])
 
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']

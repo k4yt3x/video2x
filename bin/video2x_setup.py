@@ -7,7 +7,9 @@ Name: Video2X Setup Script
 Author: K4YT3X
 Author: BrianPetkovsek
 Date Created: November 28, 2018
-Last Modified: June 15, 2019
+Last Modified: June 26, 2019
+
+Dev: SAT3LL
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -20,11 +22,14 @@ and generates a configuration for it.
 Installation Details:
 - ffmpeg: %LOCALAPPDATA%\\video2x\\ffmpeg
 - waifu2x-caffe: %LOCALAPPDATA%\\video2x\\waifu2x-caffe
+- waifu2x-cpp-converter: %LOCALAPPDATA%\\video2x\\waifu2x-converter-cpp
+- waifu2x_ncnn_vulkan: %LOCALAPPDATA%\\video2x\\waifu2x-ncnn-vulkan
 
 """
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -36,7 +41,7 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.2.1'
+VERSION = '1.3.0'
 
 
 def process_arguments():
@@ -46,7 +51,7 @@ def process_arguments():
 
     # video options
     general_options = parser.add_argument_group('General Options')
-    general_options.add_argument('-d', '--driver', help='driver to download and configure', action='store', choices=['all', 'waifu2x_caffe', 'waifu2x_converter'], default='all')
+    general_options.add_argument('-d', '--driver', help='driver to download and configure', action='store', choices=['all', 'waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'], default='all')
 
     # parse arguments
     return parser.parse_args()
@@ -75,10 +80,13 @@ class Video2xSetup:
         if self.driver == 'all':
             self._install_waifu2x_caffe()
             self._install_waifu2x_converter_cpp()
+            self._install_waifu2x_ncnn_vulkan()
         elif self.driver == 'waifu2x_caffe':
             self._install_waifu2x_caffe()
         elif self.driver == 'waifu2x_converter':
             self._install_waifu2x_converter_cpp()
+        elif self.driver == 'waifu2x_ncnn_vulkan':
+            self._install_waifu2x_ncnn_vulkan()
 
         print('\nGenerating Video2X configuration file')
         self._generate_config()
@@ -96,8 +104,12 @@ class Video2xSetup:
         """
         for file in self.trash:
             try:
-                print('Deleting: {}'.format(file))
-                os.remove(file)
+                if os.path.isfile(file):
+                    print('Deleting: {}'.format(file))
+                    os.remove(file)
+                else:
+                    print('Deleting: {}'.format(file))
+                    shutil.rmtree(file)
             except FileNotFoundError:
                 pass
 
@@ -147,6 +159,29 @@ class Video2xSetup:
         with zipfile.ZipFile(waifu2x_converter_cpp_zip) as zipf:
             zipf.extractall(os.path.join(os.getenv('localappdata'), 'video2x', 'waifu2x-converter-cpp'))
 
+    def _install_waifu2x_ncnn_vulkan(self):
+        """ Install waifu2x-ncnn-vulkan
+        """
+        print('\nInstalling waifu2x-ncnn-vulkan')
+        import re
+        import requests
+
+        # Get latest release of waifu2x-ncnn-vulkan via Github API
+        latest_release = json.loads(requests.get('https://api.github.com/repos/nihui/waifu2x-ncnn-vulkan/releases/latest').content.decode('utf-8'))
+
+        for a in latest_release['assets']:
+            if re.search(r'waifu2x-ncnn-vulkan-\d*\.zip', a['browser_download_url']):
+                waifu2x_ncnn_vulkan_zip = download(a['browser_download_url'], tempfile.gettempdir())
+                self.trash.append(waifu2x_ncnn_vulkan_zip)
+
+        # extract then move (to remove the top level directory)
+        with zipfile.ZipFile(waifu2x_ncnn_vulkan_zip) as zipf:
+            extraction_path = os.path.join(tempfile.gettempdir(), 'waifu2x-ncnn-vulkan-ext')
+            zipf.extractall(extraction_path)
+            shutil.move(os.path.join(extraction_path, os.listdir(extraction_path)[0]), os.path.join(os.getenv('localappdata'), 'video2x', 'waifu2x-ncnn-vulkan'))
+            self.trash.append(extraction_path)
+
+
     def _generate_config(self):
         """ Generate video2x config
         """
@@ -161,10 +196,15 @@ class Video2xSetup:
         if self.driver == 'all':
             template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
             template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-converter-cpp')
+            # TODO: after version 20190611 executable changes to waifu2x-ncnn-vulkan so rename this when it breaks
+            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-ncnn-vulkan', 'waifu2x.exe')
         elif self.driver == 'waifu2x_caffe':
             template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
         elif self.driver == 'waifu2x_converter':
             template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-converter-cpp')
+        elif self.driver == 'waifu2x_ncnn_vulkan':
+            # TODO: after version 20190611 executable changes to waifu2x-ncnn-vulkan so rename this when it breaks
+            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-ncnn-vulkan', 'waifu2x.exe')
 
         template_dict['ffmpeg']['ffmpeg_path'] = os.path.join(local_app_data, 'video2x', 'ffmpeg-latest-win64-static', 'bin')
         template_dict['video2x']['video2x_cache_directory'] = None
