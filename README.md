@@ -6,9 +6,9 @@
 
 You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest builds of `Video2X`. The exe files will require no Python or Python module installation.
 
-The **`full`** package provides all packages that will possibly be needed by `Video2X`, including `FFmpeg`, `waifu2x-caffe` and `waifu2x-converter-cpp`. The config file (`video2x.json`) is also already configured for the environment. All you need to do is just to launch `video2x.exe`.
+The **`full`** package provides all packages that will possibly be needed by `Video2X`, including `FFmpeg`, `waifu2x-caffe`, `waifu2x-converter-cpp`, and `waifu2x-ncnn-vulkan`. The config file (`video2x.json`) is also already configured for the environment. All you need to do is just to launch `video2x.exe`.
 
-The **`light`** package provides only the most basic functions of `Video2X`. Only `video2x.exe`, `video2x_setup.exe` and `video2x.json` are included. To setup `FFmpeg`, `waifu2x-caffe` or `waifu2x-converter-cpp` automatically, simply launch `video2x_setup.exe`.
+The **`light`** package provides only the most basic functions of `Video2X`. Only `video2x.exe`, `video2x_setup.exe` and `video2x.json` are included. To setup dependencies (e.g. `FFmpeg` and `Waifu2X`) automatically, simply launch `video2x_setup.exe`.
 
 ## Prerequisites
 
@@ -22,6 +22,10 @@ Component names that are **bolded** can be automatically downloaded and configur
 
 ## Recent Changes
 
+### 2.8.0 (June 25, 2019)
+
+- Added support for [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)
+
 ### 2.7.1 (April 18, 2019)
 
 - Fixed video2x custom temp folder bug found by @cr08 .
@@ -32,10 +36,9 @@ Component names that are **bolded** can be automatically downloaded and configur
 - Redesigned FFmpeg wrapper, FFmpeg settings are now customizable in the `video2x.json` config file.
 - Other minor enhancements and adjustments (e.g. argument -> method variable)
 
-### Setup Script 1.2.0 (March 26, 2019)
+### Setup Script 1.3.0 (June 25, 2019)
 
-- `video2x_setup.py` script can now automatically download and configure `waifu2x-converter-cpp`.
-- replaced old progress indicator with progress bar.
+- Added automatic installation support for `waifu2x-ncnn-vulkan`
 
 ## Description
 
@@ -101,7 +104,7 @@ cd video2x/bin
 
 Then you may run the `video2x_setup.py` script to install and configure the dependencies automatically. This script is designed and tested on Windows 10.
 
-This script will install the newest version of `ffmpeg`, either or both of `waifu2x-caffe` and `waifu2x-converter-cpp` to `%LOCALAPPDATA%\\video2x` and all required python libraries.
+This script will install the newest version of `ffmpeg`, any one or all `waifu2x-caffe`, `waifu2x-converter-cpp`, and `waifu2x-ncnn-vulkan` to `%LOCALAPPDATA%\\video2x` and all required python libraries.
 
 ```shell
 python video2x_setup.py
@@ -150,6 +153,12 @@ Enlarge the video by 2 times using OpenCL. Note that `waifu2x-converter-cpp` doe
 
 ```shell
 python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2x_converter
+```
+
+### AMD or Nvidia (waifu2x-ncnn-vulkan Vulkan)
+
+```shell
+python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2x_ncnn_vulkan
 ```
 
 ### CPU
