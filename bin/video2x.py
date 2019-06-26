@@ -249,10 +249,10 @@ if not args.output:
     Avalon.error('You must specify output video file/directory path')
     exit(1)
 if (args.driver == 'waifu2x_converter' or args.driver == 'waifu2x_ncnn_vulkan') and args.width and args.height:
-    Avalon.error('Waifu2x Converter CPP / waifu2x_ncnn_vulkan accepts only scaling ratio')
+    Avalon.error('Waifu2x Converter CPP/NCNN accepts only scaling ratio')
     exit(1)
 if args.driver == 'waifu2x_ncnn_vulkan' and (args.ratio > 2 or not args.ratio.is_integer()):
-    Avalon.error('scale ratio must be 2 or 1 for waifu2x_ncnn_vulkan')
+    Avalon.error('Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
     exit(1)
 if (args.width or args.height) and args.ratio:
     Avalon.error('You can only specify either scaling ratio or output width and height')
