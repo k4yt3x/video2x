@@ -40,12 +40,12 @@
     "input": null
   },
   "waifu2x_ncnn_vulkan": {
-    "waifu2x_ncnn_vulkan_path": "C:\\Users\\kobalt\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x.exe",
-    "block-size": 400,
-    "scale-ratio": null,
-    "noise-level": 2,
+    "waifu2x_ncnn_vulkan_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x.exe",
+    "input": null,
     "output": null,
-    "input": null
+    "noise-level": 2,
+    "scale-ratio": null,
+    "block-size": 400
   },
   "ffmpeg": {
     "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
