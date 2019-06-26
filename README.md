@@ -235,6 +235,7 @@ This project relies on the following software and projects.
 - [FFmpeg]('https://www.ffmpeg.org/')
 - [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)
 - [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
+- [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)
 
 ## Special Thanks
 
