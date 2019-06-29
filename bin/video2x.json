@@ -50,35 +50,35 @@
   "ffmpeg": {
     "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
     "video_to_frames": {
-        "output_options":{
-            "-qscale:v": null
-        },
-        "-hwaccel": "auto",
-        "-y": true
+      "output_options": {
+        "-qscale:v": null
+      },
+      "-hwaccel": "auto",
+      "-y": true
     },
     "frames_to_video": {
-        "input_options":{
-            "-qscale:v": null,
-            "-qscale:a": null,
-            "-f": "image2"
-        },
-        "output_options":{
-            "-vcodec": "libx264",
-            "-crf": 17,
-            "-b:v": null,
-            "-pix_fmt": "yuv420p"
-        },
-        "-y": true
+      "input_options": {
+        "-qscale:v": null,
+        "-qscale:a": null,
+        "-f": "image2"
+      },
+      "output_options": {
+        "-vcodec": "libx264",
+        "-crf": 17,
+        "-b:v": null,
+        "-pix_fmt": "yuv420p"
+      },
+      "-y": true
     },
     "migrating_tracks": {
-        "output_options":{
-            "-map": "0:v:0?",
-            "-map": "1?",
-            "-c": "copy",
-            "-map": "-1:v?",
-            "-pix_fmt": "yuv420p"
-        },
-        "-y": true
+      "output_options": {
+        "-map": "0:v:0?",
+        "-map": "1?",
+        "-c": "copy",
+        "-map": "-1:v?",
+        "-pix_fmt": "yuv420p"
+      },
+      "-y": true
     }
   },
   "video2x": {
