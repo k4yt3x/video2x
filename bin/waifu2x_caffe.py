@@ -76,9 +76,9 @@ class Waifu2xCaffe:
                 # is executable key or null or None means that leave this option out (keep default)
                 if key == 'waifu2x_caffe_path' or value is None or value is False:
                     continue
-                elif key == 'gpu' and self.multigpu:
+                elif key == 'gpu':
                     execute.append('--gpu')
-                    execute.append(str(int(threading.current_thread().name) % len(GPUtil.getGPUs())))
+                    execute.append(str(self.multigpu[int(threading.current_thread().name) % len(self.multigpu)]))
                 else:
                     if len(key) == 1:
                         execute.append(f'-{key}')

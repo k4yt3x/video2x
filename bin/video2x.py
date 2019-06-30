@@ -87,7 +87,7 @@ def process_arguments():
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', help='video2x config file location', action='store', default=os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'video2x.json'))
     upscaler_options.add_argument('-b', '--batch', help='enable batch mode (select all default values to questions)', action='store_true')
-    upscaler_options.add_argument('--multigpu', help='use all available GPUs. [waifu2x_caffe only}', action='store_true')
+    upscaler_options.add_argument('-g', '--multigpu', help='use the following GPU id. can be specified multiple times [waifu2x_caffe option only]', action='append', type=int)
 
     # scaling options
     scaling_options = parser.add_argument_group('Scaling Options')
@@ -265,6 +265,22 @@ if args.multigpu and not args.driver == 'waifu2x_caffe':
     Avalon.error('Multigpu is only available for waifu2x_caffe')
     exit(1)
 
+# check if gpu ids supplied are actually valid
+if args.multigpu:
+    available_gpulist = []
+    for gpu in GPUtil.getGPUs():
+        available_gpulist.append(gpu.id)
+
+    for user_gpu in args.multigpu:
+        if user_gpu not in available_gpulist:
+            Avalon.error('Invalid GPU specified! {} is not a valid gpu id'.format(user_gpu))
+            exit(1)
+else:
+    # ideally this should have been a default=[0] in add_argument() but when specifying gpu ids they are
+    # appended to the default list instead of overriding it
+    # See: https://bugs.python.org/issue16399
+    args.multigpu = [0]
+
 # check available memory
 check_memory()
 
@@ -319,6 +335,10 @@ if video2x_cache_directory and not os.path.isdir(video2x_cache_directory):
         Avalon.error('Unable to continue, exiting...')
         exit(1)
 
+if args.threads % len(args.multigpu):
+    Avalon.warning('Thread amount is not a multiple of the amount of GPUs specified. This will result in suboptimal resource usage')
+    if Avalon.ask('Lower the amount of threads to the nearest multiple of GPUs specified? This will yield more throughput', default=True):
+        args.threads -= args.threads % len(args.multigpu)
 
 # start execution
 try:
