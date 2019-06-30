@@ -14,6 +14,7 @@ for waifu2x-caffe.
 from avalon_framework import Avalon
 import subprocess
 import threading
+import GPUtil
 
 
 class Waifu2xCaffe:
@@ -25,10 +26,11 @@ class Waifu2xCaffe:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings, process, model_dir):
+    def __init__(self, waifu2x_settings, process, model_dir, multigpu):
         self.waifu2x_settings = waifu2x_settings
         self.waifu2x_settings['process'] = process
         self.waifu2x_settings['model_dir'] = model_dir
+        self.multigpu = multigpu
 
         # arguments passed through command line overwrites config file values
         self.process = process
@@ -74,6 +76,9 @@ class Waifu2xCaffe:
                 # is executable key or null or None means that leave this option out (keep default)
                 if key == 'waifu2x_caffe_path' or value is None or value is False:
                     continue
+                elif key == 'gpu' and self.multigpu:
+                    execute.append('--gpu')
+                    execute.append(str(int(threading.current_thread().name) % len(GPUtil.getGPUs())))
                 else:
                     if len(key) == 1:
                         execute.append(f'-{key}')

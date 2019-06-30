@@ -61,6 +61,7 @@ class Upscaler:
         self.video2x_cache_directory = os.path.join(tempfile.gettempdir(), 'video2x')
         self.image_format = 'png'
         self.preserve_frames = False
+        self.multigpu = False
 
     def create_temp_directories(self):
         """create temporary directory
@@ -212,7 +213,7 @@ class Upscaler:
 
                 # create a separate w2 instance for each thread
                 if self.waifu2x_driver == 'waifu2x_caffe':
-                    w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir)
+                    w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir, self.multigpu)
                     if self.scale_ratio:
                         thread = threading.Thread(target=w2.upscale,
                                                   args=(thread_info[0],

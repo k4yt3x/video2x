@@ -87,6 +87,7 @@ def process_arguments():
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', help='video2x config file location', action='store', default=os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'video2x.json'))
     upscaler_options.add_argument('-b', '--batch', help='enable batch mode (select all default values to questions)', action='store_true')
+    upscaler_options.add_argument('--multigpu', help='use all available GPUs. [waifu2x_caffe only}', action='store_true')
 
     # scaling options
     scaling_options = parser.add_argument_group('Scaling Options')
@@ -260,6 +261,9 @@ if (args.width or args.height) and args.ratio:
 if (args.width and not args.height) or (not args.width and args.height):
     Avalon.error('You must specify both width and height')
     exit(1)
+if args.multigpu and not args.driver == 'waifu2x_caffe':
+    Avalon.error('Multigpu is only available for waifu2x_caffe')
+    exit(1)
 
 # check available memory
 check_memory()
@@ -349,6 +353,7 @@ try:
         upscaler.video2x_cache_directory = video2x_cache_directory
         upscaler.image_format = image_format
         upscaler.preserve_frames = preserve_frames
+        upscaler.multigpu = args.multigpu
 
         # run upscaler
         upscaler.create_temp_directories()
@@ -373,6 +378,7 @@ try:
             upscaler.video2x_cache_directory = video2x_cache_directory
             upscaler.image_format = image_format
             upscaler.preserve_frames = preserve_frames
+            upscaler.multigpu = args.multigpu
 
             # run upscaler
             upscaler.create_temp_directories()
