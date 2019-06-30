@@ -279,10 +279,8 @@ if args.multigpu:
             Avalon.error('Invalid GPU specified! {} is not a valid gpu id'.format(user_gpu))
             exit(1)
 else:
-    # ideally this should have been a default=[0] in add_argument() but when specifying gpu ids they are
-    # appended to the default list instead of overriding it
-    # See: https://bugs.python.org/issue16399
-    args.multigpu = [0]
+    # if not specified, multigpu becomes a boolean flag set to False
+    args.multigpu = False
 
 # check available memory
 check_memory()
@@ -338,10 +336,11 @@ if video2x_cache_directory and not os.path.isdir(video2x_cache_directory):
         Avalon.error('Unable to continue, exiting...')
         exit(1)
 
-if args.threads % len(args.multigpu):
-    Avalon.warning('Thread amount is not a multiple of the amount of GPUs specified. This will result in suboptimal resource usage')
-    if Avalon.ask('Lower the amount of threads to the nearest multiple of GPUs specified? This will yield more throughput', default=True):
-        args.threads -= args.threads % len(args.multigpu)
+if args.multigpu:
+    if args.threads % len(args.multigpu):
+        Avalon.warning('Thread amount is not a multiple of the amount of GPUs specified. This will result in suboptimal resource usage')
+        if Avalon.ask('Lower the amount of threads to the nearest multiple of GPUs specified? This will yield more throughput', default=True):
+            args.threads -= args.threads % len(args.multigpu)
 
 # start execution
 try:
