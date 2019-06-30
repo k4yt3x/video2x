@@ -267,6 +267,9 @@ if args.multigpu and not args.driver == 'waifu2x_caffe':
 
 # check if gpu ids supplied are actually valid
 if args.multigpu:
+    # filter duplicate gpu ids
+    args.multigpu = list(set(args.multigpu))
+
     available_gpulist = []
     for gpu in GPUtil.getGPUs():
         available_gpulist.append(gpu.id)
