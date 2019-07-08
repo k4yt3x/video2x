@@ -278,6 +278,15 @@ if args.multigpu:
         if user_gpu not in available_gpulist:
             Avalon.error('Invalid GPU specified! {} is not a valid gpu id'.format(user_gpu))
             exit(1)
+
+    if args.threads < len(args.multigpu):
+        Avalon.warning('Number of GPUs specified is less than the number of threads')
+        if Avalon.ask('Raise thread count to match GPU amount?', default=True):
+            args.threads = len(args.multigpu)
+    elif (args.threads > len(args.multigpu)) and (args.threads % len(args.multigpu)):
+        Avalon.warning('Thread amount is not a multiple of the amount of GPUs specified. This will result in suboptimal resource usage')
+        if Avalon.ask('Lower the amount of threads to the nearest multiple of GPUs specified? This will yield more throughput', default=True):
+            args.threads -= args.threads % len(args.multigpu)
 else:
     # if not specified, multigpu becomes a boolean flag set to False
     args.multigpu = False
@@ -336,11 +345,6 @@ if video2x_cache_directory and not os.path.isdir(video2x_cache_directory):
         Avalon.error('Unable to continue, exiting...')
         exit(1)
 
-if args.multigpu:
-    if args.threads % len(args.multigpu):
-        Avalon.warning('Thread amount is not a multiple of the amount of GPUs specified. This will result in suboptimal resource usage')
-        if Avalon.ask('Lower the amount of threads to the nearest multiple of GPUs specified? This will yield more throughput', default=True):
-            args.threads -= args.threads % len(args.multigpu)
 
 # start execution
 try:
