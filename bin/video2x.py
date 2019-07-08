@@ -82,12 +82,12 @@ def process_arguments():
     # upscaler options
     upscaler_options = parser.add_argument_group('Upscaler Options')
     upscaler_options.add_argument('-m', '--method', help='upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'])
-    upscaler_options.add_argument('-d', '--driver', help='waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'])
+    upscaler_options.add_argument('-w', '--waifu2x_engine', help='waifu2x engine', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'], dest='driver')
     upscaler_options.add_argument('-y', '--model_dir', help='directory containing model JSON files', action='store')
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', help='video2x config file location', action='store', default=os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'video2x.json'))
     upscaler_options.add_argument('-b', '--batch', help='enable batch mode (select all default values to questions)', action='store_true')
-    upscaler_options.add_argument('-g', '--multigpu', help='use the following GPU id. can be specified multiple times [waifu2x_caffe option only]', action='append', type=int)
+    upscaler_options.add_argument('-d', '--device', help='use the following GPU id. can be specified multiple times [waifu2x_caffe option only]', action='append', type=int, dest='devices')
 
     # scaling options
     scaling_options = parser.add_argument_group('Scaling Options')
@@ -261,35 +261,35 @@ if (args.width or args.height) and args.ratio:
 if (args.width and not args.height) or (not args.width and args.height):
     Avalon.error('You must specify both width and height')
     exit(1)
-if args.multigpu and not args.driver == 'waifu2x_caffe':
-    Avalon.error('Multigpu is only available for waifu2x_caffe')
+if args.devices and not args.driver == 'waifu2x_caffe':
+    Avalon.error('Using multiple devices is only available for waifu2x_caffe')
     exit(1)
 
 # check if gpu ids supplied are actually valid
-if args.multigpu:
+if args.devices:
     # filter duplicate gpu ids
-    args.multigpu = list(set(args.multigpu))
+    args.devices = list(set(args.devices))
 
     available_gpulist = []
     for gpu in GPUtil.getGPUs():
         available_gpulist.append(gpu.id)
 
-    for user_gpu in args.multigpu:
+    for user_gpu in args.devices:
         if user_gpu not in available_gpulist:
             Avalon.error('Invalid GPU specified! {} is not a valid gpu id'.format(user_gpu))
             exit(1)
 
-    if args.threads < len(args.multigpu):
+    if args.threads < len(args.devices):
         Avalon.warning('Number of GPUs specified is less than the number of threads')
         if Avalon.ask('Raise thread count to match GPU amount?', default=True):
-            args.threads = len(args.multigpu)
-    elif (args.threads > len(args.multigpu)) and (args.threads % len(args.multigpu)):
+            args.threads = len(args.devices)
+    elif (args.threads > len(args.devices)) and (args.threads % len(args.devices)):
         Avalon.warning('Thread amount is not a multiple of the amount of GPUs specified. This will result in suboptimal resource usage')
         if Avalon.ask('Lower the amount of threads to the nearest multiple of GPUs specified? This will yield more throughput', default=True):
-            args.threads -= args.threads % len(args.multigpu)
+            args.threads -= args.threads % len(args.devices)
 else:
-    # if not specified, multigpu becomes a boolean flag set to False
-    args.multigpu = False
+    # if not specified, devices becomes a boolean flag set to False
+    args.devices = False
 
 # check available memory
 check_memory()
@@ -379,7 +379,7 @@ try:
         upscaler.video2x_cache_directory = video2x_cache_directory
         upscaler.image_format = image_format
         upscaler.preserve_frames = preserve_frames
-        upscaler.multigpu = args.multigpu
+        upscaler.devices = args.devices
 
         # run upscaler
         upscaler.create_temp_directories()
@@ -404,7 +404,7 @@ try:
             upscaler.video2x_cache_directory = video2x_cache_directory
             upscaler.image_format = image_format
             upscaler.preserve_frames = preserve_frames
-            upscaler.multigpu = args.multigpu
+            upscaler.devices = args.devices
 
             # run upscaler
             upscaler.create_temp_directories()

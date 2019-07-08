@@ -26,11 +26,11 @@ class Waifu2xCaffe:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings, process, model_dir, multigpu):
+    def __init__(self, waifu2x_settings, process, model_dir, devices):
         self.waifu2x_settings = waifu2x_settings
         self.waifu2x_settings['process'] = process
         self.waifu2x_settings['model_dir'] = model_dir
-        self.multigpu = multigpu
+        self.devices = devices
 
         # arguments passed through command line overwrites config file values
         self.process = process
@@ -76,10 +76,10 @@ class Waifu2xCaffe:
                 # is executable key or null or None means that leave this option out (keep default)
                 if key == 'waifu2x_caffe_path' or value is None or value is False:
                     continue
-                elif key == 'gpu' and self.multigpu:
-                    # intercepts the gpu flag when a multigpu array is present.
+                elif key == 'gpu' and self.devices:
+                    # intercepts the gpu flag when a devices array is present.
                     execute.append('--gpu')
-                    execute.append(str(self.multigpu[int(threading.current_thread().name) % len(self.multigpu)]))
+                    execute.append(str(self.devices[int(threading.current_thread().name) % len(self.devices)]))
                 else:
                     if len(key) == 1:
                         execute.append(f'-{key}')
