@@ -50,50 +50,54 @@ class Waifu2xNcnnVulkan:
 
         try:
             # overwrite config file settings
-            self.waifu2x_settings['input_path'] = input_directory
-            self.waifu2x_settings['output_path'] = output_directory
+            self.waifu2x_settings['input'] = input_directory
+            self.waifu2x_settings['output'] = output_directory
 
             # print thread start message
             self.print_lock.acquire()
             Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} started')
             self.print_lock.release()
 
-            # waifu2x_ncnn_vulkan accepts arguments in a positional manner
-            # See: https://github.com/nihui/waifu2x_ncnn_vulkan#usage
-            # waifu2x_ncnn_vulkan.exe [input image] [output png] [noise=-1/0/1/2/3] [scale=1/2] [blocksize=400]
-            #     noise = noise level, large value means strong denoise effect, -1=no effect
-            #     scale = scale level, 1=no scale, 2=upscale 2x
-            #     blocksize = tile size, use smaller value to reduce GPU memory usage, default is 400
+            # waifu2x_ncnn_vulkan does not have long-opts, we'll have a dictionary that maps "our" config long-opt
+            # names to their short opts
+            waifu2x_ncnn_vulkan_opt_flag = {
+                'input': '-i',
+                'output': '-o',
+                'noise-level': '-n',
+                'scale-ratio': '-s',
+                'tile-size': '-t',
+                'model-path': '-m',
+                'gpu': '-g'
+            }
 
-            # waifu2x_ncnn_vulkan does not accept an arbitrary scale ratio, max is 2
-            if scale_ratio == 1:
-                for raw_frame in os.listdir(input_directory):
-                    command = [
-                        os.path.join(input_directory, raw_frame),
-                        os.path.join(output_directory, raw_frame),
-                        str(self.waifu2x_settings['noise-level']),
-                        '1',
-                        str(self.waifu2x_settings['block-size'])
-                    ]
-                    execute = [self.waifu2x_settings['waifu2x_ncnn_vulkan_path']]
-                    execute.extend(command)
+            for raw_frame in os.listdir(input_directory):
+                execute = [self.waifu2x_settings['waifu2x_ncnn_vulkan_path']]
+                for key in self.waifu2x_settings.keys():
+                    value = self.waifu2x_settings[key]
+                    if key == 'waifu2x_ncnn_vulkan_path':
+                        continue
+                    elif key == 'input':
+                        execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+                        execute.append(os.path.join(input_directory, raw_frame))
+                    elif key == 'output':
+                        execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+                        execute.append(os.path.join(output_directory, raw_frame))
+                    elif key == 'scale-ratio':
+                        execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+                        # waifu2x_ncnn_vulkan does not accept an arbitrary scale ratio, max is 2
+                        if scale_ratio == 1:
+                            execute.append('1')
+                        else:
+                            execute.append('2')
+                    # allow upper if cases to take precedence
+                    elif value is None or value is False:
+                        continue
+                    else:
+                        execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+                        execute.append(str(value))
 
-                    Avalon.debug_info(f'Executing: {execute}')
-                    subprocess.run(execute, check=True, stderr=subprocess.DEVNULL)
-            else:
-                for raw_frame in os.listdir(input_directory):
-                    command = [
-                        os.path.join(input_directory, raw_frame),
-                        os.path.join(output_directory, raw_frame),
-                        str(self.waifu2x_settings['noise-level']),
-                        '2',
-                        str(self.waifu2x_settings['block-size'])
-                    ]
-                    execute = [self.waifu2x_settings['waifu2x_ncnn_vulkan_path']]
-                    execute.extend(command)
-
-                    Avalon.debug_info(f'Executing: {execute}')
-                    subprocess.run(execute, check=True, stderr=subprocess.DEVNULL)
+                Avalon.debug_info(f'Executing: {execute}')
+                subprocess.run(execute, check=True, stderr=subprocess.DEVNULL)
 
             # print thread exiting message
             self.print_lock.acquire()
