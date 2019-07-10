@@ -40,18 +40,21 @@
     "input": null
   },
   "waifu2x_ncnn_vulkan": {
-    "waifu2x_ncnn_vulkan_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x.exe",
+    "waifu2x_ncnn_vulkan_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x-ncnn-vulkan.exe",
     "input": null,
     "output": null,
     "noise-level": 2,
     "scale-ratio": null,
-    "block-size": 400
+    "tile-size": 400,
+    "model-path": null,
+    "gpu": 0
   },
   "ffmpeg": {
     "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
     "video_to_frames": {
       "output_options": {
-        "-qscale:v": null
+        "-qscale:v": null,
+        "-pix_fmt": "rgba64be"
       },
       "-hwaccel": "auto",
       "-y": true
@@ -66,7 +69,7 @@
         "-vcodec": "libx264",
         "-crf": 17,
         "-b:v": null,
-        "-pix_fmt": "yuv420p"
+        "-pix_fmt": null
       },
       "-y": true
     },
@@ -76,7 +79,7 @@
         "-map": "1?",
         "-c": "copy",
         "-map": "-1:v?",
-        "-pix_fmt": "yuv420p"
+        "-pix_fmt": null
       },
       "-y": true
     }

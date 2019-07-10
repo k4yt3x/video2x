@@ -15,7 +15,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 26, 2019
+Last Modified: July 9, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -57,7 +57,7 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.8.0'
+VERSION = '2.8.1'
 
 # each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)

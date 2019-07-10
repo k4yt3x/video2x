@@ -22,6 +22,11 @@ Component names that are **bolded** can be automatically downloaded and configur
 
 ## Recent Changes
 
+### 2.8.1 (July 9, 2019)
+
+- Added automatic pixel format detection
+- Added automatic color bit depth detection
+
 ### 2.8.0 (June 25, 2019)
 
 - Added support for [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)
