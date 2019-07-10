@@ -6,7 +6,7 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 15, 2019
+Last Modified: July 9, 2019
 
 Description: This class handles all FFMPEG related
 operations.
@@ -33,6 +33,40 @@ class Ffmpeg:
         self.ffmpeg_binary = os.path.join(self.ffmpeg_path, 'ffmpeg.exe')
         self.ffmpeg_probe_binary = os.path.join(self.ffmpeg_path, 'ffprobe.exe')
         self.image_format = image_format
+        self.pixel_format = None
+    
+    def get_pixel_formats(self):
+        """ Get a dictionary of supported pixel formats
+
+        List all supported pixel formats and their corresponding
+        bit depth.
+
+        Returns:
+            dictionary -- JSON dict of all pixel formats to bit depth
+        """
+        execute = [
+            self.ffmpeg_probe_binary,
+            '-v',
+            'quiet',
+            '-pix_fmts'
+        ]
+
+        Avalon.debug_info(f'Executing: {" ".join(execute)}')
+
+        # initialize dictionary to store pixel formats
+        pixel_formats = {}
+
+        # record all pixel formats into dictionary
+        for line in subprocess.run(execute, check=True, stdout=subprocess.PIPE).stdout.decode().split('\n'):
+            try:
+                pixel_formats[' '.join(line.split()).split()[1]] = int(' '.join(line.split()).split()[3])
+            except (IndexError, ValueError):
+                pass
+
+        # print pixel formats for debugging
+        Avalon.debug_info(pixel_formats)
+
+        return pixel_formats
 
     def get_video_info(self, input_video):
         """ Gets input video information
@@ -179,6 +213,13 @@ class Ffmpeg:
         # from only that section
         if section:
             source = self.ffmpeg_settings[phase][section].keys()
+
+            # if pixel format is not specified, use the source pixel format
+            try:
+                if self.ffmpeg_settings[phase][section].get('-pix_fmt') is None:
+                    self.ffmpeg_settings[phase][section]['-pix_fmt'] = self.pixel_format
+            except KeyError:
+                pass
         else:
             source = self.ffmpeg_settings[phase].keys()
 

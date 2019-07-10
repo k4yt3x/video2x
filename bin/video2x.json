@@ -66,7 +66,7 @@
         "-vcodec": "libx264",
         "-crf": 17,
         "-b:v": null,
-        "-pix_fmt": "yuv420p"
+        "-pix_fmt": null
       },
       "-y": true
     },
@@ -76,7 +76,7 @@
         "-map": "1?",
         "-c": "copy",
         "-map": "-1:v?",
-        "-pix_fmt": "yuv420p"
+        "-pix_fmt": null
       },
       "-y": true
     }

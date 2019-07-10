@@ -6,7 +6,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: June 26, 2019
+Last Modified: July 9, 2019
 
 Dev: SAT3LL
 
@@ -212,7 +212,7 @@ class Upscaler:
 
                 # create a separate w2 instance for each thread
                 if self.waifu2x_driver == 'waifu2x_caffe':
-                    w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir)
+                    w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir, self.bit_depth)
                     if self.scale_ratio:
                         thread = threading.Thread(target=w2.upscale,
                                                   args=(thread_info[0],
@@ -314,6 +314,17 @@ class Upscaler:
 
         # get average frame rate of video stream
         framerate = float(Fraction(video_info['streams'][video_stream_index]['avg_frame_rate']))
+        fm.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
+
+        # get a dict of all pixel formats and corresponding bit depth
+        pixel_formats = fm.get_pixel_formats()
+
+        try:
+            self.bit_depth = pixel_formats[fm.pixel_format]
+        except KeyError as e:
+            Avalon.error(f'Unsupported pixel format: {fm.pixel_format}')
+            raise e
+
         Avalon.info(f'Framerate: {framerate}')
 
         # width/height will be coded width/height x upscale factor

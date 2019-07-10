@@ -6,7 +6,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 15, 2019
+Last Modified: July 9, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -25,10 +25,11 @@ class Waifu2xCaffe:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings, process, model_dir):
+    def __init__(self, waifu2x_settings, process, model_dir, bit_depth):
         self.waifu2x_settings = waifu2x_settings
         self.waifu2x_settings['process'] = process
         self.waifu2x_settings['model_dir'] = model_dir
+        self.waifu2x_settings['output_depth'] = bit_depth
 
         # arguments passed through command line overwrites config file values
         self.process = process
