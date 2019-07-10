@@ -70,56 +70,34 @@ class Waifu2xNcnnVulkan:
                 'gpu': '-g'
             }
 
-            # waifu2x_ncnn_vulkan does not accept an arbitrary scale ratio, max is 2
-            if scale_ratio == 1:
-                for raw_frame in os.listdir(input_directory):
-                    execute = [self.waifu2x_settings['waifu2x_ncnn_vulkan_path']]
-                    for key in self.waifu2x_settings.keys():
-                        value = self.waifu2x_settings[key]
-                        if key == 'waifu2x_ncnn_vulkan_path':
-                            continue
-                        elif key == 'input':
-                            execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
-                            execute.append(os.path.join(input_directory, raw_frame))
-                        elif key == 'output':
-                            execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
-                            execute.append(os.path.join(output_directory, raw_frame))
-                        elif key == 'scale-ratio':
-                            execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+            for raw_frame in os.listdir(input_directory):
+                execute = [self.waifu2x_settings['waifu2x_ncnn_vulkan_path']]
+                for key in self.waifu2x_settings.keys():
+                    value = self.waifu2x_settings[key]
+                    if key == 'waifu2x_ncnn_vulkan_path':
+                        continue
+                    elif key == 'input':
+                        execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+                        execute.append(os.path.join(input_directory, raw_frame))
+                    elif key == 'output':
+                        execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+                        execute.append(os.path.join(output_directory, raw_frame))
+                    elif key == 'scale-ratio':
+                        execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+                        # waifu2x_ncnn_vulkan does not accept an arbitrary scale ratio, max is 2
+                        if scale_ratio == 1:
                             execute.append('1')
-                        # allow upper if cases to take precedence
-                        elif value is None or value is False:
-                            continue
                         else:
-                            execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
-                            execute.append(str(value))
-
-                    Avalon.debug_info(f'Executing: {execute}')
-                    subprocess.run(execute, check=True, stderr=subprocess.DEVNULL)
-            else:
-                for raw_frame in os.listdir(input_directory):
-                    execute = [self.waifu2x_settings['waifu2x_ncnn_vulkan_path']]
-                    for key in self.waifu2x_settings.keys():
-                        value = self.waifu2x_settings[key]
-                        if key == 'waifu2x_ncnn_vulkan_path':
-                            continue
-                        elif key == 'input':
-                            execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
-                            execute.append(os.path.join(input_directory, raw_frame))
-                        elif key == 'output':
-                            execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
-                            execute.append(os.path.join(output_directory, raw_frame))
-                        elif key == 'scale-ratio':
-                            execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
                             execute.append('2')
-                        elif value is None or value is False:
-                            continue
-                        else:
-                            execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
-                            execute.append(str(value))
+                    # allow upper if cases to take precedence
+                    elif value is None or value is False:
+                        continue
+                    else:
+                        execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+                        execute.append(str(value))
 
-                    Avalon.debug_info(f'Executing: {execute}')
-                    subprocess.run(execute, check=True, stderr=subprocess.DEVNULL)
+                Avalon.debug_info(f'Executing: {execute}')
+                subprocess.run(execute, check=True, stderr=subprocess.DEVNULL)
 
             # print thread exiting message
             self.print_lock.acquire()
