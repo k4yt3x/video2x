@@ -150,6 +150,14 @@ class Ffmpeg:
         # read FFmpeg input options
         execute.extend(self._read_configuration(phase='frames_to_video', section='input_options'))
 
+        # WORKAROUND FOR WAIFU2X-NCNN-VULKAN
+        import re
+        import shutil
+        regex = re.compile(r'\.png\.png$')
+        for raw_frame in os.listdir(upscaled_frames):
+            shutil.move(os.path.join(upscaled_frames, raw_frame), os.path.join(upscaled_frames, regex.sub('.png', raw_frame)))
+        # END WORKAROUND
+
         # append input frames path into command
         execute.extend([
             '-i',
