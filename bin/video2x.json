@@ -45,9 +45,11 @@
     "output": null,
     "noise-level": 2,
     "scale-ratio": null,
-    "tile-size": 400,
+    "tile-size": 200,
     "model-path": null,
-    "gpu": 0
+    "gpu": 0,
+    "load-proc-save_threads": null,
+    "verbose": null
   },
   "ffmpeg": {
     "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
