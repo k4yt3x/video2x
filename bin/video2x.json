@@ -24,7 +24,7 @@
   "waifu2x_converter": {
     "waifu2x_converter_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-converter-cpp",
     "output-format": null,
-    "png-compression": null,
+    "png-compression": 0,
     "image-quality": null,
     "block-size": null,
     "disable-gpu": null,
