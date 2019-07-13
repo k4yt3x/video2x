@@ -17,6 +17,7 @@ from avalon_framework import Avalon
 import os
 import subprocess
 import threading
+import sys
 
 
 class Waifu2xNcnnVulkan:
