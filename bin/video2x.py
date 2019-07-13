@@ -87,6 +87,7 @@ def process_arguments():
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', help='video2x config file location', action='store', default=os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'video2x.json'))
     upscaler_options.add_argument('-y', help='automatically answer to all questions', action='store_true', dest='auto_answer')
+    upscaler_options.add_argument('--cache_directory', help='custom cache directory', action='store')
 
     # scaling options
     scaling_options = parser.add_argument_group('Scaling Options')
@@ -295,28 +296,32 @@ elif args.driver == 'waifu2x_ncnn_vulkan':
 ffmpeg_settings = config['ffmpeg']
 
 # load video2x settings
-video2x_cache_directory = config['video2x']['video2x_cache_directory']
+if not args.cache_directory:
+    video2x_cache_directory = config['video2x']['video2x_cache_directory']
+else:
+    video2x_cache_directory = args.cache_directory
+
 image_format = config['video2x']['image_format'].lower()
 preserve_frames = config['video2x']['preserve_frames']
 
-# create temp directories if they don't exist
+# create root cache directory in TEMP if not defined
 if not video2x_cache_directory:
-    video2x_cache_directory = os.path.join(tempfile.gettempdir(), 'video2x')
-
-if video2x_cache_directory and not os.path.isdir(video2x_cache_directory):
-    if not os.path.isfile(video2x_cache_directory) and not os.path.islink(video2x_cache_directory):
-        Avalon.warning(f'Specified cache directory {video2x_cache_directory} does not exist')
-        if Avalon.ask('Create directory?', default=True, batch=args.auto_answer):
-            if os.mkdir(video2x_cache_directory) is None:
-                Avalon.info(f'{video2x_cache_directory} created')
-            else:
-                Avalon.error(f'Unable to create {video2x_cache_directory}')
-                Avalon.error('Aborting...')
-                exit(1)
-    else:
-        Avalon.error('Specified cache directory is a file/link')
-        Avalon.error('Unable to continue, exiting...')
-        exit(1)
+    video2x_cache_directory = tempfile.mkdtemp(prefix='video2x-')
+else:
+    if video2x_cache_directory and not os.path.isdir(video2x_cache_directory):
+        if not os.path.isfile(video2x_cache_directory) and not os.path.islink(video2x_cache_directory):
+            Avalon.warning(f'Specified cache directory {video2x_cache_directory} does not exist')
+            if Avalon.ask('Create directory?', default=True, batch=args.auto_answer):
+                if os.mkdir(video2x_cache_directory) is None:
+                    Avalon.info(f'{video2x_cache_directory} created')
+                else:
+                    Avalon.error(f'Unable to create {video2x_cache_directory}')
+                    Avalon.error('Aborting...')
+                    exit(1)
+        else:
+            Avalon.error('Specified cache directory is a file/link')
+            Avalon.error('Unable to continue, exiting...')
+            exit(1)
 
 
 # start execution
@@ -340,7 +345,9 @@ try:
             Avalon.error('Suffix must be specified for FFmpeg')
             raise Exception('No suffix specified')
 
-        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method,
+                            waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings,
+                            cache_directory=video2x_cache_directory)
 
         # set optional options
         upscaler.waifu2x_driver = args.driver
@@ -349,7 +356,6 @@ try:
         upscaler.scale_ratio = args.ratio
         upscaler.model_dir = args.model_dir
         upscaler.threads = args.threads
-        upscaler.video2x_cache_directory = video2x_cache_directory
         upscaler.image_format = image_format
         upscaler.preserve_frames = preserve_frames
 

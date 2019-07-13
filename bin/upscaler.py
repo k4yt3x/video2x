@@ -43,13 +43,14 @@ class Upscaler:
         ArgumentError -- if argument is not valid
     """
 
-    def __init__(self, input_video, output_video, method, waifu2x_settings, ffmpeg_settings):
+    def __init__(self, input_video, output_video, method, waifu2x_settings, ffmpeg_settings, cache_directory):
         # mandatory arguments
         self.input_video = input_video
         self.output_video = output_video
         self.method = method
         self.waifu2x_settings = waifu2x_settings
         self.ffmpeg_settings = ffmpeg_settings
+        self.video2x_cache_directory = cache_directory
 
         # optional arguments
         self.waifu2x_driver = 'waifu2x_caffe'
@@ -58,16 +59,15 @@ class Upscaler:
         self.scale_ratio = None
         self.model_dir = None
         self.threads = 5
-        self.video2x_cache_directory = os.path.join(tempfile.gettempdir(), 'video2x')
         self.image_format = 'png'
         self.preserve_frames = False
 
     def create_temp_directories(self):
         """create temporary directory
         """
-        self.extracted_frames = tempfile.mkdtemp(dir=self.video2x_cache_directory)
+        self.extracted_frames = tempfile.mkdtemp(dir=self.video2x_cache_directory, prefix='extract-')
         Avalon.debug_info(f'Extracted frames are being saved to: {self.extracted_frames}')
-        self.upscaled_frames = tempfile.mkdtemp(dir=self.video2x_cache_directory)
+        self.upscaled_frames = tempfile.mkdtemp(dir=self.video2x_cache_directory, prefix='upscale-')
         Avalon.debug_info(f'Upscaled frames are being saved to: {self.upscaled_frames}')
 
     def cleanup_temp_directories(self):
