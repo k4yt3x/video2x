@@ -103,14 +103,17 @@ def process_arguments():
 
 
 def print_logo():
-    print('__      __  _       _                  ___   __   __')
-    print('\\ \\    / / (_)     | |                |__ \\  \\ \\ / /')
-    print(' \\ \\  / /   _    __| |   ___    ___      ) |  \\ V /')
-    print('  \\ \\/ /   | |  / _` |  / _ \\  / _ \\    / /    > <')
-    print('   \\  /    | | | (_| | |  __/ | (_) |  / /_   / . \\')
-    print('    \\/     |_|  \\__,_|  \\___|  \\___/  |____| /_/ \\_\\')
-    print('\n               Video2X Video Enlarger')
-    spaces = ((44 - len(f'Version {VERSION}')) // 2) * ' '
+    v2x_logo = r'''
+    __      __  _       _                  ___   __   __
+    \ \    / / (_)     | |                |__ \  \ \ / /
+     \ \  / /   _    __| |   ___    ___      ) |  \ V /
+      \ \/ /   | |  / _` |  / _ \  / _ \    / /    > <
+       \  /    | | | (_| | |  __/ | (_) |  / /_   / . \
+        \/     |_|  \__,_|  \___|  \___/  |____| /_/ \_\
+    '''
+    print(v2x_logo)
+    print('\n                   Video2X Video Enlarger')
+    spaces = ((52 - len(f'Version {VERSION}')) // 2) * ' '
     print(f'{Avalon.FM.BD}\n{spaces}    Version {VERSION}\n{Avalon.FM.RST}')
 
 
