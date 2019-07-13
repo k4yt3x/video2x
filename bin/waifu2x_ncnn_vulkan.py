@@ -90,6 +90,8 @@ class Waifu2xNcnnVulkan:
                         execute.append('1')
                     else:
                         execute.append('2')
+                elif value is True:
+                    execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
                 # allow upper if cases to take precedence
                 elif value is None or value is False:
                     continue
@@ -98,7 +100,10 @@ class Waifu2xNcnnVulkan:
                     execute.append(str(value))
 
             Avalon.debug_info(f'Executing: {execute}')
-            subprocess.run(execute, check=True, stderr=subprocess.DEVNULL)
+            if self.waifu2x_settings['verbose'] is True:
+                subprocess.run(execute, check=True)
+            else:
+                subprocess.run(execute, check=True, stderr=subprocess.DEVNULL)
 
             # print thread exiting message
             self.print_lock.acquire()
