@@ -359,7 +359,15 @@ try:
     elif os.path.isdir(args.input):
         # upscale videos in a directory
         Avalon.info(f'Upscaling videos in directory: {args.input}')
+
+        # determine which files are videos
+        accepted_formats = ['.mkv', '.mp4', '.webm']
+        video_list = []
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
+            if input_video.endswith(tuple(accepted_formats)):
+                video_list.append(input_video)
+
+        for input_video in video_list:
             output_video = os.path.join(args.output, input_video)
             upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
 
