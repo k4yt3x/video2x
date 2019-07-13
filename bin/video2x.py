@@ -83,10 +83,10 @@ def process_arguments():
     upscaler_options = parser.add_argument_group('Upscaler Options')
     upscaler_options.add_argument('-m', '--method', help='upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'])
     upscaler_options.add_argument('-d', '--driver', help='waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'])
-    upscaler_options.add_argument('-y', '--model_dir', help='directory containing model JSON files', action='store')
+    upscaler_options.add_argument('--model_dir', help='directory containing model JSON files', action='store')
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', help='video2x config file location', action='store', default=os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'video2x.json'))
-    upscaler_options.add_argument('-b', '--batch', help='enable batch mode (select all default values to questions)', action='store_true')
+    upscaler_options.add_argument('-y', help='automatically answer to all questions', action='store_true', dest='auto_answer')
 
     # scaling options
     scaling_options = parser.add_argument_group('Scaling Options')
@@ -154,7 +154,7 @@ def check_memory():
             Avalon.warning(f'You might have insufficient amount of {memory_type} memory available to run this program ({memory_available} GB)')
             Avalon.warning('Proceed with caution')
             if args.threads > 1:
-                if Avalon.ask('Reduce number of threads to avoid crashing?', default=True, batch=args.batch):
+                if Avalon.ask('Reduce number of threads to avoid crashing?', default=True, batch=args.auto_answer):
                     args.threads = 1
         # if memory available is less than needed, warn the user
         elif memory_available < (mem_per_thread * args.threads):
@@ -165,7 +165,7 @@ def check_memory():
 
             # ask the user if he / she wants to change to the recommended
             # number of threads
-            if Avalon.ask('Change to the recommended value?', default=True, batch=args.batch):
+            if Avalon.ask('Change to the recommended value?', default=True, batch=args.auto_answer):
                 args.threads = int(memory_available // mem_per_thread)
             else:
                 Avalon.warning('Proceed with caution')
@@ -303,7 +303,7 @@ if not video2x_cache_directory:
 if video2x_cache_directory and not os.path.isdir(video2x_cache_directory):
     if not os.path.isfile(video2x_cache_directory) and not os.path.islink(video2x_cache_directory):
         Avalon.warning(f'Specified cache directory {video2x_cache_directory} does not exist')
-        if Avalon.ask('Create directory?', default=True, batch=args.batch):
+        if Avalon.ask('Create directory?', default=True, batch=args.auto_answer):
             if os.mkdir(video2x_cache_directory) is None:
                 Avalon.info(f'{video2x_cache_directory} created')
             else:

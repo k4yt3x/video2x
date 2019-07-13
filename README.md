@@ -183,6 +183,9 @@ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 -
 ### -h, --help
     show this help message and exit
 
+### -y
+    Answer automatically all questions
+
 ## File Options
 
 ### -i INPUT, --input INPUT
@@ -199,7 +202,7 @@ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 -
 ### -d {waifu2x_caffe,waifu2x_converter}, --driver {waifu2x_caffe,waifu2x_converter}
     Waifu2x driver (default: waifu2x_caffe)
 
-### -y MODEL_DIR, --model_dir MODEL_DIR
+### --model_dir MODEL_DIR
     Folder containing model JSON files
 
 ### -t THREADS, --threads THREADS
@@ -207,9 +210,6 @@ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 -
 
 ### -c CONFIG, --config CONFIG
     Video2X config file location (default: video2x\bin\video2x.json)
-
-### -b, --batch
-    Enable batch mode (select all default values to questions)
 
 ## Scaling Options
 
