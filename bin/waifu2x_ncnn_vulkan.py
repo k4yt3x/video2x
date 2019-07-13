@@ -35,7 +35,7 @@ class Waifu2xNcnnVulkan:
 
         # waifu2x_ncnn_vulkan can't find its own model directory if its not in the current dir
         #   so change to it
-        os.chdir(os.path.join(self.waifu2x_settings['waifu2x_ncnn_vulkan_path'], '..'))
+        # os.chdir(os.path.join(self.waifu2x_settings['waifu2x_ncnn_vulkan_path'], '..'))
 
         self.print_lock = threading.Lock()
 

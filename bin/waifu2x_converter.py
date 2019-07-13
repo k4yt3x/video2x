@@ -15,6 +15,7 @@ from avalon_framework import Avalon
 import os
 import subprocess
 import threading
+import sys
 
 
 class Waifu2xConverter:
@@ -79,7 +80,10 @@ class Waifu2xConverter:
 
                 # the key doesn't need to be passed in this case
                 if key == 'waifu2x_converter_path':
-                    execute.append(os.path.join(str(value), 'waifu2x-converter-cpp.exe'))
+                    if sys.platform != 'win32':
+                        execute.append(os.path.join(str(value), 'waifu2x-converter-cpp'))
+                    else:
+                        execute.append(os.path.join(str(value), 'waifu2x-converter-cpp.exe'))
 
                 # null or None means that leave this option out (keep default)
                 elif value is None or value is False:

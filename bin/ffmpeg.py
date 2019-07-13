@@ -15,7 +15,7 @@ from avalon_framework import Avalon
 import json
 import subprocess
 import os
-
+import sys
 
 class Ffmpeg:
     """This class communicates with ffmpeg
@@ -30,8 +30,13 @@ class Ffmpeg:
 
         self.ffmpeg_path = self.ffmpeg_settings['ffmpeg_path']
 
-        self.ffmpeg_binary = os.path.join(self.ffmpeg_path, 'ffmpeg.exe')
-        self.ffmpeg_probe_binary = os.path.join(self.ffmpeg_path, 'ffprobe.exe')
+        if sys.platform != 'win32':
+            self.ffmpeg_binary = os.path.join(self.ffmpeg_path, 'ffmpeg')
+            self.ffmpeg_probe_binary = os.path.join(self.ffmpeg_path, 'ffprobe')
+        else:
+            self.ffmpeg_binary = os.path.join(self.ffmpeg_path, 'ffmpeg.exe')
+            self.ffmpeg_probe_binary = os.path.join(self.ffmpeg_path, 'ffprobe.exe')
+            
         self.image_format = image_format
         self.pixel_format = None
     
@@ -64,7 +69,10 @@ class Ffmpeg:
                 pass
 
         # print pixel formats for debugging
-        Avalon.debug_info(pixel_formats)
+        # this avalon command returns a code if it's not run in windows
+        # so we'll catch to skip in linux until avalon is patched
+        if sys.platform == 'win32':
+            Avalon.debug_info(pixel_formats)
 
         return pixel_formats
 
@@ -262,4 +270,5 @@ class Ffmpeg:
             int -- execution return code
         """
         Avalon.debug_info(f'Executing: {execute}')
-        return subprocess.run(execute, shell=True, check=True).returncode
+        #remove shell=true becuase it isn't needed and causes issues in linux
+        return subprocess.run(execute, check=True).returncode
