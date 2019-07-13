@@ -196,8 +196,8 @@ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 -
 ### -m {cpu,gpu,cudnn}, --method {cpu,gpu,cudnn}
     Upscaling method (default: gpu)
 
-### -d {waifu2x_caffe,waifu2x_converter}, --driver {waifu2x_caffe,waifu2x_converter}
-    Waifu2x driver (default: waifu2x_caffe)
+### -w {waifu2x_caffe,waifu2x_converter}, ----waifu2x_engine {waifu2x_caffe,waifu2x_converter}
+    Waifu2x engine (default: waifu2x_caffe)
 
 ### -y MODEL_DIR, --model_dir MODEL_DIR
     Folder containing model JSON files
@@ -210,6 +210,9 @@ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 -
 
 ### -b, --batch
     Enable batch mode (select all default values to questions)
+
+### -d, --device
+    Use the following GPU id. Can be specified multiple times [waifu2x_caffe option only]
 
 ## Scaling Options
 
