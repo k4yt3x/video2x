@@ -1,0 +1,94 @@
+{
+  "waifu2x_caffe": {
+    "waifu2x_caffe_path": "/usr/bin/waifu2x-caffe-cui",
+    "input_extention_list": null,
+    "output_extention": null,
+    "mode": "noise_scale",
+    "scale_ratio": null,
+    "scale_width": null,
+    "scale_height": null,
+    "noise_level": 3,
+    "process": "gpu",
+    "crop_size": 128,
+    "output_quality": -1,
+    "output_depth": 8,
+    "batch_size": 1,
+    "gpu": 0,
+    "tta": 0,
+    "input_path": null,
+    "output_path": null,
+    "model_dir": "/usr/share/waifu2x-caffe-cui",
+    "crop_w": null,
+    "crop_h": null
+  },
+  "waifu2x_converter": {
+    "waifu2x_converter_path": "/usr/bin/",
+    "output-format": null,
+    "png-compression": null,
+    "image-quality": null,
+    "block-size": null,
+    "disable-gpu": null,
+    "force-OpenCL": null,
+    "processor": 0,
+    "jobs": null,
+    "model-dir": "/usr/share/waifu2x-converter-cpp/",
+    "scale-ratio": null,
+    "noise-level": 3,
+    "mode": "noise-scale",
+    "silent": true,
+    "output": null,
+    "input": null
+  },
+  "waifu2x_ncnn_vulkan": {
+    "waifu2x_ncnn_vulkan_path": "/home/llama/.local/share/flatpak/exports/bin/com.github.nihui.waifu2x-ncnn-vulkan",
+    "input": null,
+    "output": null,
+    "noise-level": 2,
+    "scale-ratio": null,
+    "tile-size": 200,
+    "model-path": "/app/share/models-upconv_7_anime_style_art_rgb/",
+    "gpu": 0,
+    "load-proc-save_threads": null,
+    "verbose": null
+  },
+  "ffmpeg": {
+    "ffmpeg_path": "/usr/bin/",
+    "video_to_frames": {
+      "output_options": {
+        "-qscale:v": null,
+        "-pix_fmt": "rgba64be"
+      },
+      "-hwaccel": "auto",
+      "-y": true
+    },
+    "frames_to_video": {
+      "input_options": {
+        "-qscale:v": null,
+        "-qscale:a": null,
+        "-f": "image2"
+      },
+      "output_options": {
+        "-vcodec": "libx264",
+        "-crf": 16,
+        "-b:v": null,
+        "-pix_fmt": null
+      },
+      "-y": true
+    },
+    "migrating_tracks": {
+      "output_options": {
+        "-map": "0:v:0?",
+        "-map": "1?",
+        "-c": "copy",
+        "-map": "-1:v?",
+        "-pix_fmt": null
+      },
+      "-y": true
+    }
+  },
+  "video2x": {
+    "video2x_cache_directory": null,
+    "image_format": "png",
+    "preserve_frames": false
+  }
+}
