@@ -144,7 +144,7 @@ Enlarge the video to 1920x1080 using CUDA. You may also use the `-r/--ratio` opt
 python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu --width=1920 --height=1080
 ```
 
-### Nvidia CNDNN
+### Nvidia CUDNN
 
 Enlarge the video to 1920x1080 using CUDNN. You may also use the `-r/--ratio` option.
 
@@ -160,7 +160,7 @@ Enlarge the video by 2 times using OpenCL. Note that `waifu2x-converter-cpp` doe
 python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2x_converter
 ```
 
-### AMD or Nvidia (waifu2x-ncnn-vulkan Vulkan)
+### AMD, Intel integrated GPU or Nvidia (waifu2x-ncnn-vulkan Vulkan)
 
 ```shell
 python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2x_ncnn_vulkan
@@ -184,7 +184,7 @@ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 -
     show this help message and exit
 
 ### -y
-    Answer automatically all questions
+    Automatically answer all questions
 
 ## File Options
 
@@ -199,7 +199,7 @@ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 -
 ### -m {cpu,gpu,cudnn}, --method {cpu,gpu,cudnn}
     Upscaling method (default: gpu)
 
-### -d {waifu2x_caffe,waifu2x_converter}, --driver {waifu2x_caffe,waifu2x_converter}
+### -d {waifu2x_caffe,waifu2x_converter,waifu2x_ncnn_vulkan}, --driver {waifu2x_caffe,waifu2x_converter,waifu2x_ncnn_vulkan}
     Waifu2x driver (default: waifu2x_caffe)
 
 ### --model_dir MODEL_DIR
