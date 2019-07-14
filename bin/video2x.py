@@ -270,9 +270,8 @@ if args.devices:
     # filter duplicate gpu ids
     args.devices = list(set(args.devices))
 
-    available_gpulist = []
-    for gpu in GPUtil.getGPUs():
-        available_gpulist.append(gpu.id)
+    # list NV devices
+    available_gpulist = [gpu.id for gpu in GPUtil.getGPUs()]
 
     for user_gpu in args.devices:
         if user_gpu not in available_gpulist:
