@@ -370,7 +370,7 @@ try:
         Avalon.info(f'Upscaling videos in directory: {args.input}')
 
         # determine which files are videos
-        accepted_formats = ['.mkv', '.mp4', '.webm']
+        accepted_formats = config['video2x']['video_extensions']
         video_list = []
         for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
             if input_video.endswith(tuple(accepted_formats)):
@@ -378,7 +378,9 @@ try:
 
         for input_video in video_list:
             output_video = os.path.join(args.output, input_video)
-            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video,
+                                method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings,
+                                cache_directory=video2x_cache_directory)
 
             # set optional options
             upscaler.waifu2x_driver = args.driver
@@ -387,7 +389,6 @@ try:
             upscaler.scale_ratio = args.ratio
             upscaler.model_dir = args.model_dir
             upscaler.threads = args.threads
-            upscaler.video2x_cache_directory = video2x_cache_directory
             upscaler.image_format = image_format
             upscaler.preserve_frames = preserve_frames
 

@@ -89,6 +89,11 @@
   "video2x": {
     "video2x_cache_directory": null,
     "image_format": "png",
-    "preserve_frames": false
+    "preserve_frames": false,
+    "video_extensions": [
+      ".mkv", ".mp4", ".avi",
+      ".webm", ".flv", ".3gp",
+      ".mov", ".wmi"
+    ]
   }
 }
