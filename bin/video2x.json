@@ -77,10 +77,12 @@
     },
     "migrating_tracks": {
       "output_options": {
-        "-map": "0:v:0?",
-        "-map": "1?",
+        "-map": [
+          "0:v:0?",
+          "1?",
+          "-1:v?"
+        ],
         "-c": "copy",
-        "-map": "-1:v?",
         "-pix_fmt": null
       },
       "-y": true

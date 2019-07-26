@@ -6,10 +6,9 @@
 Name: FFMPEG Class
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: July 9, 2019
+Last Modified: July 26, 2019
 
-Description: This class handles all FFMPEG related
-operations.
+Description: This class handles all FFmpeg related operations.
 """
 from avalon_framework import Avalon
 import json
@@ -18,9 +17,9 @@ import os
 
 
 class Ffmpeg:
-    """This class communicates with ffmpeg
+    """This class communicates with FFmpeg
 
-    This class deals with ffmpeg. It handles extracitng
+    This class deals with FFmpeg. It handles extracitng
     frames, stripping audio, converting images into videos
     and inserting audio tracks to videos.
     """
@@ -103,7 +102,7 @@ class Ffmpeg:
         """Extract every frame from original videos
 
         This method extracts every frame from videoin
-        using ffmpeg
+        using FFmpeg
 
         Arguments:
             input_video {string} -- input video path
@@ -239,8 +238,18 @@ class Ffmpeg:
                 value = self.ffmpeg_settings[phase][key]
 
             # null or None means that leave this option out (keep default)
-            if value is None or value is False or isinstance(value, list) or isinstance(value, dict):
+            if value is None or value is False or isinstance(value, dict):
                 continue
+
+            # if the value is a list, append the same argument and all values
+            elif isinstance(value, list):
+
+                for subvalue in value:
+                    configuration.append(key)
+                    if value is not True:
+                        configuration.append(str(subvalue))
+
+            # otherwise the value is typical       
             else:
                 configuration.append(key)
 
