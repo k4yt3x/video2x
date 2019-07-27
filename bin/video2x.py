@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: future_fstrings -*-
-
-
-"""
+# -*- coding: utf-8 -*-
+r"""
 
 __      __  _       _                  ___   __   __
 \ \    / / (_)     | |                |__ \  \ \ / /
@@ -15,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: July 9, 2019
+Last Modified: July 27, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -43,13 +41,16 @@ enlarging engine. It extracts frames from a video, enlarge it by a
 number of times without losing any details or quality, keeping lines
 smooth and edges sharp.
 """
-from avalon_framework import Avalon
+
+# local imports
 from upscaler import Upscaler
+
+# built-in imports
 import argparse
-import GPUtil
+import glob
 import json
 import os
-import psutil
+import pathlib
 import re
 import shutil
 import sys
@@ -57,7 +58,12 @@ import tempfile
 import time
 import traceback
 
-VERSION = '2.8.1'
+# third-party imports
+from avalon_framework import Avalon
+import GPUtil
+import psutil
+
+VERSION = '2.9.0'
 
 # each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
@@ -76,16 +82,16 @@ def process_arguments():
 
     # video options
     file_options = parser.add_argument_group('File Options')
-    file_options.add_argument('-i', '--input', help='source video file/directory', action='store')
-    file_options.add_argument('-o', '--output', help='output video file/directory', action='store')
+    file_options.add_argument('-i', '--input', type=pathlib.Path, help='source video file/directory', action='store')
+    file_options.add_argument('-o', '--output', type=pathlib.Path, help='output video file/directory', action='store')
 
     # upscaler options
     upscaler_options = parser.add_argument_group('Upscaler Options')
     upscaler_options.add_argument('-m', '--method', help='upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'])
     upscaler_options.add_argument('-d', '--driver', help='waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'])
-    upscaler_options.add_argument('-y', '--model_dir', help='directory containing model JSON files', action='store')
+    upscaler_options.add_argument('-y', '--model_dir', type=pathlib.Path, help='directory containing model JSON files', action='store')
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
-    upscaler_options.add_argument('-c', '--config', help='video2x config file location', action='store', default=os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'video2x.json'))
+    upscaler_options.add_argument('-c', '--config', type=pathlib.Path, help='video2x config file location', action='store', default=pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.json')
     upscaler_options.add_argument('-b', '--batch', help='enable batch mode (select all default values to questions)', action='store_true')
 
     # scaling options
@@ -103,12 +109,16 @@ def process_arguments():
 
 
 def print_logo():
-    print('__      __  _       _                  ___   __   __')
-    print('\\ \\    / / (_)     | |                |__ \\  \\ \\ / /')
-    print(' \\ \\  / /   _    __| |   ___    ___      ) |  \\ V /')
-    print('  \\ \\/ /   | |  / _` |  / _ \\  / _ \\    / /    > <')
-    print('   \\  /    | | | (_| | |  __/ | (_) |  / /_   / . \\')
-    print('    \\/     |_|  \\__,_|  \\___|  \\___/  |____| /_/ \\_\\')
+    """print video2x logo"""
+    logo = r'''
+    __      __  _       _                  ___   __   __
+    \ \    / / (_)     | |                |__ \  \ \ / /
+     \ \  / /   _    __| |   ___    ___      ) |  \ V /
+      \ \/ /   | |  / _` |  / _ \  / _ \    / /    > <
+       \  /    | | | (_| | |  __/ | (_) |  / /_   / . \
+        \/     |_|  \__,_|  \___|  \___/  |____| /_/ \_\
+    '''
+    print(logo)
     print('\n               Video2X Video Enlarger')
     spaces = ((44 - len(f'Version {VERSION}')) // 2) * ' '
     print(f'{Avalon.FM.BD}\n{spaces}    Version {VERSION}\n{Avalon.FM.RST}')
@@ -129,7 +139,7 @@ def check_memory():
     # GPUtil requires nvidia-smi.exe to interact with GPU
     if args.method == 'gpu' or args.method == 'cudnn':
         if not (shutil.which('nvidia-smi') or
-                os.path.isfile('C:\\Program Files\\NVIDIA Corporation\\NVSMI\\nvidia-smi.exe')):
+                pathlib.Path(r'C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe').is_file()):
             # Nvidia System Management Interface not available
             Avalon.warning('Nvidia-smi not available, skipping available memory check')
             Avalon.warning('If you experience error \"cudaSuccess out of memory\", try reducing number of threads you\'re using')
@@ -193,28 +203,28 @@ def absolutify_paths(config):
     Returns:
         dict -- configuration file dictionary
     """
-    current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+    current_directory = pathlib.Path(sys.argv[0]).parent.absolute()
 
     # check waifu2x-caffe path
     if not re.match('^[a-z]:', config['waifu2x_caffe']['waifu2x_caffe_path'], re.IGNORECASE):
-        config['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(current_directory, config['waifu2x_caffe']['waifu2x_caffe_path'])
+        config['waifu2x_caffe']['waifu2x_caffe_path'] = current_directory / config['waifu2x_caffe']['waifu2x_caffe_path']
 
     # check waifu2x-converter-cpp path
     if not re.match('^[a-z]:', config['waifu2x_converter']['waifu2x_converter_path'], re.IGNORECASE):
-        config['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(current_directory, config['waifu2x_converter']['waifu2x_converter_path'])
+        config['waifu2x_converter']['waifu2x_converter_path'] = current_directory / config['waifu2x_converter']['waifu2x_converter_path']
 
     # check waifu2x_ncnn_vulkan path
     if not re.match('^[a-z]:', config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'], re.IGNORECASE):
-        config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = os.path.join(current_directory, config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'])
+        config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = current_directory / config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path']
 
     # check ffmpeg path
     if not re.match('^[a-z]:', config['ffmpeg']['ffmpeg_path'], re.IGNORECASE):
-        config['ffmpeg']['ffmpeg_path'] = os.path.join(current_directory, config['ffmpeg']['ffmpeg_path'])
+        config['ffmpeg']['ffmpeg_path'] = current_directory / config['ffmpeg']['ffmpeg_path']
 
     # check video2x cache path
     if config['video2x']['video2x_cache_directory']:
         if not re.match('^[a-z]:', config['video2x']['video2x_cache_directory'], re.IGNORECASE):
-            config['video2x']['video2x_cache_directory'] = os.path.join(current_directory, config['video2x']['video2x_cache_directory'])
+            config['video2x']['video2x_cache_directory'] = current_directory / config['video2x']['video2x_cache_directory']
 
     return config
 
@@ -271,19 +281,19 @@ config = absolutify_paths(config)
 # load waifu2x configuration
 if args.driver == 'waifu2x_caffe':
     waifu2x_settings = config['waifu2x_caffe']
-    if not os.path.isfile(waifu2x_settings['waifu2x_caffe_path']):
+    if not pathlib.Path(waifu2x_settings['waifu2x_caffe_path']).is_file():
         Avalon.error('Specified waifu2x-caffe directory doesn\'t exist')
         Avalon.error('Please check the configuration file settings')
         raise FileNotFoundError(waifu2x_settings['waifu2x_caffe_path'])
 elif args.driver == 'waifu2x_converter':
     waifu2x_settings = config['waifu2x_converter']
-    if not os.path.isdir(waifu2x_settings['waifu2x_converter_path']):
+    if not pathlib.Path(waifu2x_settings['waifu2x_converter_path']).is_dir():
         Avalon.error('Specified waifu2x-converter-cpp directory doesn\'t exist')
         Avalon.error('Please check the configuration file settings')
         raise FileNotFoundError(waifu2x_settings['waifu2x_converter_path'])
 elif args.driver == 'waifu2x_ncnn_vulkan':
     waifu2x_settings = config['waifu2x_ncnn_vulkan']
-    if not os.path.isfile(waifu2x_settings['waifu2x_ncnn_vulkan_path']):
+    if not pathlib.Path(waifu2x_settings['waifu2x_ncnn_vulkan_path']).is_file():
         Avalon.error('Specified waifu2x_ncnn_vulkan directory doesn\'t exist')
         Avalon.error('Please check the configuration file settings')
         raise FileNotFoundError(waifu2x_settings['waifu2x_ncnn_vulkan_path'])
@@ -292,28 +302,38 @@ elif args.driver == 'waifu2x_ncnn_vulkan':
 ffmpeg_settings = config['ffmpeg']
 
 # load video2x settings
-video2x_cache_directory = config['video2x']['video2x_cache_directory']
 image_format = config['video2x']['image_format'].lower()
 preserve_frames = config['video2x']['preserve_frames']
 
-# create temp directories if they don't exist
-if not video2x_cache_directory:
-    video2x_cache_directory = os.path.join(tempfile.gettempdir(), 'video2x')
+# load cache directory
+if isinstance(config['video2x']['video2x_cache_directory'], str):
+    video2x_cache_directory = pathlib.Path(config['video2x']['video2x_cache_directory'])
+else:
+    video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
 
-if video2x_cache_directory and not os.path.isdir(video2x_cache_directory):
-    if not os.path.isfile(video2x_cache_directory) and not os.path.islink(video2x_cache_directory):
-        Avalon.warning(f'Specified cache directory {video2x_cache_directory} does not exist')
-        if Avalon.ask('Create directory?', default=True, batch=args.batch):
-            if os.mkdir(video2x_cache_directory) is None:
-                Avalon.info(f'{video2x_cache_directory} created')
-            else:
-                Avalon.error(f'Unable to create {video2x_cache_directory}')
-                Avalon.error('Aborting...')
-                exit(1)
+if video2x_cache_directory.exists() and not video2x_cache_directory.is_dir():
+    Avalon.error('Specified cache directory is a file/link')
+    raise FileExistsError('Specified cache directory is a file/link')
+
+elif not video2x_cache_directory.exists():
+    # if destination file is a file or a symbolic link
+    Avalon.warning(f'Specified cache directory {video2x_cache_directory} does not exist')
+
+    # try creating the cache directory
+    if Avalon.ask('Create directory?', default=True, batch=args.batch):
+        try:
+            video2x_cache_directory.mkdir(parents=True, exist_ok=True)
+            Avalon.info(f'{video2x_cache_directory} created')
+
+        # there can be a number of exceptions here
+        # PermissionError, FileExistsError, etc.
+        # therefore, we put a catch-them-all here
+        except Exception as e:
+            Avalon.error(f'Unable to create {video2x_cache_directory}')
+            Avalon.error('Aborting...')
+            raise e
     else:
-        Avalon.error('Specified cache directory is a file/link')
-        Avalon.error('Unable to continue, exiting...')
-        exit(1)
+        raise FileNotFoundError('Could not create cache directory')
 
 
 # start execution
@@ -322,17 +342,17 @@ try:
     begin_time = time.time()
 
     # if input specified is a single file
-    if os.path.isfile(args.input):
+    if args.input.is_file():
 
         # upscale single video file
         Avalon.info(f'Upscaling single video file: {args.input}')
 
         # check for input output format mismatch
-        if os.path.isdir(args.output):
+        if args.output.is_dir():
             Avalon.error('Input and output path type mismatch')
             Avalon.error('Input is single file but output is directory')
             raise Exception('input output path type mismatch')
-        if not re.search('.*\..*$', args.output):
+        if not re.search('.*\..*$', str(args.output)):
             Avalon.error('No suffix found in output file path')
             Avalon.error('Suffix must be specified for FFmpeg')
             raise Exception('No suffix specified')
@@ -356,12 +376,12 @@ try:
         upscaler.cleanup_temp_directories()
 
     # if input specified is a directory
-    elif os.path.isdir(args.input):
+    elif args.input.is_dir():
         # upscale videos in a directory
         Avalon.info(f'Upscaling videos in directory: {args.input}')
-        for input_video in [f for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]:
-            output_video = os.path.join(args.output, input_video)
-            upscaler = Upscaler(input_video=os.path.join(args.input, input_video), output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+        for input_video in [f for f in args.input.iterdir() if f.is_file()]:
+            output_video = args.output / input_video
+            upscaler = Upscaler(input_video=args.input / input_video, output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
 
             # set optional options
             upscaler.waifu2x_driver = args.driver

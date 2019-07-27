@@ -18,9 +18,15 @@ Component names that are **bolded** can be automatically downloaded and configur
 2. AMD GPU / Nvidia GPU
 3. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
 4. [**FFmpeg**](https://ffmpeg.zeranoe.com/builds/)
-5. [**waifu2x-caffe**](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
+5. [**waifu2x-caffe**](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases) / [**waifu2x-ncnn-vulkan**](https://github.com/nihui/waifu2x-ncnn-vulkan)
 
 ## Recent Changes
+
+### 2.9.0 (July 27, 2019)
+
+- Changed file handling method from `os` to `pathlib`
+- Removed f_string dependency and support for legacy versions of Python
+- Organized file import statements
 
 ### 2.8.1 (July 9, 2019)
 
@@ -34,12 +40,6 @@ Component names that are **bolded** can be automatically downloaded and configur
 ### 2.7.1 (April 18, 2019)
 
 - Fixed video2x custom temp folder bug found by @cr08 .
-
-### 2.7.0 (March 30, 2019)
-
-- Added support for different extracted image formats.
-- Redesigned FFmpeg wrapper, FFmpeg settings are now customizable in the `video2x.json` config file.
-- Other minor enhancements and adjustments (e.g. argument -> method variable)
 
 ### Setup Script 1.3.0 (June 25, 2019)
 

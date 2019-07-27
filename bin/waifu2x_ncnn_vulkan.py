@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
-# -*- coding: future_fstrings -*-
-
-
+# -*- coding: utf-8 -*-
 """
 Name: Waifu2x NCNN Vulkan Driver
 Author: SAT3LL
 Date Created: June 26, 2019
-Last Modified: June 26, 2019
+Last Modified: July 27, 2019
 
 Dev: K4YT3X
 
 Description: This class is a high-level wrapper
 for waifu2x_ncnn_vulkan.
 """
-from avalon_framework import Avalon
+
+# built-in imports
 import os
 import subprocess
 import threading
+
+# third-party imports
+from avalon_framework import Avalon
 
 
 class Waifu2xNcnnVulkan:

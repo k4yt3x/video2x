@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
-# -*- coding: future_fstrings -*-
-
-
+# -*- coding: utf-8 -*-
 """
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: June 15, 2019
+Last Modified: July 27, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
 """
-from avalon_framework import Avalon
-import os
+
+# built-in imports
+import pathlib
 import subprocess
 import threading
+
+# third-party imports
+from avalon_framework import Avalon
 
 
 class Waifu2xConverter:
@@ -62,8 +64,7 @@ class Waifu2xConverter:
             # models_rgb must be specified manually for waifu2x-converter-cpp
             # if it's not specified in the arguments, create automatically
             if self.waifu2x_settings['model-dir'] is None:
-                self.waifu2x_settings['model-dir'] = os.path.join(self.waifu2x_settings['waifu2x_converter_path'],
-                                                                  'models_rgb')
+                self.waifu2x_settings['model-dir'] = pathlib.Path(self.waifu2x_settings['waifu2x_converter_path']) / 'models_rgb'
 
             # print thread start message
             self.print_lock.acquire()
@@ -79,7 +80,7 @@ class Waifu2xConverter:
 
                 # the key doesn't need to be passed in this case
                 if key == 'waifu2x_converter_path':
-                    execute.append(os.path.join(str(value), 'waifu2x-converter-cpp.exe'))
+                    execute.append(pathlib.Path(str(value)) / 'waifu2x-converter-cpp.exe')
 
                 # null or None means that leave this option out (keep default)
                 elif value is None or value is False:

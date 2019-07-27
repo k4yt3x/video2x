@@ -4,4 +4,3 @@ GPUtil
 psutil
 requests
 tqdm
-future-fstrings>=1.1.0

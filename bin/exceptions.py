@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: future_fstrings -*-
-
-
+# -*- coding: utf-8 -*-
 """
 Name: Video2X Exceptions
 Dev: K4YT3X
 Date Created: December 13, 2018
-Last Modified: March 19, 2019
+Last Modified: July 27, 2019
 """
 
 

@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-
 """
 Name: Video2X Setup Script
 Author: K4YT3X
 Author: BrianPetkovsek
 Date Created: November 28, 2018
-Last Modified: June 26, 2019
+Last Modified: July 27, 2019
 
 Dev: SAT3LL
 
@@ -26,14 +24,19 @@ Installation Details:
 - waifu2x_ncnn_vulkan: %LOCALAPPDATA%\\video2x\\waifu2x-ncnn-vulkan
 
 """
+
+# built-in imports
 import argparse
 import json
 import os
+import pathlib
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
 import traceback
+import urllib
 import zipfile
 
 # Requests doesn't come with windows, therefore
@@ -42,6 +45,9 @@ import zipfile
 # import requests
 
 VERSION = '1.3.0'
+
+# global static variables
+LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
 
 
 def process_arguments():
@@ -104,14 +110,15 @@ class Video2xSetup:
         """
         for file in self.trash:
             try:
-                if os.path.isfile(file):
-                    print('Deleting: {}'.format(file))
-                    os.remove(file)
-                else:
-                    print('Deleting: {}'.format(file))
+                if file.is_dir():
+                    print(f'Deleting directory: {file}')
                     shutil.rmtree(file)
-            except FileNotFoundError:
-                pass
+                else:
+                    print(f'Deleting file: {file}')
+                    file.unlink()
+            except Exception:
+                print(f'Error deleting: {file}')
+                traceback.print_exc()
 
     def _install_ffmpeg(self):
         """ Install FFMPEG
@@ -122,7 +129,7 @@ class Video2xSetup:
         self.trash.append(ffmpeg_zip)
 
         with zipfile.ZipFile(ffmpeg_zip) as zipf:
-            zipf.extractall(os.path.join(os.getenv('localappdata'), 'video2x'))
+            zipf.extractall(LOCALAPPDATA / 'video2x')
 
     def _install_waifu2x_caffe(self):
         """ Install waifu2x_caffe
@@ -139,7 +146,7 @@ class Video2xSetup:
                 self.trash.append(waifu2x_caffe_zip)
 
         with zipfile.ZipFile(waifu2x_caffe_zip) as zipf:
-            zipf.extractall(os.path.join(os.getenv('localappdata'), 'video2x'))
+            zipf.extractall(LOCALAPPDATA / 'video2x')
 
     def _install_waifu2x_converter_cpp(self):
         """ Install waifu2x_caffe
@@ -157,7 +164,7 @@ class Video2xSetup:
                 self.trash.append(waifu2x_converter_cpp_zip)
 
         with zipfile.ZipFile(waifu2x_converter_cpp_zip) as zipf:
-            zipf.extractall(os.path.join(os.getenv('localappdata'), 'video2x', 'waifu2x-converter-cpp'))
+            zipf.extractall(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
 
     def _install_waifu2x_ncnn_vulkan(self):
         """ Install waifu2x-ncnn-vulkan
@@ -176,11 +183,10 @@ class Video2xSetup:
 
         # extract then move (to remove the top level directory)
         with zipfile.ZipFile(waifu2x_ncnn_vulkan_zip) as zipf:
-            extraction_path = os.path.join(tempfile.gettempdir(), 'waifu2x-ncnn-vulkan-ext')
+            extraction_path = pathlib.Path(tempfile.gettempdir()) / 'waifu2x-ncnn-vulkan-ext'
             zipf.extractall(extraction_path)
-            shutil.move(os.path.join(extraction_path, os.listdir(extraction_path)[0]), os.path.join(os.getenv('localappdata'), 'video2x', 'waifu2x-ncnn-vulkan'))
+            shutil.move(extraction_path / os.listdir(extraction_path)[0], LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan')
             self.trash.append(extraction_path)
-
 
     def _generate_config(self):
         """ Generate video2x config
@@ -190,21 +196,19 @@ class Video2xSetup:
             template_dict = json.load(template)
             template.close()
 
-        local_app_data = os.getenv('localappdata')
-
         # configure only the specified drivers
         if self.driver == 'all':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-converter-cpp')
-            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-ncnn-vulkan', 'waifu2x-ncnn-vulkan.exe')
+            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe'
+            template_dict['waifu2x_converter']['waifu2x_converter_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp'
+            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe'
         elif self.driver == 'waifu2x_caffe':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-caffe', 'waifu2x-caffe-cui.exe')
+            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe'
         elif self.driver == 'waifu2x_converter':
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-converter-cpp')
+            template_dict['waifu2x_converter']['waifu2x_converter_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp'
         elif self.driver == 'waifu2x_ncnn_vulkan':
-            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = os.path.join(local_app_data, 'video2x', 'waifu2x-ncnn-vulkan', 'waifu2x-ncnn-vulkan.exe')
+            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe'
 
-        template_dict['ffmpeg']['ffmpeg_path'] = os.path.join(local_app_data, 'video2x', 'ffmpeg-latest-win64-static', 'bin')
+        template_dict['ffmpeg']['ffmpeg_path'] = LOCALAPPDATA / 'video2x' / 'ffmpeg-latest-win64-static' / 'bin'
         template_dict['video2x']['video2x_cache_directory'] = None
         template_dict['video2x']['preserve_frames'] = False
 
@@ -220,13 +224,42 @@ def download(url, save_path, chunk_size=4096):
     from tqdm import tqdm
     import requests
 
-    output_file = os.path.join(save_path, url.split('/')[-1])
-    print('Downloading: {}'.format(url))
-    print('Chunk size: {}'.format(chunk_size))
-    print('Saving to: {}'.format(output_file))
+    save_path = pathlib.Path(save_path)
 
-    stream = requests.get(url, stream=True)
-    total_size = int(stream.headers['content-length'])
+    # create target folder if it doesn't exist
+    save_path.mkdir(parents=True, exist_ok=True)
+
+    # create requests stream for steaming file
+    stream = requests.get(url, stream=True, allow_redirects=True)
+
+    # get file name
+    file_name = None
+    if 'content-disposition' in stream.headers:
+        disposition = stream.headers['content-disposition']
+        try:
+            file_name = re.findall("filename=(.+)", disposition)[0].strip('"')
+        except IndexError:
+            pass
+
+    if file_name is None:
+        # output_file = f'{save_path}\\{stream.url.split("/")[-1]}'
+        output_file = save_path / stream.url.split('/')[-1]
+    else:
+        output_file = save_path / file_name
+
+    # decode url encoding
+    output_file = pathlib.Path(urllib.parse.unquote(str(output_file)))
+
+    # get total size for progress bar if provided in headers
+    total_size = 0
+    if 'content-length' in stream.headers:
+        total_size = int(stream.headers['content-length'])
+
+    # print download information summary
+    print(f'Downloading: {url}')
+    print(f'Total size: {total_size}')
+    print(f'Chunk size: {chunk_size}')
+    print(f'Saving to: {output_file}')
 
     # Write content into file
     with open(output_file, 'wb') as output:
@@ -236,6 +269,7 @@ def download(url, save_path, chunk_size=4096):
                     output.write(chunk)
                     progress_bar.update(len(chunk))
 
+    # return the full path of saved file
     return output_file
 
 
@@ -252,7 +286,7 @@ if __name__ == '__main__':
     try:
         args = process_arguments()
         print('Video2X Setup Script')
-        print('Version: {}'.format(VERSION))
+        print(f'Version: {VERSION}')
 
         # do not install pip modules if script
         # is packaged in exe format
