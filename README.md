@@ -244,9 +244,10 @@ This project relies on the following software and projects.
 
 ## Special Thanks
 
-Appreciations given to the following contributors:
+Appreciations given to the following code contributors:
 
 - @BrianPetkovsek
+- @SAT3LL
 
 ## Related Resources
 
