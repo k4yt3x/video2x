@@ -43,6 +43,7 @@ smooth and edges sharp.
 """
 
 # local imports
+from exceptions import *
 from upscaler import Upscaler
 
 # built-in imports
@@ -254,22 +255,22 @@ if args.version:
 # arguments sanity check
 if not args.input:
     Avalon.error('You must specify input video file/directory path')
-    exit(1)
+    raise ArgumentError('input video path not specified')
 if not args.output:
     Avalon.error('You must specify output video file/directory path')
-    exit(1)
+    raise ArgumentError('output video path not specified')
 if (args.driver == 'waifu2x_converter' or args.driver == 'waifu2x_ncnn_vulkan') and args.width and args.height:
     Avalon.error('Waifu2x Converter CPP/NCNN accepts only scaling ratio')
-    exit(1)
+    raise ArgumentError('waifu2x-converter supports only scaling ratio')
 if args.driver == 'waifu2x_ncnn_vulkan' and (args.ratio > 2 or not args.ratio.is_integer()):
     Avalon.error('Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
-    exit(1)
+    raise ArgumentError('scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
 if (args.width or args.height) and args.ratio:
     Avalon.error('You can only specify either scaling ratio or output width and height')
-    exit(1)
+    raise ArgumentError('both scaling ration and width/height specified')
 if (args.width and not args.height) or (not args.width and args.height):
     Avalon.error('You must specify both width and height')
-    exit(1)
+    raise ArgumentError('only one of width or height is specified')
 
 # check available memory
 check_memory()

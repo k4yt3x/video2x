@@ -157,7 +157,7 @@ class Upscaler:
         # initialize waifu2x driver
         drivers = ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']
         if self.waifu2x_driver not in drivers:
-            raise Exception(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
+            raise UnrecognizedDriverError(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
 
         # it's easier to do multi-threading with waifu2x_converter
         # the number of threads can be passed directly to waifu2x_converter
@@ -314,7 +314,7 @@ class Upscaler:
         # exit if no video stream found
         if video_stream_index is None:
             Avalon.error('Aborting: No video stream found')
-            exit(1)
+            raise StreamNotFoundError('no video stream found')
 
         # get average frame rate of video stream
         framerate = float(Fraction(video_info['streams'][video_stream_index]['avg_frame_rate']))
@@ -325,9 +325,9 @@ class Upscaler:
 
         try:
             self.bit_depth = pixel_formats[fm.pixel_format]
-        except KeyError as e:
+        except KeyError:
             Avalon.error(f'Unsupported pixel format: {fm.pixel_format}')
-            raise e
+            raise UnsupportedPixelError(f'unsupported pixel format {fm.pixel_format}')
 
         Avalon.info(f'Framerate: {framerate}')
 
