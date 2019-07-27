@@ -25,12 +25,13 @@ from waifu2x_ncnn_vulkan import Waifu2xNcnnVulkan
 # built-in imports
 from fractions import Fraction
 import copy
-import os
+import pathlib
 import re
 import shutil
 import tempfile
 import threading
 import time
+import traceback
 
 # third-party imports
 from avalon_framework import Avalon
@@ -61,16 +62,16 @@ class Upscaler:
         self.scale_ratio = None
         self.model_dir = None
         self.threads = 5
-        self.video2x_cache_directory = os.path.join(tempfile.gettempdir(), 'video2x')
+        self.video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
         self.image_format = 'png'
         self.preserve_frames = False
 
     def create_temp_directories(self):
         """create temporary directory
         """
-        self.extracted_frames = tempfile.mkdtemp(dir=self.video2x_cache_directory)
+        self.extracted_frames = pathlib.Path(tempfile.mkdtemp(dir=self.video2x_cache_directory))
         Avalon.debug_info(f'Extracted frames are being saved to: {self.extracted_frames}')
-        self.upscaled_frames = tempfile.mkdtemp(dir=self.video2x_cache_directory)
+        self.upscaled_frames = pathlib.Path(tempfile.mkdtemp(dir=self.video2x_cache_directory))
         Avalon.debug_info(f'Upscaled frames are being saved to: {self.upscaled_frames}')
 
     def cleanup_temp_directories(self):
@@ -84,7 +85,8 @@ class Upscaler:
                     print(f'Cleaning up cache directory: {directory}')
                     shutil.rmtree(directory)
                 except (OSError, FileNotFoundError):
-                    pass
+                    print(f'Unable to delete: {directory}')
+                    traceback.print_exc()
 
     def _check_arguments(self):
         # check if arguments are valid / all necessary argument
@@ -109,7 +111,7 @@ class Upscaler:
         # get number of extracted frames
         total_frames = 0
         for directory in extracted_frames_directories:
-            total_frames += len([f for f in os.listdir(directory) if f[-4:] == f'.{self.image_format}'])
+            total_frames += len([f for f in directory.iterdir() if str(f)[-4:] == f'.{self.image_format}'])
 
         with tqdm(total=total_frames, ascii=True, desc='Upscaling Progress') as progress_bar:
 
@@ -120,7 +122,7 @@ class Upscaler:
             while not self.progress_bar_exit_signal:
 
                 try:
-                    total_frames_upscaled = len([f for f in os.listdir(self.upscaled_frames) if f[-4:] == f'.{self.image_format}'])
+                    total_frames_upscaled = len([f for f in self.upscaled_frames.iterdir() if str(f)[-4:] == f'.{self.image_format}'])
                     delta = total_frames_upscaled - previous_cycle_frames
                     previous_cycle_frames = total_frames_upscaled
 
@@ -166,9 +168,9 @@ class Upscaler:
             progress_bar.start()
 
             w2.upscale(self.extracted_frames, self.upscaled_frames, self.scale_ratio, self.threads, self.image_format, self.upscaler_exceptions)
-            for image in [f for f in os.listdir(self.upscaled_frames) if os.path.isfile(os.path.join(self.upscaled_frames, f))]:
+            for image in [f for f in self.upscaled_frames.iterdir() if f.is_file()]:
                 renamed = re.sub(f'_\[.*-.*\]\[x(\d+(\.\d+)?)\]\.{self.image_format}', f'.{self.image_format}', image)
-                shutil.move(os.path.join(self.upscaled_frames, image), os.path.join(self.upscaled_frames, renamed))
+                (self.upscaled_frames / image).rename(self.upscaled_frames / renamed)
 
             self.progress_bar_exit_signal = True
             progress_bar.join()
@@ -178,7 +180,7 @@ class Upscaler:
             upscaler_threads = []
 
             # list all images in the extracted frames
-            frames = [os.path.join(self.extracted_frames, f) for f in os.listdir(self.extracted_frames) if os.path.isfile(os.path.join(self.extracted_frames, f))]
+            frames = [(self.extracted_frames / f) for f in self.extracted_frames.iterdir() if f.is_file]
 
             # if we have less images than threads,
             # create only the threads necessary
@@ -191,13 +193,13 @@ class Upscaler:
             thread_pool = []
             thread_directories = []
             for thread_id in range(self.threads):
-                thread_directory = os.path.join(self.extracted_frames, str(thread_id))
+                thread_directory = self.extracted_frames / str(thread_id)
                 thread_directories.append(thread_directory)
 
                 # delete old directories and create new directories
-                if os.path.isdir(thread_directory):
+                if thread_directory.is_dir():
                     shutil.rmtree(thread_directory)
-                os.mkdir(thread_directory)
+                thread_directory.mkdir(parents=True, exist_ok=True)
 
                 # append directory path into list
                 thread_pool.append((thread_directory, thread_id))
@@ -206,7 +208,7 @@ class Upscaler:
             # until there is none left in the directory
             for image in frames:
                 # move image
-                shutil.move(image, thread_pool[0][0])
+                image.rename(thread_pool[0][0] / image.name)
                 # rotate list
                 thread_pool = thread_pool[-1:] + thread_pool[:-1]
 
@@ -219,23 +221,23 @@ class Upscaler:
                     if self.scale_ratio:
                         thread = threading.Thread(target=w2.upscale,
                                                   args=(thread_info[0],
-                                                  self.upscaled_frames,
-                                                  self.scale_ratio,
-                                                  False,
-                                                  False,
-                                                  self.image_format,
-                                                  self.upscaler_exceptions))
+                                                        self.upscaled_frames,
+                                                        self.scale_ratio,
+                                                        False,
+                                                        False,
+                                                        self.image_format,
+                                                        self.upscaler_exceptions))
                     else:
-                        thread = threading.Thread(target=w2.upscale, 
-                                                  args=(thread_info[0], 
-                                                  self.upscaled_frames, 
-                                                  False, 
-                                                  self.scale_width, 
-                                                  self.scale_height, 
-                                                  self.image_format, 
-                                                  self.upscaler_exceptions))
+                        thread = threading.Thread(target=w2.upscale,
+                                                  args=(thread_info[0],
+                                                        self.upscaled_frames,
+                                                        False,
+                                                        self.scale_width,
+                                                        self.scale_height,
+                                                        self.image_format,
+                                                        self.upscaler_exceptions))
 
-                # if the driver being used is waifu2x_ncnn_vulkan 
+                # if the driver being used is waifu2x_ncnn_vulkan
                 elif self.waifu2x_driver == 'waifu2x_ncnn_vulkan':
                     w2 = Waifu2xNcnnVulkan(copy.deepcopy(self.waifu2x_settings))
                     thread = threading.Thread(target=w2.upscale,
@@ -276,7 +278,6 @@ class Upscaler:
             if len(self.upscaler_exceptions) != 0:
                 raise(self.upscaler_exceptions[0])
 
-
     def run(self):
         """Main controller for Video2X
 
@@ -289,8 +290,8 @@ class Upscaler:
         self._check_arguments()
 
         # convert paths to absolute paths
-        self.input_video = os.path.abspath(self.input_video)
-        self.output_video = os.path.abspath(self.output_video)
+        self.input_video = self.input_video.absolute()
+        self.output_video = self.output_video.absolute()
 
         # initialize objects for ffmpeg and waifu2x-caffe
         fm = Ffmpeg(self.ffmpeg_settings, self.image_format)

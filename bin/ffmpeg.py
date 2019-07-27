@@ -11,8 +11,9 @@ Description: This class handles all FFmpeg related operations.
 
 # built-in imports
 import json
-import subprocess
 import os
+import pathlib
+import subprocess
 
 # third-party imports
 from avalon_framework import Avalon
@@ -29,12 +30,12 @@ class Ffmpeg:
     def __init__(self, ffmpeg_settings, image_format):
         self.ffmpeg_settings = ffmpeg_settings
 
-        self.ffmpeg_path = self.ffmpeg_settings['ffmpeg_path']
-        self.ffmpeg_binary = os.path.join(self.ffmpeg_path, 'ffmpeg.exe')
-        self.ffmpeg_probe_binary = os.path.join(self.ffmpeg_path, 'ffprobe.exe')
+        self.ffmpeg_path = pathlib.Path(self.ffmpeg_settings['ffmpeg_path'])
+        self.ffmpeg_binary = self.ffmpeg_path / 'ffmpeg.exe'
+        self.ffmpeg_probe_binary = self.ffmpeg_path / 'ffprobe.exe'
         self.image_format = image_format
         self.pixel_format = None
-    
+
     def get_pixel_formats(self):
         """ Get a dictionary of supported pixel formats
 
@@ -50,6 +51,9 @@ class Ffmpeg:
             'quiet',
             '-pix_fmts'
         ]
+
+        # turn elements into str
+        execute = [str(e) for e in execute]
 
         Avalon.debug_info(f'Executing: {" ".join(execute)}')
 
@@ -95,6 +99,9 @@ class Ffmpeg:
             input_video
         ]
 
+        # turn elements into str
+        execute = [str(e) for e in execute]
+
         Avalon.debug_info(f'Executing: {" ".join(execute)}')
         json_str = subprocess.run(execute, check=True, stdout=subprocess.PIPE).stdout
         return json.loads(json_str.decode('utf-8'))
@@ -120,7 +127,7 @@ class Ffmpeg:
         execute.extend(self._read_configuration(phase='video_to_frames', section='output_options'))
 
         execute.extend([
-            os.path.join(extracted_frames, f'extracted_%0d.{self.image_format}')
+            extracted_frames / f'extracted_%0d.{self.image_format}'
         ])
 
         execute.extend(self._read_configuration(phase='video_to_frames'))
@@ -149,17 +156,19 @@ class Ffmpeg:
         execute.extend(self._read_configuration(phase='frames_to_video', section='input_options'))
 
         # WORKAROUND FOR WAIFU2X-NCNN-VULKAN
+        # Dev: SAT3LL
+        # rename all .png.png suffixes to .png
         import re
         import shutil
         regex = re.compile(r'\.png\.png$')
-        for raw_frame in os.listdir(upscaled_frames):
-            shutil.move(os.path.join(upscaled_frames, raw_frame), os.path.join(upscaled_frames, regex.sub('.png', raw_frame)))
+        for frame_name in upscaled_frames.iterdir():
+            (upscaled_frames / frame_name).rename(upscaled_frames / regex.sub('.png', str(frame_name)))
         # END WORKAROUND
 
         # append input frames path into command
         execute.extend([
             '-i',
-            os.path.join(upscaled_frames, f'extracted_%d.{self.image_format}')
+            upscaled_frames / f'extracted_%d.{self.image_format}'
         ])
 
         # read FFmpeg output options
@@ -170,7 +179,7 @@ class Ffmpeg:
 
         # specify output file location
         execute.extend([
-            os.path.join(upscaled_frames, 'no_audio.mp4')
+            upscaled_frames / 'no_audio.mp4'
         ])
 
         self._execute(execute)
@@ -186,7 +195,7 @@ class Ffmpeg:
         execute = [
             self.ffmpeg_binary,
             '-i',
-            os.path.join(upscaled_frames, 'no_audio.mp4'),
+            upscaled_frames / 'no_audio.mp4',
             '-i',
             input_video
         ]
@@ -248,7 +257,7 @@ class Ffmpeg:
                     if value is not True:
                         configuration.append(str(subvalue))
 
-            # otherwise the value is typical       
+            # otherwise the value is typical
             else:
                 configuration.append(key)
 
@@ -270,4 +279,8 @@ class Ffmpeg:
             int -- execution return code
         """
         Avalon.debug_info(f'Executing: {execute}')
+
+        # turn all list elements into string to avoid errors
+        execute = [str(e) for e in execute]
+
         return subprocess.run(execute, shell=True, check=True).returncode

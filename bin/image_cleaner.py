@@ -59,19 +59,19 @@ class ImageCleaner(threading.Thread):
         """
 
         # list all images in the extracted frames
-        output_frames = [f for f in os.listdir(self.output_directory) if os.path.isfile(os.path.join(self.output_directory, f))]
+        output_frames = [f for f in self.output_directory.iterdir() if f.is_file()]
 
         # compare and remove frames downscaled images that finished being upscaled
         # within each thread's  extracted frames directory
-        for i in range(self.threads):
-            dir_path = os.path.join(self.input_directory, str(i))
+        for thread_id in range(self.threads):
+            dir_path = self.input_directory / str(thread_id)
 
             # for each file within all the directories
-            for f in os.listdir(dir_path):
-                file_path = os.path.join(dir_path, f)
+            for file in dir_path.iterdir():
+                file_path = dir_path / file
 
                 # if file also exists in the output directory, then the file
                 # has already been processed, thus not needed anymore
-                if os.path.isfile(file_path) and f in output_frames:
-                    os.remove(file_path)
-                    output_frames.remove(f)
+                if file_path.is_file() and file in output_frames:
+                    file_path.unlink(file)
+                    output_frames.remove(file)
