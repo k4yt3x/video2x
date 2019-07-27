@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
-# -*- coding: future_fstrings -*-
-
-
+# -*- coding: utf-8 -*-
 """
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: June 15, 2019
+Last Modified: July 27, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
 """
-from avalon_framework import Avalon
+
+# built-in imports
 import os
 import subprocess
 import threading
+
+# third-party imports
+from avalon_framework import Avalon
 
 
 class Waifu2xConverter:

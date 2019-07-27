@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: future_fstrings -*-
-
-
+# -*- coding: utf-8 -*-
 """
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: July 9, 2019
+Last Modified: July 27, 2019
 
 Dev: SAT3LL
 
@@ -16,15 +14,16 @@ Licensed under the GNU General Public License Version 3 (GNU GPL v3),
 (C) 2018-2019 K4YT3X
 """
 
-from avalon_framework import Avalon
+# local imports
 from exceptions import *
 from ffmpeg import Ffmpeg
-from fractions import Fraction
 from image_cleaner import ImageCleaner
-from tqdm import tqdm
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
 from waifu2x_ncnn_vulkan import Waifu2xNcnnVulkan
+
+# built-in imports
+from fractions import Fraction
 import copy
 import os
 import re
@@ -32,6 +31,10 @@ import shutil
 import tempfile
 import threading
 import time
+
+# third-party imports
+from avalon_framework import Avalon
+from tqdm import tqdm
 
 
 class Upscaler:

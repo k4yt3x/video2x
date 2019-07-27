@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: future_fstrings -*-
-
-
+# -*- coding: utf-8 -*-
 """
 Name: Video2X Image Cleaner
 Author: BrianPetkovsek
 Author: K4YT3X
 Date Created: March 24, 2019
-Last Modified: April 28, 2019
+Last Modified: July 27, 2019
 
 Description: This class is to remove the extracted frames
 that have already been upscaled.
 """
 
+# built-in imports
 import os
 import threading
 import time

@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-
 """
 Name: Video2X Setup Script
 Author: K4YT3X
 Author: BrianPetkovsek
 Date Created: November 28, 2018
-Last Modified: June 26, 2019
+Last Modified: July 27, 2019
 
 Dev: SAT3LL
 
@@ -26,6 +24,8 @@ Installation Details:
 - waifu2x_ncnn_vulkan: %LOCALAPPDATA%\\video2x\\waifu2x-ncnn-vulkan
 
 """
+
+# built-in imports
 import argparse
 import json
 import os
@@ -105,10 +105,10 @@ class Video2xSetup:
         for file in self.trash:
             try:
                 if os.path.isfile(file):
-                    print('Deleting: {}'.format(file))
+                    print(f'Deleting: {file}')
                     os.remove(file)
                 else:
-                    print('Deleting: {}'.format(file))
+                    print(f'Deleting: {file}')
                     shutil.rmtree(file)
             except FileNotFoundError:
                 pass
@@ -221,9 +221,9 @@ def download(url, save_path, chunk_size=4096):
     import requests
 
     output_file = os.path.join(save_path, url.split('/')[-1])
-    print('Downloading: {}'.format(url))
-    print('Chunk size: {}'.format(chunk_size))
-    print('Saving to: {}'.format(output_file))
+    print(f'Downloading: {url}')
+    print(f'Chunk size: {chunk_size}')
+    print(f'Saving to: {output_file}')
 
     stream = requests.get(url, stream=True)
     total_size = int(stream.headers['content-length'])
@@ -252,7 +252,7 @@ if __name__ == '__main__':
     try:
         args = process_arguments()
         print('Video2X Setup Script')
-        print('Version: {}'.format(VERSION))
+        print(f'Version: {VERSION}')
 
         # do not install pip modules if script
         # is packaged in exe format

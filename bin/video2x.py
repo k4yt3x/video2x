@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: future_fstrings -*-
-
-
-"""
+# -*- coding: utf-8 -*-
+r"""
 
 __      __  _       _                  ___   __   __
 \ \    / / (_)     | |                |__ \  \ \ / /
@@ -15,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: July 9, 2019
+Last Modified: July 27, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -43,19 +41,25 @@ enlarging engine. It extracts frames from a video, enlarge it by a
 number of times without losing any details or quality, keeping lines
 smooth and edges sharp.
 """
-from avalon_framework import Avalon
+
+# local imports
 from upscaler import Upscaler
+
+# built-in imports
 import argparse
-import GPUtil
 import json
 import os
-import psutil
 import re
 import shutil
 import sys
 import tempfile
 import time
 import traceback
+
+# third-party imports
+from avalon_framework import Avalon
+import GPUtil
+import psutil
 
 VERSION = '2.8.1'
 

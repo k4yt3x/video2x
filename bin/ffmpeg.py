@@ -1,25 +1,27 @@
 #!/usr/bin/env python3
-# -*- coding: future_fstrings -*-
-
-
+# -*- coding: utf-8 -*-
 """
-Name: FFMPEG Class
+Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: July 26, 2019
+Last Modified: July 27, 2019
 
 Description: This class handles all FFmpeg related operations.
 """
-from avalon_framework import Avalon
+
+# built-in imports
 import json
 import subprocess
 import os
+
+# third-party imports
+from avalon_framework import Avalon
 
 
 class Ffmpeg:
     """This class communicates with FFmpeg
 
-    This class deals with FFmpeg. It handles extracitng
+    This class deals with FFmpeg. It handles extracting
     frames, stripping audio, converting images into videos
     and inserting audio tracks to videos.
     """
@@ -28,7 +30,6 @@ class Ffmpeg:
         self.ffmpeg_settings = ffmpeg_settings
 
         self.ffmpeg_path = self.ffmpeg_settings['ffmpeg_path']
-
         self.ffmpeg_binary = os.path.join(self.ffmpeg_path, 'ffmpeg.exe')
         self.ffmpeg_probe_binary = os.path.join(self.ffmpeg_path, 'ffprobe.exe')
         self.image_format = image_format
@@ -37,8 +38,8 @@ class Ffmpeg:
     def get_pixel_formats(self):
         """ Get a dictionary of supported pixel formats
 
-        List all supported pixel formats and their corresponding
-        bit depth.
+        List all supported pixel formats and their
+        corresponding bit depth.
 
         Returns:
             dictionary -- JSON dict of all pixel formats to bit depth
@@ -71,7 +72,7 @@ class Ffmpeg:
         """ Gets input video information
 
         This method reads input video information
-        using ffprobe in dictionary.
+        using ffprobe in dictionary
 
         Arguments:
             input_video {string} -- input video file path
@@ -101,8 +102,7 @@ class Ffmpeg:
     def extract_frames(self, input_video, extracted_frames):
         """Extract every frame from original videos
 
-        This method extracts every frame from videoin
-        using FFmpeg
+        This method extracts every frame from input video using FFmpeg
 
         Arguments:
             input_video {string} -- input video path
@@ -130,8 +130,7 @@ class Ffmpeg:
     def convert_video(self, framerate, resolution, upscaled_frames):
         """Converts images into videos
 
-        This method converts a set of images into a
-        video.
+        This method converts a set of images into a video
 
         Arguments:
             framerate {float} -- target video framerate
