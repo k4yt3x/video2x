@@ -5,7 +5,7 @@ Name: Video2X Setup Script
 Author: K4YT3X
 Author: BrianPetkovsek
 Date Created: November 28, 2018
-Last Modified: July 27, 2019
+Last Modified: July 30, 2019
 
 Dev: SAT3LL
 
@@ -22,7 +22,6 @@ Installation Details:
 - waifu2x-caffe: %LOCALAPPDATA%\\video2x\\waifu2x-caffe
 - waifu2x-cpp-converter: %LOCALAPPDATA%\\video2x\\waifu2x-converter-cpp
 - waifu2x_ncnn_vulkan: %LOCALAPPDATA%\\video2x\\waifu2x-ncnn-vulkan
-
 """
 
 # built-in imports
@@ -44,7 +43,7 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.3.0'
+VERSION = '1.4.0'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
@@ -152,7 +151,6 @@ class Video2xSetup:
         """ Install waifu2x_caffe
         """
         print('\nInstalling waifu2x-converter-cpp')
-        import re
         import requests
 
         # Get latest release of waifu2x-caffe via GitHub API
@@ -170,7 +168,6 @@ class Video2xSetup:
         """ Install waifu2x-ncnn-vulkan
         """
         print('\nInstalling waifu2x-ncnn-vulkan')
-        import re
         import requests
 
         # Get latest release of waifu2x-ncnn-vulkan via Github API
@@ -181,12 +178,17 @@ class Video2xSetup:
                 waifu2x_ncnn_vulkan_zip = download(a['browser_download_url'], tempfile.gettempdir())
                 self.trash.append(waifu2x_ncnn_vulkan_zip)
 
-        # extract then move (to remove the top level directory)
+        # extract and rename
+        waifu2x_ncnn_vulkan_directory = LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan'
         with zipfile.ZipFile(waifu2x_ncnn_vulkan_zip) as zipf:
-            extraction_path = pathlib.Path(tempfile.gettempdir()) / 'waifu2x-ncnn-vulkan-ext'
-            zipf.extractall(extraction_path)
-            shutil.move(extraction_path / os.listdir(extraction_path)[0], LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan')
-            self.trash.append(extraction_path)
+            zipf.extractall(LOCALAPPDATA / 'video2x')
+
+            # if directory already exists, remove it
+            if waifu2x_ncnn_vulkan_directory.exists():
+                shutil.rmtree(waifu2x_ncnn_vulkan_directory)
+
+            # rename the newly extracted directory
+            (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(waifu2x_ncnn_vulkan_directory)
 
     def _generate_config(self):
         """ Generate video2x config
@@ -198,17 +200,17 @@ class Video2xSetup:
 
         # configure only the specified drivers
         if self.driver == 'all':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe'
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp'
-            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe'
+            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
+            template_dict['waifu2x_converter']['waifu2x_converter_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
+            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
         elif self.driver == 'waifu2x_caffe':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe'
+            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
         elif self.driver == 'waifu2x_converter':
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp'
+            template_dict['waifu2x_converter']['waifu2x_converter_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
         elif self.driver == 'waifu2x_ncnn_vulkan':
-            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe'
+            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
 
-        template_dict['ffmpeg']['ffmpeg_path'] = LOCALAPPDATA / 'video2x' / 'ffmpeg-latest-win64-static' / 'bin'
+        template_dict['ffmpeg']['ffmpeg_path'] = str(LOCALAPPDATA / 'video2x' / 'ffmpeg-latest-win64-static' / 'bin')
         template_dict['video2x']['video2x_cache_directory'] = None
         template_dict['video2x']['preserve_frames'] = False
 
@@ -299,7 +301,16 @@ if __name__ == '__main__':
         setup.run()
         print('\nScript finished successfully')
     except Exception:
+
         traceback.print_exc()
         print('An error has occurred')
         print('Video2X Automatic Setup has failed')
+
+        # in case of a failure, try cleaning up temp files
+        try:
+            setup._cleanup()
+        except Exception:
+            traceback.print_exc()
+            print('An error occurred while trying to cleanup files')
+
         exit(1)
