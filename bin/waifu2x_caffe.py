@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: July 27, 2019
+Last Modified: August 3, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -67,9 +67,9 @@ class Waifu2xCaffe:
             self.print_lock.release()
 
             # list to be executed
-            execute = []
+            # initialize the list with waifu2x binary path as the first element
+            execute = [str(self.waifu2x_settings['waifu2x_caffe_path'])]
 
-            execute.append(self.waifu2x_settings['waifu2x_caffe_path'])
             for key in self.waifu2x_settings.keys():
 
                 value = self.waifu2x_settings[key]

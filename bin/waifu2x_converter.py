@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: July 27, 2019
+Last Modified: August 3, 2019
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
@@ -72,7 +72,8 @@ class Waifu2xConverter:
             self.print_lock.release()
 
             # list to be executed
-            execute = []
+            # initialize the list with waifu2x binary path as the first element
+            execute = [str(pathlib.Path(self.waifu2x_settings['waifu2x_converter_path']) / 'waifu2x-converter-cpp.exe')]
 
             for key in self.waifu2x_settings.keys():
 
@@ -80,7 +81,7 @@ class Waifu2xConverter:
 
                 # the key doesn't need to be passed in this case
                 if key == 'waifu2x_converter_path':
-                    execute.append(pathlib.Path(str(value)) / 'waifu2x-converter-cpp.exe')
+                    continue
 
                 # null or None means that leave this option out (keep default)
                 elif value is None or value is False:

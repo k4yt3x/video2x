@@ -4,7 +4,7 @@
 Name: Waifu2x NCNN Vulkan Driver
 Author: SAT3LL
 Date Created: June 26, 2019
-Last Modified: July 27, 2019
+Last Modified: August 3, 2019
 
 Dev: K4YT3X
 
@@ -74,17 +74,25 @@ class Waifu2xNcnnVulkan:
                 'verbose': '-v'
             }
 
-            execute = [self.waifu2x_settings['waifu2x_ncnn_vulkan_path']]
+            # list to be executed
+            # initialize the list with waifu2x binary path as the first element
+            execute = [str(self.waifu2x_settings['waifu2x_ncnn_vulkan_path'])]
+
             for key in self.waifu2x_settings.keys():
+
                 value = self.waifu2x_settings[key]
+
                 if key == 'waifu2x_ncnn_vulkan_path':
                     continue
+
                 elif key == 'input':
                     execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
                     execute.append(input_directory)
+
                 elif key == 'output':
                     execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
                     execute.append(output_directory)
+
                 elif key == 'scale-ratio':
                     execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
                     # waifu2x_ncnn_vulkan does not accept an arbitrary scale ratio, max is 2
@@ -92,9 +100,11 @@ class Waifu2xNcnnVulkan:
                         execute.append('1')
                     else:
                         execute.append('2')
+
                 # allow upper if cases to take precedence
                 elif value is None or value is False:
                     continue
+
                 else:
                     execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
                     execute.append(str(value))
