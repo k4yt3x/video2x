@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: July 27, 2019
+Last Modified: August 3, 2019
 
 Dev: SAT3LL
 
@@ -131,7 +131,7 @@ class Upscaler:
                     if self.total_frames_upscaled >= self.total_frames:
                         return
 
-                    # adds the detla into the progress bar
+                    # adds the delta into the progress bar
                     progress_bar.update(delta)
                 except FileNotFoundError:
                     pass
@@ -170,7 +170,7 @@ class Upscaler:
 
             w2.upscale(self.extracted_frames, self.upscaled_frames, self.scale_ratio, self.threads, self.image_format, self.upscaler_exceptions)
             for image in [f for f in self.upscaled_frames.iterdir() if f.is_file()]:
-                renamed = re.sub(f'_\[.*-.*\]\[x(\d+(\.\d+)?)\]\.{self.image_format}', f'.{self.image_format}', image)
+                renamed = re.sub(f'_\[.*-.*\]\[x(\d+(\.\d+)?)\]\.{self.image_format}', f'.{self.image_format}', str(image))
                 (self.upscaled_frames / image).rename(self.upscaled_frames / renamed)
 
             self.progress_bar_exit_signal = True
