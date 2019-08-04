@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: July 27, 2019
+Last Modified: August 3, 2019
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -159,8 +159,7 @@ class Ffmpeg:
         # Dev: SAT3LL
         # rename all .png.png suffixes to .png
         import re
-        import shutil
-        regex = re.compile(r'\.png\.png$')
+        regex = re.compile(r'\.png\.png$', re.IGNORECASE)
         for frame_name in upscaled_frames.iterdir():
             (upscaled_frames / frame_name).rename(upscaled_frames / regex.sub('.png', str(frame_name)))
         # END WORKAROUND
