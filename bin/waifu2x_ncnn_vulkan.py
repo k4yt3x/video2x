@@ -52,27 +52,14 @@ class Waifu2xNcnnVulkan:
 
         try:
             # overwrite config file settings
-            self.waifu2x_settings['input'] = input_directory
-            self.waifu2x_settings['output'] = output_directory
+            self.waifu2x_settings['i'] = input_directory
+            self.waifu2x_settings['o'] = output_directory
+            self.waifu2x_settings['s'] = scale_ratio
 
             # print thread start message
             self.print_lock.acquire()
             Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} started')
             self.print_lock.release()
-
-            # waifu2x_ncnn_vulkan does not have long-opts, we'll have a dictionary that maps "our" config long-opt
-            # names to their short opts
-            waifu2x_ncnn_vulkan_opt_flag = {
-                'input': '-i',
-                'output': '-o',
-                'noise-level': '-n',
-                'scale-ratio': '-s',
-                'tile-size': '-t',
-                'model-path': '-m',
-                'gpu': '-g',
-                'load-proc-save_threads': '-j',
-                'verbose': '-v'
-            }
 
             # list to be executed
             # initialize the list with waifu2x binary path as the first element
@@ -82,41 +69,25 @@ class Waifu2xNcnnVulkan:
 
                 value = self.waifu2x_settings[key]
 
-                if key == 'waifu2x_ncnn_vulkan_path':
+                # is executable key or null or None means that leave this option out (keep default)
+                if key == 'waifu2x_ncnn_vulkan_path' or value is None or value is False:
                     continue
-
-                elif key == 'input':
-                    execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
-                    execute.append(input_directory)
-
-                elif key == 'output':
-                    execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
-                    execute.append(output_directory)
-
-                elif key == 'scale-ratio':
-                    execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
-                    # waifu2x_ncnn_vulkan does not accept an arbitrary scale ratio, max is 2
-                    if scale_ratio == 1:
-                        execute.append('1')
-                    else:
-                        execute.append('2')
-
-                # allow upper if cases to take precedence
-                elif value is None or value is False:
-                    continue
-
                 else:
-                    execute.append(waifu2x_ncnn_vulkan_opt_flag[key])
+                    if len(key) == 1:
+                        execute.append(f'-{key}')
+                    else:
+                        execute.append(f'--{key}')
                     execute.append(str(value))
 
             Avalon.debug_info(f'Executing: {execute}')
-            subprocess.run(execute, check=True, stderr=subprocess.DEVNULL)
+            completed_command = subprocess.run(execute, check=True)
 
             # print thread exiting message
             self.print_lock.acquire()
             Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} exiting')
             self.print_lock.release()
 
-            return 0
+            # return command execution return code
+            return completed_command.returncode
         except Exception as e:
             upscaler_exceptions.append(e)

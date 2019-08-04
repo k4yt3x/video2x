@@ -41,15 +41,15 @@
   },
   "waifu2x_ncnn_vulkan": {
     "waifu2x_ncnn_vulkan_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x-ncnn-vulkan.exe",
-    "input": null,
-    "output": null,
-    "noise-level": 2,
-    "scale-ratio": null,
-    "tile-size": 200,
-    "model-path": null,
-    "gpu": 0,
-    "load-proc-save_threads": null,
-    "verbose": null
+    "v": null,
+    "i": null,
+    "o": null,
+    "n": 2,
+    "s": 2,
+    "t": 400,
+    "m": "models-cunet",
+    "g": 0,
+    "j": "1:2:2"
   },
   "ffmpeg": {
     "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
