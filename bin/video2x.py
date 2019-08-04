@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: July 27, 2019
+Last Modified: August 3, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -353,7 +353,7 @@ try:
             Avalon.error('Input and output path type mismatch')
             Avalon.error('Input is single file but output is directory')
             raise Exception('input output path type mismatch')
-        if not re.search('.*\..*$', str(args.output)):
+        if not re.search(r'.*\..*$', str(args.output)):
             Avalon.error('No suffix found in output file path')
             Avalon.error('Suffix must be specified for FFmpeg')
             raise Exception('No suffix specified')
