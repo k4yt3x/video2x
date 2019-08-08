@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: August 3, 2019
+Last Modified: August 7, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -66,6 +66,21 @@ import psutil
 
 VERSION = '2.9.0'
 
+LEGAL_INFO = f'''Video2X Version: {VERSION}
+Author: K4YT3X
+License: GNU GPL v3
+Github Page: https://github.com/k4yt3x/video2x
+Contact: k4yt3x@k4yt3x.com'''
+
+LOGO = r'''
+    __      __  _       _                  ___   __   __
+    \ \    / / (_)     | |                |__ \  \ \ / /
+     \ \  / /   _    __| |   ___    ___      ) |  \ V /
+      \ \/ /   | |  / _` |  / _ \  / _ \    / /    > <
+       \  /    | | | (_| | |  __/ | (_) |  / /_   / . \
+        \/     |_|  \__,_|  \___|  \___/  |____| /_/ \_\
+'''
+
 # each thread might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
 SYS_MEM_PER_THREAD = 2.5
@@ -111,15 +126,7 @@ def process_arguments():
 
 def print_logo():
     """print video2x logo"""
-    logo = r'''
-    __      __  _       _                  ___   __   __
-    \ \    / / (_)     | |                |__ \  \ \ / /
-     \ \  / /   _    __| |   ___    ___      ) |  \ V /
-      \ \/ /   | |  / _` |  / _ \  / _ \    / /    > <
-       \  /    | | | (_| | |  __/ | (_) |  / /_   / . \
-        \/     |_|  \__,_|  \___|  \___/  |____| /_/ \_\
-    '''
-    print(logo)
+    print(LOGO)
     print('\n               Video2X Video Enlarger')
     spaces = ((44 - len(f'Version {VERSION}')) // 2) * ' '
     print(f'{Avalon.FM.BD}\n{spaces}    Version {VERSION}\n{Avalon.FM.RST}')
@@ -245,11 +252,7 @@ args = process_arguments()
 
 # display version and lawful informaition
 if args.version:
-    print(f'Video2X Version: {VERSION}')
-    print('Author: K4YT3X')
-    print('License: GNU GPL v3')
-    print('Github Page: https://github.com/k4yt3x/video2x')
-    print('Contact: k4yt3x@k4yt3x.com')
+    print(LEGAL_INFO)
     exit(0)
 
 # arguments sanity check
