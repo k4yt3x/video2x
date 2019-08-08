@@ -4,7 +4,7 @@
 Name: Video2x GUI
 Author: K4YT3X
 Date Created: July 27, 2019
-Last Modified: July 27, 2019
+Last Modified: August 7, 2019
 
 Description: GUI for Video2X
 """
@@ -25,12 +25,17 @@ import threading
 import time
 import tkinter as tk
 
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 
+LEGAL_INFO = f'''Video2X GUI Version: {VERSION}
+Author: K4YT3X
+License: GNU GPL v3
+Github Page: https://github.com/k4yt3x/video2x
+Contact: k4yt3x@k4yt3x.com'''
 
 # global static variables
-
-AVAILABLE_METHODS = {'GPU': 'gpu',
+AVAILABLE_METHODS = {
+    'GPU': 'gpu',
     'CUDNN': 'cudnn',
     'CPU': 'cpu'
 }
@@ -55,6 +60,21 @@ class Video2xGui():
         self.main_window.title('Video2X GUI')
         self.main_frame = Frame()
         self.main_frame.pack(fill=BOTH, expand=True)
+
+        # add menu bar
+        self.menu_bar = Menu(self.main_frame)
+
+        # file menu
+        self.file_menu = Menu(self.menu_bar, tearoff=0)
+        self.file_menu.add_command(label='Exit', command=self.main_frame.quit)
+        self.menu_bar.add_cascade(label='File', menu=self.file_menu)
+
+        # help menu
+        self.help_menu = Menu(self.menu_bar, tearoff=0)
+        self.help_menu.add_command(label='About', command=self._display_help)
+        self.menu_bar.add_cascade(label='Help', menu=self.help_menu)
+
+        self.main_window.config(menu=self.menu_bar)
 
         # file frame
         self.file_frame = Frame(self.main_frame)
@@ -163,6 +183,9 @@ class Video2xGui():
         Button(self.start_frame, textvariable=self.start_button_text, command=self._launch_upscaling, width=20).pack(side=RIGHT)
 
         self.main_frame.mainloop()
+    
+    def _display_help(self):
+        messagebox.showinfo('About', LEGAL_INFO)
     
     def _launch_upscaling(self):
 
@@ -317,7 +340,17 @@ class Video2xGui():
 
     def _select_input(self):
         self.input_file.set(askopenfilename(title='Select Input File'))
-        self.output_file.set(f'{self.input_file.get()}_output.mp4')
+
+        # try to set an output file name automatically
+        output_file = pathlib.Path(f'{self.input_file.get()}_output.mp4')
+
+        output_file_id = 0
+        while output_file.is_file() and output_file_id <= 10:
+            output_file = pathlib.Path(f'{self.input_file.get()}_output_{output_file_id}.mp4')
+            output_file_id += 1
+        
+        if not output_file.exists():
+            self.output_file.set(str(output_file))
 
     def _select_output(self):
         self.output_file.set(asksaveasfilename(title='Select Output File'))
