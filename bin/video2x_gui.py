@@ -57,7 +57,7 @@ class Video2xGui():
 
         # create main window
         self.main_window = Tk()
-        self.main_window.title('Video2X GUI')
+        self.main_window.title(f'Video2X GUI {VERSION}')
         self.main_frame = Frame()
         self.main_frame.pack(fill=BOTH, expand=True)
 
