@@ -11,10 +11,11 @@ assignees: K4YT3X
 
 |Module|Version|
 |-|-|
-|`video2x`||
-|`ffmpeg`||
+|`Video2X`||
+|`FFmpeg`||
 |`waifu2x-caffe`||
 |`waifu2x-converter-cpp`||
+|`waifu2x-ncnn-vulkan`||
 
 ## Symptom
 
