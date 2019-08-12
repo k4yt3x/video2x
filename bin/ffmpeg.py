@@ -119,6 +119,8 @@ class Ffmpeg:
             self.ffmpeg_binary
         ]
 
+        execute.extend(self._read_configuration(phase='video_to_frames'))
+
         execute.extend([
             '-i',
             input_video
@@ -129,8 +131,6 @@ class Ffmpeg:
         execute.extend([
             extracted_frames / f'extracted_%0d.{self.image_format}'
         ])
-
-        execute.extend(self._read_configuration(phase='video_to_frames'))
 
         self._execute(execute)
 
@@ -151,6 +151,9 @@ class Ffmpeg:
             '-s',
             resolution
         ]
+
+        # read other options
+        execute.extend(self._read_configuration(phase='frames_to_video'))
 
         # read FFmpeg input options
         execute.extend(self._read_configuration(phase='frames_to_video', section='input_options'))
@@ -173,9 +176,6 @@ class Ffmpeg:
         # read FFmpeg output options
         execute.extend(self._read_configuration(phase='frames_to_video', section='output_options'))
 
-        # read other options
-        execute.extend(self._read_configuration(phase='frames_to_video'))
-
         # specify output file location
         execute.extend([
             upscaled_frames / 'no_audio.mp4'
@@ -192,20 +192,23 @@ class Ffmpeg:
             upscaled_frames {string} -- directory containing upscaled frames
         """
         execute = [
-            self.ffmpeg_binary,
+            self.ffmpeg_binary
+        ]
+
+        execute.extend(self._read_configuration(phase='migrating_tracks'))
+
+        execute.extend([
             '-i',
             upscaled_frames / 'no_audio.mp4',
             '-i',
             input_video
-        ]
+        ])
 
         execute.extend(self._read_configuration(phase='migrating_tracks', section='output_options'))
 
         execute.extend([
             output_video
         ])
-
-        execute.extend(self._read_configuration(phase='migrating_tracks'))
 
         self._execute(execute)
 
@@ -277,9 +280,9 @@ class Ffmpeg:
         Returns:
             int -- execution return code
         """
-        Avalon.debug_info(f'Executing: {execute}')
-
         # turn all list elements into string to avoid errors
         execute = [str(e) for e in execute]
+
+        Avalon.debug_info(f'Executing: {execute}')
 
         return subprocess.run(execute, shell=True, check=True).returncode

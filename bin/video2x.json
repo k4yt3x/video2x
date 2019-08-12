@@ -73,6 +73,7 @@
         "-b:v": null,
         "-pix_fmt": null
       },
+      "-hwaccel": "auto",
       "-y": true
     },
     "migrating_tracks": {
@@ -85,6 +86,7 @@
         "-c": "copy",
         "-pix_fmt": null
       },
+      "-hwaccel": "auto",
       "-y": true
     }
   },
