@@ -88,6 +88,7 @@ class Video2xSetup:
             self._install_waifu2x_caffe()
             self._install_waifu2x_converter_cpp()
             self._install_waifu2x_ncnn_vulkan()
+            self._install_anime4k()
         elif self.driver == 'waifu2x_caffe':
             self._install_waifu2x_caffe()
         elif self.driver == 'waifu2x_converter':
