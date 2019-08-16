@@ -51,6 +51,10 @@
     "g": 0,
     "j": "1:2:2"
   },
+  "anime4k": {
+    "anime4k_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\Anime4K_Java\\Anime4K.jar",
+    "java_path": "C:\\Program Files\\Java\\jdk-12.0.2\\bin\\java.exe"
+  },
   "ffmpeg": {
     "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
     "video_to_frames": {

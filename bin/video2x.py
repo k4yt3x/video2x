@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: August 7, 2019
+Last Modified: August 15, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -64,7 +64,7 @@ from avalon_framework import Avalon
 import GPUtil
 import psutil
 
-VERSION = '2.9.0'
+VERSION = '2.10.0'
 
 LEGAL_INFO = f'''Video2X Version: {VERSION}
 Author: K4YT3X
@@ -104,7 +104,7 @@ def process_arguments():
     # upscaler options
     upscaler_options = parser.add_argument_group('Upscaler Options')
     upscaler_options.add_argument('-m', '--method', help='upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'])
-    upscaler_options.add_argument('-d', '--driver', help='waifu2x driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'])
+    upscaler_options.add_argument('-d', '--driver', help='upscaling driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k'])
     upscaler_options.add_argument('-y', '--model_dir', type=pathlib.Path, help='directory containing model JSON files', action='store')
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', type=pathlib.Path, help='video2x config file location', action='store', default=pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.json')
@@ -224,6 +224,10 @@ def absolutify_paths(config):
     # check waifu2x_ncnn_vulkan path
     if not re.match('^[a-z]:', config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'], re.IGNORECASE):
         config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = current_directory / config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path']
+    
+    # check anime4k path
+    if not re.match('^[a-z]:', config['anime4k']['anime4k_path'], re.IGNORECASE):
+        config['anime4k']['anime4k_path'] = current_directory / config['anime4k']['anime4k_path']
 
     # check ffmpeg path
     if not re.match('^[a-z]:', config['ffmpeg']['ffmpeg_path'], re.IGNORECASE):
@@ -301,6 +305,12 @@ elif args.driver == 'waifu2x_ncnn_vulkan':
         Avalon.error('Specified waifu2x_ncnn_vulkan directory doesn\'t exist')
         Avalon.error('Please check the configuration file settings')
         raise FileNotFoundError(waifu2x_settings['waifu2x_ncnn_vulkan_path'])
+elif args.driver == 'anime4k':
+    waifu2x_settings = config['anime4k']
+    if not pathlib.Path(waifu2x_settings['anime4k_path']).is_file():
+        Avalon.error('Specified anime4k directory doesn\'t exist')
+        Avalon.error('Please check the configuration file settings')
+        raise FileNotFoundError(waifu2x_settings['anime4k_path'])
 
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']

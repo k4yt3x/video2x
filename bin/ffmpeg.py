@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: August 3, 2019
+Last Modified: August 15, 2019
 
 Description: This class handles all FFmpeg related operations.
 """

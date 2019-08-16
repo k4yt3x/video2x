@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: August 3, 2019
+Last Modified: August 15, 2019
 
 Dev: SAT3LL
 
@@ -15,6 +15,7 @@ Licensed under the GNU General Public License Version 3 (GNU GPL v3),
 """
 
 # local imports
+from anime4k import Anime4k
 from exceptions import *
 from ffmpeg import Ffmpeg
 from image_cleaner import ImageCleaner
@@ -156,7 +157,7 @@ class Upscaler:
         self.upscaler_exceptions = []
 
         # initialize waifu2x driver
-        drivers = ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']
+        drivers = ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']
         if self.waifu2x_driver not in drivers:
             raise UnrecognizedDriverError(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
 
@@ -176,6 +177,8 @@ class Upscaler:
             self.progress_bar_exit_signal = True
             progress_bar.join()
             return
+
+        # drivers that are to be multi-threaded by video2x
         else:
             # create a container for all upscaler threads
             upscaler_threads = []
@@ -241,6 +244,15 @@ class Upscaler:
                 # if the driver being used is waifu2x_ncnn_vulkan
                 elif self.waifu2x_driver == 'waifu2x_ncnn_vulkan':
                     w2 = Waifu2xNcnnVulkan(copy.deepcopy(self.waifu2x_settings))
+                    thread = threading.Thread(target=w2.upscale,
+                                              args=(thread_info[0],
+                                                    self.upscaled_frames,
+                                                    self.scale_ratio,
+                                                    self.upscaler_exceptions))
+
+                # if the driver being used is anime4k
+                elif self.waifu2x_driver == 'anime4k':
+                    w2 = Anime4k(copy.deepcopy(self.waifu2x_settings))
                     thread = threading.Thread(target=w2.upscale,
                                               args=(thread_info[0],
                                                     self.upscaled_frames,
