@@ -76,7 +76,9 @@ class Anime4k:
                     if locals()[arg] is not None:
                         execute.extend([locals([arg])])
 
-                Avalon.debug_info(f'Executing: {execute}')
+                self.print_lock.acquire()
+                Avalon.debug_info(f'Executing: {execute}', )
+                self.print_lock.release()
                 return_value += subprocess.run(execute, check=True).returncode
 
             # print thread exiting message
