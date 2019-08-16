@@ -44,6 +44,7 @@ smooth and edges sharp.
 
 # local imports
 from exceptions import *
+from upscaler import AVAILABLE_DRIVERS
 from upscaler import Upscaler
 
 # built-in imports
@@ -104,7 +105,7 @@ def process_arguments():
     # upscaler options
     upscaler_options = parser.add_argument_group('Upscaler Options')
     upscaler_options.add_argument('-m', '--method', help='upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'])
-    upscaler_options.add_argument('-d', '--driver', help='upscaling driver', action='store', default='waifu2x_caffe', choices=['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k'])
+    upscaler_options.add_argument('-d', '--driver', help='upscaling driver', action='store', default='waifu2x_caffe', choices=AVAILABLE_DRIVERS)
     upscaler_options.add_argument('-y', '--model_dir', type=pathlib.Path, help='directory containing model JSON files', action='store')
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', type=pathlib.Path, help='video2x config file location', action='store', default=pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.json')
@@ -279,8 +280,25 @@ if (args.width and not args.height) or (not args.width and args.height):
     Avalon.error('You must specify both width and height')
     raise ArgumentError('only one of width or height is specified')
 
-# check available memory
-check_memory()
+# check available memory if driver is waifu2x-based
+if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']:
+    check_memory()
+
+# anime4k runs significantly faster with more threads
+if args.driver == 'anime4k' and args.threads <= 1:
+    Avalon.warning('Anime4K runs significantly faster with more threads')
+    if Avalon.ask('Use more threads of Anime4K?', True):
+        while True:
+            try:
+                threads = Avalon.gets('Amount of threads to use [5]: ')
+                args.threads = int(threads)
+                break
+            except ValueError:
+                if threads == '':
+                    args.threads = 5
+                    break
+                else:
+                    Avalon.error(f'{threads} is not a valid integer')
 
 # read configurations from JSON
 config = read_config(args.config)
