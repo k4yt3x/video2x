@@ -38,6 +38,8 @@ import traceback
 from avalon_framework import Avalon
 from tqdm import tqdm
 
+AVAILABLE_DRIVERS = ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']
+
 
 class Upscaler:
     """ An instance of this class is a upscaler that will
@@ -157,7 +159,7 @@ class Upscaler:
         self.upscaler_exceptions = []
 
         # initialize waifu2x driver
-        drivers = ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']
+        drivers = AVAILABLE_DRIVERS
         if self.waifu2x_driver not in drivers:
             raise UnrecognizedDriverError(f'Unrecognized waifu2x driver: {self.waifu2x_driver}')
 
