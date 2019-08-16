@@ -4,7 +4,7 @@
 Name: Video2x GUI
 Author: K4YT3X
 Date Created: July 27, 2019
-Last Modified: August 7, 2019
+Last Modified: August 16, 2019
 
 Description: GUI for Video2X
 """
@@ -25,7 +25,7 @@ import threading
 import time
 import tkinter as tk
 
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 LEGAL_INFO = f'''Video2X GUI Version: {VERSION}
 Author: K4YT3X
@@ -43,7 +43,8 @@ AVAILABLE_METHODS = {
 AVAILABLE_DRIVERS = {
     'Waifu2X Caffe': 'waifu2x_caffe',
     'Waifu2X Converter CPP': 'waifu2x_converter',
-    'Waifu2x NCNN Vulkan': 'waifu2x_ncnn_vulkan'
+    'Waifu2x NCNN Vulkan': 'waifu2x_ncnn_vulkan',
+    'Anime4K': 'anime4k'
 }
 
 IMAGE_FORMATS = {'PNG', 'JPG'}

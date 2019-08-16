@@ -2,11 +2,11 @@
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
 
-## Download Builds (beta)
+## Download Builds
 
 You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest builds of `Video2X`. The exe files will require no Python or Python module installation.
 
-The **`full`** package provides all packages that will possibly be needed by `Video2X`, including `FFmpeg`, `waifu2x-caffe`, `waifu2x-converter-cpp`, and `waifu2x-ncnn-vulkan`. The config file (`video2x.json`) is also already configured for the environment. All you need to do is just to launch `video2x.exe`.
+The **`full`** package provides all packages that will possibly be needed by `Video2X`, including `FFmpeg`, `waifu2x-caffe`, `waifu2x-converter-cpp`, `waifu2x-ncnn-vulkan`, and `Anime4K`. The config file (`video2x.json`) is also already configured for the environment. All you need to do is just to launch `video2x.exe`.
 
 The **`light`** package provides only the most basic functions of `Video2X`. Only `video2x.exe`, `video2x_setup.exe` and `video2x.json` are included. To setup dependencies (e.g. `FFmpeg` and `Waifu2X`) automatically, simply launch `video2x_setup.exe`.
 
@@ -18,9 +18,17 @@ Component names that are **bolded** can be automatically downloaded and configur
 2. AMD GPU / Nvidia GPU
 3. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
 4. [**FFmpeg**](https://ffmpeg.zeranoe.com/builds/)
-5. [**waifu2x-caffe**](https://github.com/lltcggie/waifu2x-caffe/releases) / [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases) / [**waifu2x-ncnn-vulkan**](https://github.com/nihui/waifu2x-ncnn-vulkan)
+5. One of the following drivers
+   - [**waifu2x-caffe**](https://github.com/lltcggie/waifu2x-caffe/releases)
+   - [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
+   - [**waifu2x-ncnn-vulkan**](https://github.com/nihui/waifu2x-ncnn-vulkan)
+   - [**Anime4K**](https://github.com/bloc97/Anime4K)
 
 ## Recent Changes
+
+### 2.10.0 (August 16, 2019)
+
+- **Added support for [Anime4K](https://github.com/bloc97/Anime4K)**
 
 ### 2.9.0 (July 27, 2019)
 
@@ -35,15 +43,11 @@ Component names that are **bolded** can be automatically downloaded and configur
 
 ### 2.8.0 (June 25, 2019)
 
-- Added support for [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)
+- **Added support for [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)**
 
-### 2.7.1 (April 18, 2019)
+### Setup Script 1.5.0 (August 16, 2019)
 
-- Fixed video2x custom temp folder bug found by @cr08 .
-
-### Setup Script 1.3.0 (June 25, 2019)
-
-- Added automatic installation support for `waifu2x-ncnn-vulkan`
+- Added automatic installation support for `Anime4K`
 
 ## Description
 
@@ -89,14 +93,18 @@ If you have any questions, first try visiting our [Q&A](https://github.com/k4yt3
 
 ### Prerequisites
 
-- **Python 3**  
+- **Python 3**
 Download: https://www.python.org/downloads/windows/
-- **FFmpeg Windows Build**  
-Download: https://ffmpeg.org/download.html  
-- **waifu2x-caffe** (for Nvidia CUDA/CUDNN)  
+- **FFmpeg Windows Build**
+Download: https://ffmpeg.org/download.html
+- **waifu2x-caffe** (for Nvidia CUDA/CUDNN)
 Download: https://github.com/lltcggie/waifu2x-caffe/releases
-- **waifu2x-converter-cpp** (required for AMD, OpenCL and OpenGL processing)  
+- **waifu2x-converter-cpp** (required for AMD, OpenCL and OpenGL processing)
 Download: https://github.com/DeadSix27/waifu2x-converter-cpp/releases
+- **waifu2x-ncnn-vulkan**
+Download: https://github.com/nihui/waifu2x-ncnn-vulkan/releases
+- **Anime4K**
+Download: https://github.com/bloc97/Anime4K/releases
 
 ### Installing Dependencies
 
@@ -144,7 +152,7 @@ Enlarge the video to 1920x1080 using CUDA. You may also use the `-r/--ratio` opt
 python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu --width=1920 --height=1080
 ```
 
-### Nvidia CNDNN
+### Nvidia CUDNN
 
 Enlarge the video to 1920x1080 using CUDNN. You may also use the `-r/--ratio` option.
 
@@ -168,7 +176,7 @@ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2
 
 ### CPU
 
-Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` option. This is potentially much slower than using a GPU. The configuration file for this method is similar to the previous methods.
+Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` option. **waifu2x-based upscalers potentially run much slower than using a GPU, but Anime4K is more CPU-dependant**. The configuration file for this method is similar to the previous methods.
 
 ```shell
 python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m cpu --width=1920 --height=1080
@@ -241,6 +249,7 @@ This project relies on the following software and projects.
 - [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)
 - [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
 - [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)
+- [Anime4K](https://github.com/bloc97/Anime4K)
 
 ## Special Thanks
 
