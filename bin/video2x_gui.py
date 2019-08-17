@@ -4,7 +4,7 @@
 Name: Video2x GUI
 Author: K4YT3X
 Date Created: July 27, 2019
-Last Modified: August 16, 2019
+Last Modified: August 17, 2019
 
 Description: GUI for Video2X
 """
@@ -202,8 +202,8 @@ class Video2xGui():
         if self.output_file.get() == '':
             messagebox.showerror('Error', 'You must specify output video file/directory path')
             return
-        if (self.driver.get() == 'waifu2x_converter' or self.driver.get() == 'waifu2x_ncnn_vulkan') and self.width.get() and self.height.get():
-            messagebox.showerror('Error', 'Waifu2x Converter CPP/NCNN accepts only scaling ratio')
+        if (self.driver.get() in ['Waifu2X Converter CPP', 'Waifu2x NCNN Vulkan', 'Anime4K']) and self.width.get() and self.height.get():
+            messagebox.showerror('Error', f'Selected driver \"{self.driver.get()}\" accepts only scaling ratio')
             return
         if self.driver.get() == 'waifu2x_ncnn_vulkan' and (self.scale_ratio.get() > 2 or not self.scale_ratio.get().is_integer()):
             messagebox.showerror('Error', 'Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
@@ -242,14 +242,21 @@ class Video2xGui():
             waifu2x_settings = config['waifu2x_converter']
             if not pathlib.Path(waifu2x_settings['waifu2x_converter_path']).is_dir():
                 messagebox.showerror('Error', 'Specified waifu2x-converter-cpp directory doesn\'t exist\nPlease check the configuration file settings')
+                raise FileNotFoundError(waifu2x_settings['waifu2x_converter_path'])
         elif driver == 'waifu2x_ncnn_vulkan':
             waifu2x_settings = config['waifu2x_ncnn_vulkan']
             if not pathlib.Path(waifu2x_settings['waifu2x_ncnn_vulkan_path']).is_file():
                 messagebox.showerror('Error', 'Specified waifu2x_ncnn_vulkan directory doesn\'t exist\nPlease check the configuration file settings')
                 raise FileNotFoundError(waifu2x_settings['waifu2x_ncnn_vulkan_path'])
+        elif driver == 'anime4k':
+            waifu2x_settings = config['anime4k']
+            if not pathlib.Path(waifu2x_settings['anime4k_path']).is_file():
+                messagebox.showerror('Error', 'Specified Anime4K directory doesn\'t exist\nPlease check the configuration file settings')
+                raise FileNotFoundError(waifu2x_settings['anime4k_path'])
 
         # read FFmpeg configuration
         ffmpeg_settings = config['ffmpeg']
+
         # load video2x settings
         image_format = config['video2x']['image_format'].lower()
         preserve_frames = config['video2x']['preserve_frames']

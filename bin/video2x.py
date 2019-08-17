@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: August 15, 2019
+Last Modified: August 17, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -267,9 +267,9 @@ if not args.input:
 if not args.output:
     Avalon.error('You must specify output video file/directory path')
     raise ArgumentError('output video path not specified')
-if (args.driver == 'waifu2x_converter' or args.driver == 'waifu2x_ncnn_vulkan') and args.width and args.height:
-    Avalon.error('Waifu2x Converter CPP/NCNN accepts only scaling ratio')
-    raise ArgumentError('waifu2x-converter supports only scaling ratio')
+if (args.driver in ['waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']) and args.width and args.height:
+    Avalon.error('Selected driver accepts only scaling ratio')
+    raise ArgumentError('selected driver supports only scaling ratio')
 if args.driver == 'waifu2x_ncnn_vulkan' and (args.ratio > 2 or not args.ratio.is_integer()):
     Avalon.error('Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
     raise ArgumentError('scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
