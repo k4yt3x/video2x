@@ -225,6 +225,9 @@ class Video2xGui():
 
     def _upscale(self):
 
+        # start timer
+        begin_time = time.time()
+
         # read configuration file
         config = read_config('video2x.json')
         config = absolutify_paths(config)
@@ -320,11 +323,10 @@ class Video2xGui():
         self.upscaler.cleanup_temp_directories()
 
         # show message when upscaling completes
-        messagebox.showinfo('Info', 'Upscaling Completed')
+        messagebox.showinfo('Info', f'Upscaling Completed\nTime Taken: {round((time.time() - begin_time), 5)} seconds')
         self.progress_bar['value'] = 100
         self.running = False
         self.start_button_text.set('Start')
-
 
     def _progress_bar(self):
         """ This method prints a progress bar
