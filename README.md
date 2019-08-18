@@ -65,6 +65,8 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 
 ## Screenshot
 
+![video2x_gui](https://user-images.githubusercontent.com/21986859/63219691-ee478400-c166-11e9-8c15-dcf59228bd96.png)
+
 ![screenshot](https://user-images.githubusercontent.com/21986859/40265170-39c0caae-5b01-11e8-8371-8b6c24769639.png)
 
 ---
