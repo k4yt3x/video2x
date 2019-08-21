@@ -5,7 +5,7 @@ Name: Video2X Setup Script
 Author: K4YT3X
 Author: BrianPetkovsek
 Date Created: November 28, 2018
-Last Modified: August 16, 2019
+Last Modified: August 20, 2019
 
 Dev: SAT3LL
 
@@ -81,7 +81,7 @@ class Video2xSetup:
             print('\nInstalling Python libraries')
             self._install_python_requirements()
 
-        print('\nInstalling FFMPEG')
+        print('\nInstalling FFmpeg')
         self._install_ffmpeg()
 
         if self.driver == 'all':
@@ -199,6 +199,8 @@ class Video2xSetup:
         """ Install Anime4K
         """
         print('\nInstalling Anime4K')
+
+        """
         import requests
 
         # get latest release of Anime4K via Github API
@@ -210,6 +212,12 @@ class Video2xSetup:
             if 'Anime4K_Java.zip' in a['browser_download_url']:
                 anime4k_zip = download(a['browser_download_url'], tempfile.gettempdir())
                 self.trash.append(anime4k_zip)
+        """
+
+        # since Java pre-compiled release has been removed from download
+        # page, we use this cached version as a temporary solution
+        anime4k_zip = download('https://files.flexio.org/Resources/anime4k.zip', tempfile.gettempdir())
+        self.trash.append(anime4k_zip)
 
         # extract and rename
         with zipfile.ZipFile(anime4k_zip) as zipf:
