@@ -23,7 +23,6 @@ import pathlib
 import tempfile
 import threading
 import time
-import tkinter as tk
 
 VERSION = '1.1.1'
 

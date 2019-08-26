@@ -12,7 +12,6 @@ that have already been upscaled.
 """
 
 # built-in imports
-import os
 import threading
 import time
 

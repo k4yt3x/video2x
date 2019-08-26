@@ -11,7 +11,6 @@ Description: This class handles all FFmpeg related operations.
 
 # built-in imports
 import json
-import os
 import pathlib
 import subprocess
 
