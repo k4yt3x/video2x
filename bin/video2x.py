@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: August 17, 2019
+Last Modified: August 21, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -49,9 +49,8 @@ from upscaler import Upscaler
 
 # built-in imports
 import argparse
-import glob
+import contextlib
 import json
-import os
 import pathlib
 import re
 import shutil
@@ -128,9 +127,8 @@ def process_arguments():
 def print_logo():
     """print video2x logo"""
     print(LOGO)
-    print('\n               Video2X Video Enlarger')
-    spaces = ((44 - len(f'Version {VERSION}')) // 2) * ' '
-    print(f'{Avalon.FM.BD}\n{spaces}    Version {VERSION}\n{Avalon.FM.RST}')
+    print(f'\n{"Video2X Video Enlarger".rjust(40, " ")}')
+    print(f'\n{Avalon.FM.BD}{f"Version {VERSION}".rjust(36, " ")}{Avalon.FM.RST}\n')
 
 
 def check_memory():
@@ -153,12 +151,10 @@ def check_memory():
             Avalon.warning('Nvidia-smi not available, skipping available memory check')
             Avalon.warning('If you experience error \"cudaSuccess out of memory\", try reducing number of threads you\'re using')
         else:
-            try:
+            with contextlib.suppress(ValueError):
                 # "0" is GPU ID. Both waifu2x drivers use the first GPU available, therefore only 0 makes sense
                 gpu_memory_available = (GPUtil.getGPUs()[0].memoryTotal - GPUtil.getGPUs()[0].memoryUsed) / 1024
                 memory_status.append(('GPU', gpu_memory_available))
-            except ValueError:
-                pass
 
     # go though each checkable memory type and check availability
     for memory_type, memory_available in memory_status:
@@ -225,7 +221,7 @@ def absolutify_paths(config):
     # check waifu2x_ncnn_vulkan path
     if not re.match('^[a-z]:', config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'], re.IGNORECASE):
         config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = current_directory / config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path']
-    
+
     # check anime4k path
     if not re.match('^[a-z]:', config['anime4k']['anime4k_path'], re.IGNORECASE):
         config['anime4k']['anime4k_path'] = current_directory / config['anime4k']['anime4k_path']
@@ -440,8 +436,6 @@ except Exception:
     traceback.print_exc()
 finally:
     # remove Video2X cache directory
-    try:
+    with contextlib.suppress(FileNotFoundError):
         if not preserve_frames:
             shutil.rmtree(video2x_cache_directory)
-    except FileNotFoundError:
-        pass
