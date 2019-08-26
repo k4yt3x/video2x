@@ -27,6 +27,7 @@ Installation Details:
 
 # built-in imports
 import argparse
+import contextlib
 import json
 import os
 import pathlib
@@ -274,10 +275,8 @@ def download(url, save_path, chunk_size=4096):
     file_name = None
     if 'content-disposition' in stream.headers:
         disposition = stream.headers['content-disposition']
-        try:
+        with contextlib.suppress(IndexError):
             file_name = re.findall("filename=(.+)", disposition)[0].strip('"')
-        except IndexError:
-            pass
 
     if file_name is None:
         # output_file = f'{save_path}\\{stream.url.split("/")[-1]}'

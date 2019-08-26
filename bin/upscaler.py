@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: August 15, 2019
+Last Modified: August 21, 2019
 
 Dev: SAT3LL
 
@@ -25,6 +25,7 @@ from waifu2x_ncnn_vulkan import Waifu2xNcnnVulkan
 
 # built-in imports
 from fractions import Fraction
+import contextlib
 import copy
 import pathlib
 import re
@@ -125,7 +126,7 @@ class Upscaler:
             previous_cycle_frames = 0
             while not self.progress_bar_exit_signal:
 
-                try:
+                with contextlib.suppress(FileNotFoundError):
                     self.total_frames_upscaled = len([f for f in self.upscaled_frames.iterdir() if str(f)[-4:] == f'.{self.image_format}'])
                     delta = self.total_frames_upscaled - previous_cycle_frames
                     previous_cycle_frames = self.total_frames_upscaled
@@ -136,8 +137,6 @@ class Upscaler:
 
                     # adds the delta into the progress bar
                     progress_bar.update(delta)
-                except FileNotFoundError:
-                    pass
 
                 time.sleep(1)
 
