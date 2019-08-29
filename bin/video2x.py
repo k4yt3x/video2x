@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: August 21, 2019
+Last Modified: August 29, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -407,9 +407,13 @@ try:
     elif args.input.is_dir():
         # upscale videos in a directory
         Avalon.info(f'Upscaling videos in directory: {args.input}')
+
+        # make output directory if it doesn't exist
+        args.output.mkdir(parents=True, exist_ok=True)
+
         for input_video in [f for f in args.input.iterdir() if f.is_file()]:
-            output_video = args.output / input_video
-            upscaler = Upscaler(input_video=args.input / input_video, output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+            output_video = args.output / input_video.name
+            upscaler = Upscaler(input_video=input_video, output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
 
             # set optional options
             upscaler.waifu2x_driver = args.driver
