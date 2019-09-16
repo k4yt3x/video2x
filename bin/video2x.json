@@ -1,6 +1,7 @@
 {
   "waifu2x_caffe": {
-    "waifu2x_caffe_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe",
+    "path": "waifu2x-caffe",
+    "win_binary": "waifu2x-caffe-cui.exe",
     "input_extention_list": null,
     "output_extention": null,
     "mode": "noise_scale",
@@ -22,7 +23,7 @@
     "crop_h": null
   },
   "waifu2x_converter": {
-    "waifu2x_converter_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-converter-cpp",
+    "path": "waifu2x-converter-cpp",
     "output-format": null,
     "png-compression": null,
     "image-quality": null,
@@ -40,7 +41,7 @@
     "input": null
   },
   "waifu2x_ncnn_vulkan": {
-    "waifu2x_ncnn_vulkan_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x-ncnn-vulkan.exe",
+    "path": "waifu2x-ncnn-vulkan",
     "v": null,
     "i": null,
     "o": null,
@@ -52,11 +53,11 @@
     "j": "1:2:2"
   },
   "anime4k": {
-    "anime4k_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\anime4k\\Anime4K.jar",
+    "path": "anime4k",
     "java_path": "C:\\Program Files\\Java\\jdk-12.0.2\\bin\\java.exe"
   },
   "ffmpeg": {
-    "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
+    "path": "ffmpeg-latest-win64-static\\bin",
     "video_to_frames": {
       "output_options": {
         "-qscale:v": null,
@@ -99,6 +100,6 @@
   "video2x": {
     "video2x_cache_directory": null,
     "image_format": "png",
-    "preserve_frames": false
+    "preserve_frames": true
   }
 }

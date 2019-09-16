@@ -10,6 +10,9 @@ Description: This class is a high-level wrapper
 for Anime4k.
 """
 
+# local imports
+import common
+
 # built-in imports
 import subprocess
 import threading
@@ -27,8 +30,8 @@ class Anime4k:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings):
-        self.waifu2x_settings = waifu2x_settings
+    def __init__(self, settings):
+        self.settings = settings
         self.print_lock = threading.Lock()
 
     def upscale(self, input_directory, output_directory, scale_ratio, upscaler_exceptions, push_strength=None, push_grad_strength=None):
@@ -57,9 +60,9 @@ class Anime4k:
             for image in extracted_frame_files:
 
                 execute = [
-                    self.waifu2x_settings['java_path'],
+                    self.settings['java_path'],
                     '-jar',
-                    self.waifu2x_settings['anime4k_path'],
+                    common.find_path(self.settings['path']),
                     str(image.absolute()),
                     str(output_directory / image.name),
                     str(scale_ratio)

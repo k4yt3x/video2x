@@ -12,6 +12,9 @@ Description: This class is a high-level wrapper
 for waifu2x_ncnn_vulkan.
 """
 
+# local imports
+import common
+
 # built-in imports
 import os
 import subprocess
@@ -30,14 +33,14 @@ class Waifu2xNcnnVulkan:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings):
-        self.waifu2x_settings = waifu2x_settings
+    def __init__(self, settings):
+        self.settings = settings
 
         # arguments passed through command line overwrites config file values
 
         # waifu2x_ncnn_vulkan can't find its own model directory if its not in the current dir
         #   so change to it
-        os.chdir(os.path.join(self.waifu2x_settings['waifu2x_ncnn_vulkan_path'], '..'))
+        os.chdir(os.path.join(self.settings['waifu2x_ncnn_vulkan_path'], '..'))
 
         self.print_lock = threading.Lock()
 
@@ -52,9 +55,9 @@ class Waifu2xNcnnVulkan:
 
         try:
             # overwrite config file settings
-            self.waifu2x_settings['i'] = input_directory
-            self.waifu2x_settings['o'] = output_directory
-            self.waifu2x_settings['s'] = scale_ratio
+            self.settings['i'] = input_directory
+            self.settings['o'] = output_directory
+            self.settings['s'] = scale_ratio
 
             # print thread start message
             self.print_lock.acquire()
@@ -63,11 +66,11 @@ class Waifu2xNcnnVulkan:
 
             # list to be executed
             # initialize the list with waifu2x binary path as the first element
-            execute = [str(self.waifu2x_settings['waifu2x_ncnn_vulkan_path'])]
+            execute = [common.find_path(self.settings['path'])]
 
-            for key in self.waifu2x_settings.keys():
+            for key in self.settings.keys():
 
-                value = self.waifu2x_settings[key]
+                value = self.settings[key]
 
                 # is executable key or null or None means that leave this option out (keep default)
                 if key == 'waifu2x_ncnn_vulkan_path' or value is None or value is False:

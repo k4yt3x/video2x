@@ -10,9 +10,13 @@ Description: This class is a high-level wrapper
 for waifu2x-caffe.
 """
 
+# local imports
+import common
+
 # built-in imports
 import subprocess
 import threading
+import sys
 
 # third-party imports
 from avalon_framework import Avalon
@@ -27,11 +31,11 @@ class Waifu2xCaffe:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings, process, model_dir, bit_depth):
-        self.waifu2x_settings = waifu2x_settings
-        self.waifu2x_settings['process'] = process
-        self.waifu2x_settings['model_dir'] = model_dir
-        self.waifu2x_settings['output_depth'] = bit_depth
+    def __init__(self, settings, process, model_dir, bit_depth):
+        self.settings = settings
+        self.settings['process'] = process
+        self.settings['model_dir'] = model_dir
+        self.settings['output_depth'] = bit_depth
 
         # arguments passed through command line overwrites config file values
         self.process = process
@@ -50,16 +54,16 @@ class Waifu2xCaffe:
 
         try:
             # overwrite config file settings
-            self.waifu2x_settings['input_path'] = input_directory
-            self.waifu2x_settings['output_path'] = output_directory
+            self.settings['input_path'] = input_directory
+            self.settings['output_path'] = output_directory
 
             if scale_ratio:
-                self.waifu2x_settings['scale_ratio'] = scale_ratio
+                self.settings['scale_ratio'] = scale_ratio
             elif scale_width and scale_height:
-                self.waifu2x_settings['scale_width'] = scale_width
-                self.waifu2x_settings['scale_height'] = scale_height
+                self.settings['scale_width'] = scale_width
+                self.settings['scale_height'] = scale_height
 
-            self.waifu2x_settings['output_extention'] = image_format
+            self.settings['output_extention'] = image_format
 
             # print thread start message
             self.print_lock.acquire()
@@ -68,14 +72,17 @@ class Waifu2xCaffe:
 
             # list to be executed
             # initialize the list with waifu2x binary path as the first element
-            execute = [str(self.waifu2x_settings['waifu2x_caffe_path'])]
+            if sys.platform == 'win32':
+                execute = [common.find_path(self.settings['path'], self.settings['win_binary'])]
+            else:
+                execute = [common.find_path(self.settings['path'])]
 
-            for key in self.waifu2x_settings.keys():
+            for key in self.settings.keys():
 
-                value = self.waifu2x_settings[key]
+                value = self.settings[key]
 
                 # is executable key or null or None means that leave this option out (keep default)
-                if key == 'waifu2x_caffe_path' or value is None or value is False:
+                if key == 'path' or key == 'win_binary' or value is None or value is False:
                     continue
                 else:
                     if len(key) == 1:

@@ -46,6 +46,7 @@ smooth and edges sharp.
 from exceptions import *
 from upscaler import AVAILABLE_DRIVERS
 from upscaler import Upscaler
+import common
 
 # built-in imports
 import argparse
@@ -298,33 +299,14 @@ if args.driver == 'anime4k' and args.threads <= 1:
 
 # read configurations from JSON
 config = read_config(args.config)
-config = absolutify_paths(config)
+# config = absolutify_paths(config)
 
 # load waifu2x configuration
-if args.driver == 'waifu2x_caffe':
-    waifu2x_settings = config['waifu2x_caffe']
-    if not pathlib.Path(waifu2x_settings['waifu2x_caffe_path']).is_file():
-        Avalon.error('Specified waifu2x-caffe directory doesn\'t exist')
-        Avalon.error('Please check the configuration file settings')
-        raise FileNotFoundError(waifu2x_settings['waifu2x_caffe_path'])
-elif args.driver == 'waifu2x_converter':
-    waifu2x_settings = config['waifu2x_converter']
-    if not pathlib.Path(waifu2x_settings['waifu2x_converter_path']).is_dir():
-        Avalon.error('Specified waifu2x-converter-cpp directory doesn\'t exist')
-        Avalon.error('Please check the configuration file settings')
-        raise FileNotFoundError(waifu2x_settings['waifu2x_converter_path'])
-elif args.driver == 'waifu2x_ncnn_vulkan':
-    waifu2x_settings = config['waifu2x_ncnn_vulkan']
-    if not pathlib.Path(waifu2x_settings['waifu2x_ncnn_vulkan_path']).is_file():
-        Avalon.error('Specified waifu2x_ncnn_vulkan directory doesn\'t exist')
-        Avalon.error('Please check the configuration file settings')
-        raise FileNotFoundError(waifu2x_settings['waifu2x_ncnn_vulkan_path'])
-elif args.driver == 'anime4k':
-    waifu2x_settings = config['anime4k']
-    if not pathlib.Path(waifu2x_settings['anime4k_path']).is_file():
-        Avalon.error('Specified anime4k directory doesn\'t exist')
-        Avalon.error('Please check the configuration file settings')
-        raise FileNotFoundError(waifu2x_settings['anime4k_path'])
+waifu2x_settings = config[args.driver]
+if common.find_path(waifu2x_settings['path']) is None:
+    Avalon.error("Specified" + args.driver + "directory doesn't exist")
+    Avalon.error("Please check the configuration file settings")
+    raise FileNotFoundError(waifu2x_settings['path'])
 
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']

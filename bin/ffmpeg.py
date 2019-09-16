@@ -9,16 +9,18 @@ Last Modified: August 15, 2019
 Description: This class handles all FFmpeg related operations.
 """
 
+# local imports
+import common
+
 # built-in imports
 import json
-import pathlib
 import subprocess
 
 # third-party imports
 from avalon_framework import Avalon
 
 
-class Ffmpeg:
+class FFmpeg:
     """This class communicates with FFmpeg
 
     This class deals with FFmpeg. It handles extracting
@@ -26,13 +28,12 @@ class Ffmpeg:
     and inserting audio tracks to videos.
     """
 
-    def __init__(self, ffmpeg_settings, image_format):
-        self.ffmpeg_settings = ffmpeg_settings
-
-        self.ffmpeg_path = pathlib.Path(self.ffmpeg_settings['ffmpeg_path'])
-        self.ffmpeg_binary = self.ffmpeg_path / 'ffmpeg.exe'
-        self.ffmpeg_probe_binary = self.ffmpeg_path / 'ffprobe.exe'
+    def __init__(self, settings, image_format):
+        self.settings = settings
         self.image_format = image_format
+
+        self.ffmpeg_path = common.find_path(self.settings['path'], 'ffmpeg')
+        self.ffprobe_path = common.find_path(self.settings['path'], 'ffprobe')
         self.pixel_format = None
 
     def get_pixel_formats(self):
@@ -45,7 +46,7 @@ class Ffmpeg:
             dictionary -- JSON dict of all pixel formats to bit depth
         """
         execute = [
-            self.ffmpeg_probe_binary,
+            self.ffprobe_path,
             '-v',
             'quiet',
             '-pix_fmts'
@@ -87,7 +88,7 @@ class Ffmpeg:
         # this execution command needs to be hard-coded
         # since video2x only strictly recignizes this one format
         execute = [
-            self.ffmpeg_probe_binary,
+            self.ffprobe_path,
             '-v',
             'quiet',
             '-print_format',
@@ -115,7 +116,7 @@ class Ffmpeg:
             extracted_frames {string} -- video output directory
         """
         execute = [
-            self.ffmpeg_binary
+            self.ffmpeg_path
         ]
 
         execute.extend(self._read_configuration(phase='video_to_frames'))
@@ -144,7 +145,7 @@ class Ffmpeg:
             upscaled_frames {string} -- source images directory
         """
         execute = [
-            self.ffmpeg_binary,
+            self.ffmpeg_path,
             '-r',
             str(framerate),
             '-s',
@@ -191,7 +192,7 @@ class Ffmpeg:
             upscaled_frames {string} -- directory containing upscaled frames
         """
         execute = [
-            self.ffmpeg_binary
+            self.ffmpeg_path
         ]
 
         execute.extend(self._read_configuration(phase='migrating_tracks'))
@@ -228,23 +229,23 @@ class Ffmpeg:
         # if section is specified, read configurations or keys
         # from only that section
         if section:
-            source = self.ffmpeg_settings[phase][section].keys()
+            source = self.settings[phase][section].keys()
 
             # if pixel format is not specified, use the source pixel format
             try:
-                if self.ffmpeg_settings[phase][section].get('-pix_fmt') is None:
-                    self.ffmpeg_settings[phase][section]['-pix_fmt'] = self.pixel_format
+                if self.settings[phase][section].get('-pix_fmt') is None:
+                    self.settings[phase][section]['-pix_fmt'] = self.pixel_format
             except KeyError:
                 pass
         else:
-            source = self.ffmpeg_settings[phase].keys()
+            source = self.settings[phase].keys()
 
         for key in source:
 
             if section:
-                value = self.ffmpeg_settings[phase][section][key]
+                value = self.settings[phase][section][key]
             else:
-                value = self.ffmpeg_settings[phase][key]
+                value = self.settings[phase][key]
 
             # null or None means that leave this option out (keep default)
             if value is None or value is False or isinstance(value, dict):

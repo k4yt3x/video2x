@@ -10,6 +10,9 @@ Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
 """
 
+# local imports
+import common
+
 # built-in imports
 import pathlib
 import subprocess
@@ -28,9 +31,9 @@ class Waifu2xConverter:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings, model_dir):
-        self.waifu2x_settings = waifu2x_settings
-        self.waifu2x_settings['model_dir'] = model_dir
+    def __init__(self, settings, model_dir):
+        self.settings = settings
+        self.settings['model_dir'] = model_dir
         self.print_lock = threading.Lock()
 
     def upscale(self, input_directory, output_directory, scale_ratio, jobs, image_format, upscaler_exceptions):
@@ -46,16 +49,16 @@ class Waifu2xConverter:
 
         try:
             # overwrite config file settings
-            self.waifu2x_settings['input'] = input_directory
-            self.waifu2x_settings['output'] = output_directory
-            self.waifu2x_settings['scale-ratio'] = scale_ratio
-            self.waifu2x_settings['jobs'] = jobs
-            self.waifu2x_settings['output-format'] = image_format
+            self.settings['input'] = input_directory
+            self.settings['output'] = output_directory
+            self.settings['scale-ratio'] = scale_ratio
+            self.settings['jobs'] = jobs
+            self.settings['output-format'] = image_format
 
             # models_rgb must be specified manually for waifu2x-converter-cpp
             # if it's not specified in the arguments, create automatically
-            if self.waifu2x_settings['model-dir'] is None:
-                self.waifu2x_settings['model-dir'] = pathlib.Path(self.waifu2x_settings['waifu2x_converter_path']) / 'models_rgb'
+            if self.settings['model-dir'] is None:
+                self.settings['model-dir'] = pathlib.Path(self.settings['path']) / 'models_rgb'
 
             # print thread start message
             self.print_lock.acquire()
@@ -64,11 +67,11 @@ class Waifu2xConverter:
 
             # list to be executed
             # initialize the list with waifu2x binary path as the first element
-            execute = [str(pathlib.Path(self.waifu2x_settings['waifu2x_converter_path']) / 'waifu2x-converter-cpp.exe')]
+            execute = [common.find_path(self.settings['path'])]
 
-            for key in self.waifu2x_settings.keys():
+            for key in self.settings.keys():
 
-                value = self.waifu2x_settings[key]
+                value = self.settings[key]
 
                 # the key doesn't need to be passed in this case
                 if key == 'waifu2x_converter_path':

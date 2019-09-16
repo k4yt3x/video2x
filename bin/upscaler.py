@@ -17,7 +17,7 @@ Licensed under the GNU General Public License Version 3 (GNU GPL v3),
 # local imports
 from anime4k import Anime4k
 from exceptions import *
-from ffmpeg import Ffmpeg
+from ffmpeg import FFmpeg
 from image_cleaner import ImageCleaner
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
@@ -308,7 +308,7 @@ class Upscaler:
         self.output_video = self.output_video.absolute()
 
         # initialize objects for ffmpeg and waifu2x-caffe
-        fm = Ffmpeg(self.ffmpeg_settings, self.image_format)
+        fm = FFmpeg(self.ffmpeg_settings, self.image_format)
 
         # extract frames from video
         fm.extract_frames(self.input_video, self.extracted_frames)
