@@ -67,7 +67,7 @@ class Ffmpeg:
                 pass
 
         # print pixel formats for debugging
-        Avalon.debug_info(pixel_formats)
+        Avalon.debug_info(str(pixel_formats))
 
         return pixel_formats
 
