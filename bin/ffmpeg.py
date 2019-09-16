@@ -284,4 +284,4 @@ class Ffmpeg:
 
         Avalon.debug_info(f'Executing: {execute}')
 
-        return subprocess.run(execute, shell=True, check=True).returncode
+        return subprocess.run(execute, check=True).returncode
