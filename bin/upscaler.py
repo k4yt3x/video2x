@@ -64,6 +64,7 @@ class Upscaler:
         self.scale_width = None
         self.scale_height = None
         self.scale_ratio = None
+        self.model_dir = None
         self.threads = 5
         self.video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
         self.image_format = 'png'
@@ -164,7 +165,7 @@ class Upscaler:
         # it's easier to do multi-threading with waifu2x_converter
         # the number of threads can be passed directly to waifu2x_converter
         if self.waifu2x_driver == 'waifu2x_converter':
-            w2 = Waifu2xConverter(self.waifu2x_settings)
+            w2 = Waifu2xConverter(self.waifu2x_settings, self.model_dir)
 
             progress_bar = threading.Thread(target=self._progress_bar, args=([self.extracted_frames],))
             progress_bar.start()
@@ -221,7 +222,7 @@ class Upscaler:
 
                 # create a separate w2 instance for each thread
                 if self.waifu2x_driver == 'waifu2x_caffe':
-                    w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.bit_depth)
+                    w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir, self.bit_depth)
                     if self.scale_ratio:
                         thread = threading.Thread(target=w2.upscale,
                                                   args=(thread_info[0],
@@ -243,7 +244,7 @@ class Upscaler:
 
                 # if the driver being used is waifu2x_ncnn_vulkan
                 elif self.waifu2x_driver == 'waifu2x_ncnn_vulkan':
-                    w2 = Waifu2xNcnnVulkan(copy.deepcopy(self.waifu2x_settings))
+                    w2 = Waifu2xNcnnVulkan(copy.deepcopy(self.waifu2x_settings), self.model_dir)
                     thread = threading.Thread(target=w2.upscale,
                                               args=(thread_info[0],
                                                     self.upscaled_frames,

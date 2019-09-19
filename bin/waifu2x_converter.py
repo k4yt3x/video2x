@@ -30,9 +30,12 @@ class Waifu2xConverter:
     the upscale function.
     """
 
-    def __init__(self, settings):
+    def __init__(self, settings, model_dir):
         self.settings = settings
         self.print_lock = threading.Lock()
+
+        if model_dir:
+            self.settings['model-dir'] = model_dir
 
         # Searches for models directory
         if 'model-dir' in self.settings:

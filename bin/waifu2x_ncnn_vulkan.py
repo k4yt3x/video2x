@@ -32,9 +32,12 @@ class Waifu2xNcnnVulkan:
     the upscale function.
     """
 
-    def __init__(self, settings):
+    def __init__(self, settings, model_dir):
         self.settings = settings
         self.print_lock = threading.Lock()
+
+        if model_dir:
+            self.settings['m'] = model_dir
 
         # Searches for models directory
         if 'm' in self.settings:

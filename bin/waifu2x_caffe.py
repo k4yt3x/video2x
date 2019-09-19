@@ -30,7 +30,7 @@ class Waifu2xCaffe:
     the upscale function.
     """
 
-    def __init__(self, settings, process, bit_depth):
+    def __init__(self, settings, process, model_dir, bit_depth):
         self.settings = settings
         self.settings['process'] = process
         self.settings['output_depth'] = bit_depth
@@ -38,6 +38,9 @@ class Waifu2xCaffe:
         # arguments passed through command line overwrites config file values
         self.process = process
         self.print_lock = threading.Lock()
+
+        if model_dir:
+            self.settings['model_dir'] = model_dir
 
         # Searches for models directory
         if 'model_dir' in self.settings:
