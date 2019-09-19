@@ -105,6 +105,6 @@
   "video2x": {
     "video2x_cache_directory": null,
     "image_format": "png",
-    "preserve_frames": true
+    "preserve_frames": false
   }
 }
