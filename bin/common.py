@@ -25,15 +25,20 @@ def find_path(path="", filename=""):
         return [Path(path), filename + '.exe']
     elif os.path.exists(Path(path) / filename):
         return [Path(path), filename]
+
     # Search one directory back
     elif os.path.exists(Path('..') / path / Path(filename + '.exe')):
         return [Path('..') / path, filename + '.exe']
     elif os.path.exists(Path('..') / path / filename):
         return [Path('..') / path, filename]
+
     # Search for program in $PATH
-    elif filename and subprocess.run('command -v ' + filename + '.exe', shell=True).returncode == 0:
-        return [Path(""), filename + '.exe']
-    elif filename and subprocess.run('command -v ' + filename, shell=True).returncode == 0:
-        return [Path(""), filename]
+    elif filename:
+        if subprocess.run('command -v ' + filename + '.exe', shell=True, stdout=subprocess.DEVNULL).returncode == 0:
+            return [Path(""), filename + '.exe']
+        elif subprocess.run('command -v ' + filename, shell=True, stdout=subprocess.DEVNULL).returncode == 0:
+            return [Path(""), filename]
+
     else:
+        # Couldn't find file
         return [None, None]

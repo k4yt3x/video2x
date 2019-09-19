@@ -46,6 +46,7 @@ smooth and edges sharp.
 from exceptions import *
 from upscaler import AVAILABLE_DRIVERS
 from upscaler import Upscaler
+import common
 
 # built-in imports
 import argparse
@@ -58,6 +59,7 @@ import sys
 import tempfile
 import time
 import traceback
+import sys
 
 # third-party imports
 from avalon_framework import Avalon
@@ -260,8 +262,35 @@ config = read_config(args.config)
 # load waifu2x configuration
 waifu2x_settings = config[args.driver]
 
+# Search for valid java binary path
+if args.driver == 'anime4k':
+    path = common.find_path(waifu2x_settings['java_path'], 'java')
+    waifu2x_settings['java_path'] = path[0]
+    waifu2x_settings['java_binary'] = path[1]
+
+    if waifu2x_settings['java_path'] is None and waifu2x_settings['java_binary'] is None:
+        raise FileNotFoundError('java')
+
+# Search for valid waifu2x binary path
+if 'win_binary' in waifu2x_settings and sys.platform == 'win32':
+    path = common.find_path(waifu2x_settings['path'], waifu2x_settings['win_binary'])
+else:
+    path = common.find_path(waifu2x_settings['path'], waifu2x_settings['binary'])
+waifu2x_settings['path'] = path[0]
+waifu2x_settings['binary'] = path[1]
+
+if waifu2x_settings['path'] is None and waifu2x_settings['binary'] is None:
+    raise FileNotFoundError(args.driver)
+
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']
+
+# Search for valid ffmpeg path
+ffmpeg_path = common.find_path(ffmpeg_settings['path'], 'ffmpeg')
+ffprobe_path = common.find_path(ffmpeg_settings['path'], 'ffprobe')
+ffmpeg_settings['path'] = ffmpeg_path[0]
+ffmpeg_settings['ffmpeg_binary'] = ffmpeg_path[1]
+ffmpeg_settings['ffprobe_binary'] = ffprobe_path[1]
 
 # load video2x settings
 image_format = config['video2x']['image_format'].lower()

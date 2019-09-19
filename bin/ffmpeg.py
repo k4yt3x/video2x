@@ -39,7 +39,7 @@ class FFmpeg:
             dictionary -- JSON dict of all pixel formats to bit depth
         """
         execute = [
-            self.settings['path'] / 'ffprobe',
+            self.settings['path'] / self.settings['ffprobe_binary'],
             '-v',
             'quiet',
             '-pix_fmts'
@@ -81,7 +81,7 @@ class FFmpeg:
         # this execution command needs to be hard-coded
         # since video2x only strictly recignizes this one format
         execute = [
-            self.settings['path'] / 'ffprobe',
+            self.settings['path'] / self.settings['ffprobe_binary'],
             '-v',
             'quiet',
             '-print_format',
@@ -109,7 +109,7 @@ class FFmpeg:
             extracted_frames {string} -- video output directory
         """
         execute = [
-            self.settings['path'] / 'ffmpeg',
+            self.settings['path'] / self.settings['ffmpeg_binary'],
         ]
 
         execute.extend(self._read_configuration(phase='video_to_frames'))
@@ -138,7 +138,7 @@ class FFmpeg:
             upscaled_frames {string} -- source images directory
         """
         execute = [
-            self.settings['path'] / 'ffmpeg',
+            self.settings['path'] / self.settings['ffmpeg_binary'],
             '-r',
             framerate,
             '-s',
@@ -185,7 +185,7 @@ class FFmpeg:
             upscaled_frames {string} -- directory containing upscaled frames
         """
         execute = [
-            self.settings['path'] / 'ffmpeg',
+            self.settings['path'] / self.settings['ffmpeg_binary'],
         ]
 
         execute.extend(self._read_configuration(phase='migrating_tracks'))
