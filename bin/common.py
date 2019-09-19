@@ -16,22 +16,23 @@ import subprocess
 
 def find_path(path="", filename=""):
     """Looks for file in specified path. If not found, checks system path."""
-
-    # Converts abs path to relative path, ensuring searching one directory back works
-    path = os.path.relpath(Path(path))
+    current_path = Path(__file__).parent  # common.py's path
 
     # Search in specified path
     if os.path.exists(Path(path) / Path(filename + '.exe')):
         return [Path(path), filename + '.exe']
     elif os.path.exists(Path(path) / filename):
         return [Path(path), filename]
-
-    # Search one directory back
-    elif os.path.exists(Path('..') / path / Path(filename + '.exe')):
-        return [Path('..') / path, filename + '.exe']
-    elif os.path.exists(Path('..') / path / filename):
-        return [Path('..') / path, filename]
-
+    # Search in common.py's path (usually bin folder)
+    if os.path.exists(current_path / path / Path(filename + '.exe')):
+        return [current_path / path, filename + '.exe']
+    elif os.path.exists(current_path / path / filename):
+        return [current_path / path, filename]
+    # Search one directory back (usually video2x folder)
+    elif os.path.exists(current_path / '..' / path / Path(filename + '.exe')):
+        return [current_path / '..' / path, filename + '.exe']
+    elif os.path.exists(current_path / '..' / path / filename):
+        return [current_path / '..' / path, filename]
     # Search for program in $PATH
     elif filename:
         if subprocess.run('command -v ' + filename + '.exe', shell=True, stdout=subprocess.DEVNULL).returncode == 0:
@@ -39,6 +40,5 @@ def find_path(path="", filename=""):
         elif subprocess.run('command -v ' + filename, shell=True, stdout=subprocess.DEVNULL).returncode == 0:
             return [Path(""), filename]
 
-    else:
-        # Couldn't find file
-        return [None, None]
+    # Couldn't find file
+    return [None, None]

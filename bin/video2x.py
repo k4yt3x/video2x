@@ -59,7 +59,7 @@ import sys
 import tempfile
 import time
 import traceback
-import sys
+from pathlib import Path
 
 # third-party imports
 from avalon_framework import Avalon
@@ -265,22 +265,23 @@ waifu2x_settings = config[args.driver]
 # Search for valid java binary path
 if args.driver == 'anime4k':
     path = common.find_path(waifu2x_settings['java_path'], 'java')
+    if path[0] is None and path[1] is None:
+        raise FileNotFoundError(Path(waifu2x_settings['java_path']).absolute() / 'java')
+
     waifu2x_settings['java_path'] = path[0]
     waifu2x_settings['java_binary'] = path[1]
 
-    if waifu2x_settings['java_path'] is None and waifu2x_settings['java_binary'] is None:
-        raise FileNotFoundError('java')
 
 # Search for valid waifu2x binary path
 if 'win_binary' in waifu2x_settings and sys.platform == 'win32':
-    path = common.find_path(waifu2x_settings['path'], waifu2x_settings['win_binary'])
-else:
-    path = common.find_path(waifu2x_settings['path'], waifu2x_settings['binary'])
+    waifu2x_settings['binary'] = waifu2x_settings['win_binary']
+
+path = common.find_path(waifu2x_settings['path'], waifu2x_settings['binary'])
+if path[0] is None and path[1] is None:
+    raise FileNotFoundError(Path(waifu2x_settings['path']).absolute() / waifu2x_settings['binary'])
+
 waifu2x_settings['path'] = path[0]
 waifu2x_settings['binary'] = path[1]
-
-if waifu2x_settings['path'] is None and waifu2x_settings['binary'] is None:
-    raise FileNotFoundError(args.driver)
 
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']
