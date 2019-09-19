@@ -180,16 +180,16 @@ class Video2xSetup:
                 self.trash.append(waifu2x_ncnn_vulkan_zip)
 
         # extract and rename
-        waifu2x_ncnn_vulkan_directory = VIDEO2X_PATH / 'video2x' / 'waifu2x-ncnn-vulkan'
+        waifu2x_ncnn_vulkan_directory = VIDEO2X_PATH / 'waifu2x-ncnn-vulkan'
         with zipfile.ZipFile(waifu2x_ncnn_vulkan_zip) as zipf:
-            zipf.extractall(VIDEO2X_PATH / 'video2x')
+            zipf.extractall(VIDEO2X_PATH)
 
             # if directory already exists, remove it
             if waifu2x_ncnn_vulkan_directory.exists():
                 shutil.rmtree(waifu2x_ncnn_vulkan_directory)
 
             # rename the newly extracted directory
-            (VIDEO2X_PATH / 'video2x' / zipf.namelist()[0]).rename(waifu2x_ncnn_vulkan_directory)
+            (VIDEO2X_PATH / zipf.namelist()[0]).rename(waifu2x_ncnn_vulkan_directory)
 
     def _install_anime4k(self):
         """ Install Anime4K
@@ -217,7 +217,7 @@ class Video2xSetup:
 
         # extract and rename
         with zipfile.ZipFile(anime4k_zip) as zipf:
-            zipf.extractall(VIDEO2X_PATH / 'video2x' / 'anime4k')
+            zipf.extractall(VIDEO2X_PATH / 'anime4k')
 
 
 def download(url, save_path, chunk_size=4096):
