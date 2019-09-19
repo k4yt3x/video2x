@@ -1,6 +1,7 @@
 {
   "waifu2x_caffe": {
     "path": "waifu2x-caffe",
+    "binary": "waifu2x-caffe",
     "win_binary": "waifu2x-caffe-cui.exe",
     "input_extention_list": null,
     "output_extention": null,
@@ -18,12 +19,13 @@
     "tta": 0,
     "input_path": null,
     "output_path": null,
-    "model_dir": null,
+    "model_dir": "models/cunet",
     "crop_w": null,
     "crop_h": null
   },
   "waifu2x_converter": {
     "path": "waifu2x-converter-cpp",
+    "binary": "waifu2x-converter-cpp",
     "output-format": null,
     "png-compression": null,
     "image-quality": null,
@@ -32,29 +34,32 @@
     "force-OpenCL": null,
     "processor": null,
     "jobs": null,
-    "model-dir": null,
+    "model-dir": "models_rgb",
     "scale-ratio": null,
     "noise-level": 3,
     "mode": "noise-scale",
-    "silent": true,
+    "log-level": 0,
+    "auto-naming": 0,
     "output": null,
     "input": null
   },
   "waifu2x_ncnn_vulkan": {
     "path": "waifu2x-ncnn-vulkan",
+    "binary": "waifu2x-ncnn-vulkan",
     "v": null,
     "i": null,
     "o": null,
-    "n": 2,
+    "n": 3,
     "s": 2,
-    "t": 400,
+    "t": 128,
     "m": "models-cunet",
     "g": 0,
     "j": "1:2:2"
   },
   "anime4k": {
     "path": "anime4k",
-    "java_path": "C:\\Program Files\\Java\\jdk-12.0.2\\bin\\java.exe"
+    "binary": "Anime4K.jar",
+    "java_path": "C:\\Program Files\\Java\\jdk-12.0.2\\bin"
   },
   "ffmpeg": {
     "path": "ffmpeg-latest-win64-static\\bin",

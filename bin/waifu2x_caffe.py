@@ -16,7 +16,6 @@ import common
 # built-in imports
 import subprocess
 import threading
-import sys
 
 # third-party imports
 from avalon_framework import Avalon
@@ -31,16 +30,24 @@ class Waifu2xCaffe:
     the upscale function.
     """
 
-    def __init__(self, settings, process, model_dir, bit_depth):
+    def __init__(self, settings, process, bit_depth):
         self.settings = settings
         self.settings['process'] = process
-        self.settings['model_dir'] = model_dir
         self.settings['output_depth'] = bit_depth
 
         # arguments passed through command line overwrites config file values
         self.process = process
-        self.model_dir = model_dir
         self.print_lock = threading.Lock()
+
+        # Searches for models directory
+        if 'model_dir' in self.settings:
+            model_dir = common.find_path(self.settings['model_dir'])
+
+            # Search for model folder in waifu2x-caffe folder
+            if model_dir[0] is None:
+                model_dir = common.find_path(self.settings['path'] / self.settings['model_dir'])
+
+            self.settings['model_dir'] = model_dir[0]
 
     def upscale(self, input_directory, output_directory, scale_ratio, scale_width, scale_height, image_format, upscaler_exceptions):
         """This is the core function for WAIFU2X class
@@ -72,24 +79,20 @@ class Waifu2xCaffe:
 
             # list to be executed
             # initialize the list with waifu2x binary path as the first element
-            if sys.platform == 'win32':
-                execute = [common.find_path(self.settings['path'], self.settings['win_binary'])]
-            else:
-                execute = [common.find_path(self.settings['path'])]
+            execute = [self.settings['path'] / self.settings['binary']]
 
-            for key in self.settings.keys():
-
-                value = self.settings[key]
-
-                # is executable key or null or None means that leave this option out (keep default)
-                if key == 'path' or key == 'win_binary' or value is None or value is False:
+            for key, value in self.settings.items():
+                if key == 'path' or key == 'binary' or key == 'win_binary':
                     continue
+                # is executable key or null or None means that leave this option out (keep default)
+                if value is None or value is False:
+                    continue
+
+                if len(key) == 1:
+                    execute.append(f'-{key}')
                 else:
-                    if len(key) == 1:
-                        execute.append(f'-{key}')
-                    else:
-                        execute.append(f'--{key}')
-                    execute.append(str(value))
+                    execute.append(f'--{key}')
+                execute.append(str(value))
 
             Avalon.debug_info(f'Executing: {execute}')
             completed_command = subprocess.run(execute, check=True)

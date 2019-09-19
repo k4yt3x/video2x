@@ -9,9 +9,6 @@ Last Modified: August 15, 2019
 Description: This class handles all FFmpeg related operations.
 """
 
-# local imports
-import common
-
 # built-in imports
 import json
 import subprocess
@@ -32,10 +29,6 @@ class FFmpeg:
         self.settings = settings
         self.image_format = image_format
 
-        self.ffmpeg_path = common.find_path(self.settings['path'], 'ffmpeg')
-        self.ffprobe_path = common.find_path(self.settings['path'], 'ffprobe')
-        self.pixel_format = None
-
     def get_pixel_formats(self):
         """ Get a dictionary of supported pixel formats
 
@@ -46,7 +39,7 @@ class FFmpeg:
             dictionary -- JSON dict of all pixel formats to bit depth
         """
         execute = [
-            self.ffprobe_path,
+            self.settings['path'] / 'ffprobe',
             '-v',
             'quiet',
             '-pix_fmts'
@@ -88,7 +81,7 @@ class FFmpeg:
         # this execution command needs to be hard-coded
         # since video2x only strictly recignizes this one format
         execute = [
-            self.ffprobe_path,
+            self.settings['path'] / 'ffprobe',
             '-v',
             'quiet',
             '-print_format',
@@ -116,7 +109,7 @@ class FFmpeg:
             extracted_frames {string} -- video output directory
         """
         execute = [
-            self.ffmpeg_path
+            self.settings['path'] / 'ffmpeg',
         ]
 
         execute.extend(self._read_configuration(phase='video_to_frames'))
@@ -145,9 +138,9 @@ class FFmpeg:
             upscaled_frames {string} -- source images directory
         """
         execute = [
-            self.ffmpeg_path,
+            self.settings['path'] / 'ffmpeg',
             '-r',
-            str(framerate),
+            framerate,
             '-s',
             resolution
         ]
@@ -192,7 +185,7 @@ class FFmpeg:
             upscaled_frames {string} -- directory containing upscaled frames
         """
         execute = [
-            self.ffmpeg_path
+            self.settings['path'] / 'ffmpeg',
         ]
 
         execute.extend(self._read_configuration(phase='migrating_tracks'))

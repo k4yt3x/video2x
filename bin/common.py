@@ -14,28 +14,26 @@ from pathlib import Path
 import subprocess
 
 
-def find_path(path, filename=""):
-    """Looks for file in specified path. If not found, checks system path. Returns path if file is found."""
-    if filename == "":
-        filename = path
+def find_path(path="", filename=""):
+    """Looks for file in specified path. If not found, checks system path."""
 
-    if os.path.exists(Path.joinpath(Path('..'), path, filename + '.exe')):
-        return Path.joinpath(Path('..'), path, filename + '.exe')
-    elif os.path.exists(Path.joinpath(Path('..'), path, filename + '.jar')):
-        return Path.joinpath(Path('..'), path, filename + '.jar')
-    elif os.path.exists(Path.joinpath(Path('..'), path, filename)):
-        return Path.joinpath(Path('..'), path, filename)
-    elif os.path.exists(Path.joinpath(Path(path), filename + '.exe')):
-        return Path.joinpath(Path(path), filename + '.exe')
-    elif os.path.exists(Path.joinpath(Path(path), filename + '.jar')):
-        return Path.joinpath(Path(path), filename + '.jar')
-    elif os.path.exists(Path.joinpath(Path(path), filename)):
-        return Path.joinpath(Path(path), filename)
-    elif subprocess.run('command -v ' + filename + '.exe', shell=True).returncode == 0:
-        return subprocess.check_output('command -v ' + filename + '.exe', shell=True).strip().decode('utf-8')
-    elif subprocess.run('command -v ' + filename + '.exe', shell=True).returncode == 0:
-        return subprocess.check_output('command -v ' + filename + '.exe', shell=True).strip().decode('utf-8')
-    elif subprocess.run('command -v ' + filename, shell=True).returncode == 0:
-        return subprocess.check_output('command -v ' + filename, shell=True).strip().decode('utf-8')
+    # Converts abs path to relative path, ensuring searching one directory back works
+    path = os.path.relpath(Path(path))
+
+    # Search in specified path
+    if os.path.exists(Path(path) / Path(filename + '.exe')):
+        return [Path(path), filename + '.exe']
+    elif os.path.exists(Path(path) / filename):
+        return [Path(path), filename]
+    # Search one directory back
+    elif os.path.exists(Path('..') / path / Path(filename + '.exe')):
+        return [Path('..') / path, filename + '.exe']
+    elif os.path.exists(Path('..') / path / filename):
+        return [Path('..') / path, filename]
+    # Search for program in $PATH
+    elif filename and subprocess.run('command -v ' + filename + '.exe', shell=True).returncode == 0:
+        return [Path(""), filename + '.exe']
+    elif filename and subprocess.run('command -v ' + filename, shell=True).returncode == 0:
+        return [Path(""), filename]
     else:
-        return None
+        return [None, None]

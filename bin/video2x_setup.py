@@ -28,9 +28,7 @@ Installation Details:
 # built-in imports
 import argparse
 import contextlib
-import json
-import os
-import pathlib
+from pathlib import Path
 import re
 import shutil
 import subprocess
@@ -48,7 +46,7 @@ import zipfile
 VERSION = '1.5.0'
 
 # global static variables
-LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
+VIDEO2X_PATH = Path(__file__).parent
 DRIVER_OPTIONS = ['all', 'waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']
 
 
@@ -99,9 +97,6 @@ class Video2xSetup:
         elif self.driver == 'anime4k':
             self._install_anime4k()
 
-        print('\nGenerating Video2X configuration file')
-        self._generate_config()
-
         print('\nCleaning up temporary files')
         self._cleanup()
 
@@ -134,7 +129,7 @@ class Video2xSetup:
         self.trash.append(ffmpeg_zip)
 
         with zipfile.ZipFile(ffmpeg_zip) as zipf:
-            zipf.extractall(LOCALAPPDATA / 'video2x')
+            zipf.extractall(VIDEO2X_PATH)
 
     def _install_waifu2x_caffe(self):
         """ Install waifu2x_caffe
@@ -151,7 +146,7 @@ class Video2xSetup:
                 self.trash.append(waifu2x_caffe_zip)
 
         with zipfile.ZipFile(waifu2x_caffe_zip) as zipf:
-            zipf.extractall(LOCALAPPDATA / 'video2x')
+            zipf.extractall(VIDEO2X_PATH)
 
     def _install_waifu2x_converter_cpp(self):
         """ Install waifu2x_caffe
@@ -168,7 +163,7 @@ class Video2xSetup:
                 self.trash.append(waifu2x_converter_cpp_zip)
 
         with zipfile.ZipFile(waifu2x_converter_cpp_zip) as zipf:
-            zipf.extractall(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
+            zipf.extractall(VIDEO2X_PATH / 'waifu2x-converter-cpp')
 
     def _install_waifu2x_ncnn_vulkan(self):
         """ Install waifu2x-ncnn-vulkan
@@ -185,16 +180,16 @@ class Video2xSetup:
                 self.trash.append(waifu2x_ncnn_vulkan_zip)
 
         # extract and rename
-        waifu2x_ncnn_vulkan_directory = LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan'
+        waifu2x_ncnn_vulkan_directory = VIDEO2X_PATH / 'video2x' / 'waifu2x-ncnn-vulkan'
         with zipfile.ZipFile(waifu2x_ncnn_vulkan_zip) as zipf:
-            zipf.extractall(LOCALAPPDATA / 'video2x')
+            zipf.extractall(VIDEO2X_PATH / 'video2x')
 
             # if directory already exists, remove it
             if waifu2x_ncnn_vulkan_directory.exists():
                 shutil.rmtree(waifu2x_ncnn_vulkan_directory)
 
             # rename the newly extracted directory
-            (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(waifu2x_ncnn_vulkan_directory)
+            (VIDEO2X_PATH / 'video2x' / zipf.namelist()[0]).rename(waifu2x_ncnn_vulkan_directory)
 
     def _install_anime4k(self):
         """ Install Anime4K
@@ -222,39 +217,7 @@ class Video2xSetup:
 
         # extract and rename
         with zipfile.ZipFile(anime4k_zip) as zipf:
-            zipf.extractall(LOCALAPPDATA / 'video2x' / 'anime4k')
-
-    def _generate_config(self):
-        """ Generate video2x config
-        """
-        # Open current video2x.json file as template
-        with open('video2x.json', 'r') as template:
-            template_dict = json.load(template)
-            template.close()
-
-        # configure only the specified drivers
-        if self.driver == 'all':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
-            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
-            template_dict['anime4k']['anime4k_path'] = str(LOCALAPPDATA / 'video2x' / 'anime4k' / 'Anime4K.jar')
-        elif self.driver == 'waifu2x_caffe':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
-        elif self.driver == 'waifu2x_converter':
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
-        elif self.driver == 'waifu2x_ncnn_vulkan':
-            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
-        elif self.driver == 'anime4k':
-            template_dict['anime4k']['anime4k_path'] = str(LOCALAPPDATA / 'video2x' / 'anime4k' / 'Anime4K.jar')
-
-        template_dict['ffmpeg']['ffmpeg_path'] = str(LOCALAPPDATA / 'video2x' / 'ffmpeg-latest-win64-static' / 'bin')
-        template_dict['video2x']['video2x_cache_directory'] = None
-        template_dict['video2x']['preserve_frames'] = False
-
-        # Write configuration into file
-        with open('video2x.json', 'w') as config:
-            json.dump(template_dict, config, indent=2)
-            config.close()
+            zipf.extractall(VIDEO2X_PATH / 'video2x' / 'anime4k')
 
 
 def download(url, save_path, chunk_size=4096):

@@ -14,7 +14,6 @@ for waifu2x-converter-cpp.
 import common
 
 # built-in imports
-import pathlib
 import subprocess
 import threading
 
@@ -31,10 +30,19 @@ class Waifu2xConverter:
     the upscale function.
     """
 
-    def __init__(self, settings, model_dir):
+    def __init__(self, settings):
         self.settings = settings
-        self.settings['model_dir'] = model_dir
         self.print_lock = threading.Lock()
+
+        # Searches for models directory
+        if 'model-dir' in self.settings:
+            model_dir = common.find_path(self.settings['model-dir'])
+
+            # Search for model folder in waifu2x-converter-cpp folder
+            if model_dir[0] is None:
+                model_dir = common.find_path(self.settings['path'] / self.settings['model-dir'])
+
+            self.settings['model-dir'] = model_dir[0]
 
     def upscale(self, input_directory, output_directory, scale_ratio, jobs, image_format, upscaler_exceptions):
         """ Waifu2x Converter Driver Upscaler
@@ -55,11 +63,6 @@ class Waifu2xConverter:
             self.settings['jobs'] = jobs
             self.settings['output-format'] = image_format
 
-            # models_rgb must be specified manually for waifu2x-converter-cpp
-            # if it's not specified in the arguments, create automatically
-            if self.settings['model-dir'] is None:
-                self.settings['model-dir'] = pathlib.Path(self.settings['path']) / 'models_rgb'
-
             # print thread start message
             self.print_lock.acquire()
             Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} started')
@@ -67,30 +70,27 @@ class Waifu2xConverter:
 
             # list to be executed
             # initialize the list with waifu2x binary path as the first element
-            execute = [common.find_path(self.settings['path'])]
+            execute = [self.settings['path'] / self.settings['binary']]
 
-            for key in self.settings.keys():
-
-                value = self.settings[key]
-
+            for key, value in self.settings.items():
                 # the key doesn't need to be passed in this case
-                if key == 'waifu2x_converter_path':
+                if key == 'path' or key == 'binary':
                     continue
 
                 # null or None means that leave this option out (keep default)
                 elif value is None or value is False:
                     continue
+
+                if len(key) == 1:
+                    execute.append(f'-{key}')
                 else:
-                    if len(key) == 1:
-                        execute.append(f'-{key}')
-                    else:
-                        execute.append(f'--{key}')
+                    execute.append(f'--{key}')
 
-                    # true means key is an option
-                    if value is True:
-                        continue
+                # true means key is an option
+                if value is True:
+                    continue
 
-                    execute.append(str(value))
+                execute.append(str(value))
 
             Avalon.debug_info(f'Executing: {execute}')
             return subprocess.run(execute, check=True).returncode

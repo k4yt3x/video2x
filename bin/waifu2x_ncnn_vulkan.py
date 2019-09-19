@@ -16,7 +16,6 @@ for waifu2x_ncnn_vulkan.
 import common
 
 # built-in imports
-import os
 import subprocess
 import threading
 
@@ -35,14 +34,17 @@ class Waifu2xNcnnVulkan:
 
     def __init__(self, settings):
         self.settings = settings
-
-        # arguments passed through command line overwrites config file values
-
-        # waifu2x_ncnn_vulkan can't find its own model directory if its not in the current dir
-        #   so change to it
-        os.chdir(os.path.join(self.settings['waifu2x_ncnn_vulkan_path'], '..'))
-
         self.print_lock = threading.Lock()
+
+        # Searches for models directory
+        if 'm' in self.settings:
+            model_dir = common.find_path(self.settings['m'])
+
+            # Search for model folder in waifu2x-ncnn-vulkan folder
+            if model_dir[0] is None:
+                model_dir = common.find_path(self.settings['path'] / self.settings['m'])
+
+            self.settings['m'] = model_dir[0]
 
     def upscale(self, input_directory, output_directory, scale_ratio, upscaler_exceptions):
         """This is the core function for WAIFU2X class
@@ -66,21 +68,20 @@ class Waifu2xNcnnVulkan:
 
             # list to be executed
             # initialize the list with waifu2x binary path as the first element
-            execute = [common.find_path(self.settings['path'])]
+            execute = [self.settings['path'] / self.settings['binary']]
 
-            for key in self.settings.keys():
-
-                value = self.settings[key]
-
-                # is executable key or null or None means that leave this option out (keep default)
-                if key == 'waifu2x_ncnn_vulkan_path' or value is None or value is False:
+            for key, value in self.settings.items():
+                if key == 'path' or key == 'binary':
                     continue
+                # is executable key or null or None means that leave this option out (keep default)
+                if value is None or value is False:
+                    continue
+
+                if len(key) == 1:
+                    execute.append(f'-{key}')
                 else:
-                    if len(key) == 1:
-                        execute.append(f'-{key}')
-                    else:
-                        execute.append(f'--{key}')
-                    execute.append(str(value))
+                    execute.append(f'--{key}')
+                execute.append(str(value))
 
             Avalon.debug_info(f'Executing: {execute}')
             completed_command = subprocess.run(execute, check=True)

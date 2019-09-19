@@ -22,6 +22,7 @@ from image_cleaner import ImageCleaner
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
 from waifu2x_ncnn_vulkan import Waifu2xNcnnVulkan
+import common
 
 # built-in imports
 from fractions import Fraction
@@ -34,6 +35,7 @@ import tempfile
 import threading
 import time
 import traceback
+import sys
 
 # third-party imports
 from avalon_framework import Avalon
@@ -64,11 +66,27 @@ class Upscaler:
         self.scale_width = None
         self.scale_height = None
         self.scale_ratio = None
-        self.model_dir = None
         self.threads = 5
         self.video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
         self.image_format = 'png'
         self.preserve_frames = False
+
+        # Search for valid waifu2x binary path
+        if 'win_binary' in self.waifu2x_settings and sys.platform == 'win32':
+            path = common.find_path(self.waifu2x_settings['path'], self.waifu2x_settings['win_binary'])
+        else:
+            path = common.find_path(self.waifu2x_settings['path'], self.waifu2x_settings['binary'])
+        self.waifu2x_settings['path'] = path[0]
+        self.waifu2x_settings['binary'] = path[1]
+
+        # Search for valid java binary path
+        if 'java_path' in self.waifu2x_settings:
+            path = common.find_path(self.waifu2x_settings['java_path'], 'java')
+            self.waifu2x_settings['java_path'] = path[0]
+            self.waifu2x_settings['java_binary'] = path[1]
+
+        # Search for valid ffmpeg path
+        self.ffmpeg_settings['path'] = common.find_path(self.ffmpeg_settings['path'], 'ffmpeg')[0]
 
     def create_temp_directories(self):
         """create temporary directory
@@ -165,7 +183,7 @@ class Upscaler:
         # it's easier to do multi-threading with waifu2x_converter
         # the number of threads can be passed directly to waifu2x_converter
         if self.waifu2x_driver == 'waifu2x_converter':
-            w2 = Waifu2xConverter(self.waifu2x_settings, self.model_dir)
+            w2 = Waifu2xConverter(self.waifu2x_settings)
 
             progress_bar = threading.Thread(target=self._progress_bar, args=([self.extracted_frames],))
             progress_bar.start()
@@ -222,7 +240,7 @@ class Upscaler:
 
                 # create a separate w2 instance for each thread
                 if self.waifu2x_driver == 'waifu2x_caffe':
-                    w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir, self.bit_depth)
+                    w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.bit_depth)
                     if self.scale_ratio:
                         thread = threading.Thread(target=w2.upscale,
                                                   args=(thread_info[0],
