@@ -77,7 +77,7 @@ class Waifu2xConverter:
 
             for key, value in self.settings.items():
                 # the key doesn't need to be passed in this case
-                if key == 'path' or key == 'binary':
+                if key in ['path', 'binary', 'win_binary']:
                     continue
 
                 # null or None means that leave this option out (keep default)

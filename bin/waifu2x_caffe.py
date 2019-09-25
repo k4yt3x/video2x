@@ -85,7 +85,7 @@ class Waifu2xCaffe:
             execute = [self.settings['path'] / self.settings['binary']]
 
             for key, value in self.settings.items():
-                if key == 'path' or key == 'binary' or key == 'win_binary':
+                if key in ['path', 'binary', 'win_binary']:
                     continue
                 # is executable key or null or None means that leave this option out (keep default)
                 if value is None or value is False:

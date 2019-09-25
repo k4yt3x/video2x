@@ -87,7 +87,7 @@ class Anime4k:
 
                 if not logged:
                     self.print_lock.acquire()
-                    Avalon.debug_info(f'Executing: {execute}', )
+                    Avalon.debug_info(f'Executing: {execute}')
                     self.print_lock.release()
                     logged = True
 

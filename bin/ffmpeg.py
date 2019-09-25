@@ -17,7 +17,7 @@ import subprocess
 from avalon_framework import Avalon
 
 
-class FFmpeg:
+class Ffmpeg:
     """This class communicates with FFmpeg
 
     This class deals with FFmpeg. It handles extracting
@@ -28,6 +28,8 @@ class FFmpeg:
     def __init__(self, settings, image_format):
         self.settings = settings
         self.image_format = image_format
+        self.ffmpeg_binary_path = self.settings['path'] / self.settings['ffmpeg_binary']
+        self.ffprobe_binary_path = self.settings['path'] / self.settings['ffprobe_binary']
 
     def get_pixel_formats(self):
         """ Get a dictionary of supported pixel formats
@@ -39,7 +41,7 @@ class FFmpeg:
             dictionary -- JSON dict of all pixel formats to bit depth
         """
         execute = [
-            self.settings['path'] / self.settings['ffprobe_binary'],
+            self.ffprobe_binary_path,
             '-v',
             'quiet',
             '-pix_fmts'
@@ -81,7 +83,7 @@ class FFmpeg:
         # this execution command needs to be hard-coded
         # since video2x only strictly recignizes this one format
         execute = [
-            self.settings['path'] / self.settings['ffprobe_binary'],
+            self.ffprobe_binary_path,
             '-v',
             'quiet',
             '-print_format',
@@ -109,7 +111,7 @@ class FFmpeg:
             extracted_frames {string} -- video output directory
         """
         execute = [
-            self.settings['path'] / self.settings['ffmpeg_binary'],
+            self.ffmpeg_binary_path,
         ]
 
         execute.extend(self._read_configuration(phase='video_to_frames'))
@@ -138,7 +140,7 @@ class FFmpeg:
             upscaled_frames {string} -- source images directory
         """
         execute = [
-            self.settings['path'] / self.settings['ffmpeg_binary'],
+            self.ffmpeg_binary_path,
             '-r',
             framerate,
             '-s',
