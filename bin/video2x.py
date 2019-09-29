@@ -243,10 +243,10 @@ if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']:
 # anime4k runs significantly faster with more threads
 if args.driver == 'anime4k' and args.threads <= 1:
     Avalon.warning('Anime4K runs significantly faster with more threads')
-    if Avalon.ask('Use more threads of Anime4K?', True):
+    if Avalon.ask('Use more threads of Anime4K?', default=True, batch=args.batch):
         while True:
             try:
-                threads = Avalon.gets('Amount of threads to use [5]: ')
+                threads = Avalon.gets('Amount of threads to use [5]: ', default=5, batch=args.batch)
                 args.threads = int(threads)
                 break
             except ValueError:
