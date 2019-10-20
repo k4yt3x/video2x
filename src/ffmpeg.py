@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: August 15, 2019
+Last Modified: October 6, 2019
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -30,8 +30,8 @@ class Ffmpeg:
         self.ffmpeg_settings = ffmpeg_settings
 
         self.ffmpeg_path = pathlib.Path(self.ffmpeg_settings['ffmpeg_path'])
-        self.ffmpeg_binary = self.ffmpeg_path / 'ffmpeg.exe'
-        self.ffmpeg_probe_binary = self.ffmpeg_path / 'ffprobe.exe'
+        self.ffmpeg_binary = self.ffmpeg_path / 'ffmpeg'
+        self.ffmpeg_probe_binary = self.ffmpeg_path / 'ffprobe'
         self.image_format = image_format
         self.pixel_format = None
 
