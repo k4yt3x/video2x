@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: August 29, 2019
+Last Modified: October 6, 2019
 
 Dev: BrianPetkovsek
 Dev: SAT3LL
@@ -50,7 +50,6 @@ from upscaler import Upscaler
 # built-in imports
 import argparse
 import contextlib
-import json
 import pathlib
 import re
 import shutil
@@ -58,13 +57,18 @@ import sys
 import tempfile
 import time
 import traceback
+import yaml
 
 # third-party imports
 from avalon_framework import Avalon
-import GPUtil
 import psutil
 
-VERSION = '2.10.0'
+# platform-specific imports
+if sys.platform == 'win32':
+    import GPUtil
+
+
+VERSION = '3.0.0'
 
 LEGAL_INFO = f'''Video2X Version: {VERSION}
 Author: K4YT3X
@@ -107,7 +111,7 @@ def process_arguments():
     upscaler_options.add_argument('-d', '--driver', help='upscaling driver', action='store', default='waifu2x_caffe', choices=AVAILABLE_DRIVERS)
     upscaler_options.add_argument('-y', '--model_dir', type=pathlib.Path, help='directory containing model JSON files', action='store')
     upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
-    upscaler_options.add_argument('-c', '--config', type=pathlib.Path, help='video2x config file location', action='store', default=pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.json')
+    upscaler_options.add_argument('-c', '--config', type=pathlib.Path, help='video2x config file location', action='store', default=pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml')
     upscaler_options.add_argument('-b', '--batch', help='enable batch mode (select all default values to questions)', action='store_true')
 
     # scaling options
@@ -186,14 +190,18 @@ def check_memory():
                 Avalon.warning('Proceed with caution')
 
 
-def read_config(config_file):
-    """ Reads configuration file
+def read_config(config_file: pathlib.Path) -> dict:
+    """ read video2x configurations from config file
 
-    Returns a dictionary read by JSON.
+    Arguments:
+        config_file {pathlib.Path} -- video2x configuration file pathlib.Path
+
+    Returns:
+        dict -- dictionary of video2x configuration
     """
-    with open(config_file, 'r') as raw_config:
-        config = json.load(raw_config)
-        return config
+
+    with open(config_file, 'r') as config:
+        return yaml.load(config, Loader=yaml.CLoader)
 
 
 def absolutify_paths(config):
@@ -277,16 +285,16 @@ if (args.width and not args.height) or (not args.width and args.height):
     raise ArgumentError('only one of width or height is specified')
 
 # check available memory if driver is waifu2x-based
-if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']:
+if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'] and sys.platform == 'win32':
     check_memory()
 
 # anime4k runs significantly faster with more threads
 if args.driver == 'anime4k' and args.threads <= 1:
     Avalon.warning('Anime4K runs significantly faster with more threads')
-    if Avalon.ask('Use more threads of Anime4K?', True):
+    if Avalon.ask('Use more threads of Anime4K?', default=True, batch=args.batch):
         while True:
             try:
-                threads = Avalon.gets('Amount of threads to use [5]: ')
+                threads = Avalon.gets('Amount of threads to use [5]: ', default=5, batch=args.batch)
                 args.threads = int(threads)
                 break
             except ValueError:
@@ -296,35 +304,24 @@ if args.driver == 'anime4k' and args.threads <= 1:
                 else:
                     Avalon.error(f'{threads} is not a valid integer')
 
-# read configurations from JSON
+# read configurations from configuration file
 config = read_config(args.config)
-config = absolutify_paths(config)
+
+# config = absolutify_paths(config)
 
 # load waifu2x configuration
-if args.driver == 'waifu2x_caffe':
-    waifu2x_settings = config['waifu2x_caffe']
-    if not pathlib.Path(waifu2x_settings['waifu2x_caffe_path']).is_file():
-        Avalon.error('Specified waifu2x-caffe directory doesn\'t exist')
+driver_settings = config[args.driver]
+
+# check if driver path exists
+if not pathlib.Path(driver_settings['path']).is_file():
+    if not pathlib.Path(f'{driver_settings["path"]}.exe').is_file():
+        Avalon.error('Specified driver executable directory doesn\'t exist')
         Avalon.error('Please check the configuration file settings')
-        raise FileNotFoundError(waifu2x_settings['waifu2x_caffe_path'])
-elif args.driver == 'waifu2x_converter':
-    waifu2x_settings = config['waifu2x_converter']
-    if not pathlib.Path(waifu2x_settings['waifu2x_converter_path']).is_dir():
-        Avalon.error('Specified waifu2x-converter-cpp directory doesn\'t exist')
-        Avalon.error('Please check the configuration file settings')
-        raise FileNotFoundError(waifu2x_settings['waifu2x_converter_path'])
-elif args.driver == 'waifu2x_ncnn_vulkan':
-    waifu2x_settings = config['waifu2x_ncnn_vulkan']
-    if not pathlib.Path(waifu2x_settings['waifu2x_ncnn_vulkan_path']).is_file():
-        Avalon.error('Specified waifu2x_ncnn_vulkan directory doesn\'t exist')
-        Avalon.error('Please check the configuration file settings')
-        raise FileNotFoundError(waifu2x_settings['waifu2x_ncnn_vulkan_path'])
-elif args.driver == 'anime4k':
-    waifu2x_settings = config['anime4k']
-    if not pathlib.Path(waifu2x_settings['anime4k_path']).is_file():
-        Avalon.error('Specified anime4k directory doesn\'t exist')
-        Avalon.error('Please check the configuration file settings')
-        raise FileNotFoundError(waifu2x_settings['anime4k_path'])
+        raise FileNotFoundError(driver_settings['path'])
+
+# TODO: check Java here
+if args.driver == 'anime4k':
+    pass
 
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']
@@ -385,7 +382,7 @@ try:
             Avalon.error('Suffix must be specified for FFmpeg')
             raise Exception('No suffix specified')
 
-        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+        upscaler = Upscaler(input_video=args.input, output_video=args.output, method=args.method, driver_settings=driver_settings, ffmpeg_settings=ffmpeg_settings)
 
         # set optional options
         upscaler.waifu2x_driver = args.driver
@@ -413,7 +410,7 @@ try:
 
         for input_video in [f for f in args.input.iterdir() if f.is_file()]:
             output_video = args.output / input_video.name
-            upscaler = Upscaler(input_video=input_video, output_video=output_video, method=args.method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+            upscaler = Upscaler(input_video=input_video, output_video=output_video, method=args.method, driver_settings=driver_settings, ffmpeg_settings=ffmpeg_settings)
 
             # set optional options
             upscaler.waifu2x_driver = args.driver
