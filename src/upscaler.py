@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: August 21, 2019
+Last Modified: October 6, 2019
 
 Dev: SAT3LL
 
@@ -51,12 +51,12 @@ class Upscaler:
         ArgumentError -- if argument is not valid
     """
 
-    def __init__(self, input_video, output_video, method, waifu2x_settings, ffmpeg_settings):
+    def __init__(self, input_video, output_video, method, driver_settings, ffmpeg_settings):
         # mandatory arguments
         self.input_video = input_video
         self.output_video = output_video
         self.method = method
-        self.waifu2x_settings = waifu2x_settings
+        self.driver_settings = driver_settings
         self.ffmpeg_settings = ffmpeg_settings
 
         # optional arguments
@@ -165,7 +165,7 @@ class Upscaler:
         # it's easier to do multi-threading with waifu2x_converter
         # the number of threads can be passed directly to waifu2x_converter
         if self.waifu2x_driver == 'waifu2x_converter':
-            w2 = Waifu2xConverter(self.waifu2x_settings, self.model_dir)
+            w2 = Waifu2xConverter(self.driver_settings, self.model_dir)
 
             progress_bar = threading.Thread(target=self._progress_bar, args=([self.extracted_frames],))
             progress_bar.start()
@@ -222,7 +222,7 @@ class Upscaler:
 
                 # create a separate w2 instance for each thread
                 if self.waifu2x_driver == 'waifu2x_caffe':
-                    w2 = Waifu2xCaffe(copy.deepcopy(self.waifu2x_settings), self.method, self.model_dir, self.bit_depth)
+                    w2 = Waifu2xCaffe(copy.deepcopy(self.driver_settings), self.method, self.model_dir, self.bit_depth)
                     if self.scale_ratio:
                         thread = threading.Thread(target=w2.upscale,
                                                   args=(thread_info[0],
@@ -244,7 +244,7 @@ class Upscaler:
 
                 # if the driver being used is waifu2x_ncnn_vulkan
                 elif self.waifu2x_driver == 'waifu2x_ncnn_vulkan':
-                    w2 = Waifu2xNcnnVulkan(copy.deepcopy(self.waifu2x_settings))
+                    w2 = Waifu2xNcnnVulkan(copy.deepcopy(self.driver_settings))
                     thread = threading.Thread(target=w2.upscale,
                                               args=(thread_info[0],
                                                     self.upscaled_frames,
@@ -253,7 +253,7 @@ class Upscaler:
 
                 # if the driver being used is anime4k
                 elif self.waifu2x_driver == 'anime4k':
-                    w2 = Anime4k(copy.deepcopy(self.waifu2x_settings))
+                    w2 = Anime4k(copy.deepcopy(self.driver_settings))
                     thread = threading.Thread(target=w2.upscale,
                                               args=(thread_info[0],
                                                     self.upscaled_frames,

@@ -4,7 +4,7 @@
 Name: Waifu2x NCNN Vulkan Driver
 Author: SAT3LL
 Date Created: June 26, 2019
-Last Modified: August 3, 2019
+Last Modified: October 6, 2019
 
 Dev: K4YT3X
 
@@ -30,14 +30,14 @@ class Waifu2xNcnnVulkan:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings):
-        self.waifu2x_settings = waifu2x_settings
+    def __init__(self, driver_settings):
+        self.driver_settings = driver_settings
 
         # arguments passed through command line overwrites config file values
 
         # waifu2x_ncnn_vulkan can't find its own model directory if its not in the current dir
         #   so change to it
-        os.chdir(os.path.join(self.waifu2x_settings['waifu2x_ncnn_vulkan_path'], '..'))
+        os.chdir(os.path.join(self.driver_settings['waifu2x_ncnn_vulkan_path'], '..'))
 
         self.print_lock = threading.Lock()
 
@@ -52,9 +52,9 @@ class Waifu2xNcnnVulkan:
 
         try:
             # overwrite config file settings
-            self.waifu2x_settings['i'] = input_directory
-            self.waifu2x_settings['o'] = output_directory
-            self.waifu2x_settings['s'] = scale_ratio
+            self.driver_settings['i'] = input_directory
+            self.driver_settings['o'] = output_directory
+            self.driver_settings['s'] = scale_ratio
 
             # print thread start message
             self.print_lock.acquire()
@@ -63,14 +63,14 @@ class Waifu2xNcnnVulkan:
 
             # list to be executed
             # initialize the list with waifu2x binary path as the first element
-            execute = [str(self.waifu2x_settings['waifu2x_ncnn_vulkan_path'])]
+            execute = [str(self.driver_settings['path'])]
 
-            for key in self.waifu2x_settings.keys():
+            for key in self.driver_settings.keys():
 
-                value = self.waifu2x_settings[key]
+                value = self.driver_settings[key]
 
                 # is executable key or null or None means that leave this option out (keep default)
-                if key == 'waifu2x_ncnn_vulkan_path' or value is None or value is False:
+                if key == 'path' or value is None or value is False:
                     continue
                 else:
                     if len(key) == 1:

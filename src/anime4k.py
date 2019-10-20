@@ -4,7 +4,7 @@
 Name: Anime4K Driver
 Author: K4YT3X
 Date Created: August 15, 2019
-Last Modified: August 15, 2019
+Last Modified: October 6, 2019
 
 Description: This class is a high-level wrapper
 for Anime4k.
@@ -27,8 +27,8 @@ class Anime4k:
     the upscale function.
     """
 
-    def __init__(self, waifu2x_settings):
-        self.waifu2x_settings = waifu2x_settings
+    def __init__(self, driver_settings):
+        self.driver_settings = driver_settings
         self.print_lock = threading.Lock()
 
     def upscale(self, input_directory, output_directory, scale_ratio, upscaler_exceptions, push_strength=None, push_grad_strength=None):
@@ -57,9 +57,9 @@ class Anime4k:
             for image in extracted_frame_files:
 
                 execute = [
-                    self.waifu2x_settings['java_path'],
+                    self.driver_settings['java_path'],
                     '-jar',
-                    self.waifu2x_settings['anime4k_path'],
+                    self.driver_settings['anime4k_path'],
                     str(image.absolute()),
                     str(output_directory / image.name),
                     str(scale_ratio)
