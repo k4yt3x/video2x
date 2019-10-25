@@ -4,7 +4,7 @@
 Name: Waifu2x NCNN Vulkan Driver
 Author: SAT3LL
 Date Created: June 26, 2019
-Last Modified: August 3, 2019
+Last Modified: October 24, 2019
 
 Dev: K4YT3X
 
@@ -54,7 +54,7 @@ class Waifu2xNcnnVulkan:
             # overwrite config file settings
             self.waifu2x_settings['i'] = input_directory
             self.waifu2x_settings['o'] = output_directory
-            self.waifu2x_settings['s'] = scale_ratio
+            self.waifu2x_settings['s'] = int(scale_ratio)
 
             # print thread start message
             self.print_lock.acquire()
