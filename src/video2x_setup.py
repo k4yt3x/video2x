@@ -2,17 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 Name: Video2X Setup Script
-Author: K4YT3X
-Author: BrianPetkovsek
+Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: August 20, 2019
+Last Modified: November 15, 2019
 
-Dev: SAT3LL
-
-Licensed under the GNU General Public License Version 3 (GNU GPL v3),
-    available at: https://www.gnu.org/licenses/gpl-3.0.txt
-
-(C) 2018-2019 K4YT3X
+Editor: BrianPetkovsek
+Editor: SAT3LL
 
 Description: This script helps installing all dependencies of video2x
 and generates a configuration for it.
@@ -26,9 +21,9 @@ Installation Details:
 """
 
 # built-in imports
+from datetime import timedelta
 import argparse
 import contextlib
-import json
 import os
 import pathlib
 import re
@@ -36,8 +31,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import traceback
 import urllib
+import yaml
 import zipfile
 
 # Requests doesn't come with windows, therefore
@@ -45,14 +42,15 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.5.0'
+VERSION = '1.6.0'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
+VIDEO2X_CONFIG = pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.json'
 DRIVER_OPTIONS = ['all', 'waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']
 
 
-def process_arguments():
+def parse_arguments():
     """Processes CLI arguments
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -227,9 +225,9 @@ class Video2xSetup:
     def _generate_config(self):
         """ Generate video2x config
         """
-        # Open current video2x.json file as template
-        with open('video2x.json', 'r') as template:
-            template_dict = json.load(template)
+        # open current video2x configuration file as template
+        with open(VIDEO2X_CONFIG, 'r') as template:
+            template_dict = yaml.load(template, Loader=yaml.CLoader)
             template.close()
 
         # configure only the specified drivers
@@ -251,10 +249,9 @@ class Video2xSetup:
         template_dict['video2x']['video2x_cache_directory'] = None
         template_dict['video2x']['preserve_frames'] = False
 
-        # Write configuration into file
-        with open('video2x.json', 'w') as config:
-            json.dump(template_dict, config, indent=2)
-            config.close()
+        # write configuration into file
+        with open(VIDEO2X_CONFIG, 'w') as config:
+            yaml.dump(template_dict, config)
 
 
 def download(url, save_path, chunk_size=4096):
@@ -321,7 +318,14 @@ def pip_install(file):
 
 if __name__ == '__main__':
     try:
-        args = process_arguments()
+        # set default exit code
+        EXIT_CODE = 0
+
+        # get start time
+        start_time = time.time()
+
+        # parse command line arguments
+        args = parse_arguments()
         print('Video2X Setup Script')
         print(f'Version: {VERSION}')
 
@@ -335,8 +339,16 @@ if __name__ == '__main__':
         setup = Video2xSetup(args.driver, download_python_modules)
         setup.run()
         print('\nScript finished successfully')
-    except Exception:
 
+    # if PermissionError is raised
+    # user needs to run this with higher privilege
+    except PermissionError:
+        print('You might have insufficient privilege for this script to run')
+        print('Try running this script with Administrator privileges')
+        EXIT_CODE = 1
+
+    # for any exception in the script
+    except Exception:
         traceback.print_exc()
         print('An error has occurred')
         print('Video2X Automatic Setup has failed')
@@ -348,4 +360,10 @@ if __name__ == '__main__':
             traceback.print_exc()
             print('An error occurred while trying to cleanup files')
 
-        exit(1)
+        EXIT_CODE = 1
+
+    finally:
+        print('Script finished')
+        print(f'Time taken: {timedelta(seconds=round(time.time() - start_time))}')
+        input('Press [ENTER] to exit script')
+        sys.exit(EXIT_CODE)
