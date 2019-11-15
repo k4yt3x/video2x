@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: October 6, 2019
+Last Modified: November 15, 2019
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -67,7 +67,7 @@ class Ffmpeg:
                 pass
 
         # print pixel formats for debugging
-        Avalon.debug_info(pixel_formats)
+        Avalon.debug_info(str(pixel_formats))
 
         return pixel_formats
 
@@ -284,4 +284,4 @@ class Ffmpeg:
 
         Avalon.debug_info(f'Executing: {execute}')
 
-        return subprocess.run(execute, shell=True, check=True).returncode
+        return subprocess.run(execute, check=True).returncode
