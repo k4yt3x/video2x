@@ -11,12 +11,12 @@ __      __  _       _                  ___   __   __
 
 
 Name: Video2X Controller
-Author: K4YT3X
+Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: October 6, 2019
+Last Modified: November 15, 2019
 
-Dev: BrianPetkovsek
-Dev: SAT3LL
+Editor: BrianPetkovsek
+Editor: SAT3LL
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -91,7 +91,7 @@ SYS_MEM_PER_THREAD = 2.5
 GPU_MEM_PER_THREAD = 3.5
 
 
-def process_arguments():
+def parse_arguments():
     """Processes CLI arguments
 
     This function parses all arguments
@@ -256,13 +256,13 @@ if __name__ != '__main__':
 # print video2x logo
 print_logo()
 
-# process CLI arguments
-args = process_arguments()
+# parse command line arguments
+args = parse_arguments()
 
 # display version and lawful informaition
 if args.version:
     print(LEGAL_INFO)
-    exit(0)
+    sys.exit(0)
 
 # arguments sanity check
 if not args.input:
@@ -301,8 +301,7 @@ if args.driver == 'anime4k' and args.threads <= 1:
                 if threads == '':
                     args.threads = 5
                     break
-                else:
-                    Avalon.error(f'{threads} is not a valid integer')
+                Avalon.error(f'{threads} is not a valid integer')
 
 # read configurations from configuration file
 config = read_config(args.config)
@@ -319,9 +318,11 @@ if not pathlib.Path(driver_settings['path']).is_file():
         Avalon.error('Please check the configuration file settings')
         raise FileNotFoundError(driver_settings['path'])
 
-# TODO: check Java here
+# if the driver is Anime4K, check if JDK 12 is installed
 if args.driver == 'anime4k':
-    pass
+    if not pathlib.Path('C:/Program Files/Java/jdk-12.0.2/bin/java.exe').is_file():
+        Avalon.warning('Cannot find JDK 12 at its default installation location')
+        Avalon.warning('Please ensure you have JDK 12 installed and configured')
 
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']
@@ -432,9 +433,11 @@ try:
         raise FileNotFoundError(f'{args.input} is neither file nor directory')
 
     Avalon.info(f'Program completed, taking {round((time.time() - begin_time), 5)} seconds')
+
 except Exception:
     Avalon.error('An exception has occurred')
     traceback.print_exc()
+
 finally:
     # remove Video2X cache directory
     with contextlib.suppress(FileNotFoundError):
