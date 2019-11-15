@@ -59,7 +59,7 @@ class Anime4k:
                 execute = [
                     self.driver_settings['java_path'],
                     '-jar',
-                    self.driver_settings['anime4k_path'],
+                    self.driver_settings['path'],
                     str(image.absolute()),
                     str(output_directory / image.name),
                     str(scale_ratio)
