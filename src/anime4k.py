@@ -4,7 +4,7 @@
 Name: Anime4K Driver
 Author: K4YT3X
 Date Created: August 15, 2019
-Last Modified: October 6, 2019
+Last Modified: November 15, 2019
 
 Description: This class is a high-level wrapper
 for Anime4k.
