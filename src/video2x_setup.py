@@ -34,7 +34,6 @@ import tempfile
 import time
 import traceback
 import urllib
-import yaml
 import zipfile
 
 # Requests doesn't come with windows, therefore
@@ -225,9 +224,11 @@ class Video2xSetup:
     def _generate_config(self):
         """ Generate video2x config
         """
+        import yaml
+
         # open current video2x configuration file as template
         with open(VIDEO2X_CONFIG, 'r') as template:
-            template_dict = yaml.load(template, Loader=yaml.CLoader)
+            template_dict = yaml.load(template, Loader=yaml.FullLoader)
             template.close()
 
         # configure only the specified drivers
