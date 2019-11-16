@@ -4,9 +4,9 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: July 27, 2019
-Last Modified: November 15, 2019
+Last Modified: November 16, 2019
 
-Description: GUI for Video2X
+Description: A simple GUI for Video2X made with tkinter.
 """
 
 # local imports
@@ -18,13 +18,15 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter.filedialog import *
-import json
 import pathlib
 import tempfile
 import threading
 import time
+import yaml
 
 VERSION = '1.1.2'
+
+VIDEO2X_CONFIG = pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml'
 
 LEGAL_INFO = f'''Video2X GUI Version: {VERSION}
 Author: K4YT3X
@@ -268,7 +270,7 @@ class Video2xGui():
         begin_time = time.time()
 
         # read configuration file
-        config = read_config('video2x.json')
+        config = read_config(VIDEO2X_CONFIG)
         config = absolutify_paths(config)
 
         input_file = pathlib.Path(self.input_file.get())
@@ -414,10 +416,10 @@ class Video2xGui():
 def read_config(config_file):
     """ Reads configuration file
 
-    Returns a dictionary read by JSON.
+    Returns a dictionary read by parsing Video2X config.
     """
     with open(config_file, 'r') as raw_config:
-        config = json.load(raw_config)
+        config = yaml.load(raw_config, Loader=yaml.FullLoader)
         return config
 
 
