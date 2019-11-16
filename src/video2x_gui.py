@@ -19,6 +19,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter.filedialog import *
 import pathlib
+import sys
 import tempfile
 import threading
 import time
