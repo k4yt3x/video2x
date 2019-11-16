@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: November 15, 2019
+Last Modified: November 16, 2019
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -45,7 +45,7 @@ VERSION = '1.6.0'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
-VIDEO2X_CONFIG = pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.json'
+VIDEO2X_CONFIG = pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml'
 DRIVER_OPTIONS = ['all', 'waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']
 
 
@@ -363,6 +363,8 @@ if __name__ == '__main__':
 
         EXIT_CODE = 1
 
+    # regardless if script finishes successfully or not
+    # print script execution summary
     finally:
         print('Script finished')
         print(f'Time taken: {timedelta(seconds=round(time.time() - start_time))}')
