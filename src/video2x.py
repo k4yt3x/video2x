@@ -201,7 +201,7 @@ def read_config(config_file: pathlib.Path) -> dict:
     """
 
     with open(config_file, 'r') as config:
-        return yaml.load(config, Loader=yaml.CLoader)
+        return yaml.load(config, Loader=yaml.FullLoader)
 
 
 def absolutify_paths(config):
