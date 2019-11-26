@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Name: Video2x GUI
+Creator: Video2X GUI
 Author: K4YT3X
 Date Created: July 27, 2019
-Last Modified: August 17, 2019
+Last Modified: November 16, 2019
 
-Description: GUI for Video2X
+Description: A simple GUI for Video2X made with tkinter.
 """
 
 # local imports
@@ -18,13 +18,16 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter.filedialog import *
-import json
 import pathlib
+import sys
 import tempfile
 import threading
 import time
+import yaml
 
-VERSION = '1.1.1'
+VERSION = '1.1.2'
+
+VIDEO2X_CONFIG = pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml'
 
 LEGAL_INFO = f'''Video2X GUI Version: {VERSION}
 Author: K4YT3X
@@ -47,6 +50,46 @@ AVAILABLE_DRIVERS = {
 }
 
 IMAGE_FORMATS = {'PNG', 'JPG'}
+
+DEMUXER_EXTENSIONS = {'3dostr', '4xm', 'aa', 'aac', 'ac3', 'acm', 'act',
+                      'adf', 'adp', 'ads', 'adx', 'aea', 'afc', 'aiff', 'aix', 'alaw',
+                      'alias_pix', 'alsa', 'amr', 'amrnb', 'amrwb', 'anm', 'apc', 'ape',
+                      'apng', 'aptx', 'aptx_hd', 'aqtitle', 'asf', 'asf_o', 'ass', 'ast',
+                      'au', 'avi', 'avisynth', 'avr', 'avs', 'avs2', 'bethsoftvid', 'bfi',
+                      'bfstm', 'bin', 'bink', 'bit', 'bmp_pipe', 'bmv', 'boa', 'brender_pix',
+                      'brstm', 'c93', 'caf', 'cavsvideo', 'cdg', 'cdxl', 'cine', 'codec2',
+                      'codec2raw', 'concat', 'dash', 'data', 'daud', 'dcstr', 'dds_pipe',
+                      'dfa', 'dirac', 'dnxhd', 'dpx_pipe', 'dsf', 'dsicin', 'dss', 'dts',
+                      'dtshd', 'dv', 'dvbsub', 'dvbtxt', 'dxa', 'ea', 'ea_cdata', 'eac3',
+                      'epaf', 'exr_pipe', 'f32be', 'f32le', 'f64be', 'f64le', 'fbdev',
+                      'ffmetadata', 'film_cpk', 'filmstrip', 'fits', 'flac', 'flic', 'flv',
+                      'frm', 'fsb', 'g722', 'g723_1', 'g726', 'g726le', 'g729', 'gdv', 'genh',
+                      'gif', 'gsm', 'gxf', 'h261', 'h263', 'h264', 'hevc', 'hls', 'applehttp',
+                      'hnm', 'ico', 'idcin', 'idf', 'iec61883', 'iff', 'ilbc', 'image2',
+                      'image2pipe', 'ingenient', 'ipmovie', 'ircam', 'iss', 'iv8', 'ivf',
+                      'ivr', 'j2k_pipe', 'jack', 'jacosub', 'jpeg_pipe', 'jpegls_pipe',
+                      'jv', 'kmsgrab', 'lavfi', 'libcdio', 'libdc1394', 'libgme', 'libopenmpt',
+                      'live_flv', 'lmlm4', 'loas', 'lrc', 'lvf', 'lxf', 'm4v', 'matroska', 'webm',
+                      'mgsts', 'microdvd', 'mjpeg', 'mjpeg_2000', 'mlp', 'mlv', 'mm', 'mmf',
+                      'mov', 'mp4', 'm4a', '3gp', '3g2', 'mj2', 'mp3', 'mpc', 'mpc8', 'mpeg',
+                      'mpegts', 'mpegtsraw', 'mpegvideo', 'mpjpeg', 'mpl2', 'mpsub', 'msf',
+                      'msnwctcp', 'mtaf', 'mtv', 'mulaw', 'musx', 'mv', 'mvi', 'mxf', 'mxg',
+                      'nc', 'nistsphere', 'nsp', 'nsv', 'nut', 'nuv', 'ogg', 'oma', 'openal',
+                      'oss', 'paf', 'pam_pipe', 'pbm_pipe', 'pcx_pipe', 'pgm_pipe', 'pgmyuv_pipe',
+                      'pictor_pipe', 'pjs', 'pmp', 'png_pipe', 'ppm_pipe', 'psd_pipe', 'psxstr',
+                      'pulse', 'pva', 'pvf', 'qcp', 'qdraw_pipe', 'r3d', 'rawvideo', 'realtext',
+                      'redspark', 'rl2', 'rm', 'roq', 'rpl', 'rsd', 'rso', 'rtp', 'rtsp',
+                      's16be', 's16le', 's24be', 's24le', 's32be', 's32le', 's337m', 's8',
+                      'sami', 'sap', 'sbc', 'sbg', 'scc', 'sdp', 'sdr2', 'sds', 'sdx', 'ser',
+                      'sgi_pipe', 'shn', 'siff', 'sln', 'smjpeg', 'smk', 'smush', 'sndio',
+                      'sol', 'sox', 'spdif', 'srt', 'stl', 'subviewer', 'subviewer1', 'sunrast_pipe',
+                      'sup', 'svag', 'svg_pipe', 'swf', 'tak', 'tedcaptions', 'thp', 'tiertexseq',
+                      'tiff_pipe', 'tmv', 'truehd', 'tta', 'tty', 'txd', 'ty', 'u16be', 'u16le',
+                      'u24be', 'u24le', 'u32be', 'u32le', 'u8', 'v210', 'v210x', 'vag', 'vc1',
+                      'vc1test', 'vidc', 'video4linux2', 'v4l2', 'vivo', 'vmd', 'vobsub', 'voc',
+                      'vpk', 'vplayer', 'vqf', 'w64', 'wav', 'wc3movie', 'webm_dash_manifest',
+                      'webp_pipe', 'webvtt', 'wsaud', 'wsd', 'wsvqa', 'wtv', 'wv', 'wve', 'x11grab',
+                      'xa', 'xbin', 'xmv', 'xpm_pipe', 'xvag', 'xwd_pipe', 'xwma', 'yop', 'yuv4mpegpipe'}
 
 
 class Video2xGui():
@@ -228,7 +271,7 @@ class Video2xGui():
         begin_time = time.time()
 
         # read configuration file
-        config = read_config('video2x.json')
+        config = read_config(VIDEO2X_CONFIG)
         config = absolutify_paths(config)
 
         input_file = pathlib.Path(self.input_file.get())
@@ -350,12 +393,18 @@ class Video2xGui():
     def _select_input(self):
         self.input_file.set(askopenfilename(title='Select Input File'))
 
+        # remove input file extension
+        input_filename = str(self.input_file.get())
+        for extension in DEMUXER_EXTENSIONS:
+            if input_filename.endswith(f'.{extension}'):
+                input_filename = input_filename[:-1 - len(extension)]
+
         # try to set an output file name automatically
-        output_file = pathlib.Path(f'{self.input_file.get()}_output.mp4')
+        output_file = pathlib.Path(f'{input_filename}_output.mp4')
 
         output_file_id = 0
         while output_file.is_file() and output_file_id <= 10:
-            output_file = pathlib.Path(f'{self.input_file.get()}_output_{output_file_id}.mp4')
+            output_file = pathlib.Path(f'{input_filename}_output_{output_file_id}.mp4')
             output_file_id += 1
         
         if not output_file.exists():
@@ -368,10 +417,10 @@ class Video2xGui():
 def read_config(config_file):
     """ Reads configuration file
 
-    Returns a dictionary read by JSON.
+    Returns a dictionary read by parsing Video2X config.
     """
     with open(config_file, 'r') as raw_config:
-        config = json.load(raw_config)
+        config = yaml.load(raw_config, Loader=yaml.FullLoader)
         return config
 
 

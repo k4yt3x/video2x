@@ -26,6 +26,13 @@ Component names that are **bolded** can be automatically downloaded and configur
 
 ## Recent Changes
 
+### 3.0.0 (November 26, 2019)
+
+- Linux compatibility
+- Configuration file changed to YAML format
+  - You may still use a JSON-formatted config file. To do so, please specify `-c video2x.json`.
+- Other code clean-up and optimization
+
 ### 2.10.0 (August 16, 2019)
 
 - **Added support for [Anime4K](https://github.com/bloc97/Anime4K)**
@@ -36,18 +43,10 @@ Component names that are **bolded** can be automatically downloaded and configur
 - Removed f_string dependency and support for legacy versions of Python
 - Organized file import statements
 
-### 2.8.1 (July 9, 2019)
+### Setup Script 1.6.0 (November 26, 2019)
 
-- Added automatic pixel format detection
-- Added automatic color bit depth detection
-
-### 2.8.0 (June 25, 2019)
-
-- **Added support for [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)**
-
-### Setup Script 1.5.0 (August 16, 2019)
-
-- Added automatic installation support for `Anime4K`
+- Added compatibility for new YAML configuration file
+- Added better exception handling
 
 ## Description
 

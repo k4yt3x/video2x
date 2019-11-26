@@ -2,5 +2,6 @@ avalon_framework
 colorama
 GPUtil
 psutil
+pyyaml
 requests
 tqdm
