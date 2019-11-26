@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: November 16, 2019
+Last Modified: November 26, 2019
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -325,6 +325,12 @@ if __name__ == '__main__':
         # get start time
         start_time = time.time()
 
+        # check platform
+        if sys.platform == 'win32':
+            print('This script is currently only compatible with Windows')
+            EXIT_CODE = 1
+            sys.exit(1)
+
         # parse command line arguments
         args = parse_arguments()
         print('Video2X Setup Script')
@@ -341,9 +347,13 @@ if __name__ == '__main__':
         setup.run()
         print('\nScript finished successfully')
 
+    except SystemExit:
+        pass
+
     # if PermissionError is raised
     # user needs to run this with higher privilege
     except PermissionError:
+        traceback.print_exc()
         print('You might have insufficient privilege for this script to run')
         print('Try running this script with Administrator privileges')
         EXIT_CODE = 1
