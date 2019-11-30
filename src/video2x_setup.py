@@ -326,7 +326,7 @@ if __name__ == '__main__':
         start_time = time.time()
 
         # check platform
-        if sys.platform == 'win32':
+        if sys.platform != 'win32':
             print('This script is currently only compatible with Windows')
             EXIT_CODE = 1
             sys.exit(1)
