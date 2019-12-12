@@ -2,7 +2,7 @@
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
 
-## Download Builds
+## Download Builds (Windows)
 
 You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest builds of `Video2X`. The exe files will require no Python or Python module installation.
 
@@ -14,7 +14,7 @@ The **`light`** package provides only the most basic functions of `Video2X`. Onl
 
 Component names that are **bolded** can be automatically downloaded and configured with the `video2x_setup.py` script.
 
-1. Operating System: Windows
+1. Operating System: Windows / Linux
 2. AMD GPU / Nvidia GPU
 3. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
 4. [**FFmpeg**](https://ffmpeg.zeranoe.com/builds/)
