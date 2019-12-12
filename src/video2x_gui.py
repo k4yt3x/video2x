@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: July 27, 2019
-Last Modified: November 16, 2019
+Last Modified: December 11, 2019
 
 Description: A simple GUI for Video2X made with tkinter.
 """
@@ -25,7 +25,7 @@ import threading
 import time
 import yaml
 
-VERSION = '1.1.2'
+VERSION = '1.1.3'
 
 VIDEO2X_CONFIG = pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml'
 
@@ -278,26 +278,13 @@ class Video2xGui():
         output_file = pathlib.Path(self.output_file.get())
         driver = AVAILABLE_DRIVERS[self.driver.get()]
 
-        if driver == 'waifu2x_caffe':
-            waifu2x_settings = config['waifu2x_caffe']
-            if not pathlib.Path(waifu2x_settings['waifu2x_caffe_path']).is_file():
-                messagebox.showerror('Error', 'Specified waifu2x-caffe directory doesn\'t exist\nPlease check the configuration file settings')
-                raise FileNotFoundError(waifu2x_settings['waifu2x_caffe_path'])
-        elif driver == 'waifu2x_converter':
-            waifu2x_settings = config['waifu2x_converter']
-            if not pathlib.Path(waifu2x_settings['waifu2x_converter_path']).is_dir():
-                messagebox.showerror('Error', 'Specified waifu2x-converter-cpp directory doesn\'t exist\nPlease check the configuration file settings')
-                raise FileNotFoundError(waifu2x_settings['waifu2x_converter_path'])
-        elif driver == 'waifu2x_ncnn_vulkan':
-            waifu2x_settings = config['waifu2x_ncnn_vulkan']
-            if not pathlib.Path(waifu2x_settings['waifu2x_ncnn_vulkan_path']).is_file():
-                messagebox.showerror('Error', 'Specified waifu2x_ncnn_vulkan directory doesn\'t exist\nPlease check the configuration file settings')
-                raise FileNotFoundError(waifu2x_settings['waifu2x_ncnn_vulkan_path'])
-        elif driver == 'anime4k':
-            waifu2x_settings = config['anime4k']
-            if not pathlib.Path(waifu2x_settings['anime4k_path']).is_file():
-                messagebox.showerror('Error', 'Specified Anime4K directory doesn\'t exist\nPlease check the configuration file settings')
-                raise FileNotFoundError(waifu2x_settings['anime4k_path'])
+        # load specified driver's config into driver_settings
+        driver_settings = config[driver]
+
+        # if executable doesn't exist, show warning
+        if not pathlib.Path(driver_settings['path']).is_file() and not pathlib.Path(f'{driver_settings["path"]}.exe').is_file():
+            messagebox.showerror('Error', 'Specified driver directory doesn\'t exist\nPlease check the configuration file settings')
+            raise FileNotFoundError(driver_settings['path'])
 
         # read FFmpeg configuration
         ffmpeg_settings = config['ffmpeg']
@@ -340,7 +327,7 @@ class Video2xGui():
         method = AVAILABLE_METHODS[self.method.get()]
         preserve_frames = self.preserve_frames.get()
 
-        self.upscaler = Upscaler(input_video=input_file, output_video=output_file, method=method, waifu2x_settings=waifu2x_settings, ffmpeg_settings=ffmpeg_settings)
+        self.upscaler = Upscaler(input_video=input_file, output_video=output_file, method=method, driver_settings=driver_settings, ffmpeg_settings=ffmpeg_settings)
 
         # set optional options
         self.upscaler.waifu2x_driver = driver
@@ -439,16 +426,16 @@ def absolutify_paths(config):
     current_directory = pathlib.Path(sys.argv[0]).parent.absolute()
 
     # check waifu2x-caffe path
-    if not re.match('^[a-z]:', config['waifu2x_caffe']['waifu2x_caffe_path'], re.IGNORECASE):
-        config['waifu2x_caffe']['waifu2x_caffe_path'] = current_directory / config['waifu2x_caffe']['waifu2x_caffe_path']
+    if not re.match('^[a-z]:', config['waifu2x_caffe']['path'], re.IGNORECASE):
+        config['waifu2x_caffe']['path'] = current_directory / config['waifu2x_caffe']['path']
 
     # check waifu2x-converter-cpp path
-    if not re.match('^[a-z]:', config['waifu2x_converter']['waifu2x_converter_path'], re.IGNORECASE):
-        config['waifu2x_converter']['waifu2x_converter_path'] = current_directory / config['waifu2x_converter']['waifu2x_converter_path']
+    if not re.match('^[a-z]:', config['waifu2x_converter']['path'], re.IGNORECASE):
+        config['waifu2x_converter']['path'] = current_directory / config['waifu2x_converter']['path']
 
     # check waifu2x_ncnn_vulkan path
-    if not re.match('^[a-z]:', config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'], re.IGNORECASE):
-        config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = current_directory / config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path']
+    if not re.match('^[a-z]:', config['waifu2x_ncnn_vulkan']['path'], re.IGNORECASE):
+        config['waifu2x_ncnn_vulkan']['path'] = current_directory / config['waifu2x_ncnn_vulkan']['path']
 
     # check ffmpeg path
     if not re.match('^[a-z]:', config['ffmpeg']['ffmpeg_path'], re.IGNORECASE):
