@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: November 15, 2019
+Last Modified: December 11, 2019
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -437,6 +437,10 @@ try:
 except Exception:
     Avalon.error('An exception has occurred')
     traceback.print_exc()
+
+    # try cleaning up temp directories
+    with contextlib.suppress(Exception):
+        upscaler.cleanup_temp_directories()
 
 finally:
     # remove Video2X cache directory

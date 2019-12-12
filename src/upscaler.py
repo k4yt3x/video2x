@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: October 6, 2019
+Last Modified: December 11, 2019
 
 Dev: SAT3LL
 
@@ -82,7 +82,7 @@ class Upscaler:
         """delete temp directories when done
         """
         if not self.preserve_frames:
-            for directory in [self.extracted_frames, self.upscaled_frames]:
+            for directory in [self.extracted_frames, self.upscaled_frames, self.video2x_cache_directory]:
                 try:
                     # avalon framework cannot be used if python is shutting down
                     # therefore, plain print is used

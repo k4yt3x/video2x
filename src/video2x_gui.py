@@ -18,6 +18,7 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter.filedialog import *
+import contextlib
 import pathlib
 import sys
 import tempfile
@@ -204,7 +205,7 @@ class Video2xGui():
 
         # preserve frames
         self.preserve_frames = BooleanVar(self.options_left)
-        self.preserve_frames.set(True)
+        self.preserve_frames.set(False)
         Label(self.options_right, text='Preserve Frames', relief=RIDGE, width=15).grid(row=3, column=0, padx=2, pady=3)
         preserve_frames_menu = OptionMenu(self.options_right, self.preserve_frames, *{True, False})
         preserve_frames_menu.grid(row=3, column=1, padx=2, pady=3, sticky=W)
@@ -267,95 +268,104 @@ class Video2xGui():
 
     def _upscale(self):
 
-        # start timer
-        begin_time = time.time()
+        try:
+            # start timer
+            begin_time = time.time()
 
-        # read configuration file
-        config = read_config(VIDEO2X_CONFIG)
-        config = absolutify_paths(config)
+            # read configuration file
+            config = read_config(VIDEO2X_CONFIG)
+            config = absolutify_paths(config)
 
-        input_file = pathlib.Path(self.input_file.get())
-        output_file = pathlib.Path(self.output_file.get())
-        driver = AVAILABLE_DRIVERS[self.driver.get()]
+            input_file = pathlib.Path(self.input_file.get())
+            output_file = pathlib.Path(self.output_file.get())
+            driver = AVAILABLE_DRIVERS[self.driver.get()]
 
-        # load specified driver's config into driver_settings
-        driver_settings = config[driver]
+            # load specified driver's config into driver_settings
+            driver_settings = config[driver]
 
-        # if executable doesn't exist, show warning
-        if not pathlib.Path(driver_settings['path']).is_file() and not pathlib.Path(f'{driver_settings["path"]}.exe').is_file():
-            messagebox.showerror('Error', 'Specified driver directory doesn\'t exist\nPlease check the configuration file settings')
-            raise FileNotFoundError(driver_settings['path'])
+            # if executable doesn't exist, show warning
+            if not pathlib.Path(driver_settings['path']).is_file() and not pathlib.Path(f'{driver_settings["path"]}.exe').is_file():
+                messagebox.showerror('Error', 'Specified driver directory doesn\'t exist\nPlease check the configuration file settings')
+                raise FileNotFoundError(driver_settings['path'])
 
-        # read FFmpeg configuration
-        ffmpeg_settings = config['ffmpeg']
+            # read FFmpeg configuration
+            ffmpeg_settings = config['ffmpeg']
 
-        # load video2x settings
-        image_format = config['video2x']['image_format'].lower()
-        preserve_frames = config['video2x']['preserve_frames']
+            # load video2x settings
+            image_format = config['video2x']['image_format'].lower()
+            preserve_frames = config['video2x']['preserve_frames']
 
-        # load cache directory
-        if isinstance(config['video2x']['video2x_cache_directory'], str):
-            video2x_cache_directory = pathlib.Path(config['video2x']['video2x_cache_directory'])
-        else:
-            video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
-
-        if video2x_cache_directory.exists() and not video2x_cache_directory.is_dir():
-            messagebox.showerror('Error', 'Specified cache directory is a file/link')
-            raise FileExistsError('Specified cache directory is a file/link')
-
-        elif not video2x_cache_directory.exists():
-            # try creating the cache directory
-            if messagebox.askyesno('Question', f'Specified cache directory {video2x_cache_directory} does not exist\nCreate directory?'):
-                try:
-                    video2x_cache_directory.mkdir(parents=True, exist_ok=True)
-
-                # there can be a number of exceptions here
-                # PermissionError, FileExistsError, etc.
-                # therefore, we put a catch-them-all here
-                except Exception as e:
-                    messagebox.showerror('Error', f'Unable to create {video2x_cache_directory}\nAborting...')
-                    raise e
+            # load cache directory
+            if isinstance(config['video2x']['video2x_cache_directory'], str):
+                video2x_cache_directory = pathlib.Path(config['video2x']['video2x_cache_directory'])
             else:
-                raise FileNotFoundError('Could not create cache directory')
+                video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
 
-        # load more settings from gui
-        width = self.width.get()
-        height = self.height.get()
-        scale_ratio = self.scale_ratio.get()
-        image_format = self.image_format.get()
-        threads = self.threads.get()
-        method = AVAILABLE_METHODS[self.method.get()]
-        preserve_frames = self.preserve_frames.get()
+            if video2x_cache_directory.exists() and not video2x_cache_directory.is_dir():
+                messagebox.showerror('Error', 'Specified cache directory is a file/link')
+                raise FileExistsError('Specified cache directory is a file/link')
 
-        self.upscaler = Upscaler(input_video=input_file, output_video=output_file, method=method, driver_settings=driver_settings, ffmpeg_settings=ffmpeg_settings)
+            elif not video2x_cache_directory.exists():
+                # try creating the cache directory
+                if messagebox.askyesno('Question', f'Specified cache directory {video2x_cache_directory} does not exist\nCreate directory?'):
+                    try:
+                        video2x_cache_directory.mkdir(parents=True, exist_ok=True)
 
-        # set optional options
-        self.upscaler.waifu2x_driver = driver
-        self.upscaler.scale_width = width
-        self.upscaler.scale_height = height
-        self.upscaler.scale_ratio = scale_ratio
-        self.upscaler.model_dir = None
-        self.upscaler.threads = threads
-        self.upscaler.video2x_cache_directory = video2x_cache_directory
-        self.upscaler.image_format = image_format
-        self.upscaler.preserve_frames = preserve_frames
+                    # there can be a number of exceptions here
+                    # PermissionError, FileExistsError, etc.
+                    # therefore, we put a catch-them-all here
+                    except Exception as e:
+                        messagebox.showerror('Error', f'Unable to create {video2x_cache_directory}\nAborting...')
+                        raise e
+                else:
+                    raise FileNotFoundError('Could not create cache directory')
 
-        # run upscaler
-        self.upscaler.create_temp_directories()
+            # load more settings from gui
+            width = self.width.get()
+            height = self.height.get()
+            scale_ratio = self.scale_ratio.get()
+            image_format = self.image_format.get()
+            threads = self.threads.get()
+            method = AVAILABLE_METHODS[self.method.get()]
+            preserve_frames = self.preserve_frames.get()
 
-        # start progress bar
-        progress_bar = threading.Thread(target=self._progress_bar)
-        progress_bar.start()
+            self.upscaler = Upscaler(input_video=input_file, output_video=output_file, method=method, driver_settings=driver_settings, ffmpeg_settings=ffmpeg_settings)
 
-        # start upscaling
-        self.upscaler.run()
-        self.upscaler.cleanup_temp_directories()
+            # set optional options
+            self.upscaler.waifu2x_driver = driver
+            self.upscaler.scale_width = width
+            self.upscaler.scale_height = height
+            self.upscaler.scale_ratio = scale_ratio
+            self.upscaler.model_dir = None
+            self.upscaler.threads = threads
+            self.upscaler.video2x_cache_directory = video2x_cache_directory
+            self.upscaler.image_format = image_format
+            self.upscaler.preserve_frames = preserve_frames
 
-        # show message when upscaling completes
-        messagebox.showinfo('Info', f'Upscaling Completed\nTime Taken: {round((time.time() - begin_time), 5)} seconds')
-        self.progress_bar['value'] = 100
-        self.running = False
-        self.start_button_text.set('Start')
+            # run upscaler
+            self.upscaler.create_temp_directories()
+
+            # start progress bar
+            progress_bar = threading.Thread(target=self._progress_bar)
+            progress_bar.start()
+
+            # start upscaling
+            self.upscaler.run()
+            self.upscaler.cleanup_temp_directories()
+
+            # show message when upscaling completes
+            messagebox.showinfo('Info', f'Upscaling Completed\nTime Taken: {round((time.time() - begin_time), 5)} seconds')
+            self.progress_bar['value'] = 100
+            self.running = False
+            self.start_button_text.set('Start')
+        
+        except Exception as e:
+            messagebox.showerror('Error', f'Upscaler ran into an error:\n{e}')
+
+            # try cleaning up temp directories
+            with contextlib.suppress(Exception):
+                self.upscaler.cleanup_temp_directories()
+
 
     def _progress_bar(self):
         """ This method prints a progress bar
