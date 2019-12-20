@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: December 11, 2019
+Last Modified: December 19, 2019
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -61,11 +61,8 @@ import yaml
 
 # third-party imports
 from avalon_framework import Avalon
+import GPUtil
 import psutil
-
-# platform-specific imports
-if sys.platform == 'win32':
-    import GPUtil
 
 
 VERSION = '3.0.0'
@@ -148,7 +145,7 @@ def check_memory():
 
     # check if Nvidia-smi is available
     # GPUtil requires nvidia-smi.exe to interact with GPU
-    if args.method == 'gpu' or args.method == 'cudnn':
+    if args.method in ['gpu', 'cudnn']:
         if not (shutil.which('nvidia-smi') or
                 pathlib.Path(r'C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe').is_file()):
             # Nvidia System Management Interface not available
@@ -285,7 +282,7 @@ if (args.width and not args.height) or (not args.width and args.height):
     raise ArgumentError('only one of width or height is specified')
 
 # check available memory if driver is waifu2x-based
-if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan'] and sys.platform == 'win32':
+if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']:
     check_memory()
 
 # anime4k runs significantly faster with more threads
