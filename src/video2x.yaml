@@ -1,89 +1,92 @@
----
-waifu2x_caffe:
-  path: C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-caffe\waifu2x-caffe-cui
-  input_extention_list:
-  output_extention:
-  mode: noise_scale
-  scale_ratio:
-  scale_width:
-  scale_height:
-  noise_level: 3
-  process: gpu
-  crop_size: 128
-  output_quality: -1
-  output_depth: 8
-  batch_size: 1
-  gpu: 0
-  tta: 0
-  input_path:
-  output_path:
-  model_dir:
-  crop_w:
-  crop_h:
-waifu2x_converter:
-  path: C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-converter-cpp
-  output-format:
-  png-compression:
-  image-quality:
-  block-size:
-  disable-gpu:
-  force-OpenCL:
-  processor:
-  jobs:
-  model-dir:
-  scale-ratio:
-  noise-level: 3
-  mode: noise-scale
-  silent: true
-  output:
-  input:
-waifu2x_ncnn_vulkan:
-  path: C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-ncnn-vulkan\waifu2x-ncnn-vulkan
-  v:
-  i:
-  o:
-  n: 2
-  s: 2
-  t: 400
-  m: models-cunet
-  g: 0
-  j: "1:2:2"
 anime4k:
-  path: C:\Users\K4YT3X\AppData\Local\video2x\anime4k\Anime4K.jar
+  anime4k_path: %USERPROFILE%\AppData\Local\video2x\anime4k\Anime4K.jar
   java_path: C:\Program Files\Java\jdk-12.0.2\bin\java.exe
+  path: %USERPROFILE%\AppData\Local\video2x\anime4k\Anime4K.jar
 ffmpeg:
-  ffmpeg_path: C:\Users\K4YT3X\AppData\Local\video2x\ffmpeg-latest-win64-static\bin
-  video_to_frames:
-    output_options:
-      "-qscale:v":
-      "-pix_fmt": rgba64be
-    "-hwaccel": auto
-    "-y": true
+  ffmpeg_path: %USERPROFILE%\AppData\Local\video2x\ffmpeg-latest-win64-static\bin
   frames_to_video:
+    -hwaccel: auto
+    -y: true
     input_options:
-      "-qscale:v":
-      "-qscale:a":
-      "-f": image2
+      -f: image2
+      -qscale:a: null
+      -qscale:v: null
     output_options:
-      "-vcodec": libx264
-      "-crf": 17
-      "-b:v":
-      "-pix_fmt":
-    "-hwaccel": auto
-    "-y": true
+      -b:v: null
+      -crf: 17
+      -pix_fmt: null
+      -vcodec: libx264
   migrating_tracks:
+    -hwaccel: auto
+    -y: true
     output_options:
-      "-map":
-        - 0:v?
-        - 1:a?
-        - 1:s?
-        - 1:d?
-        - 1:t?
-      "-c": copy
-      "-pix_fmt":
-    "-hwaccel": auto
-    "-y": true
+      -c: copy
+      -map:
+      - 0:v?
+      - 1:a?
+      - 1:s?
+      - 1:d?
+      - 1:t?
+      -pix_fmt: null
+  video_to_frames:
+    -hwaccel: auto
+    -y: true
+    output_options:
+      -pix_fmt: rgba64be
+      -qscale:v: null
 video2x:
-  video2x_cache_directory:
   image_format: png
   preserve_frames: false
+  video2x_cache_directory: null
+waifu2x_caffe:
+  batch_size: 1
+  crop_h: null
+  crop_size: 128
+  crop_w: null
+  gpu: 0
+  input_extention_list: null
+  input_path: null
+  mode: noise_scale
+  model_dir: null
+  noise_level: 3
+  output_depth: 8
+  output_extention: null
+  output_path: null
+  output_quality: -1
+  path: %USERPROFILE%\AppData\Local\video2x\waifu2x-caffe\waifu2x-caffe-cui
+  process: gpu
+  scale_height: null
+  scale_ratio: null
+  scale_width: null
+  tta: 0
+  waifu2x_caffe_path: %USERPROFILE%\AppData\Local\video2x\waifu2x-caffe\waifu2x-caffe-cui.exe
+waifu2x_converter:
+  block-size: null
+  disable-gpu: null
+  force-OpenCL: null
+  image-quality: null
+  input: null
+  jobs: null
+  mode: noise-scale
+  model-dir: null
+  noise-level: 3
+  output: null
+  output-format: null
+  path: %USERPROFILE%\AppData\Local\video2x\waifu2x-converter-cpp
+  png-compression: null
+  processor: null
+  scale-ratio: null
+  silent: true
+  waifu2x_converter_path: %USERPROFILE%\AppData\Local\video2x\waifu2x-converter-cpp
+waifu2x_ncnn_vulkan:
+  g: 0
+  i: null
+  j: '1:2:2'
+  m: models-cunet
+  n: 2
+  o: null
+  path: %USERPROFILE%\AppData\Local\video2x\waifu2x-ncnn-vulkan\waifu2x-ncnn-vulkan
+  s: 2
+  t: 400
+  v: null
+  waifu2x_ncnn_vulkan_path: %USERPROFILE%\AppData\Local\video2x\waifu2x-ncnn-vulkan\waifu2x-ncnn-vulkan.exe
