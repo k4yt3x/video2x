@@ -271,15 +271,15 @@ if not args.output:
 if (args.driver in ['waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']) and args.width and args.height:
     Avalon.error('Selected driver accepts only scaling ratio')
     raise ArgumentError('selected driver supports only scaling ratio')
+if args.driver == 'waifu2x_ncnn_vulkan' and args.ratio is not None and (args.ratio > 2 or not args.ratio.is_integer()):
+    Avalon.error('Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
+    raise ArgumentError('scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
 if (args.width or args.height) and args.ratio:
     Avalon.error('You can only specify either scaling ratio or output width and height')
     raise ArgumentError('both scaling ration and width/height specified')
 if (args.width and not args.height) or (not args.width and args.height):
     Avalon.error('You must specify both width and height')
     raise ArgumentError('only one of width or height is specified')
-if args.driver == 'waifu2x_ncnn_vulkan' and (args.ratio > 2 or not args.ratio.is_integer()):
-    Avalon.error('Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
-    raise ArgumentError('scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
 
 # check available memory if driver is waifu2x-based
 if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']:
