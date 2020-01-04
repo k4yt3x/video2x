@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: November 26, 2019
+Last Modified: January 4, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -41,7 +41,7 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.6.0'
+VERSION = '1.6.1'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
@@ -233,18 +233,18 @@ class Video2xSetup:
 
         # configure only the specified drivers
         if self.driver == 'all':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
-            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
-            template_dict['anime4k']['anime4k_path'] = str(LOCALAPPDATA / 'video2x' / 'anime4k' / 'Anime4K.jar')
+            template_dict['waifu2x_caffe']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
+            template_dict['waifu2x_converter']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
+            template_dict['waifu2x_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
+            template_dict['anime4k']['path'] = str(LOCALAPPDATA / 'video2x' / 'anime4k' / 'Anime4K.jar')
         elif self.driver == 'waifu2x_caffe':
-            template_dict['waifu2x_caffe']['waifu2x_caffe_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
+            template_dict['waifu2x_caffe']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
         elif self.driver == 'waifu2x_converter':
-            template_dict['waifu2x_converter']['waifu2x_converter_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
+            template_dict['waifu2x_converter']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
         elif self.driver == 'waifu2x_ncnn_vulkan':
-            template_dict['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
+            template_dict['waifu2x_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
         elif self.driver == 'anime4k':
-            template_dict['anime4k']['anime4k_path'] = str(LOCALAPPDATA / 'video2x' / 'anime4k' / 'Anime4K.jar')
+            template_dict['anime4k']['path'] = str(LOCALAPPDATA / 'video2x' / 'anime4k' / 'Anime4K.jar')
 
         template_dict['ffmpeg']['ffmpeg_path'] = str(LOCALAPPDATA / 'video2x' / 'ffmpeg-latest-win64-static' / 'bin')
         template_dict['video2x']['video2x_cache_directory'] = None
