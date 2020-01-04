@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 Name: Waifu2x NCNN Vulkan Driver
-Author: SAT3LL
+Creator: SAT3LL
 Date Created: June 26, 2019
 Last Modified: November 15, 2019
 
-Dev: K4YT3X
+Editor: K4YT3X
+Last Modified: January 4, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x_ncnn_vulkan.
@@ -37,7 +38,7 @@ class Waifu2xNcnnVulkan:
 
         # waifu2x_ncnn_vulkan can't find its own model directory if its not in the current dir
         #   so change to it
-        os.chdir(os.path.join(self.driver_settings['waifu2x_ncnn_vulkan_path'], '..'))
+        os.chdir(os.path.join(self.driver_settings['path'], '..'))
 
         self.print_lock = threading.Lock()
 
