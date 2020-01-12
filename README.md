@@ -175,6 +175,14 @@ python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2
 python video2x.py -i sample_input.mp4 -o sample_output.mp4 -m gpu -r 2 -d waifu2x_ncnn_vulkan
 ```
 
+### Anime4K
+
+Enlarge the video by 2 times using Anime4K. **Remember to install and configure [JRE 12](https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase12-5440181.html) path in the configuration file.**
+
+```shell
+python video2x.py -i sample_input.mp4 -o sample_output.mp4 -r 2 -d anime4k
+```
+
 ### CPU
 
 Enlarge the video to 1920x1080 using the CPU. You may also use the `-r/--ratio` option. **waifu2x-based upscalers potentially run much slower than using a GPU, but Anime4K is more CPU-dependant**. The configuration file for this method is similar to the previous methods.
@@ -240,7 +248,7 @@ https://www.gnu.org/licenses/gpl-3.0.txt
 
 ![GPLv3 Icon](https://www.gnu.org/graphics/gplv3-127x51.png)
 
-(C) 2018-2019 K4YT3X
+(C) 2018-2020 K4YT3X
 
 ## Credits
 
