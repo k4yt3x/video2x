@@ -361,9 +361,9 @@ class Upscaler:
         Avalon.info('Converting extracted frames into video')
 
         # use user defined output size
-        fm.convert_video(framerate, f'{self.scale_width}x{self.scale_height}', self.upscaled_frames)
+        fm.convert_video(framerate, f'{self.scale_width}x{self.scale_height}', self.exported_frames)
         Avalon.info('Conversion completed')
 
         # migrate audio tracks and subtitles
         Avalon.info('Migrating audio tracks and subtitles to upscaled video')
-        fm.migrate_audio_tracks_subtitles(self.input_video, self.output_video, self.upscaled_frames)
+        fm.migrate_audio_tracks_subtitles(self.input_video, self.output_video, self.exported_frames)
