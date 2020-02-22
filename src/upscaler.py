@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: December 11, 2019
+Last Modified: February 22, 2020
 
 Dev: SAT3LL
 
@@ -116,7 +116,7 @@ class Upscaler:
         # get number of extracted frames
         self.total_frames = 0
         for directory in extracted_frames_directories:
-            self.total_frames += len([f for f in directory.iterdir() if str(f)[-4:] == f'.{self.image_format}'])
+            self.total_frames += len([f for f in directory.iterdir() if str(f).lower().endswith(self.image_format.lower())])
 
         with tqdm(total=self.total_frames, ascii=True, desc='Upscaling Progress') as progress_bar:
 
@@ -127,7 +127,7 @@ class Upscaler:
             while not self.progress_bar_exit_signal:
 
                 with contextlib.suppress(FileNotFoundError):
-                    self.total_frames_upscaled = len([f for f in self.upscaled_frames.iterdir() if str(f)[-4:] == f'.{self.image_format}'])
+                    self.total_frames_upscaled = len([f for f in self.upscaled_frames.iterdir() if str(f).lower().endswith(self.image_format.lower())])
                     delta = self.total_frames_upscaled - previous_cycle_frames
                     previous_cycle_frames = self.total_frames_upscaled
 
