@@ -4,13 +4,16 @@
 Name: Anime4K Driver
 Author: K4YT3X
 Date Created: August 15, 2019
-Last Modified: November 15, 2019
+Last Modified: February 26, 2020
 
 Description: This class is a high-level wrapper
 for Anime4k.
 """
 
 # built-in imports
+import os
+import queue
+import shlex
 import subprocess
 import threading
 
@@ -31,7 +34,7 @@ class Anime4k:
         self.driver_settings = driver_settings
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_directory, output_directory, scale_ratio, upscaler_exceptions, push_strength=None, push_grad_strength=None):
+    def upscale(self, input_directory, output_directory, scale_ratio, processes, push_strength=None, push_grad_strength=None):
         """ Anime4K wrapper
 
         Arguments:
@@ -46,47 +49,63 @@ class Anime4k:
         Returns:
             subprocess.Popen.returncode -- command line return value of execution
         """
-        try:
-            # return value is the sum of all execution return codes
-            return_value = 0
 
-            # get a list lof all image files in input_directory
-            extracted_frame_files = [f for f in input_directory.iterdir() if str(f).lower().endswith('.png') or str(f).lower().endswith('.jpg')]
+        # a list of all commands to be executed
+        commands = queue.Queue()
 
-            # upscale each image in input_directory
-            for image in extracted_frame_files:
+        # get a list lof all image files in input_directory
+        extracted_frame_files = [f for f in input_directory.iterdir() if str(f).lower().endswith('.png') or str(f).lower().endswith('.jpg')]
 
-                execute = [
-                    self.driver_settings['java_path'],
-                    '-jar',
-                    self.driver_settings['path'],
-                    str(image.absolute()),
-                    str(output_directory / image.name),
-                    str(scale_ratio)
-                ]
+        # upscale each image in input_directory
+        for image in extracted_frame_files:
 
-                # optional arguments
-                kwargs = [
-                    'push_strength',
-                    'push_grad_strength'
-                ]
+            execute = [
+                self.driver_settings['java_path'],
+                '-jar',
+                self.driver_settings['path'],
+                str(image.absolute()),
+                str(output_directory / image.name),
+                str(scale_ratio)
+            ]
 
-                # if optional argument specified, append value to execution list
-                for arg in kwargs:
-                    if locals()[arg] is not None:
-                        execute.extend([locals([arg])])
+            # optional arguments
+            kwargs = [
+                'push_strength',
+                'push_grad_strength'
+            ]
+
+            # if optional argument specified, append value to execution list
+            for arg in kwargs:
+                if locals()[arg] is not None:
+                    execute.extend([locals([arg])])
+
+            commands.put(execute)
+
+        # initialize two lists to hold running and finished processes
+        anime4k_running_processes = []
+        anime4k_finished_processes = []
+
+        # run all commands in queue
+        while not commands.empty():
+
+            # if any commands have completed
+            # remove the subprocess.Popen project and move it into finished processes
+            for process in anime4k_running_processes:
+                if process.poll() is not None:
+                    Avalon.debug_info(f'Subprocess {process.pid} exited with code {process.poll()}')
+                    anime4k_finished_processes.append(process)
+                    anime4k_running_processes.remove(process)
+
+            # when number running processes is less than what's specified
+            # create new processes and add to running process pool
+            while len(anime4k_running_processes) < processes:
+                next_in_queue = commands.get()
+                new_process = subprocess.Popen(next_in_queue)
+                anime4k_running_processes.append(new_process)
 
                 self.print_lock.acquire()
-                Avalon.debug_info(f'Executing: {execute}', )
+                Avalon.debug_info(f'[upscaler] Subprocess {new_process.pid} executing: {shlex.join(next_in_queue)}')
                 self.print_lock.release()
-                return_value += subprocess.run(execute, check=True).returncode
 
-            # print thread exiting message
-            self.print_lock.acquire()
-            Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} exiting')
-            self.print_lock.release()
-
-            # return command execution return code
-            return return_value
-        except Exception as e:
-            upscaler_exceptions.append(e)
+        # return command execution return code
+        return anime4k_finished_processes

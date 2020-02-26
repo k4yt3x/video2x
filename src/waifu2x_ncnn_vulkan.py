@@ -7,7 +7,7 @@ Date Created: June 26, 2019
 Last Modified: November 15, 2019
 
 Editor: K4YT3X
-Last Modified: January 4, 2020
+Last Modified: February 22, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x_ncnn_vulkan.
@@ -15,6 +15,7 @@ for waifu2x_ncnn_vulkan.
 
 # built-in imports
 import os
+import shlex
 import subprocess
 import threading
 
@@ -42,7 +43,7 @@ class Waifu2xNcnnVulkan:
 
         self.print_lock = threading.Lock()
 
-    def upscale(self, input_directory, output_directory, scale_ratio, upscaler_exceptions):
+    def upscale(self, input_directory, output_directory, scale_ratio):
         """This is the core function for WAIFU2X class
 
         Arguments:
@@ -51,44 +52,31 @@ class Waifu2xNcnnVulkan:
             ratio {int} -- output video ratio
         """
 
-        try:
-            # overwrite config file settings
-            self.driver_settings['i'] = input_directory
-            self.driver_settings['o'] = output_directory
-            self.driver_settings['s'] = int(scale_ratio)
+        # overwrite config file settings
+        self.driver_settings['i'] = input_directory
+        self.driver_settings['o'] = output_directory
+        self.driver_settings['s'] = int(scale_ratio)
 
-            # print thread start message
-            self.print_lock.acquire()
-            Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} started')
-            self.print_lock.release()
+        # list to be executed
+        # initialize the list with waifu2x binary path as the first element
+        execute = [str(self.driver_settings['path'])]
 
-            # list to be executed
-            # initialize the list with waifu2x binary path as the first element
-            execute = [str(self.driver_settings['path'])]
+        for key in self.driver_settings.keys():
 
-            for key in self.driver_settings.keys():
+            value = self.driver_settings[key]
 
-                value = self.driver_settings[key]
-
-                # is executable key or null or None means that leave this option out (keep default)
-                if key == 'path' or value is None or value is False:
-                    continue
+            # is executable key or null or None means that leave this option out (keep default)
+            if key == 'path' or value is None or value is False:
+                continue
+            else:
+                if len(key) == 1:
+                    execute.append(f'-{key}')
                 else:
-                    if len(key) == 1:
-                        execute.append(f'-{key}')
-                    else:
-                        execute.append(f'--{key}')
-                    execute.append(str(value))
+                    execute.append(f'--{key}')
+                execute.append(str(value))
 
-            Avalon.debug_info(f'Executing: {execute}')
-            completed_command = subprocess.run(execute, check=True)
-
-            # print thread exiting message
-            self.print_lock.acquire()
-            Avalon.debug_info(f'[upscaler] Thread {threading.current_thread().name} exiting')
-            self.print_lock.release()
-
-            # return command execution return code
-            return completed_command.returncode
-        except Exception as e:
-            upscaler_exceptions.append(e)
+        # return the Popen object of the new process created
+        self.print_lock.acquire()
+        Avalon.debug_info(f'[upscaler] Subprocess {os.getpid()} executing: {shlex.join(execute)}')
+        self.print_lock.release()
+        return subprocess.Popen(execute)
