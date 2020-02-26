@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: January 4, 2020
+Last Modified: February 26, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -34,7 +34,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 Description: Video2X is an automation software based on waifu2x image
 enlarging engine. It extracts frames from a video, enlarge it by a
@@ -53,6 +53,7 @@ import contextlib
 import pathlib
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -65,7 +66,7 @@ import GPUtil
 import psutil
 
 
-VERSION = '3.0.0'
+VERSION = '3.1.0'
 
 LEGAL_INFO = f'''Video2X Version: {VERSION}
 Author: K4YT3X
@@ -82,10 +83,10 @@ LOGO = r'''
         \/     |_|  \__,_|  \___|  \___/  |____| /_/ \_\
 '''
 
-# each thread might take up to 2.5 GB during initialization.
+# each process might take up to 2.5 GB during initialization.
 # (system memory, not to be confused with GPU memory)
-SYS_MEM_PER_THREAD = 2.5
-GPU_MEM_PER_THREAD = 3.5
+SYS_MEM_PER_PROCESS = 2.5
+GPU_MEM_PER_PROCESS = 3.5
 
 
 def parse_arguments():
@@ -107,7 +108,7 @@ def parse_arguments():
     upscaler_options.add_argument('-m', '--method', help='upscaling method', action='store', default='gpu', choices=['cpu', 'gpu', 'cudnn'])
     upscaler_options.add_argument('-d', '--driver', help='upscaling driver', action='store', default='waifu2x_caffe', choices=AVAILABLE_DRIVERS)
     upscaler_options.add_argument('-y', '--model_dir', type=pathlib.Path, help='directory containing model JSON files', action='store')
-    upscaler_options.add_argument('-t', '--threads', help='number of threads to use for upscaling', action='store', type=int, default=1)
+    upscaler_options.add_argument('-p', '--processes', help='number of processes to use for upscaling', action='store', type=int, default=1)
     upscaler_options.add_argument('-c', '--config', type=pathlib.Path, help='video2x config file location', action='store', default=pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml')
     upscaler_options.add_argument('-b', '--batch', help='enable batch mode (select all default values to questions)', action='store_true')
 
@@ -135,7 +136,7 @@ def print_logo():
 def check_memory():
     """ Check usable system memory
     Warn the user if insufficient memory is available for
-    the number of threads that the user have chosen.
+    the number of processes that the user have chosen.
     """
 
     memory_status = []
@@ -150,7 +151,7 @@ def check_memory():
                 pathlib.Path(r'C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe').is_file()):
             # Nvidia System Management Interface not available
             Avalon.warning('Nvidia-smi not available, skipping available memory check')
-            Avalon.warning('If you experience error \"cudaSuccess out of memory\", try reducing number of threads you\'re using')
+            Avalon.warning('If you experience error \"cudaSuccess out of memory\", try reducing number of processes you\'re using')
         else:
             with contextlib.suppress(ValueError):
                 # "0" is GPU ID. Both waifu2x drivers use the first GPU available, therefore only 0 makes sense
@@ -161,28 +162,28 @@ def check_memory():
     for memory_type, memory_available in memory_status:
 
         if memory_type == 'system':
-            mem_per_thread = SYS_MEM_PER_THREAD
+            mem_per_process = SYS_MEM_PER_PROCESS
         else:
-            mem_per_thread = GPU_MEM_PER_THREAD
+            mem_per_process = GPU_MEM_PER_PROCESS
 
-        # if user doesn't even have enough memory to run even one thread
-        if memory_available < mem_per_thread:
+        # if user doesn't even have enough memory to run even one process
+        if memory_available < mem_per_process:
             Avalon.warning(f'You might have insufficient amount of {memory_type} memory available to run this program ({memory_available} GB)')
             Avalon.warning('Proceed with caution')
-            if args.threads > 1:
-                if Avalon.ask('Reduce number of threads to avoid crashing?', default=True, batch=args.batch):
-                    args.threads = 1
+            if args.processes > 1:
+                if Avalon.ask('Reduce number of processes to avoid crashing?', default=True, batch=args.batch):
+                    args.processes = 1
         # if memory available is less than needed, warn the user
-        elif memory_available < (mem_per_thread * args.threads):
-            Avalon.warning(f'Each waifu2x-caffe thread will require up to {SYS_MEM_PER_THREAD} GB of system memory')
-            Avalon.warning(f'You demanded {args.threads} threads to be created, but you only have {round(memory_available, 4)} GB {memory_type} memory available')
-            Avalon.warning(f'{mem_per_thread * args.threads} GB of {memory_type} memory is recommended for {args.threads} threads')
-            Avalon.warning(f'With your current amount of {memory_type} memory available, {int(memory_available // mem_per_thread)} threads is recommended')
+        elif memory_available < (mem_per_process * args.processes):
+            Avalon.warning(f'Each waifu2x-caffe process will require up to {SYS_MEM_PER_PROCESS} GB of system memory')
+            Avalon.warning(f'You demanded {args.processes} processes to be created, but you only have {round(memory_available, 4)} GB {memory_type} memory available')
+            Avalon.warning(f'{mem_per_process * args.processes} GB of {memory_type} memory is recommended for {args.processes} processes')
+            Avalon.warning(f'With your current amount of {memory_type} memory available, {int(memory_available // mem_per_process)} processes is recommended')
 
             # ask the user if he / she wants to change to the recommended
-            # number of threads
+            # number of processes
             if Avalon.ask('Change to the recommended value?', default=True, batch=args.batch):
-                args.threads = int(memory_available // mem_per_thread)
+                args.processes = int(memory_available // mem_per_process)
             else:
                 Avalon.warning('Proceed with caution')
 
@@ -285,20 +286,20 @@ if (args.width and not args.height) or (not args.width and args.height):
 if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']:
     check_memory()
 
-# anime4k runs significantly faster with more threads
-if args.driver == 'anime4k' and args.threads <= 1:
-    Avalon.warning('Anime4K runs significantly faster with more threads')
-    if Avalon.ask('Use more threads of Anime4K?', default=True, batch=args.batch):
+# anime4k runs significantly faster with more processes
+if args.driver == 'anime4k' and args.processes <= 1:
+    Avalon.warning('Anime4K runs significantly faster with more processes')
+    if Avalon.ask('Use more processes of Anime4K?', default=True, batch=args.batch):
         while True:
             try:
-                threads = Avalon.gets('Amount of threads to use [5]: ', default=5, batch=args.batch)
-                args.threads = int(threads)
+                processes = Avalon.gets('Amount of processes to use [5]: ', default=5, batch=args.batch)
+                args.processes = int(processes)
                 break
             except ValueError:
-                if threads == '':
-                    args.threads = 5
+                if processes == '':
+                    args.processes = 5
                     break
-                Avalon.error(f'{threads} is not a valid integer')
+                Avalon.error(f'{processes} is not a valid integer')
 
 # read configurations from configuration file
 config = read_config(args.config)
@@ -309,17 +310,39 @@ config = read_config(args.config)
 driver_settings = config[args.driver]
 
 # check if driver path exists
-if not pathlib.Path(driver_settings['path']).is_file():
-    if not pathlib.Path(f'{driver_settings["path"]}.exe').is_file():
+if not pathlib.Path(driver_settings['path']).exists():
+    if not pathlib.Path(f'{driver_settings["path"]}.exe').exists():
         Avalon.error('Specified driver executable directory doesn\'t exist')
         Avalon.error('Please check the configuration file settings')
         raise FileNotFoundError(driver_settings['path'])
 
 # if the driver is Anime4K, check if JDK 12 is installed
+jdk_available = True
 if args.driver == 'anime4k':
-    if not pathlib.Path('C:/Program Files/Java/jdk-12.0.2/bin/java.exe').is_file():
-        Avalon.warning('Cannot find JDK 12 at its default installation location')
-        Avalon.warning('Please ensure you have JDK 12 installed and configured')
+
+    # if specified JDK path doesn't exist
+    if not pathlib.Path(driver_settings['java_path']).is_file():
+
+        # try to find JDK on system
+        if shutil.which('java') is not None:
+
+            # check if JDK has master version 12
+            java_version_output = subprocess.run(['java', '-version'], capture_output=True).stderr
+            if re.search(r'java version "12\.\d\.\d"', java_version_output.decode().split('\n')[0]) is not None:
+                driver_settings['java_path'] = shutil.which('java')
+            else:
+                jdk_available = False
+
+        # if java is not found in PATH
+        else:
+            jdk_available = False
+
+# if JDK 12 is not found
+# warn the user and exit
+if jdk_available is False:
+    Avalon.error('Cannot find JDK 12 on this system')
+    Avalon.error('Please ensure you have JDK 12 installed and configured')
+    sys.exit(1)
 
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']
@@ -388,7 +411,7 @@ try:
         upscaler.scale_height = args.height
         upscaler.scale_ratio = args.ratio
         upscaler.model_dir = args.model_dir
-        upscaler.threads = args.threads
+        upscaler.processes = args.processes
         upscaler.video2x_cache_directory = video2x_cache_directory
         upscaler.image_format = image_format
         upscaler.preserve_frames = preserve_frames
@@ -416,7 +439,7 @@ try:
             upscaler.scale_height = args.height
             upscaler.scale_ratio = args.ratio
             upscaler.model_dir = args.model_dir
-            upscaler.threads = args.threads
+            upscaler.processes = args.processes
             upscaler.video2x_cache_directory = video2x_cache_directory
             upscaler.image_format = image_format
             upscaler.preserve_frames = preserve_frames
