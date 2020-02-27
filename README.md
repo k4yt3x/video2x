@@ -26,6 +26,12 @@ Component names that are **bolded** can be automatically downloaded and configur
 
 ## Recent Changes
 
+### 3.1.0 (February 26, 2020)
+
+- Removed the redundant layer of multi-threading since multi-process has to be implemented for launching Windows PE files in sub-processes
+- Added support for graceful exit upon `KeyboardInterrupt` or termination signals
+- Other minor improvements such as replacing `' '.join(execute)` with `shlex.join(execute)`
+
 ### 3.0.0 (November 26, 2019)
 
 - Linux compatibility
@@ -36,12 +42,6 @@ Component names that are **bolded** can be automatically downloaded and configur
 ### 2.10.0 (August 16, 2019)
 
 - **Added support for [Anime4K](https://github.com/bloc97/Anime4K)**
-
-### 2.9.0 (July 27, 2019)
-
-- Changed file handling method from `os` to `pathlib`
-- Removed f_string dependency and support for legacy versions of Python
-- Organized file import statements
 
 ### Setup Script 1.6.0 (November 26, 2019)
 
@@ -94,7 +94,7 @@ If you have any questions, first try visiting our [Q&A](https://github.com/k4yt3
 
 ### Prerequisites
 
-- **Python 3**
+- **Python 3.8**
 Download: https://www.python.org/downloads/windows/
 - **FFmpeg Windows Build**
 Download: https://ffmpeg.org/download.html
