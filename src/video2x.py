@@ -352,7 +352,7 @@ image_format = config['video2x']['image_format'].lower()
 preserve_frames = config['video2x']['preserve_frames']
 
 # load cache directory
-if isinstance(config['video2x']['video2x_cache_directory'], str):
+if config['video2x']['video2x_cache_directory'] is not None:
     video2x_cache_directory = pathlib.Path(config['video2x']['video2x_cache_directory'])
 else:
     video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
