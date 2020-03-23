@@ -6,12 +6,9 @@ Author: K4YT3X
 Date Created: December 10, 2018
 Last Modified: February 22, 2020
 
-Dev: SAT3LL
-
-Licensed under the GNU General Public License Version 3 (GNU GPL v3),
-    available at: https://www.gnu.org/licenses/gpl-3.0.txt
-
-(C) 2018-2019 K4YT3X
+Description: This file contains the Upscaler class. Each
+instance of the Upscaler class is an upscaler on an image or
+a folder.
 """
 
 # local imports

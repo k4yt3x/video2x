@@ -3,9 +3,14 @@
 """
 Name: Video2X Image Cleaner
 Author: BrianPetkovsek
-Author: K4YT3X
 Date Created: March 24, 2019
 Last Modified: July 27, 2019
+
+Editor: K4YT3X
+Last Modified: March 23, 2020
+
+Editor: 28598519a
+Last Modified: March 23, 2020
 
 Description: This class is to remove the extracted frames
 that have already been upscaled.

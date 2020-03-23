@@ -13,10 +13,16 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 26, 2020
+Last Modified: March 23, 2020
 
 Editor: BrianPetkovsek
+Last Modified: June 17, 2019
+
 Editor: SAT3LL
+Last Modified: June 25, 2019
+
+Editor: 28598519a
+Last Modified: March 23, 2020
 
 Licensed under the GNU General Public License Version 3 (GNU GPL v3),
     available at: https://www.gnu.org/licenses/gpl-3.0.txt
