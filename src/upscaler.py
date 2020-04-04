@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: February 22, 2020
+Last Modified: April 4, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -71,6 +71,12 @@ class Upscaler:
     def create_temp_directories(self):
         """create temporary directory
         """
+
+        # create a new temp directory if the current one is not found
+        if not self.video2x_cache_directory.exists():
+            self.video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
+
+        # create temp directories for extracted frames and upscaled frames
         self.extracted_frames = pathlib.Path(tempfile.mkdtemp(dir=self.video2x_cache_directory))
         Avalon.debug_info(f'Extracted frames are being saved to: {self.extracted_frames}')
         self.upscaled_frames = pathlib.Path(tempfile.mkdtemp(dir=self.video2x_cache_directory))
