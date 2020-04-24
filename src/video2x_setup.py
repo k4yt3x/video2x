@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: January 4, 2020
+Last Modified: April 24, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -214,7 +214,7 @@ class Video2xSetup:
 
         # since Java pre-compiled release has been removed from download
         # page, we use this cached version as a temporary solution
-        anime4k_zip = download('https://files.flexio.org/Resources/anime4k.zip', tempfile.gettempdir())
+        anime4k_zip = download('https://files.k4yt3x.com/Resources/anime4k.zip', tempfile.gettempdir())
         self.trash.append(anime4k_zip)
 
         # extract and rename
