@@ -1,6 +1,6 @@
 {
   "waifu2x_caffe": {
-    "waifu2x_caffe_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui.exe",
+    "path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-caffe\\waifu2x-caffe-cui",
     "input_extention_list": null,
     "output_extention": null,
     "mode": "noise_scale",
@@ -22,7 +22,7 @@
     "crop_h": null
   },
   "waifu2x_converter": {
-    "waifu2x_converter_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-converter-cpp",
+    "path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-converter-cpp",
     "output-format": null,
     "png-compression": null,
     "image-quality": null,
@@ -40,7 +40,7 @@
     "input": null
   },
   "waifu2x_ncnn_vulkan": {
-    "waifu2x_ncnn_vulkan_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x-ncnn-vulkan.exe",
+    "path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\waifu2x-ncnn-vulkan\\waifu2x-ncnn-vulkan",
     "v": null,
     "i": null,
     "o": null,
@@ -52,7 +52,7 @@
     "j": "1:2:2"
   },
   "anime4k": {
-    "anime4k_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\anime4k\\Anime4K.jar",
+    "path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\anime4k\\Anime4K.jar",
     "java_path": "C:\\Program Files\\Java\\jdk-12.0.2\\bin\\java.exe"
   },
   "ffmpeg": {
@@ -83,9 +83,11 @@
     "migrating_tracks": {
       "output_options": {
         "-map": [
-          "0:v:0?",
-          "1?",
-          "-1:v?"
+          "0:v?",
+          "1:a?",
+          "1:s?",
+          "1:d?",
+          "1:t?"
         ],
         "-c": "copy",
         "-pix_fmt": null
