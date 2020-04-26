@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: March 23, 2020
+Last Modified: April 26, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -222,30 +222,18 @@ def absolutify_paths(config):
     """
     current_directory = pathlib.Path(sys.argv[0]).parent.absolute()
 
-    # check waifu2x-caffe path
-    if not re.match('^[a-z]:', config['waifu2x_caffe']['waifu2x_caffe_path'], re.IGNORECASE):
-        config['waifu2x_caffe']['waifu2x_caffe_path'] = current_directory / config['waifu2x_caffe']['waifu2x_caffe_path']
+    directories = [
+        config['waifu2x_caffe']['waifu2x_caffe_path'],
+        config['waifu2x_converter']['waifu2x_converter_path'],
+        config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'],
+        config['anime4k']['anime4k_path'],
+        config['ffmpeg']['ffmpeg_path'],
+        config['video2x']['video2x_cache_directory']
+    ]
 
-    # check waifu2x-converter-cpp path
-    if not re.match('^[a-z]:', config['waifu2x_converter']['waifu2x_converter_path'], re.IGNORECASE):
-        config['waifu2x_converter']['waifu2x_converter_path'] = current_directory / config['waifu2x_converter']['waifu2x_converter_path']
-
-    # check waifu2x_ncnn_vulkan path
-    if not re.match('^[a-z]:', config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'], re.IGNORECASE):
-        config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path'] = current_directory / config['waifu2x_ncnn_vulkan']['waifu2x_ncnn_vulkan_path']
-
-    # check anime4k path
-    if not re.match('^[a-z]:', config['anime4k']['anime4k_path'], re.IGNORECASE):
-        config['anime4k']['anime4k_path'] = current_directory / config['anime4k']['anime4k_path']
-
-    # check ffmpeg path
-    if not re.match('^[a-z]:', config['ffmpeg']['ffmpeg_path'], re.IGNORECASE):
-        config['ffmpeg']['ffmpeg_path'] = current_directory / config['ffmpeg']['ffmpeg_path']
-
-    # check video2x cache path
-    if config['video2x']['video2x_cache_directory']:
-        if not re.match('^[a-z]:', config['video2x']['video2x_cache_directory'], re.IGNORECASE):
-            config['video2x']['video2x_cache_directory'] = current_directory / config['video2x']['video2x_cache_directory']
+    for directory in directories:
+        if directory and re.match('^[a-z]:', directory, re.IGNORECASE) is None:
+            directory = current_directory / directory
 
     return config
 
