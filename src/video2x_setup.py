@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: April 24, 2020
+Last Modified: April 26, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -18,6 +18,7 @@ Installation Details:
 - waifu2x-cpp-converter: %LOCALAPPDATA%\\video2x\\waifu2x-converter-cpp
 - waifu2x_ncnn_vulkan: %LOCALAPPDATA%\\video2x\\waifu2x-ncnn-vulkan
 - anime4k: %LOCALAPPDATA%\\video2x\\anime4k
+- srmd_ncnn_vulkan: %LOCALAPPDATA%\\video2x\\srmd-ncnn-vulkan
 """
 
 # built-in imports
@@ -41,12 +42,12 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.6.1'
+VERSION = '1.7.0'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
 VIDEO2X_CONFIG = pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml'
-DRIVER_OPTIONS = ['all', 'waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']
+DRIVER_OPTIONS = ['all', 'waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k', 'srmd_ncnn_vulkan']
 
 
 def parse_arguments():
@@ -87,6 +88,7 @@ class Video2xSetup:
             self._install_waifu2x_converter_cpp()
             self._install_waifu2x_ncnn_vulkan()
             self._install_anime4k()
+            self._install_srmd_ncnn_vulkan()
         elif self.driver == 'waifu2x_caffe':
             self._install_waifu2x_caffe()
         elif self.driver == 'waifu2x_converter':
@@ -95,6 +97,8 @@ class Video2xSetup:
             self._install_waifu2x_ncnn_vulkan()
         elif self.driver == 'anime4k':
             self._install_anime4k()
+        elif self.driver == 'srmd_ncnn_vulkan':
+            self._install_srmd_ncnn_vulkan()
 
         print('\nGenerating Video2X configuration file')
         self._generate_config()
@@ -220,6 +224,32 @@ class Video2xSetup:
         # extract and rename
         with zipfile.ZipFile(anime4k_zip) as zipf:
             zipf.extractall(LOCALAPPDATA / 'video2x' / 'anime4k')
+
+    def _install_srmd_ncnn_vulkan(self):
+        """ Install srmd-ncnn-vulkan
+        """
+        print('\nInstalling srmd-ncnn-vulkan')
+        import requests
+
+        # Get latest release of srmd-ncnn-vulkan via Github API
+        latest_release = requests.get('https://api.github.com/repos/nihui/srmd-ncnn-vulkan/releases/latest').json()
+
+        for a in latest_release['assets']:
+            if re.search(r'srmd-ncnn-vulkan-\d*\.zip', a['browser_download_url']):
+                srmd_ncnn_vulkan_zip = download(a['browser_download_url'], tempfile.gettempdir())
+                self.trash.append(srmd_ncnn_vulkan_zip)
+
+        # extract and rename
+        srmd_ncnn_vulkan_directory = LOCALAPPDATA / 'video2x' / 'srmd-ncnn-vulkan'
+        with zipfile.ZipFile(srmd_ncnn_vulkan_zip) as zipf:
+            zipf.extractall(LOCALAPPDATA / 'video2x')
+
+            # if directory already exists, remove it
+            if srmd_ncnn_vulkan_directory.exists():
+                shutil.rmtree(srmd_ncnn_vulkan_directory)
+
+            # rename the newly extracted directory
+            (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(srmd_ncnn_vulkan_directory)
 
     def _generate_config(self):
         """ Generate video2x config
