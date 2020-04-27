@@ -6,7 +6,7 @@
 
 You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest builds of `Video2X`. The exe files will require no Python or Python module installation.
 
-The **`full`** package provides all packages that will possibly be needed by `Video2X`, including `FFmpeg`, `waifu2x-caffe`, `waifu2x-converter-cpp`, `waifu2x-ncnn-vulkan`, and `Anime4K`. The config file (`video2x.json`) is also already configured for the environment. All you need to do is just to launch `video2x.exe`.
+The **`full`** package provides all packages that will possibly be needed by `Video2X`, including `FFmpeg`, `waifu2x-caffe`, `waifu2x-converter-cpp`, `waifu2x-ncnn-vulkan`, `Anime4K` and `srmd-ncnn-vulkan`. The config file (`video2x.json`) is also already configured for the environment. All you need to do is just to launch `video2x.exe`.
 
 The **`light`** package provides only the most basic functions of `Video2X`. Only `video2x.exe`, `video2x_setup.exe` and `video2x.json` are included. To setup dependencies (e.g. `FFmpeg` and `Waifu2X`) automatically, simply launch `video2x_setup.exe`.
 
@@ -23,8 +23,13 @@ Component names that are **bolded** can be automatically downloaded and configur
    - [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
    - [**waifu2x-ncnn-vulkan**](https://github.com/nihui/waifu2x-ncnn-vulkan)
    - [**Anime4K**](https://github.com/bloc97/Anime4K)
+   - [**srmd-ncnn-vulkan**](https://github.com/nihui/srmd-ncnn-vulkan)
 
 ## Recent Changes
+
+### 3.2.0 (April 26, 2020)
+
+- Added support for [SRMD-NCNN-Vulkan](https://github.com/nihui/srmd-ncnn-vulkan)
 
 ### 3.1.0 (February 26, 2020)
 
@@ -38,10 +43,6 @@ Component names that are **bolded** can be automatically downloaded and configur
 - Configuration file changed to YAML format
   - You may still use a JSON-formatted config file. To do so, please specify `-c video2x.json`.
 - Other code clean-up and optimization
-
-### 2.10.0 (August 16, 2019)
-
-- **Added support for [Anime4K](https://github.com/bloc97/Anime4K)**
 
 ### Setup Script 1.6.0 (November 26, 2019)
 
@@ -106,6 +107,8 @@ Download: https://github.com/DeadSix27/waifu2x-converter-cpp/releases
 Download: https://github.com/nihui/waifu2x-ncnn-vulkan/releases
 - **Anime4K**
 Download: https://github.com/bloc97/Anime4K/releases
+- **srmd-ncnn-vulkan**
+Download: https://github.com/nihui/srmd-ncnn-vulkan/releases
 
 ### Installing Dependencies
 
