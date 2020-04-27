@@ -44,10 +44,9 @@ Component names that are **bolded** can be automatically downloaded and configur
   - You may still use a JSON-formatted config file. To do so, please specify `-c video2x.json`.
 - Other code clean-up and optimization
 
-### Setup Script 1.6.0 (November 26, 2019)
+### Setup Script 1.7.0 (April 26, 2020)
 
-- Added compatibility for new YAML configuration file
-- Added better exception handling
+- Added support for srmd-ncnn-vulkan
 
 ## Description
 
