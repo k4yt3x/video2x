@@ -55,6 +55,19 @@
     "path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\anime4k\\Anime4K.jar",
     "java_path": "C:\\Program Files\\Java\\jdk-12.0.2\\bin\\java.exe"
   },
+  "srmd_ncnn_vulkan": {
+    "path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\srmd-ncnn-vulkan\\srmd-ncnn-vulkan",
+    "v": null,
+    "i": null,
+    "o": null,
+    "n": 3,
+    "s": 2,
+    "t": 400,
+    "m": "models-srmd",
+    "g": 0,
+    "j": "1:2:2",
+    "x": null
+  },
   "ffmpeg": {
     "ffmpeg_path": "C:\\Users\\K4YT3X\\AppData\\Local\\video2x\\ffmpeg-latest-win64-static\\bin",
     "video_to_frames": {
