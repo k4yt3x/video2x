@@ -72,7 +72,7 @@ import GPUtil
 import psutil
 
 
-VERSION = '3.1.0'
+VERSION = '3.2.0'
 
 LEGAL_INFO = f'''Video2X Version: {VERSION}
 Author: K4YT3X
@@ -269,6 +269,9 @@ if (args.driver in ['waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']) and 
 if args.driver == 'waifu2x_ncnn_vulkan' and args.ratio is not None and (args.ratio > 2 or not args.ratio.is_integer()):
     Avalon.error('Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
     raise ArgumentError('scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
+if args.driver == 'srmd_ncnn_vulkan' and args.ratio is not None and (args.ratio not in [2, 3, 4]):
+    Avalon.error('Scaling ratio must be one of 2, 3 or 4 for srmd_ncnn_vulkan')
+    raise ArgumentError('scaling ratio must be one of 2, 3 or 4 for srmd_ncnn_vulkan')
 if (args.width or args.height) and args.ratio:
     Avalon.error('You can only specify either scaling ratio or output width and height')
     raise ArgumentError('both scaling ration and width/height specified')
@@ -277,7 +280,7 @@ if (args.width and not args.height) or (not args.width and args.height):
     raise ArgumentError('only one of width or height is specified')
 
 # check available memory if driver is waifu2x-based
-if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan']:
+if args.driver in ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'srmd_ncnn_vulkan']:
     check_memory()
 
 # anime4k runs significantly faster with more processes

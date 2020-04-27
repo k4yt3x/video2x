@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: April 4, 2020
+Last Modified: April 26, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -16,6 +16,7 @@ from anime4k import Anime4k
 from exceptions import *
 from ffmpeg import Ffmpeg
 from image_cleaner import ImageCleaner
+from srmd_ncnn_vulkan import SrmdNcnnVulkan
 from waifu2x_caffe import Waifu2xCaffe
 from waifu2x_converter import Waifu2xConverter
 from waifu2x_ncnn_vulkan import Waifu2xNcnnVulkan
@@ -37,7 +38,7 @@ import traceback
 from avalon_framework import Avalon
 from tqdm import tqdm
 
-AVAILABLE_DRIVERS = ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']
+AVAILABLE_DRIVERS = ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k', 'srmd_ncnn_vulkan']
 
 
 class Upscaler:
@@ -241,6 +242,13 @@ class Upscaler:
                                                      self.upscaled_frames,
                                                      self.scale_ratio,
                                                      self.processes)
+
+            # if the driver being used is srmd_ncnn_vulkan
+            elif self.waifu2x_driver == 'srmd_ncnn_vulkan':
+                driver = SrmdNcnnVulkan(copy.deepcopy(self.driver_settings))
+                upscaler_processes.append(driver.upscale(process_directory,
+                                                         self.upscaled_frames,
+                                                         self.scale_ratio))
 
         # start progress bar in a different thread
         progress_bar = threading.Thread(target=self._progress_bar, args=(process_directories,))
