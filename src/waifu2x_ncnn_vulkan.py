@@ -15,7 +15,6 @@ for waifu2x_ncnn_vulkan.
 
 # built-in imports
 import os
-import shlex
 import subprocess
 import threading
 
@@ -77,6 +76,6 @@ class Waifu2xNcnnVulkan:
 
         # return the Popen object of the new process created
         self.print_lock.acquire()
-        Avalon.debug_info(f'[upscaler] Subprocess {os.getpid()} executing: {shlex.join(execute)}')
+        Avalon.debug_info(f'[upscaler] Subprocess {os.getpid()} executing: {"-".join(execute)}')
         self.print_lock.release()
         return subprocess.Popen(execute)
