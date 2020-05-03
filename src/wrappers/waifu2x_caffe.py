@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 22, 2020
+Last Modified: May 3, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -29,14 +29,12 @@ class Waifu2xCaffe:
     the upscale function.
     """
 
-    def __init__(self, driver_settings, process, model_dir, bit_depth):
+    def __init__(self, driver_settings, model_dir, bit_depth):
         self.driver_settings = driver_settings
-        self.driver_settings['process'] = process
         self.driver_settings['model_dir'] = model_dir
         self.driver_settings['output_depth'] = bit_depth
 
         # arguments passed through command line overwrites config file values
-        self.process = process
         self.model_dir = model_dir
         self.print_lock = threading.Lock()
 
@@ -64,21 +62,24 @@ class Waifu2xCaffe:
 
         # list to be executed
         # initialize the list with waifu2x binary path as the first element
-        execute = [str(self.driver_settings['path'])]
+        execute = [self.driver_settings.pop('path')]
 
         for key in self.driver_settings.keys():
 
             value = self.driver_settings[key]
 
             # is executable key or null or None means that leave this option out (keep default)
-            if key == 'path' or value is None or value is False:
+            if value is None or value is False:
                 continue
             else:
                 if len(key) == 1:
                     execute.append(f'-{key}')
                 else:
                     execute.append(f'--{key}')
-                execute.append(str(value))
+
+                # true means key is an option
+                if value is not True:
+                    execute.append(str(value))
 
         # return the Popen object of the new process created
         self.print_lock.acquire()

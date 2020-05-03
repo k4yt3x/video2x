@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: February 22, 2020
+Last Modified: May 3, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
@@ -21,7 +21,7 @@ import threading
 from avalon_framework import Avalon
 
 
-class Waifu2xConverter:
+class Waifu2xConverterCpp:
     """This class communicates with waifu2x cui engine
 
     An object will be created for this class, containing information
@@ -56,22 +56,18 @@ class Waifu2xConverter:
         # models_rgb must be specified manually for waifu2x-converter-cpp
         # if it's not specified in the arguments, create automatically
         if self.driver_settings['model-dir'] is None:
-            self.driver_settings['model-dir'] = pathlib.Path(self.driver_settings['path']) / 'models_rgb'
+            self.driver_settings['model-dir'] = pathlib.Path(self.driver_settings['path']).parent / 'models_rgb'
 
         # list to be executed
         # initialize the list with waifu2x binary path as the first element
-        execute = [str(pathlib.Path(self.driver_settings['path']) / 'waifu2x-converter-cpp.exe')]
+        execute = [self.driver_settings.pop('path')]
 
         for key in self.driver_settings.keys():
 
             value = self.driver_settings[key]
 
-            # the key doesn't need to be passed in this case
-            if key == 'path':
-                continue
-
             # null or None means that leave this option out (keep default)
-            elif value is None or value is False:
+            if value is None or value is False:
                 continue
             else:
                 if len(key) == 1:
@@ -80,10 +76,8 @@ class Waifu2xConverter:
                     execute.append(f'--{key}')
 
                 # true means key is an option
-                if value is True:
-                    continue
-
-                execute.append(str(value))
+                if value is not True:
+                    execute.append(str(value))
 
         # return the Popen object of the new process created
         self.print_lock.acquire()
