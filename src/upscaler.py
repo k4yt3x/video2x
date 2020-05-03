@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: April 26, 2020
+Last Modified: May 3, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -12,19 +12,20 @@ a folder.
 """
 
 # local imports
-from anime4k import Anime4k
 from exceptions import *
-from ffmpeg import Ffmpeg
 from image_cleaner import ImageCleaner
-from srmd_ncnn_vulkan import SrmdNcnnVulkan
-from waifu2x_caffe import Waifu2xCaffe
-from waifu2x_converter import Waifu2xConverter
-from waifu2x_ncnn_vulkan import Waifu2xNcnnVulkan
+from wrappers.anime4kcpp import Anime4kCpp
+from wrappers.ffmpeg import Ffmpeg
+from wrappers.srmd_ncnn_vulkan import SrmdNcnnVulkan
+from wrappers.waifu2x_caffe import Waifu2xCaffe
+from wrappers.waifu2x_converter_cpp import Waifu2xConverterCpp
+from wrappers.waifu2x_ncnn_vulkan import Waifu2xNcnnVulkan
 
 # built-in imports
 from fractions import Fraction
 import contextlib
 import copy
+import os
 import pathlib
 import re
 import shutil
@@ -38,7 +39,7 @@ import traceback
 from avalon_framework import Avalon
 from tqdm import tqdm
 
-AVAILABLE_DRIVERS = ['waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k', 'srmd_ncnn_vulkan']
+AVAILABLE_DRIVERS = ['waifu2x_caffe', 'waifu2x_converter_cpp', 'waifu2x_ncnn_vulkan', 'srmd_ncnn_vulkan', 'anime4kcpp']
 
 
 class Upscaler:
@@ -50,16 +51,15 @@ class Upscaler:
         ArgumentError -- if argument is not valid
     """
 
-    def __init__(self, input_video, output_video, method, driver_settings, ffmpeg_settings):
+    def __init__(self, input_video, output_video, driver_settings, ffmpeg_settings):
         # mandatory arguments
         self.input_video = input_video
         self.output_video = output_video
-        self.method = method
         self.driver_settings = driver_settings
         self.ffmpeg_settings = ffmpeg_settings
 
         # optional arguments
-        self.waifu2x_driver = 'waifu2x_caffe'
+        self.driver = 'waifu2x_caffe'
         self.scale_width = None
         self.scale_height = None
         self.scale_ratio = None
@@ -101,13 +101,26 @@ class Upscaler:
         # check if arguments are valid / all necessary argument
         # values are specified
         if not self.input_video:
-            raise ArgumentError('You need to specify the video to process')
-        elif (not self.scale_width or not self.scale_height) and not self.scale_ratio:
-            raise ArgumentError('You must specify output video width and height or upscale factor')
-        elif not self.output_video:
-            raise ArgumentError('You need to specify the output video name')
-        elif not self.method:
-            raise ArgumentError('You need to specify the enlarging processing unit')
+            Avalon.error('You must specify input video file/directory path')
+            raise ArgumentError('input video path not specified')
+        if not self.output_video:
+            Avalon.error('You must specify output video file/directory path')
+            raise ArgumentError('output video path not specified')
+        if (self.driver in ['waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k']) and self.scale_width and self.scale_height:
+            Avalon.error('Selected driver accepts only scaling ratio')
+            raise ArgumentError('selected driver supports only scaling ratio')
+        if self.driver == 'waifu2x_ncnn_vulkan' and self.scale_ratio is not None and (self.scale_ratio > 2 or not self.scale_ratio.is_integer()):
+            Avalon.error('Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
+            raise ArgumentError('scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
+        if self.driver == 'srmd_ncnn_vulkan' and self.scale_ratio is not None and (self.scale_ratio not in [2, 3, 4]):
+            Avalon.error('Scaling ratio must be one of 2, 3 or 4 for srmd_ncnn_vulkan')
+            raise ArgumentError('scaling ratio must be one of 2, 3 or 4 for srmd_ncnn_vulkan')
+        if (self.scale_width or self.scale_height) and self.scale_ratio:
+            Avalon.error('You can only specify either scaling ratio or output width and height')
+            raise ArgumentError('both scaling ration and width/height specified')
+        if (self.scale_width and not self.scale_height) or (not self.scale_width and self.scale_height):
+            Avalon.error('You must specify both width and height')
+            raise ArgumentError('only one of width or height is specified')
 
     def _progress_bar(self, extracted_frames_directories):
         """ This method prints a progress bar
@@ -159,8 +172,8 @@ class Upscaler:
         self.progress_bar_exit_signal = False
 
         # initialize waifu2x driver
-        if self.waifu2x_driver not in AVAILABLE_DRIVERS:
-            raise UnrecognizedDriverError(f'Unrecognized driver: {self.waifu2x_driver}')
+        if self.driver not in AVAILABLE_DRIVERS:
+            raise UnrecognizedDriverError(f'Unrecognized driver: {self.driver}')
 
         # create a container for all upscaler processes
         upscaler_processes = []
@@ -186,7 +199,7 @@ class Upscaler:
             process_directory.mkdir(parents=True, exist_ok=True)
 
         # waifu2x-converter-cpp will perform multi-threading within its own process
-        if self.waifu2x_driver in ['waifu2x_converter', 'anime4k'] :
+        if self.driver == 'waifu2x_converter_cpp':
             process_directories = [self.extracted_frames]
 
         else:
@@ -202,8 +215,8 @@ class Upscaler:
         for process_directory in process_directories:
 
             # if the driver being used is waifu2x-caffe
-            if self.waifu2x_driver == 'waifu2x_caffe':
-                driver = Waifu2xCaffe(copy.deepcopy(self.driver_settings), self.method, self.model_dir, self.bit_depth)
+            if self.driver == 'waifu2x_caffe':
+                driver = Waifu2xCaffe(copy.deepcopy(self.driver_settings), self.model_dir, self.bit_depth)
                 if self.scale_ratio:
                     upscaler_processes.append(driver.upscale(process_directory,
                                                              self.upscaled_frames,
@@ -220,8 +233,8 @@ class Upscaler:
                                                              self.image_format))
 
             # if the driver being used is waifu2x-converter-cpp
-            elif self.waifu2x_driver == 'waifu2x_converter':
-                driver = Waifu2xConverter(self.driver_settings, self.model_dir)
+            elif self.driver == 'waifu2x_converter_cpp':
+                driver = Waifu2xConverterCpp(self.driver_settings, self.model_dir)
                 upscaler_processes.append(driver.upscale(process_directory,
                                                          self.upscaled_frames,
                                                          self.scale_ratio,
@@ -229,22 +242,14 @@ class Upscaler:
                                                          self.image_format))
 
             # if the driver being used is waifu2x-ncnn-vulkan
-            elif self.waifu2x_driver == 'waifu2x_ncnn_vulkan':
+            elif self.driver == 'waifu2x_ncnn_vulkan':
                 driver = Waifu2xNcnnVulkan(copy.deepcopy(self.driver_settings))
                 upscaler_processes.append(driver.upscale(process_directory,
                                                          self.upscaled_frames,
                                                          self.scale_ratio))
 
-            # if the driver being used is anime4k
-            elif self.waifu2x_driver == 'anime4k':
-                driver = Anime4k(copy.deepcopy(self.driver_settings))
-                upscaler_processes += driver.upscale(process_directory,
-                                                     self.upscaled_frames,
-                                                     self.scale_ratio,
-                                                     self.processes)
-
             # if the driver being used is srmd_ncnn_vulkan
-            elif self.waifu2x_driver == 'srmd_ncnn_vulkan':
+            elif self.driver == 'srmd_ncnn_vulkan':
                 driver = SrmdNcnnVulkan(copy.deepcopy(self.driver_settings))
                 upscaler_processes.append(driver.upscale(process_directory,
                                                          self.upscaled_frames,
@@ -278,7 +283,7 @@ class Upscaler:
 
         # if the driver is waifu2x-converter-cpp
         # images need to be renamed to be recognizable for FFmpeg
-        if self.waifu2x_driver == 'waifu2x_converter':
+        if self.driver == 'waifu2x_converter_cpp':
             for image in [f for f in self.upscaled_frames.iterdir() if f.is_file()]:
                 renamed = re.sub(f'_\\[.*\\]\\[x(\\d+(\\.\\d+)?)\\]\\.{self.image_format}', f'.{self.image_format}', str(image.name))
                 (self.upscaled_frames / image).rename(self.upscaled_frames / renamed)
@@ -305,64 +310,80 @@ class Upscaler:
         self.input_video = self.input_video.absolute()
         self.output_video = self.output_video.absolute()
 
-        # initialize objects for ffmpeg and waifu2x-caffe
-        fm = Ffmpeg(self.ffmpeg_settings, self.image_format)
+        # drivers that have native support for video processing
+        if self.driver == 'anime4kcpp':
+            # append FFmpeg path to the end of PATH
+            # Anime4KCPP will then use FFmpeg to migrate audio tracks
+            os.environ['PATH'] += f';{self.ffmpeg_settings["ffmpeg_path"]}'
+            Avalon.info('Starting to upscale extracted images')
+            driver = Anime4kCpp(self.driver_settings)
+            driver.upscale(self.input_video, self.output_video, self.scale_ratio, self.processes).wait()
+            Avalon.info('Upscaling completed')
 
-        # extract frames from video
-        fm.extract_frames(self.input_video, self.extracted_frames)
+        else:
+            self.create_temp_directories()
 
-        Avalon.info('Reading video information')
-        video_info = fm.get_video_info(self.input_video)
-        # analyze original video with ffprobe and retrieve framerate
-        # width, height = info['streams'][0]['width'], info['streams'][0]['height']
+            # initialize objects for ffmpeg and waifu2x-caffe
+            fm = Ffmpeg(self.ffmpeg_settings, self.image_format)
 
-        # find index of video stream
-        video_stream_index = None
-        for stream in video_info['streams']:
-            if stream['codec_type'] == 'video':
-                video_stream_index = stream['index']
-                break
+            Avalon.info('Reading video information')
+            video_info = fm.get_video_info(self.input_video)
+            # analyze original video with ffprobe and retrieve framerate
+            # width, height = info['streams'][0]['width'], info['streams'][0]['height']
 
-        # exit if no video stream found
-        if video_stream_index is None:
-            Avalon.error('Aborting: No video stream found')
-            raise StreamNotFoundError('no video stream found')
+            # find index of video stream
+            video_stream_index = None
+            for stream in video_info['streams']:
+                if stream['codec_type'] == 'video':
+                    video_stream_index = stream['index']
+                    break
 
-        # get average frame rate of video stream
-        framerate = float(Fraction(video_info['streams'][video_stream_index]['avg_frame_rate']))
-        fm.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
+            # exit if no video stream found
+            if video_stream_index is None:
+                Avalon.error('Aborting: No video stream found')
+                raise StreamNotFoundError('no video stream found')
 
-        # get a dict of all pixel formats and corresponding bit depth
-        pixel_formats = fm.get_pixel_formats()
+            # extract frames from video
+            fm.extract_frames(self.input_video, self.extracted_frames)
 
-        # try getting pixel format's corresponding bti depth
-        try:
-            self.bit_depth = pixel_formats[fm.pixel_format]
-        except KeyError:
-            Avalon.error(f'Unsupported pixel format: {fm.pixel_format}')
-            raise UnsupportedPixelError(f'unsupported pixel format {fm.pixel_format}')
+            # get average frame rate of video stream
+            framerate = float(Fraction(video_info['streams'][video_stream_index]['avg_frame_rate']))
+            fm.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
 
-        Avalon.info(f'Framerate: {framerate}')
+            # get a dict of all pixel formats and corresponding bit depth
+            pixel_formats = fm.get_pixel_formats()
 
-        # width/height will be coded width/height x upscale factor
-        if self.scale_ratio:
-            original_width = video_info['streams'][video_stream_index]['width']
-            original_height = video_info['streams'][video_stream_index]['height']
-            self.scale_width = int(self.scale_ratio * original_width)
-            self.scale_height = int(self.scale_ratio * original_height)
+            # try getting pixel format's corresponding bti depth
+            try:
+                self.bit_depth = pixel_formats[fm.pixel_format]
+            except KeyError:
+                Avalon.error(f'Unsupported pixel format: {fm.pixel_format}')
+                raise UnsupportedPixelError(f'unsupported pixel format {fm.pixel_format}')
 
-        # upscale images one by one using waifu2x
-        Avalon.info('Starting to upscale extracted images')
-        self._upscale_frames()
-        Avalon.info('Upscaling completed')
+            Avalon.info(f'Framerate: {framerate}')
 
-        # frames to Video
-        Avalon.info('Converting extracted frames into video')
+            # width/height will be coded width/height x upscale factor
+            if self.scale_ratio:
+                original_width = video_info['streams'][video_stream_index]['width']
+                original_height = video_info['streams'][video_stream_index]['height']
+                self.scale_width = int(self.scale_ratio * original_width)
+                self.scale_height = int(self.scale_ratio * original_height)
 
-        # use user defined output size
-        fm.convert_video(framerate, f'{self.scale_width}x{self.scale_height}', self.upscaled_frames)
-        Avalon.info('Conversion completed')
+            # upscale images one by one using waifu2x
+            Avalon.info('Starting to upscale extracted images')
+            self._upscale_frames()
+            Avalon.info('Upscaling completed')
 
-        # migrate audio tracks and subtitles
-        Avalon.info('Migrating audio tracks and subtitles to upscaled video')
-        fm.migrate_audio_tracks_subtitles(self.input_video, self.output_video, self.upscaled_frames)
+            # frames to Video
+            Avalon.info('Converting extracted frames into video')
+
+            # use user defined output size
+            fm.convert_video(framerate, f'{self.scale_width}x{self.scale_height}', self.upscaled_frames)
+            Avalon.info('Conversion completed')
+
+            # migrate audio tracks and subtitles
+            Avalon.info('Migrating audio tracks and subtitles to upscaled video')
+            fm.migrate_audio_tracks_subtitles(self.input_video, self.output_video, self.upscaled_frames)
+
+            # destroy temp directories
+            self.cleanup_temp_directories()

@@ -19,8 +19,8 @@ waifu2x_caffe:
   model_dir: null
   crop_w: null
   crop_h: null
-waifu2x_converter:
-  path: 'C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-converter-cpp'
+waifu2x_converter_cpp:
+  path: 'C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-converter-cpp\waifu2x-converter-cpp'
   output-format: null
   png-compression: null
   image-quality: null
@@ -47,9 +47,6 @@ waifu2x_ncnn_vulkan:
   m: models-cunet
   g: 0
   j: '1:2:2'
-anime4k:
-  path: 'C:\Users\K4YT3X\AppData\Local\video2x\anime4k\Anime4K.jar'
-  java_path: 'C:\Program Files\Java\jdk-12.0.2\bin\java.exe'
 srmd_ncnn_vulkan:
   path: 'C:\Users\K4YT3X\AppData\Local\video2x\srmd-ncnn-vulkan\srmd-ncnn-vulkan'
   v: null
@@ -62,6 +59,27 @@ srmd_ncnn_vulkan:
   g: 0
   j: '1:2:2'
   x: null
+anime4kcpp:
+  path: 'C:\Users\k4yt3x\AppData\Local\video2x\anime4kcpp\Anime4KCPP_CLI'
+  input: null
+  output: null
+  passes: 2
+  pushColorCount: 2
+  strengthColor: 0.3
+  strengthGradient: 1
+  zoomFactor: 2
+  threads: 16
+  fastMode: null
+  videoMode: true
+  preview: null
+  preProcessing: null
+  postProcessing: null
+  preFilters: 4
+  postFilters: 40
+  GPUMode: null
+  listGPUs: null
+  platformID: 0
+  deviceID: 0
 ffmpeg:
   ffmpeg_path: 'C:\Users\K4YT3X\AppData\Local\video2x\ffmpeg-latest-win64-static\bin'
   video_to_frames:
