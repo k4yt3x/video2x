@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 3, 2020
+Last Modified: May 4, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -55,6 +55,7 @@ from upscaler import Upscaler
 # built-in imports
 import argparse
 import contextlib
+import importlib
 import pathlib
 import re
 import shutil
@@ -68,7 +69,7 @@ import yaml
 from avalon_framework import Avalon
 
 
-VERSION = '3.3.0'
+VERSION = '4.0.0'
 
 LEGAL_INFO = f'''Video2X Version: {VERSION}
 Author: K4YT3X
@@ -87,26 +88,19 @@ LOGO = r'''
 
 
 def parse_arguments():
-    """Processes CLI arguments
-
-    This function parses all arguments
-    This allows users to customize options
-    for the output video.
+    """ parse CLI arguments
     """
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog='video2x', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # video options
-    file_options = parser.add_argument_group('File Options')
-    file_options.add_argument('-i', '--input', type=pathlib.Path, help='source video file/directory', action='store', required=True)
-    file_options.add_argument('-o', '--output', type=pathlib.Path, help='output video file/directory', action='store', required=True)
-
-    # upscaler options
-    upscaler_options = parser.add_argument_group('Upscaler Options')
-    upscaler_options.add_argument('-d', '--driver', help='upscaling driver', action='store', default='waifu2x_caffe', choices=AVAILABLE_DRIVERS)
-    upscaler_options.add_argument('-y', '--model_dir', type=pathlib.Path, help='directory containing model JSON files', action='store')
-    upscaler_options.add_argument('-p', '--processes', help='number of processes to use for upscaling', action='store', type=int, default=1)
-    upscaler_options.add_argument('-c', '--config', type=pathlib.Path, help='video2x config file location', action='store', default=pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml')
-    upscaler_options.add_argument('-b', '--batch', help='enable batch mode (select all default values to questions)', action='store_true')
+    general_options = parser.add_argument_group('General Options')
+    general_options.add_argument('-i', '--input', type=pathlib.Path, help='source video file/directory')
+    general_options.add_argument('-o', '--output', type=pathlib.Path, help='output video file/directory')
+    general_options.add_argument('-c', '--config', type=pathlib.Path, help='video2x config file location', action='store',
+                                 default=pathlib.Path(__file__).parent.absolute() / 'video2x.yaml')
+    general_options.add_argument('-d', '--driver', help='upscaling driver', choices=AVAILABLE_DRIVERS, default='waifu2x_caffe')
+    general_options.add_argument('-p', '--processes', help='number of processes to use for upscaling', action='store', type=int, default=1)
+    general_options.add_argument('-v', '--version', help='display version, lawful information and exit', action='store_true')
 
     # scaling options
     scaling_options = parser.add_argument_group('Scaling Options')
@@ -114,12 +108,17 @@ def parse_arguments():
     scaling_options.add_argument('--height', help='output video height', action='store', type=int)
     scaling_options.add_argument('-r', '--ratio', help='scaling ratio', action='store', type=float)
 
-    # extra options
-    extra_options = parser.add_argument_group('Extra Options')
-    extra_options.add_argument('-v', '--version', help='display version, lawful information and exit', action='store_true')
+    # if no driver arguments are specified
+    if '--' not in sys.argv:
+        video2x_args = parser.parse_args()
+        return video2x_args, None
 
-    # parse arguments
-    return parser.parse_args()
+    # if driver arguments are specified
+    else:
+        video2x_args = parser.parse_args(sys.argv[1:sys.argv.index('--')])
+        wrapper = getattr(importlib.import_module(f'wrappers.{video2x_args.driver}'), 'WrapperMain')
+        driver_args = wrapper.parse_arguments(sys.argv[sys.argv.index('--') + 1:])
+        return video2x_args, driver_args
 
 
 def print_logo():
@@ -154,18 +153,24 @@ if __name__ != '__main__':
 print_logo()
 
 # parse command line arguments
-args = parse_arguments()
+video2x_args, driver_args = parse_arguments()
 
 # display version and lawful informaition
-if args.version:
+if video2x_args.version:
     print(LEGAL_INFO)
     sys.exit(0)
 
 # read configurations from configuration file
-config = read_config(args.config)
+config = read_config(video2x_args.config)
 
 # load waifu2x configuration
-driver_settings = config[args.driver]
+driver_settings = config[video2x_args.driver]
+
+# overwrite driver_settings with driver_args
+driver_args_dict = vars(driver_args)
+for key in driver_args_dict:
+    if driver_args_dict[key] is not None:
+        driver_settings[key] = driver_args_dict[key]
 
 # check if driver path exists
 if not pathlib.Path(driver_settings['path']).exists():
@@ -211,33 +216,32 @@ try:
     begin_time = time.time()
 
     # if input specified is a single file
-    if args.input.is_file():
+    if video2x_args.input.is_file():
 
         # upscale single video file
-        Avalon.info(f'Upscaling single video file: {args.input}')
+        Avalon.info(f'Upscaling single video file: {video2x_args.input}')
 
         # check for input output format mismatch
-        if args.output.is_dir():
+        if video2x_args.output.is_dir():
             Avalon.error('Input and output path type mismatch')
             Avalon.error('Input is single file but output is directory')
             raise Exception('input output path type mismatch')
-        if not re.search(r'.*\..*$', str(args.output)):
+        if not re.search(r'.*\..*$', str(video2x_args.output)):
             Avalon.error('No suffix found in output file path')
             Avalon.error('Suffix must be specified for FFmpeg')
             raise Exception('No suffix specified')
 
-        upscaler = Upscaler(input_video=args.input,
-                            output_video=args.output,
+        upscaler = Upscaler(input_video=video2x_args.input,
+                            output_video=video2x_args.output,
                             driver_settings=driver_settings,
                             ffmpeg_settings=ffmpeg_settings)
 
         # set optional options
-        upscaler.driver = args.driver
-        upscaler.scale_width = args.width
-        upscaler.scale_height = args.height
-        upscaler.scale_ratio = args.ratio
-        upscaler.model_dir = args.model_dir
-        upscaler.processes = args.processes
+        upscaler.driver = video2x_args.driver
+        upscaler.scale_width = video2x_args.width
+        upscaler.scale_height = video2x_args.height
+        upscaler.scale_ratio = video2x_args.ratio
+        upscaler.processes = video2x_args.processes
         upscaler.video2x_cache_directory = video2x_cache_directory
         upscaler.image_format = image_format
         upscaler.preserve_frames = preserve_frames
@@ -246,27 +250,26 @@ try:
         upscaler.run()
 
     # if input specified is a directory
-    elif args.input.is_dir():
+    elif video2x_args.input.is_dir():
         # upscale videos in a directory
-        Avalon.info(f'Upscaling videos in directory: {args.input}')
+        Avalon.info(f'Upscaling videos in directory: {video2x_args.input}')
 
         # make output directory if it doesn't exist
-        args.output.mkdir(parents=True, exist_ok=True)
+        video2x_args.output.mkdir(parents=True, exist_ok=True)
 
-        for input_video in [f for f in args.input.iterdir() if f.is_file()]:
-            output_video = args.output / input_video.name
+        for input_video in [f for f in video2x_args.input.iterdir() if f.is_file()]:
+            output_video = video2x_args.output / input_video.name
             upscaler = Upscaler(input_video=input_video,
                                 output_video=output_video,
                                 driver_settings=driver_settings,
                                 ffmpeg_settings=ffmpeg_settings)
 
             # set optional options
-            upscaler.driver = args.driver
-            upscaler.scale_width = args.width
-            upscaler.scale_height = args.height
-            upscaler.scale_ratio = args.ratio
-            upscaler.model_dir = args.model_dir
-            upscaler.processes = args.processes
+            upscaler.driver = video2x_args.driver
+            upscaler.scale_width = video2x_args.width
+            upscaler.scale_height = video2x_args.height
+            upscaler.scale_ratio = video2x_args.ratio
+            upscaler.processes = video2x_args.processes
             upscaler.video2x_cache_directory = video2x_cache_directory
             upscaler.image_format = image_format
             upscaler.preserve_frames = preserve_frames
@@ -275,7 +278,7 @@ try:
             upscaler.run()
     else:
         Avalon.error('Input path is neither a file nor a directory')
-        raise FileNotFoundError(f'{args.input} is neither file nor directory')
+        raise FileNotFoundError(f'{video2x_args.input} is neither file nor directory')
 
     Avalon.info(f'Program completed, taking {round((time.time() - begin_time), 5)} seconds')
 

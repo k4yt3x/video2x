@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 3, 2020
+Last Modified: May 4, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -14,17 +14,13 @@ a folder.
 # local imports
 from exceptions import *
 from image_cleaner import ImageCleaner
-from wrappers.anime4kcpp import Anime4kCpp
 from wrappers.ffmpeg import Ffmpeg
-from wrappers.srmd_ncnn_vulkan import SrmdNcnnVulkan
-from wrappers.waifu2x_caffe import Waifu2xCaffe
-from wrappers.waifu2x_converter_cpp import Waifu2xConverterCpp
-from wrappers.waifu2x_ncnn_vulkan import Waifu2xNcnnVulkan
 
 # built-in imports
 from fractions import Fraction
 import contextlib
 import copy
+import importlib
 import os
 import pathlib
 import re
@@ -39,7 +35,15 @@ import traceback
 from avalon_framework import Avalon
 from tqdm import tqdm
 
-AVAILABLE_DRIVERS = ['waifu2x_caffe', 'waifu2x_converter_cpp', 'waifu2x_ncnn_vulkan', 'srmd_ncnn_vulkan', 'anime4kcpp']
+# these names are consistent for
+# - driver selection in command line
+# - driver wrapper file names
+# - config file keys
+AVAILABLE_DRIVERS = ['waifu2x_caffe',
+                     'waifu2x_converter_cpp',
+                     'waifu2x_ncnn_vulkan',
+                     'srmd_ncnn_vulkan',
+                     'anime4kcpp']
 
 
 class Upscaler:
@@ -63,7 +67,6 @@ class Upscaler:
         self.scale_width = None
         self.scale_height = None
         self.scale_ratio = None
-        self.model_dir = None
         self.processes = 1
         self.video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
         self.image_format = 'png'
@@ -214,27 +217,21 @@ class Upscaler:
         # create threads and start them
         for process_directory in process_directories:
 
+            DriverWrapperMain = getattr(importlib.import_module(f'wrappers.{self.driver}'), 'WrapperMain')
+            driver = DriverWrapperMain(copy.deepcopy(self.driver_settings))
+
             # if the driver being used is waifu2x-caffe
             if self.driver == 'waifu2x_caffe':
-                driver = Waifu2xCaffe(copy.deepcopy(self.driver_settings), self.model_dir, self.bit_depth)
-                if self.scale_ratio:
-                    upscaler_processes.append(driver.upscale(process_directory,
-                                                             self.upscaled_frames,
-                                                             self.scale_ratio,
-                                                             False,
-                                                             False,
-                                                             self.image_format))
-                else:
-                    upscaler_processes.append(driver.upscale(process_directory,
-                                                             self.upscaled_frames,
-                                                             False,
-                                                             self.scale_width,
-                                                             self.scale_height,
-                                                             self.image_format))
+                upscaler_processes.append(driver.upscale(process_directory,
+                                                         self.upscaled_frames,
+                                                         self.scale_ratio,
+                                                         self.scale_width,
+                                                         self.scale_height,
+                                                         self.image_format,
+                                                         self.bit_depth))
 
             # if the driver being used is waifu2x-converter-cpp
             elif self.driver == 'waifu2x_converter_cpp':
-                driver = Waifu2xConverterCpp(self.driver_settings, self.model_dir)
                 upscaler_processes.append(driver.upscale(process_directory,
                                                          self.upscaled_frames,
                                                          self.scale_ratio,
@@ -243,14 +240,12 @@ class Upscaler:
 
             # if the driver being used is waifu2x-ncnn-vulkan
             elif self.driver == 'waifu2x_ncnn_vulkan':
-                driver = Waifu2xNcnnVulkan(copy.deepcopy(self.driver_settings))
                 upscaler_processes.append(driver.upscale(process_directory,
                                                          self.upscaled_frames,
                                                          self.scale_ratio))
 
             # if the driver being used is srmd_ncnn_vulkan
             elif self.driver == 'srmd_ncnn_vulkan':
-                driver = SrmdNcnnVulkan(copy.deepcopy(self.driver_settings))
                 upscaler_processes.append(driver.upscale(process_directory,
                                                          self.upscaled_frames,
                                                          self.scale_ratio))

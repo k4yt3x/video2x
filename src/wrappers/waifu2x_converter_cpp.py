@@ -4,13 +4,14 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: May 3, 2020
+Last Modified: May 4, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
 """
 
 # built-in imports
+import argparse
 import os
 import pathlib
 import shlex
@@ -21,7 +22,7 @@ import threading
 from avalon_framework import Avalon
 
 
-class Waifu2xConverterCpp:
+class WrapperMain:
     """This class communicates with waifu2x cui engine
 
     An object will be created for this class, containing information
@@ -30,10 +31,39 @@ class Waifu2xConverterCpp:
     the upscale function.
     """
 
-    def __init__(self, driver_settings, model_dir):
+    def __init__(self, driver_settings):
         self.driver_settings = driver_settings
-        self.driver_settings['model_dir'] = model_dir
         self.print_lock = threading.Lock()
+
+    @staticmethod
+    def parse_arguments(arguments):
+        parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
+        parser.add_argument('--help', action='help', help='show this help message and exit')
+        parser.add_argument('--list-supported-formats', action='store_true', help='dump currently supported format list')
+        parser.add_argument('--list-opencv-formats', action='store_true', help='(deprecated. Use --list-supported-formats) dump opencv supported format list')
+        parser.add_argument('-l', '--list-processor', action='store_true', help='dump processor list')
+        parser.add_argument('-f', '--output-format', choices=['png', 'jpg'], help='The format used when running in recursive/folder mode\nSee --list-supported-formats for a list of supported formats/extensions.')
+        parser.add_argument('-c', '--png-compression', type=int, choices=range(10), help='Set PNG compression level (0-9), 9 = Max compression (slowest & smallest)')
+        parser.add_argument('-q', '--image-quality', type=int, choices=range(100), help='JPEG & WebP Compression quality (0-101, 0 being smallest size and lowest quality), use 101 for lossless WebP')
+        parser.add_argument('--block-size', type=int, help='block size')
+        parser.add_argument('--disable-gpu', action='store_true', help='disable GPU')
+        parser.add_argument('--force-OpenCL', action='store_true', help='force to use OpenCL on Intel Platform')
+        parser.add_argument('-p', '--processor', type=int, help='set target processor')
+        parser.add_argument('-j', '--jobs', type=int, help='number of threads launching at the same time')
+        parser.add_argument('--model-dir', type=str, help='path to custom model directory (don\'t append last / )')
+        parser.add_argument('--scale-ratio', type=float, help='custom scale ratio')
+        parser.add_argument('--noise-level', type=int, choices=range(4), help='noise reduction level')
+        parser.add_argument('-m', '--mode', choices=['noise', 'scale', 'noise-scale'], help='image processing mode')
+        parser.add_argument('-v', '--log-level', type=int, choices=range(5), help='Set log level')
+        parser.add_argument('-s', '--silent', action='store_true', help='Enable silent mode. (same as --log-level 1)')
+        parser.add_argument('-t', '--tta', type=int, choices=range(2), help='Enable Test-Time Augmentation mode.')
+        parser.add_argument('-g', '--generate-subdir', type=int, choices=range(2), help='Generate sub folder when recursive directory is enabled.')
+        parser.add_argument('-a', '--auto-naming', type=int, choices=range(2), help='Add postfix to output name when output path is not specified.\nSet 0 to disable this.')
+        parser.add_argument('-r', '--recursive-directory', type=int, choices=range(2), help='Search recursively through directories to find more images to process.')
+        # parser.add_argument('-o', '--output', type=pathlib.Pathh, help='path to output image file or directory  (you should use the full path)')
+        # parser.add_argument('-i', '--input', type=pathlib.Path, help='(required)  path to input image file or directory (you should use the full path)')
+        parser.add_argument('--version', action='store_true', help='Displays version information and exits.')
+        return parser.parse_args(arguments)
 
     def upscale(self, input_directory, output_directory, scale_ratio, jobs, image_format):
         """ Waifu2x Converter Driver Upscaler
