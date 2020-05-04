@@ -167,10 +167,11 @@ config = read_config(video2x_args.config)
 driver_settings = config[video2x_args.driver]
 
 # overwrite driver_settings with driver_args
-driver_args_dict = vars(driver_args)
-for key in driver_args_dict:
-    if driver_args_dict[key] is not None:
-        driver_settings[key] = driver_args_dict[key]
+if driver_args is not None:
+    driver_args_dict = vars(driver_args)
+    for key in driver_args_dict:
+        if driver_args_dict[key] is not None:
+            driver_settings[key] = driver_args_dict[key]
 
 # check if driver path exists
 if not pathlib.Path(driver_settings['path']).exists():
