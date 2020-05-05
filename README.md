@@ -1,3 +1,8 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square)
+![GitHub All Releases](https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square)
+![GitHub](https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square)
+![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-blue?style=flat-square)
+
 # Video2X Lossless Video Enlarger
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
