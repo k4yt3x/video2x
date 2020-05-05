@@ -1,0 +1,244 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2020-05-04 19:14-0400\n"
+"PO-Revision-Date: 2020-05-04 19:16-0400\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.3\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: upscaler.py:85
+msgid "Extracted frames are being saved to: {}"
+msgstr "提取的帧将被保存到：{}"
+
+#: upscaler.py:87
+msgid "Upscaled frames are being saved to: {}"
+msgstr "已放大的帧将被保存到：{}"
+
+#: upscaler.py:97
+msgid "Cleaning up cache directory: {}"
+msgstr "清理缓存目录：{}"
+
+#: upscaler.py:100
+msgid "Unable to delete: {}"
+msgstr "无法删除：{}"
+
+#: upscaler.py:107
+msgid "You must specify input video file/directory path"
+msgstr "您必须指定输入视频文件/目录路径"
+
+#: upscaler.py:110
+msgid "You must specify output video file/directory path"
+msgstr "您必须指定输出视频文件/目录路径"
+
+#: upscaler.py:113
+msgid "Selected driver accepts only scaling ratio"
+msgstr "所选驱动程序仅接受缩放比率"
+
+#: upscaler.py:116
+msgid "Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan"
+msgstr "waifu2x_ncnn_vulkan 的缩放比必须为 1 或 2"
+
+#: upscaler.py:119
+msgid "Scaling ratio must be one of 2, 3 or 4 for srmd_ncnn_vulkan"
+msgstr "srmd_ncnn_vulkan 的缩放比必须为 2、3 或 4"
+
+#: upscaler.py:122
+msgid "You can only specify either scaling ratio or output width and height"
+msgstr "您只能指定缩放比或输出宽度和高度两者之一"
+
+#: upscaler.py:125
+msgid "You must specify both width and height"
+msgstr "您必须同时指定宽度和高度"
+
+#: upscaler.py:142
+msgid "Upscaling Progress"
+msgstr "放大进度"
+
+#: upscaler.py:179
+msgid "Unrecognized driver: {}"
+msgstr "无法识别的驱动名称：{}"
+
+#: upscaler.py:258
+msgid "Starting upscaled image cleaner"
+msgstr "启动已放大图像清理程序"
+
+#: upscaler.py:264
+msgid "Main process waiting for subprocesses to exit"
+msgstr "主进程开始等待子进程结束"
+
+#: upscaler.py:266
+msgid "Subprocess {} exited with code {}"
+msgstr "子进程 {} 结束，返回码 {}"
+
+#: upscaler.py:274 upscaler.py:287
+msgid "Killing upscaled image cleaner"
+msgstr "终结已放大图像清理程序"
+
+#: upscaler.py:313 upscaler.py:368
+msgid "Starting to upscale extracted images"
+msgstr "开始对提取的帧进行放大"
+
+#: upscaler.py:316 upscaler.py:370
+msgid "Upscaling completed"
+msgstr "放大完成"
+
+#: upscaler.py:324
+msgid "Reading video information"
+msgstr "读取视频信息"
+
+#: upscaler.py:338
+msgid "Aborting: No video stream found"
+msgstr "程序中止：文件中未找到视频流"
+
+#: upscaler.py:355
+msgid "Unsupported pixel format: {}"
+msgstr "不支持的像素格式：{}"
+
+#: upscaler.py:358
+msgid "Framerate: {}"
+msgstr "帧率：{}"
+
+#: upscaler.py:373
+msgid "Converting extracted frames into video"
+msgstr "将提取的帧转换为视频"
+
+#: upscaler.py:377
+msgid "Conversion completed"
+msgstr "转换已完成"
+
+#: upscaler.py:380
+msgid "Migrating audio tracks and subtitles to upscaled video"
+msgstr "将音轨和字幕迁移到放大后的视频"
+
+#: video2x.py:87
+msgid ""
+"Video2X Version: {}\n"
+"Author: K4YT3X\n"
+"License: GNU GPL v3\n"
+"Github Page: https://github.com/k4yt3x/video2x\n"
+"Contact: k4yt3x@k4yt3x.com"
+msgstr ""
+"Video2X 版本： {}\n"
+"作者： K4YT3X\n"
+"开源许可： GNU GPL v3\n"
+"GitHub 主页：https://github.com/k4yt3x/video2x\n"
+"联系方式：k4yt3x@k4yt3x.com"
+
+#: video2x.py:109
+msgid "General Options"
+msgstr "通用选项"
+
+#: video2x.py:110
+msgid "show this help message and exit"
+msgstr "显示此帮助消息并退出"
+
+#: video2x.py:111
+msgid "source video file/directory"
+msgstr "源视频文件/目录"
+
+#: video2x.py:112
+msgid "output video file/directory"
+msgstr "输出视频文件/目录"
+
+#: video2x.py:113
+msgid "video2x config file path"
+msgstr "video2x 配置文件路径"
+
+#: video2x.py:115
+msgid "upscaling driver"
+msgstr "视频放大驱动"
+
+#: video2x.py:116
+msgid "number of processes to use for upscaling"
+msgstr "并发进程数"
+
+#: video2x.py:117
+msgid "display version, lawful information and exit"
+msgstr "显示版本和法律信息并退出"
+
+#: video2x.py:120
+msgid "Scaling Options"
+msgstr "缩放选项"
+
+#: video2x.py:121
+msgid "output video width"
+msgstr "输出视频宽度"
+
+#: video2x.py:122
+msgid "output video height"
+msgstr "输出视频高度"
+
+#: video2x.py:123
+msgid "scaling ratio"
+msgstr "缩放比"
+
+#: video2x.py:163
+msgid "This file cannot be imported"
+msgstr "此文件无法被当作模块导入"
+
+#: video2x.py:193
+msgid "Specified driver executable directory doesn't exist"
+msgstr "指定驱动的可执行文件不存在"
+
+#: video2x.py:194
+msgid "Please check the configuration file settings"
+msgstr "请检查配置文件设置"
+
+#: video2x.py:211
+msgid "Specified cache directory is a file/link"
+msgstr "指定的缓存目录是文件/链接"
+
+#: video2x.py:218
+msgid "Creating cache directory {}"
+msgstr "创建缓存目录 {}"
+
+#: video2x.py:224
+msgid "Unable to create {}"
+msgstr "无法创建 {}"
+
+#: video2x.py:237
+msgid "Upscaling single video file: {}"
+msgstr "放大单个视频文件：{}"
+
+#: video2x.py:241
+msgid "Input and output path type mismatch"
+msgstr "输入和输出路径类型不匹配"
+
+#: video2x.py:242
+msgid "Input is single file but output is directory"
+msgstr "所选的输入路径是单个文件，但输出路径是目录"
+
+#: video2x.py:245
+msgid "No suffix found in output file path"
+msgstr "在输出文件路径中未找到后缀"
+
+#: video2x.py:246
+msgid "Suffix must be specified for FFmpeg"
+msgstr "必须为 FFmpeg 指定后缀"
+
+#: video2x.py:270
+msgid "Upscaling videos in directory: {}"
+msgstr "放大该文件夹中的所有视频：{}"
+
+#: video2x.py:295
+msgid "Input path is neither a file nor a directory"
+msgstr "输入路径既不是文件也不是目录"
+
+#: video2x.py:298
+msgid "Program completed, taking {} seconds"
+msgstr "程序执行完毕，总计花费 {} 秒"
+
+#: video2x.py:301
+msgid "An exception has occurred"
+msgstr "发生了异常"
