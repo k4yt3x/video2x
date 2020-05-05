@@ -44,7 +44,7 @@ waifu2x_ncnn_vulkan:
   'n': 2
   s: 2
   t: 400
-  m: models-cunet
+  m: null # models-cunet
   g: 0
   j: '1:2:2'
 srmd_ncnn_vulkan:
@@ -55,7 +55,7 @@ srmd_ncnn_vulkan:
   'n': 3
   s: 2
   t: 400
-  m: models-srmd
+  m: null # models-srmd
   g: 0
   j: '1:2:2'
   x: null
