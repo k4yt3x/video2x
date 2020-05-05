@@ -60,7 +60,7 @@ srmd_ncnn_vulkan:
   j: '1:2:2'
   x: null
 anime4kcpp:
-  path: 'C:\Users\k4yt3x\AppData\Local\video2x\anime4kcpp\Anime4KCPP_CLI'
+  path: 'C:\Users\k4yt3x\AppData\Local\video2x\anime4kcpp\CLI\Anime4KCPP_CLI\Anime4KCPP_CLI'
   input: null
   output: null
   passes: 2
