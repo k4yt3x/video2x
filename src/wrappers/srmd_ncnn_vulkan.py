@@ -13,6 +13,8 @@ for srmd_ncnn_vulkan.
 # built-in imports
 import argparse
 import os
+import pathlib
+import platform
 import shlex
 import subprocess
 import threading
@@ -32,13 +34,6 @@ class WrapperMain:
 
     def __init__(self, driver_settings):
         self.driver_settings = driver_settings
-
-        # arguments passed through command line overwrites config file values
-
-        # srmd_ncnn_vulkan can't find its own model directory if its not in the current dir
-        #   so change to it
-        os.chdir(os.path.join(self.driver_settings['path'], '..'))
-
         self.print_lock = threading.Lock()
 
     @staticmethod
@@ -70,6 +65,11 @@ class WrapperMain:
         self.driver_settings['i'] = input_directory
         self.driver_settings['o'] = output_directory
         self.driver_settings['s'] = scale_ratio
+
+        # by default, srmd-ncnn-vulkan will look for the models under the current working directory
+        # change the working directory to its containing folder if model directory not specified
+        if self.driver_settings['m'] is None and platform.system() == 'Windows':
+            os.chdir(pathlib.Path(self.driver_settings['path']).parent)
 
         # list to be executed
         # initialize the list with the binary path as the first element

@@ -4,7 +4,7 @@
 Name: Waifu2x NCNN Vulkan Driver
 Creator: SAT3LL
 Date Created: June 26, 2019
-Last Modified: May 4, 2020
+Last Modified: May 5, 2020
 
 Editor: K4YT3X
 Last Modified: February 22, 2020
@@ -16,6 +16,8 @@ for waifu2x_ncnn_vulkan.
 # built-in imports
 import argparse
 import os
+import pathlib
+import platform
 import shlex
 import subprocess
 import threading
@@ -35,13 +37,6 @@ class WrapperMain:
 
     def __init__(self, driver_settings):
         self.driver_settings = driver_settings
-
-        # arguments passed through command line overwrites config file values
-
-        # waifu2x_ncnn_vulkan can't find its own model directory if its not in the current dir
-        #   so change to it
-        os.chdir(os.path.join(self.driver_settings['path'], '..'))
-
         self.print_lock = threading.Lock()
 
     @staticmethod
@@ -73,6 +68,11 @@ class WrapperMain:
         self.driver_settings['i'] = input_directory
         self.driver_settings['o'] = output_directory
         self.driver_settings['s'] = int(scale_ratio)
+
+        # by default, waifu2x-ncnn-vulkan will look for the models under the current working directory
+        # change the working directory to its containing folder if model directory not specified
+        if self.driver_settings['m'] is None and platform.system() == 'Windows':
+            os.chdir(pathlib.Path(self.driver_settings['path']).parent)
 
         # list to be executed
         # initialize the list with waifu2x binary path as the first element
