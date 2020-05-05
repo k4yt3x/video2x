@@ -4,7 +4,7 @@
 Name: SRMD NCNN Vulkan Driver
 Creator: K4YT3X
 Date Created: April 26, 2020
-Last Modified: May 4, 2020
+Last Modified: May 5, 2020
 
 Description: This class is a high-level wrapper
 for srmd_ncnn_vulkan.
@@ -73,7 +73,7 @@ class WrapperMain:
 
         # list to be executed
         # initialize the list with the binary path as the first element
-        execute = [str(self.driver_settings['path'])]
+        execute = [self.driver_settings.pop('path')]
 
         for key in self.driver_settings.keys():
 
