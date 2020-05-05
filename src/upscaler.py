@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 4, 2020
+Last Modified: May 5, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -311,7 +311,12 @@ class Upscaler:
             # Anime4KCPP will then use FFmpeg to migrate audio tracks
             os.environ['PATH'] += f';{self.ffmpeg_settings["ffmpeg_path"]}'
             Avalon.info(_('Starting to upscale extracted images'))
-            driver = Anime4kCpp(self.driver_settings)
+
+            # import and initialize Anime4KCPP wrapper
+            DriverWrapperMain = getattr(importlib.import_module('wrappers.anime4kcpp'), 'WrapperMain')
+            driver = DriverWrapperMain(copy.deepcopy(self.driver_settings))
+
+            # run Anime4KCPP
             driver.upscale(self.input_video, self.output_video, self.scale_ratio, self.processes).wait()
             Avalon.info(_('Upscaling completed'))
 
