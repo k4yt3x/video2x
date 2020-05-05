@@ -55,7 +55,9 @@ from upscaler import Upscaler
 # built-in imports
 import argparse
 import contextlib
+import gettext
 import importlib
+import locale
 import pathlib
 import re
 import shutil
@@ -68,14 +70,24 @@ import yaml
 # third-party imports
 from avalon_framework import Avalon
 
+# internationalization constants
+DOMAIN = 'video2x'
+LOCALE_DIRECTORY = pathlib.Path(__file__).parent.absolute() / 'locale'
+
+# getting default locale settings
+default_locale, encoding = locale.getdefaultlocale()
+language = gettext.translation(DOMAIN, LOCALE_DIRECTORY, [default_locale], fallback=True)
+language.install()
+_ = language.gettext
+
 
 VERSION = '4.0.0'
 
-LEGAL_INFO = f'''Video2X Version: {VERSION}
+LEGAL_INFO = _('''Video2X Version: {}
 Author: K4YT3X
 License: GNU GPL v3
 Github Page: https://github.com/k4yt3x/video2x
-Contact: k4yt3x@k4yt3x.com'''
+Contact: k4yt3x@k4yt3x.com''').format(VERSION)
 
 LOGO = r'''
     __      __  _       _                  ___   __   __
@@ -90,23 +102,24 @@ LOGO = r'''
 def parse_arguments():
     """ parse CLI arguments
     """
-    parser = argparse.ArgumentParser(prog='video2x', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog='video2x', formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
 
     # video options
-    general_options = parser.add_argument_group('General Options')
-    general_options.add_argument('-i', '--input', type=pathlib.Path, help='source video file/directory')
-    general_options.add_argument('-o', '--output', type=pathlib.Path, help='output video file/directory')
-    general_options.add_argument('-c', '--config', type=pathlib.Path, help='video2x config file location', action='store',
+    general_options = parser.add_argument_group(_('General Options'))
+    general_options.add_argument('-h', '--help', action='help', help=_('show this help message and exit'))
+    general_options.add_argument('-i', '--input', type=pathlib.Path, help=_('source video file/directory'))
+    general_options.add_argument('-o', '--output', type=pathlib.Path, help=_('output video file/directory'))
+    general_options.add_argument('-c', '--config', type=pathlib.Path, help=_('video2x config file path'), action='store',
                                  default=pathlib.Path(__file__).parent.absolute() / 'video2x.yaml')
-    general_options.add_argument('-d', '--driver', help='upscaling driver', choices=AVAILABLE_DRIVERS, default='waifu2x_caffe')
-    general_options.add_argument('-p', '--processes', help='number of processes to use for upscaling', action='store', type=int, default=1)
-    general_options.add_argument('-v', '--version', help='display version, lawful information and exit', action='store_true')
+    general_options.add_argument('-d', '--driver', help=_('upscaling driver'), choices=AVAILABLE_DRIVERS, default='waifu2x_caffe')
+    general_options.add_argument('-p', '--processes', help=_('number of processes to use for upscaling'), action='store', type=int, default=1)
+    general_options.add_argument('-v', '--version', help=_('display version, lawful information and exit'), action='store_true')
 
     # scaling options
-    scaling_options = parser.add_argument_group('Scaling Options')
-    scaling_options.add_argument('--width', help='output video width', action='store', type=int)
-    scaling_options.add_argument('--height', help='output video height', action='store', type=int)
-    scaling_options.add_argument('-r', '--ratio', help='scaling ratio', action='store', type=float)
+    scaling_options = parser.add_argument_group(_('Scaling Options'))
+    scaling_options.add_argument('--width', help=_('output video width'), action='store', type=int)
+    scaling_options.add_argument('--height', help=_('output video height'), action='store', type=int)
+    scaling_options.add_argument('-r', '--ratio', help=_('scaling ratio'), action='store', type=float)
 
     # if no driver arguments are specified
     if '--' not in sys.argv:
@@ -146,7 +159,7 @@ def read_config(config_file: pathlib.Path) -> dict:
 
 # this is not a library
 if __name__ != '__main__':
-    Avalon.error('This file cannot be imported')
+    Avalon.error(_('This file cannot be imported'))
     raise ImportError(f'{__file__} cannot be imported')
 
 # print video2x logo
@@ -176,8 +189,8 @@ if driver_args is not None:
 # check if driver path exists
 if not pathlib.Path(driver_settings['path']).exists():
     if not pathlib.Path(f'{driver_settings["path"]}.exe').exists():
-        Avalon.error('Specified driver executable directory doesn\'t exist')
-        Avalon.error('Please check the configuration file settings')
+        Avalon.error(_('Specified driver executable directory doesn\'t exist'))
+        Avalon.error(_('Please check the configuration file settings'))
         raise FileNotFoundError(driver_settings['path'])
 
 # read FFmpeg configuration
@@ -194,20 +207,20 @@ else:
     video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
 
 if video2x_cache_directory.exists() and not video2x_cache_directory.is_dir():
-    Avalon.error('Specified cache directory is a file/link')
+    Avalon.error(_('Specified cache directory is a file/link'))
     raise FileExistsError('Specified cache directory is a file/link')
 
 # if cache directory doesn't exist
 # ask the user if it should be created
 elif not video2x_cache_directory.exists():
     try:
-        Avalon.debug_info(f'Creating cache directory {video2x_cache_directory}')
+        Avalon.debug_info(_('Creating cache directory {}').format(video2x_cache_directory))
         video2x_cache_directory.mkdir(parents=True, exist_ok=True)
     # there can be a number of exceptions here
     # PermissionError, FileExistsError, etc.
     # therefore, we put a catch-them-all here
     except Exception as exception:
-        Avalon.error(f'Unable to create {video2x_cache_directory}')
+        Avalon.error(_('Unable to create {}').format(video2x_cache_directory))
         raise exception
 
 
@@ -220,16 +233,16 @@ try:
     if video2x_args.input.is_file():
 
         # upscale single video file
-        Avalon.info(f'Upscaling single video file: {video2x_args.input}')
+        Avalon.info(_('Upscaling single video file: {}').format(video2x_args.input))
 
         # check for input output format mismatch
         if video2x_args.output.is_dir():
-            Avalon.error('Input and output path type mismatch')
-            Avalon.error('Input is single file but output is directory')
+            Avalon.error(_('Input and output path type mismatch'))
+            Avalon.error(_('Input is single file but output is directory'))
             raise Exception('input output path type mismatch')
         if not re.search(r'.*\..*$', str(video2x_args.output)):
-            Avalon.error('No suffix found in output file path')
-            Avalon.error('Suffix must be specified for FFmpeg')
+            Avalon.error(_('No suffix found in output file path'))
+            Avalon.error(_('Suffix must be specified for FFmpeg'))
             raise Exception('No suffix specified')
 
         upscaler = Upscaler(input_video=video2x_args.input,
@@ -253,7 +266,7 @@ try:
     # if input specified is a directory
     elif video2x_args.input.is_dir():
         # upscale videos in a directory
-        Avalon.info(f'Upscaling videos in directory: {video2x_args.input}')
+        Avalon.info(_('Upscaling videos in directory: {}').format(video2x_args.input))
 
         # make output directory if it doesn't exist
         video2x_args.output.mkdir(parents=True, exist_ok=True)
@@ -278,13 +291,13 @@ try:
             # run upscaler
             upscaler.run()
     else:
-        Avalon.error('Input path is neither a file nor a directory')
+        Avalon.error(_('Input path is neither a file nor a directory'))
         raise FileNotFoundError(f'{video2x_args.input} is neither file nor directory')
 
-    Avalon.info(f'Program completed, taking {round((time.time() - begin_time), 5)} seconds')
+    Avalon.info(_('Program completed, taking {} seconds').format(round((time.time() - begin_time), 5)))
 
 except Exception:
-    Avalon.error('An exception has occurred')
+    Avalon.error(_('An exception has occurred'))
     traceback.print_exc()
 
     # try cleaning up temp directories
