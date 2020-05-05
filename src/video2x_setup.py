@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: April 26, 2020
+Last Modified: May 5, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -17,7 +17,7 @@ Installation Details:
 - waifu2x-caffe: %LOCALAPPDATA%\\video2x\\waifu2x-caffe
 - waifu2x-cpp-converter: %LOCALAPPDATA%\\video2x\\waifu2x-converter-cpp
 - waifu2x_ncnn_vulkan: %LOCALAPPDATA%\\video2x\\waifu2x-ncnn-vulkan
-- anime4k: %LOCALAPPDATA%\\video2x\\anime4k
+- anime4kcpp: %LOCALAPPDATA%\\video2x\\anime4kcpp
 - srmd_ncnn_vulkan: %LOCALAPPDATA%\\video2x\\srmd-ncnn-vulkan
 """
 
@@ -42,12 +42,12 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.7.0'
+VERSION = '1.8.0'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
-VIDEO2X_CONFIG = pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml'
-DRIVER_OPTIONS = ['all', 'waifu2x_caffe', 'waifu2x_converter', 'waifu2x_ncnn_vulkan', 'anime4k', 'srmd_ncnn_vulkan']
+VIDEO2X_CONFIG = pathlib.Path(__file__).parent.absolute() / 'video2x.yaml'
+DRIVER_OPTIONS = ['all', 'ffmpeg', 'waifu2x_caffe', 'waifu2x_converter_cpp', 'waifu2x_ncnn_vulkan', 'anime4kcpp', 'srmd_ncnn_vulkan']
 
 
 def parse_arguments():
@@ -80,23 +80,23 @@ class Video2xSetup:
             print('\nInstalling Python libraries')
             self._install_python_requirements()
 
-        print('\nInstalling FFmpeg')
-        self._install_ffmpeg()
-
         if self.driver == 'all':
+            self._install_ffmpeg()
             self._install_waifu2x_caffe()
             self._install_waifu2x_converter_cpp()
             self._install_waifu2x_ncnn_vulkan()
-            self._install_anime4k()
+            self._install_anime4kcpp()
             self._install_srmd_ncnn_vulkan()
+        elif self.driver == 'ffmpeg':
+            self._install_ffmpeg()
         elif self.driver == 'waifu2x_caffe':
             self._install_waifu2x_caffe()
-        elif self.driver == 'waifu2x_converter':
+        elif self.driver == 'waifu2x_converter_cpp':
             self._install_waifu2x_converter_cpp()
         elif self.driver == 'waifu2x_ncnn_vulkan':
             self._install_waifu2x_ncnn_vulkan()
-        elif self.driver == 'anime4k':
-            self._install_anime4k()
+        elif self.driver == 'anime4kcpp':
+            self._install_anime4kcpp()
         elif self.driver == 'srmd_ncnn_vulkan':
             self._install_srmd_ncnn_vulkan()
 
@@ -129,6 +129,8 @@ class Video2xSetup:
     def _install_ffmpeg(self):
         """ Install FFMPEG
         """
+        print('\nInstalling FFmpeg')
+
         latest_release = 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-latest-win64-static.zip'
 
         ffmpeg_zip = download(latest_release, tempfile.gettempdir())
@@ -197,33 +199,28 @@ class Video2xSetup:
             # rename the newly extracted directory
             (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(waifu2x_ncnn_vulkan_directory)
 
-    def _install_anime4k(self):
-        """ Install Anime4K
+    def _install_anime4kcpp(self):
+        """ Install Anime4KCPP
         """
-        print('\nInstalling Anime4K')
+        print('\nInstalling Anime4KCPP')
 
-        """
+        import pyunpack
         import requests
 
-        # get latest release of Anime4K via Github API
-        # at the time of writing this portion, Anime4K doesn't yet have a stable release
+        # get latest release of Anime4KCPP via Github API
+        # at the time of writing this portion, Anime4KCPP doesn't yet have a stable release
         # therefore releases/latest won't work
-        latest_release = requests.get('https://api.github.com/repos/bloc97/Anime4K/releases').json()[0]
+        latest_release = requests.get('https://api.github.com/repos/TianZerL/Anime4KCPP/releases/latest').json()
 
         for a in latest_release['assets']:
-            if 'Anime4K_Java.zip' in a['browser_download_url']:
-                anime4k_zip = download(a['browser_download_url'], tempfile.gettempdir())
-                self.trash.append(anime4k_zip)
-        """
-
-        # since Java pre-compiled release has been removed from download
-        # page, we use this cached version as a temporary solution
-        anime4k_zip = download('https://files.k4yt3x.com/Resources/anime4k.zip', tempfile.gettempdir())
-        self.trash.append(anime4k_zip)
+            if re.search(r'Anime4KCPP_CLI-.*-Win64-msvc\.7z', a['browser_download_url']):
+                anime4kcpp_zip = download(a['browser_download_url'], tempfile.gettempdir())
+                self.trash.append(anime4kcpp_zip)
 
         # extract and rename
-        with zipfile.ZipFile(anime4k_zip) as zipf:
-            zipf.extractall(LOCALAPPDATA / 'video2x' / 'anime4k')
+        # with py7zr.SevenZipFile(anime4kcpp_zip, mode='r') as archive:
+        (LOCALAPPDATA / 'video2x' / 'anime4kcpp').mkdir(parents=True, exist_ok=True)
+        pyunpack.Archive(anime4kcpp_zip).extractall(LOCALAPPDATA / 'video2x' / 'anime4kcpp')
 
     def _install_srmd_ncnn_vulkan(self):
         """ Install srmd-ncnn-vulkan
@@ -264,17 +261,17 @@ class Video2xSetup:
         # configure only the specified drivers
         if self.driver == 'all':
             template_dict['waifu2x_caffe']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
-            template_dict['waifu2x_converter']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
+            template_dict['waifu2x_converter_cpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
             template_dict['waifu2x_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
-            template_dict['anime4k']['path'] = str(LOCALAPPDATA / 'video2x' / 'anime4k' / 'Anime4K.jar')
+            template_dict['anime4kcpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'anime4kcpp' / 'CLI' / 'Anime4KCPP_CLI' / 'Anime4KCPP_CLI')
         elif self.driver == 'waifu2x_caffe':
             template_dict['waifu2x_caffe']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui.exe')
-        elif self.driver == 'waifu2x_converter':
-            template_dict['waifu2x_converter']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
+        elif self.driver == 'waifu2x_converter_cpp':
+            template_dict['waifu2x_converter_cpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp' / 'waifu2x-converter-cpp')
         elif self.driver == 'waifu2x_ncnn_vulkan':
             template_dict['waifu2x_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan.exe')
-        elif self.driver == 'anime4k':
-            template_dict['anime4k']['path'] = str(LOCALAPPDATA / 'video2x' / 'anime4k' / 'Anime4K.jar')
+        elif self.driver == 'anime4kcpp':
+            template_dict['anime4kcpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'anime4kcpp' / 'CLI' / 'Anime4KCPP_CLI' / 'Anime4KCPP_CLI')
 
         template_dict['ffmpeg']['ffmpeg_path'] = str(LOCALAPPDATA / 'video2x' / 'ffmpeg-latest-win64-static' / 'bin')
         template_dict['video2x']['video2x_cache_directory'] = None

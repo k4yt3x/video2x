@@ -1,7 +1,8 @@
 avalon_framework
 colorama
-GPUtil
+patool
 psutil
+pyunpack
 pyyaml
 requests
 tqdm
