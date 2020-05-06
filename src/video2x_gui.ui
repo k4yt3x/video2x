@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>618</width>
-    <height>389</height>
+    <width>622</width>
+    <height>474</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,7 +30,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="mainTab">
        <attribute name="title">
@@ -159,7 +159,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <layout class="QHBoxLayout" name="cacheHorizontalLayout">
             <item>
              <widget class="QLabel" name="cacheLabel">
               <property name="minimumSize">
@@ -302,172 +302,268 @@
            <attribute name="title">
             <string>Waifu2X Caffe</string>
            </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_9">
+           <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <layout class="QVBoxLayout" name="waifu2xCaffeTabVerticalLayout">
+             <layout class="QHBoxLayout" name="waifu2xCaffePathHorizontalLayout">
               <item>
-               <layout class="QHBoxLayout" name="waifu2xCaffePathHorizontalLayout">
-                <item>
-                 <widget class="QLineEdit" name="waifu2xCaffePathLineEdit"/>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="waifu2xCaffePathSelectButton">
-                  <property name="text">
-                   <string>Select Binary Path</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QLineEdit" name="waifu2xCaffePathLineEdit"/>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="waifu2xCaffeModeHorizontalLayout">
-                <item>
-                 <widget class="QLabel" name="waifu2xCaffeModeLabel">
-                  <property name="text">
-                   <string>Mode</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="waifu2xCaffeModeComboBox">
-                  <item>
-                   <property name="text">
-                    <string>Noise Scale</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Auto Scale</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Noise</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Scale</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QPushButton" name="waifu2xCaffePathSelectButton">
+                <property name="text">
+                 <string>Select Binary Path</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeModeHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeModeLabel">
+                <property name="text">
+                 <string>Mode</string>
+                </property>
+               </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="waifu2xCaffeNoiseLevelHorizontalLayout">
+               <widget class="QComboBox" name="waifu2xCaffeModeComboBox">
                 <item>
-                 <widget class="QLabel" name="waifu2xCaffeNoiseLevelLabel">
-                  <property name="text">
-                   <string>Noise Level</string>
-                  </property>
-                 </widget>
+                 <property name="text">
+                  <string>noise_scale</string>
+                 </property>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="waifu2xCaffeNoiseLevelComboBox">
-                  <item>
-                   <property name="text">
-                    <string>3</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>1</string>
-                   </property>
-                  </item>
-                 </widget>
+                 <property name="text">
+                  <string>auto_scale</string>
+                 </property>
                 </item>
-               </layout>
+                <item>
+                 <property name="text">
+                  <string>scale</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>noise</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeNoiseLevelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeNoiseLevelLabel">
+                <property name="text">
+                 <string>Noise Level</string>
+                </property>
+               </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="waifu2xCaffeProcessHorizontalLayout">
-                <item>
-                 <widget class="QLabel" name="waifu2xCaffeProcessLabel">
-                  <property name="text">
-                   <string>Process</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="waifu2xCaffeProcessComboBox">
-                  <item>
-                   <property name="text">
-                    <string>GPU</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>cuDNN</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>CPU</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QSpinBox" name="waifu2xCaffeNoiseLevelSpinBox">
+                <property name="maximum">
+                 <number>3</number>
+                </property>
+                <property name="value">
+                 <number>3</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeProcessHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeProcessLabel">
+                <property name="text">
+                 <string>Process</string>
+                </property>
+               </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="waifu2xCaffeModelHorizontalLayout">
+               <widget class="QComboBox" name="waifu2xCaffeProcessComboBox">
                 <item>
-                 <widget class="QLabel" name="waifu2xCaffeModelLabel">
-                  <property name="text">
-                   <string>Model</string>
-                  </property>
-                 </widget>
+                 <property name="text">
+                  <string>gpu</string>
+                 </property>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="waifu2xCaffeModelComboBox">
-                  <item>
-                   <property name="text">
-                    <string>cunet</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>anime_style_art</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>anime_style_art_rgb</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>photo</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>ukbench</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>upconv_7_anime_style_art_rgb</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>upconv_7_photo</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>upresnet10</string>
-                   </property>
-                  </item>
-                 </widget>
+                 <property name="text">
+                  <string>cudnn</string>
+                 </property>
                 </item>
-               </layout>
+                <item>
+                 <property name="text">
+                  <string>cpu</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeModelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeModelLabel">
+                <property name="text">
+                 <string>Model</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="waifu2xCaffeModelComboBox">
+                <item>
+                 <property name="text">
+                  <string>cunet</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>anime_style_art</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>anime_style_art_rgb</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>photo</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>ukbench</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>upconv_7_anime_style_art_rgb</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>upconv_7_photo</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>upresnet10</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeCropSizeHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeCropSizeLabel">
+                <property name="text">
+                 <string>Crop Size</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xCaffeCropSizeSpinBox">
+                <property name="maximum">
+                 <number>9999</number>
+                </property>
+                <property name="value">
+                 <number>128</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeOutputQualityHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeOutputQualityLabel">
+                <property name="text">
+                 <string>Output Quality</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xCaffeOutputQualitySpinBox">
+                <property name="minimum">
+                 <number>-1</number>
+                </property>
+                <property name="value">
+                 <number>-1</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeOutputDepthHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeOutputDepthLabel">
+                <property name="text">
+                 <string>Output Depth</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xCaffeOutputDepthSpinBox">
+                <property name="maximum">
+                 <number>9999</number>
+                </property>
+                <property name="value">
+                 <number>8</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeBatchSizeHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeBatchSizeLabel">
+                <property name="text">
+                 <string>Batch Size</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xCaffeBatchSizeSpinBox">
+                <property name="maximum">
+                 <number>9999</number>
+                </property>
+                <property name="value">
+                 <number>1</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeGpuHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeGpuLabel">
+                <property name="text">
+                 <string>GPU</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xCaffeGpuSpinBox"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeOptionsHorizontalLayout">
+              <item>
+               <widget class="QCheckBox" name="waifu2xCaffeTtaCheckBox">
+                <property name="text">
+                 <string>TTA (Test-Time Augmentation)</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -477,6 +573,135 @@
            <attribute name="title">
             <string>Waifu2X Converter CPP</string>
            </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppPathHorizontalLayout">
+              <item>
+               <widget class="QLineEdit" name="waifu2xConverterCppPathLineEdit"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="waifu2xConverterCppPathSelectButton">
+                <property name="text">
+                 <string>Select Binary Path</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppPngCompressionHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xConverterCppPngCompressionLabel">
+                <property name="text">
+                 <string>PNG Compression</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xConverterCppPngCompressionSpinBox">
+                <property name="maximum">
+                 <number>9</number>
+                </property>
+                <property name="value">
+                 <number>5</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppProcessorHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xConverterCppProcessorLabel">
+                <property name="text">
+                 <string>Processor</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xConverterCppProcessorSpinBox">
+                <property name="minimum">
+                 <number>-1</number>
+                </property>
+                <property name="maximum">
+                 <number>9999</number>
+                </property>
+                <property name="value">
+                 <number>-1</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppModelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xConverterCppModelLabel">
+                <property name="text">
+                 <string>Model</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="waifu2xConverterCppModelComboBox">
+                <item>
+                 <property name="text">
+                  <string>models_rgb</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppModeHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xConverterCppModeLabel">
+                <property name="text">
+                 <string>Mode</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="waifu2xConverterCppModeComboBox">
+                <item>
+                 <property name="text">
+                  <string>noise-scale</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>noise</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>scale</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppOptionsHorizontalLayout">
+              <item>
+               <widget class="QCheckBox" name="disableGpuCheckBox">
+                <property name="text">
+                 <string>Disable GPU</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="ttaCheckBox">
+                <property name="text">
+                 <string>TTA (Test-Time Augmentation)</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="waifu2xNcnnVulkanTab">
            <attribute name="title">
@@ -537,7 +762,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>618</width>
+     <width>622</width>
      <height>21</height>
     </rect>
    </property>
