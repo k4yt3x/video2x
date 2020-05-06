@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
+    <width>617</width>
     <height>474</height>
    </rect>
   </property>
@@ -707,16 +707,479 @@
            <attribute name="title">
             <string>Waifu2X NCNN Vulkan</string>
            </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xNcnnVulkanPathHorizontalLayout">
+              <item>
+               <widget class="QLineEdit" name="waifu2xNcnnVulkanPathLineEdit"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="waifu2xNcnnVulkanPathSelectButton">
+                <property name="text">
+                 <string>Select Binary Path</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xNcnnVulkanNoiseLevelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xNcnnVulkanNoiseLevelLabel">
+                <property name="text">
+                 <string>Noise Level</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xNcnnVulkanNoiseLevelSpinBox">
+                <property name="minimum">
+                 <number>-1</number>
+                </property>
+                <property name="maximum">
+                 <number>3</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xNcnnVulkanTileSizeHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xNcnnVulkanTileSizeLabel">
+                <property name="text">
+                 <string>Tile Size</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xNcnnVulkanTileSizeSpinBox">
+                <property name="minimum">
+                 <number>32</number>
+                </property>
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+                <property name="value">
+                 <number>400</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xNcnnVulkanModelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xNcnnVulkanModelLabel">
+                <property name="text">
+                 <string>Model</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="waifu2xNcnnVulkanModelComboBox">
+                <item>
+                 <property name="text">
+                  <string>models-cunet</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>models-upconv_7_anime_style_art_rgb</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>models-upconv_7_photo</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xNcnnVulkanGpuIdHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xNcnnVulkanGpuIdLabel">
+                <property name="text">
+                 <string>GPU ID</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xNcnnVulkanGpuIdSpinBox"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xNcnnVulkanJobsHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xNcnnVulkanJobsLabel">
+                <property name="text">
+                 <string>Jobs</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="waifu2xNcnnVulkanJobsLineEdit">
+                <property name="text">
+                 <string>1:2:2</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xNcnnVulkanOptionsHorizontalLayout">
+              <item>
+               <widget class="QCheckBox" name="waifu2xNcnnVulkanTtaCheckBox">
+                <property name="text">
+                 <string>TTA (Test-Time Augmentation)</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="srmdNcnnVulkanTab">
            <attribute name="title">
             <string>SRMD NCNN Vulkan</string>
            </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <layout class="QHBoxLayout" name="srmdNcnnVulkanPathHorizontalLayout">
+              <item>
+               <widget class="QLineEdit" name="srmdNcnnVulkanPathLineEdit"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="srmdNcnnVulkanPathSelectButton">
+                <property name="text">
+                 <string>Select Binary Path</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="srmdNcnnVulkanNoiseLevelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="srmdNcnnVulkanNoiseLevelLabel">
+                <property name="text">
+                 <string>Noise Level</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="srmdNcnnVulkanNoiseLevelSpinBox">
+                <property name="minimum">
+                 <number>-1</number>
+                </property>
+                <property name="maximum">
+                 <number>10</number>
+                </property>
+                <property name="value">
+                 <number>3</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="srmdNcnnVulkanTileSizeHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="srmdNcnnVulkanTileSizeLabel">
+                <property name="text">
+                 <string>Tile Size</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="srmdNcnnVulkanTileSizeSpinBox">
+                <property name="minimum">
+                 <number>32</number>
+                </property>
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+                <property name="value">
+                 <number>400</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="srmdNcnnVulkanModelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="srmdNcnnVulkanModelLabel">
+                <property name="text">
+                 <string>Model</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="srmdNcnnVulkanModelComboBox">
+                <item>
+                 <property name="text">
+                  <string>models-srmd</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="srmdNcnnVulkanGpuIdHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="srmdNcnnVulkanGpuIdLabel">
+                <property name="text">
+                 <string>GPU ID</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="srmdNcnnVulkanGpuIdSpinBox"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="srmdNcnnVulkanJobsHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="srmdNcnnVulkanJobsLabel">
+                <property name="text">
+                 <string>Jobs</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="srmdNcnnVulkanJobsLineEdit">
+                <property name="text">
+                 <string>1:2:2</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="srmdNcnnVulkanOptionsHorizontalLayout">
+              <item>
+               <widget class="QCheckBox" name="srmdNcnnVulkanTtaCheckBox">
+                <property name="text">
+                 <string>TTA (Test-Time Augmentation)</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="anime4kCppTab">
            <attribute name="title">
             <string>Anime4K CPP</string>
            </attribute>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="3" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppStrengthColorHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppStrengthColorLabel">
+                <property name="text">
+                 <string>Strength Color</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="anime4kCppStrengthColorSpinBox">
+                <property name="value">
+                 <double>0.300000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <layout class="QHBoxLayout" name="anime4kCppPathHorizontalLayout">
+              <item>
+               <widget class="QLineEdit" name="anime4kCppPathLineEdit"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="anime4kCppPathSelectButton">
+                <property name="text">
+                 <string>Select Binary Path</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="7" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppThreadsHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppThreadsLabel">
+                <property name="text">
+                 <string>Threads</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppThreadsSpinBox">
+                <property name="maximum">
+                 <number>999</number>
+                </property>
+                <property name="value">
+                 <number>16</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="4" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppStrengthGradientHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppStrengthGradientLabel">
+                <property name="text">
+                 <string>Strength Gradient</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="anime4kCppStrengthGradientSpinBox">
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppPassesHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppPassesLabel">
+                <property name="text">
+                 <string>Passes</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppPassesSpinBox">
+                <property name="value">
+                 <number>2</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppPushColorCountHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppPushColorLabel">
+                <property name="text">
+                 <string>Push Color Count</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppPushColorCountSpinBox">
+                <property name="value">
+                 <number>2</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="9" column="0" colspan="2">
+             <widget class="QGroupBox" name="anime4kCppSwitchesGroupBox">
+              <property name="title">
+               <string>Switches</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_12">
+               <item>
+                <widget class="QCheckBox" name="anime4kCppFastModeCheckBox">
+                 <property name="text">
+                  <string>Fast Mode</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="anime4kCppPreProcessingCheckBox">
+                 <property name="text">
+                  <string>Pre-Processing</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="anime4kCppPostProcessingCheckBox">
+                 <property name="text">
+                  <string>Post-Processing</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="anime4kCppGpuModeCheckBox">
+                 <property name="text">
+                  <string>GPU Mode</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <layout class="QHBoxLayout" name="anime4kCppPreFiltersHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppPreFiltersLabel">
+                <property name="text">
+                 <string>Pre-Filters</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppPreFiltersSpinBox"/>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="anime4kCppPostFiltersHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppPostFiltersLabel">
+                <property name="text">
+                 <string>Post-Filters</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppPostFiltersSpinBox"/>
+              </item>
+             </layout>
+            </item>
+            <item row="3" column="1">
+             <layout class="QHBoxLayout" name="anime4kCppPlatformIdHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppPlatformIdLabel">
+                <property name="text">
+                 <string>Platform ID</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppPlatformIdSpinBox"/>
+              </item>
+             </layout>
+            </item>
+            <item row="4" column="1">
+             <layout class="QHBoxLayout" name="anime4kCppDeviceIdHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppDeviceIdLabel">
+                <property name="text">
+                 <string>Device ID</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppDeviceIdSpinBox"/>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
@@ -762,7 +1225,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>622</width>
+     <width>617</width>
      <height>21</height>
     </rect>
    </property>

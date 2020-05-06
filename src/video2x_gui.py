@@ -150,12 +150,50 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-converter-cpp
         self.waifu2x_converter_cpp_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xConverterCppPathLineEdit')
+        self.waifu2x_converter_cpp_path_edit_button = self.findChild(QtWidgets.QLineEdit, 'waifu2xConverterCppPathSelectButton')
         self.waifu2x_converter_cpp_png_compression_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xConverterCppPngCompressionSpinBox')
         self.waifu2x_converter_cpp_processor_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xConverterCppProcessorSpinBox')
         self.waifu2x_converter_cpp_model_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xConverterCppModelComboBox')
         self.waifu2x_converter_cpp_mode_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xConverterCppModeComboBox')
         self.waifu2x_converter_cpp_disable_gpu_check_box = self.findChild(QtWidgets.QCheckBox, 'disableGpuCheckBox')
         self.waifu2x_converter_cpp_tta_check_box = self.findChild(QtWidgets.QCheckBox, 'ttaCheckBox')
+
+        # waifu2x-ncnn-vulkan
+        self.waifu2x_ncnn_vulkan_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xNcnnVulkanPathLineEdit')
+        self.waifu2x_ncnn_vulkan_path_select_button = self.findChild(QtWidgets.QPushButton, 'waifu2xNcnnVulkanPathSelectButton')
+        self.waifu2x_ncnn_vulkan_noise_level_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xNcnnVulkanNoiseLevelSpinBox')
+        self.waifu2x_ncnn_vulkan_tile_size_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xNcnnVulkanTileSizeSpinBox')
+        self.waifu2x_ncnn_vulkan_model_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xNcnnVulkanModelComboBox')
+        self.waifu2x_ncnn_vulkan_gpu_id_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xNcnnVulkanGpuIdSpinBox')
+        self.waifu2x_ncnn_vulkan_jobs_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xNcnnVulkanJobsLineEdit')
+        self.waifu2x_ncnn_vulkan_tta_check_box = self.findChild(QtWidgets.QCheckBox, 'waifu2xNcnnVulkanTtaCheckBox')
+
+        # srmd-ncnn-vulkan
+        self.srmd_ncnn_vulkan_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'srmdNcnnVulkanPathLineEdit')
+        self.srmd_ncnn_vulkan_path_select_button = self.findChild(QtWidgets.QPushButton, 'srmdNcnnVulkanPathSelectButton')
+        self.srmd_ncnn_vulkan_noise_level_spin_box = self.findChild(QtWidgets.QSpinBox, 'srmdNcnnVulkanNoiseLevelSpinBox')
+        self.srmd_ncnn_vulkan_tile_size_spin_box = self.findChild(QtWidgets.QSpinBox, 'srmdNcnnVulkanTileSizeSpinBox')
+        self.srmd_ncnn_vulkan_model_combo_box = self.findChild(QtWidgets.QComboBox, 'srmdNcnnVulkanModelComboBox')
+        self.srmd_ncnn_vulkan_gpu_id_spin_box = self.findChild(QtWidgets.QSpinBox, 'srmdNcnnVulkanGpuIdSpinBox')
+        self.srmd_ncnn_vulkan_jobs_line_edit = self.findChild(QtWidgets.QLineEdit, 'srmdNcnnVulkanJobsLineEdit')
+        self.srmd_ncnn_vulkan_tta_check_box = self.findChild(QtWidgets.QCheckBox, 'srmdNcnnVulkanTtaCheckBox')
+
+        # anime4k
+        self.anime4kcpp_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'anime4kCppPathLineEdit')
+        self.anime4kcpp_path_select_button = self.findChild(QtWidgets.QPushButton, 'anime4kCppPathSelectButton')
+        self.anime4kcpp_passes_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPassesSpinBox')
+        self.anime4kcpp_push_color_count_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPushColorCountSpinBox')
+        self.anime4kcpp_strength_color_spin_box = self.findChild(QtWidgets.QDoubleSpinBox, 'anime4kCppStrengthColorSpinBox')
+        self.anime4kcpp_strength_gradient_spin_box = self.findChild(QtWidgets.QDoubleSpinBox, 'anime4kCppStrengthGradientSpinBox')
+        self.anime4kcpp_threads_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppThreadsSpinBox')
+        self.anime4kcpp_pre_filters_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPreFiltersSpinBox')
+        self.anime4kcpp_post_filters_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPostFiltersSpinBox')
+        self.anime4kcpp_platform_id_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPlatformIdSpinBox')
+        self.anime4kcpp_device_id_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppDeviceIdSpinBox')
+        self.anime4kcpp_fast_mode_check_box = self.findChild(QtWidgets.QCheckBox, 'anime4kCppFastModeCheckBox')
+        self.anime4kcpp_pre_processing_check_box = self.findChild(QtWidgets.QCheckBox, 'anime4kCppPreProcessingCheckBox')
+        self.anime4kcpp_post_processing_check_box = self.findChild(QtWidgets.QCheckBox, 'anime4kCppPostProcessingCheckBox')
+        self.anime4kcpp_gpu_mode_check_box = self.findChild(QtWidgets.QCheckBox, 'anime4kCppGpuModeCheckBox')
 
         # load configurations
         self.load_configurations()
@@ -236,6 +274,41 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.waifu2x_converter_cpp_disable_gpu_check_box.setChecked(settings['disable-gpu'])
         self.waifu2x_converter_cpp_tta_check_box.setChecked(bool(settings['tta']))
 
+        # waifu2x-ncnn-vulkan
+        settings = self.config['waifu2x_ncnn_vulkan']
+        self.waifu2x_ncnn_vulkan_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.waifu2x_ncnn_vulkan_noise_level_spin_box.setValue(settings['n'])
+        self.waifu2x_ncnn_vulkan_tile_size_spin_box.setValue(settings['t'])
+        self.waifu2x_ncnn_vulkan_gpu_id_spin_box.setValue(settings['g'])
+        self.waifu2x_ncnn_vulkan_jobs_line_edit.setText(settings['j'])
+        self.waifu2x_ncnn_vulkan_tta_check_box.setChecked(settings['x'])
+
+        # srmd-ncnn-vulkan
+        settings = self.config['srmd_ncnn_vulkan']
+        self.srmd_ncnn_vulkan_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.srmd_ncnn_vulkan_noise_level_spin_box.setValue(settings['n'])
+        self.srmd_ncnn_vulkan_tile_size_spin_box.setValue(settings['t'])
+        self.srmd_ncnn_vulkan_gpu_id_spin_box.setValue(settings['g'])
+        self.srmd_ncnn_vulkan_jobs_line_edit.setText(settings['j'])
+        self.srmd_ncnn_vulkan_tta_check_box.setChecked(settings['x'])
+
+        # anime4k
+        settings = self.config['anime4kcpp']
+        self.anime4kcpp_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.anime4kcpp_passes_spin_box.setValue(settings['passes'])
+        self.anime4kcpp_push_color_count_spin_box.setValue(settings['pushColorCount'])
+        self.anime4kcpp_strength_color_spin_box.setValue(settings['strengthColor'])
+        self.anime4kcpp_strength_gradient_spin_box.setValue(settings['strengthGradient'])
+        self.anime4kcpp_threads_spin_box.setValue(settings['threads'])
+        self.anime4kcpp_pre_filters_spin_box.setValue(settings['preFilters'])
+        self.anime4kcpp_post_filters_spin_box.setValue(settings['postFilters'])
+        self.anime4kcpp_platform_id_spin_box.setValue(settings['platformID'])
+        self.anime4kcpp_device_id_spin_box.setValue(settings['deviceID'])
+        self.anime4kcpp_fast_mode_check_box.setChecked(settings['fastMode'])
+        self.anime4kcpp_pre_processing_check_box.setChecked(settings['preProcessing'])
+        self.anime4kcpp_post_processing_check_box.setChecked(settings['postProcessing'])
+        self.anime4kcpp_gpu_mode_check_box.setChecked(settings['GPUMode'])
+
     def resolve_driver_settings(self):
         
         # waifu2x-caffe
@@ -259,6 +332,41 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['waifu2x_converter_cpp']['mode'] = self.waifu2x_converter_cpp_mode_combo_box.currentText()
         self.config['waifu2x_converter_cpp']['disable-gpu'] = bool(self.waifu2x_converter_cpp_disable_gpu_check_box.checkState())
         self.config['waifu2x_converter_cpp']['tta'] = int(self.waifu2x_converter_cpp_tta_check_box.checkState())
+
+        # waifu2x-ncnn-vulkan
+        self.config['waifu2x_ncnn_vulkan']['path'] = self.waifu2x_ncnn_vulkan_path_line_edit.text()
+        self.config['waifu2x_ncnn_vulkan']['n'] = self.waifu2x_ncnn_vulkan_noise_level_spin_box.value()
+        self.config['waifu2x_ncnn_vulkan']['t'] = self.waifu2x_ncnn_vulkan_tile_size_spin_box.value()
+        self.config['waifu2x_ncnn_vulkan']['m'] = str((pathlib.Path(self.config['waifu2x_ncnn_vulkan']['path']).parent / self.waifu2x_ncnn_vulkan_model_combo_box.currentText()).absolute())
+        self.config['waifu2x_ncnn_vulkan']['g'] = self.waifu2x_ncnn_vulkan_gpu_id_spin_box.value()
+        self.config['waifu2x_ncnn_vulkan']['j'] = self.waifu2x_ncnn_vulkan_jobs_line_edit.text()
+        self.config['waifu2x_ncnn_vulkan']['x'] = self.waifu2x_ncnn_vulkan_tta_check_box.checkState()
+
+        # srmd-ncnn-vulkan
+        self.config['srmd_ncnn_vulkan']['path'] = self.srmd_ncnn_vulkan_path_line_edit.text()
+        self.config['srmd_ncnn_vulkan']['n'] = self.srmd_ncnn_vulkan_noise_level_spin_box.value()
+        self.config['srmd_ncnn_vulkan']['t'] = self.srmd_ncnn_vulkan_tile_size_spin_box.value()
+        self.config['srmd_ncnn_vulkan']['m'] = str((pathlib.Path(self.config['srmd_ncnn_vulkan']['path']).parent / self.srmd_ncnn_vulkan_model_combo_box.currentText()).absolute())
+        self.config['srmd_ncnn_vulkan']['g'] = self.srmd_ncnn_vulkan_gpu_id_spin_box.value()
+        self.config['srmd_ncnn_vulkan']['j'] = self.srmd_ncnn_vulkan_jobs_line_edit.text()
+        self.config['srmd_ncnn_vulkan']['x'] = self.srmd_ncnn_vulkan_tta_check_box.checkState()
+
+        # anime4k
+        self.config['anime4kcpp']['path'] = self.anime4kcpp_path_line_edit.text()
+        self.config['anime4kcpp']['passes'] = self.anime4kcpp_passes_spin_box.value()
+        self.config['anime4kcpp']['pushColorCount'] = self.anime4kcpp_push_color_count_spin_box.value()
+        self.config['anime4kcpp']['strengthColor'] = self.anime4kcpp_strength_color_spin_box.value()
+        self.config['anime4kcpp']['strengthGradient'] = self.anime4kcpp_strength_gradient_spin_box.value()
+        self.config['anime4kcpp']['threads'] = self.anime4kcpp_threads_spin_box.value()
+        self.config['anime4kcpp']['preFilters'] = self.anime4kcpp_pre_filters_spin_box.value()
+        self.config['anime4kcpp']['postFilters'] = self.anime4kcpp_post_filters_spin_box.value()
+        self.config['anime4kcpp']['platformID'] = self.anime4kcpp_platform_id_spin_box.value()
+        self.config['anime4kcpp']['deviceID'] = self.anime4kcpp_device_id_spin_box.value()
+        self.config['anime4kcpp']['fastMode'] = bool(self.anime4kcpp_fast_mode_check_box.checkState())
+        self.config['anime4kcpp']['preProcessing'] = bool(self.anime4kcpp_pre_processing_check_box.checkState())
+        self.config['anime4kcpp']['postProcessing'] = bool(self.anime4kcpp_post_processing_check_box.checkState())
+        self.config['anime4kcpp']['GPUMode'] = bool(self.anime4kcpp_gpu_mode_check_box.checkState())
+
 
     def select_input_file(self):
         input_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Input File', )
