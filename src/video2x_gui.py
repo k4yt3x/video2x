@@ -48,8 +48,7 @@ AVAILABLE_DRIVERS = {
 
 class UpscalerSignals(QObject):
     finished = pyqtSignal()
-    error = pyqtSignal(tuple)
-    result = pyqtSignal(object)
+    error = pyqtSignal(str)
 
 class Worker(QRunnable):
 
@@ -67,15 +66,13 @@ class Worker(QRunnable):
 
         # Retrieve args/kwargs here; and fire processing using them
         try:
-            result = self.fn(*self.args, **self.kwargs)
+            self.fn(*self.args, **self.kwargs)
         except Exception:
-            traceback.print_exc()
-            exctype, value = sys.exc_info()[:2]
-            self.signals.error.emit((exctype, value, traceback.format_exc()))
-        else:
-            self.signals.result.emit(result)  # Return the result of the processing
+            error_message = traceback.format_exc()
+            print(error_message, file=sys.stderr)
+            self.signals.error.emit(error_message)
         finally:
-            self.signals.finished.emit()  # Done
+            self.signals.finished.emit()
 
 class Video2XMainWindow(QtWidgets.QMainWindow):
 
@@ -138,6 +135,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         # waifu2x-caffe
         self.waifu2x_caffe_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xCaffePathLineEdit')
         self.waifu2x_caffe_path_select_button = self.findChild(QtWidgets.QPushButton, 'waifu2xCaffePathSelectButton')
+        self.waifu2x_caffe_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.waifu2x_caffe_path_line_edit))
         self.waifu2x_caffe_mode_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xCaffeModeComboBox')
         self.waifu2x_caffe_noise_level_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xCaffeNoiseLevelSpinBox')
         self.waifu2x_caffe_process_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xCaffeProcessComboBox')
@@ -151,7 +149,8 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-converter-cpp
         self.waifu2x_converter_cpp_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xConverterCppPathLineEdit')
-        self.waifu2x_converter_cpp_path_edit_button = self.findChild(QtWidgets.QLineEdit, 'waifu2xConverterCppPathSelectButton')
+        self.waifu2x_converter_cpp_path_edit_button = self.findChild(QtWidgets.QPushButton, 'waifu2xConverterCppPathSelectButton')
+        self.waifu2x_converter_cpp_path_edit_button.clicked.connect(lambda: self.select_driver_binary_path(self.waifu2x_converter_cpp_path_line_edit))
         self.waifu2x_converter_cpp_png_compression_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xConverterCppPngCompressionSpinBox')
         self.waifu2x_converter_cpp_processor_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xConverterCppProcessorSpinBox')
         self.waifu2x_converter_cpp_model_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xConverterCppModelComboBox')
@@ -162,6 +161,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         # waifu2x-ncnn-vulkan
         self.waifu2x_ncnn_vulkan_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xNcnnVulkanPathLineEdit')
         self.waifu2x_ncnn_vulkan_path_select_button = self.findChild(QtWidgets.QPushButton, 'waifu2xNcnnVulkanPathSelectButton')
+        self.waifu2x_ncnn_vulkan_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.waifu2x_ncnn_vulkan_path_line_edit))
         self.waifu2x_ncnn_vulkan_noise_level_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xNcnnVulkanNoiseLevelSpinBox')
         self.waifu2x_ncnn_vulkan_tile_size_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xNcnnVulkanTileSizeSpinBox')
         self.waifu2x_ncnn_vulkan_model_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xNcnnVulkanModelComboBox')
@@ -172,6 +172,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         # srmd-ncnn-vulkan
         self.srmd_ncnn_vulkan_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'srmdNcnnVulkanPathLineEdit')
         self.srmd_ncnn_vulkan_path_select_button = self.findChild(QtWidgets.QPushButton, 'srmdNcnnVulkanPathSelectButton')
+        self.srmd_ncnn_vulkan_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.srmd_ncnn_vulkan_path_line_edit))
         self.srmd_ncnn_vulkan_noise_level_spin_box = self.findChild(QtWidgets.QSpinBox, 'srmdNcnnVulkanNoiseLevelSpinBox')
         self.srmd_ncnn_vulkan_tile_size_spin_box = self.findChild(QtWidgets.QSpinBox, 'srmdNcnnVulkanTileSizeSpinBox')
         self.srmd_ncnn_vulkan_model_combo_box = self.findChild(QtWidgets.QComboBox, 'srmdNcnnVulkanModelComboBox')
@@ -182,6 +183,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         # anime4k
         self.anime4kcpp_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'anime4kCppPathLineEdit')
         self.anime4kcpp_path_select_button = self.findChild(QtWidgets.QPushButton, 'anime4kCppPathSelectButton')
+        self.anime4kcpp_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.anime4kcpp_path_line_edit))
         self.anime4kcpp_passes_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPassesSpinBox')
         self.anime4kcpp_push_color_count_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPushColorCountSpinBox')
         self.anime4kcpp_strength_color_spin_box = self.findChild(QtWidgets.QDoubleSpinBox, 'anime4kCppStrengthColorSpinBox')
@@ -439,7 +441,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.output_line_edit.setText(str(pathlib.Path(output_file[0]).absolute()))
 
     def select_output_folder(self):
-        output_folder = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Output Folder')
+        output_folder = QtWidgets.QFileDialog.getSaveFileName(self, 'Select Output Folder')
         if output_folder == '':
             return
 
@@ -459,6 +461,13 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         self.config_line_edit.setText(str(pathlib.Path(config_file[0]).absolute()))
         self.load_configurations()
+    
+    def select_driver_binary_path(self, driver_line_edit):
+        driver_binary_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Driver Binary File')
+        if not isinstance(driver_binary_path, tuple) or driver_binary_path[0] == '':
+            return
+
+        driver_line_edit.setText(str(pathlib.Path(driver_binary_path[0]).absolute()))
 
     def show_error(self, message: str):
         QtWidgets.QErrorMessage(self).showMessage(message.replace('\n', '<br>'))
@@ -501,7 +510,6 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
             # create thread pool for upscaler workers
             self.threadpool = QThreadPool()
-            self.workers = []
 
             # load driver settings from GUI
             self.resolve_driver_settings()
@@ -544,8 +552,8 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
                 # run upscaler
                 worker = Worker(self.upscaler.run)
+                worker.signals.error.connect(self.upscale_errored)
                 worker.signals.finished.connect(self.upscale_completed)
-                self.workers.append(worker)
                 self.threadpool.start(worker)
                 self.start_button.setEnabled(False)
                 # self.stop_button.setEnabled(True)
@@ -579,22 +587,28 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
                     # run upscaler
                     worker = Worker(self.upscaler.run)
+                    worker.signals.error.connect(self.upscale_errored)
                     worker.signals.finished.connect(self.upscale_completed)
                     self.threadpool.start(worker)
                     self.start_button.setEnabled(False)
+                    # self.stop_button.setEnabled(True)
             else:
                 self.show_error('Input path is neither a file nor a directory')
                 raise FileNotFoundError(f'{input_directory} is neither file nor directory')
 
         except Exception:
-            error_message = traceback.format_exc()
-            self.show_error(f'Upscaler ran into an error:\n{error_message}')
-            print(error_message, file=sys.stderr)
+            self.upscale_errored(traceback.format_exc())
 
-            # try cleaning up temp directories
-            with contextlib.suppress(Exception):
-                self.upscaler.progress_bar_exit_signal = True
-                self.upscaler.cleanup_temp_directories()
+        finally:
+            self.upscale_completed()
+    
+    def upscale_errored(self, error_message):
+        self.show_error(f'Upscaler ran into an error:\n{error_message}')
+
+        # try cleaning up temp directories
+        with contextlib.suppress(Exception):
+            self.upscaler.progress_bar_exit_signal = True
+            self.upscaler.cleanup_temp_directories()
 
     def upscale_completed(self):
         # if all threads have finished
