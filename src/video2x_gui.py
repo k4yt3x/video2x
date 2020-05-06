@@ -133,6 +133,30 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.stop_button = self.findChild(QtWidgets.QPushButton, 'stopButton')
         self.stop_button.clicked.connect(self.stop)
 
+        # driver settings
+        # waifu2x-caffe
+        self.waifu2x_caffe_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xCaffePathLineEdit')
+        self.waifu2x_caffe_path_select_button = self.findChild(QtWidgets.QPushButton, 'waifu2xCaffePathSelectButton')
+        self.waifu2x_caffe_mode_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xCaffeModeComboBox')
+        self.waifu2x_caffe_noise_level_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xCaffeNoiseLevelSpinBox')
+        self.waifu2x_caffe_process_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xCaffeProcessComboBox')
+        self.waifu2x_caffe_model_combobox = self.findChild(QtWidgets.QComboBox, 'waifu2xCaffeModelComboBox')
+        self.waifu2x_caffe_crop_size_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xCaffeCropSizeSpinBox')
+        self.waifu2x_caffe_output_quality_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xCaffeOutputQualitySpinBox')
+        self.waifu2x_caffe_output_depth_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xCaffeOutputDepthSpinBox')
+        self.waifu2x_caffe_batch_size_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xCaffeBatchSizeSpinBox')
+        self.waifu2x_caffe_gpu_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xCaffeGpuSpinBox')
+        self.waifu2x_caffe_tta_check_box = self.findChild(QtWidgets.QCheckBox, 'waifu2xCaffeTtaCheckBox')
+
+        # waifu2x-converter-cpp
+        self.waifu2x_converter_cpp_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xConverterCppPathLineEdit')
+        self.waifu2x_converter_cpp_png_compression_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xConverterCppPngCompressionSpinBox')
+        self.waifu2x_converter_cpp_processor_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xConverterCppProcessorSpinBox')
+        self.waifu2x_converter_cpp_model_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xConverterCppModelComboBox')
+        self.waifu2x_converter_cpp_mode_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xConverterCppModeComboBox')
+        self.waifu2x_converter_cpp_disable_gpu_check_box = self.findChild(QtWidgets.QCheckBox, 'disableGpuCheckBox')
+        self.waifu2x_converter_cpp_tta_check_box = self.findChild(QtWidgets.QCheckBox, 'ttaCheckBox')
+
         # load configurations
         self.load_configurations()
 
@@ -151,35 +175,90 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             return yaml.load(config, Loader=yaml.FullLoader)
 
     def load_configurations(self):
+
+        # get config file path from line edit
         config_file_path = pathlib.Path(self.config_line_edit.text())
+
+        # if file doesn't exist, return
         if not config_file_path.is_file():
             QtWidgets.QErrorMessage(self).showMessage('Video2X configuration file not found, please specify manually.')
+            return
+
+        # read configuration dict from config file
+        self.config = self.read_config(config_file_path)
+
+        # load FFmpeg settings
+        self.ffmpeg_settings = self.config['ffmpeg']
+
+        # load cache directory, create it if necessary
+        if self.config['video2x']['video2x_cache_directory'] is not None:
+            video2x_cache_directory = pathlib.Path(self.config['video2x']['video2x_cache_directory'])
         else:
-            self.config = self.read_config(config_file_path)
-            self.ffmpeg_settings = self.config['ffmpeg']
+            video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
 
-            # load cache directory
-            if self.config['video2x']['video2x_cache_directory'] is not None:
-                video2x_cache_directory = pathlib.Path(self.config['video2x']['video2x_cache_directory'])
-            else:
-                video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
+        if video2x_cache_directory.exists() and not video2x_cache_directory.is_dir():
+            self.show_error('Specified cache directory is a file/link')
+            raise FileExistsError('Specified cache directory is a file/link')
 
-            if video2x_cache_directory.exists() and not video2x_cache_directory.is_dir():
-                self.show_error('Specified cache directory is a file/link')
-                raise FileExistsError('Specified cache directory is a file/link')
+        # if cache directory doesn't exist
+        # ask the user if it should be created
+        elif not video2x_cache_directory.exists():
+            try:
+                video2x_cache_directory.mkdir(parents=True, exist_ok=True)
+            except Exception as exception:
+                self.show_error(f'Unable to create cache directory: {video2x_cache_directory}')
+                raise exception
+        self.cache_line_edit.setText(str(video2x_cache_directory.absolute()))
 
-            # if cache directory doesn't exist
-            # ask the user if it should be created
-            elif not video2x_cache_directory.exists():
-                try:
-                    video2x_cache_directory.mkdir(parents=True, exist_ok=True)
-                except Exception as exception:
-                    self.show_error(f'Unable to create cache directory: {video2x_cache_directory}')
-                    raise exception
-            self.cache_line_edit.setText(str(video2x_cache_directory.absolute()))
-
-            self.preserve_frames_check_box.setChecked(self.config['video2x']['preserve_frames'])
+        # load preserve frames settings
+        self.preserve_frames_check_box.setChecked(self.config['video2x']['preserve_frames'])
         self.start_button.setEnabled(True)
+
+        # waifu2x-caffe
+        settings = self.config['waifu2x_caffe']
+        self.waifu2x_caffe_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.waifu2x_caffe_mode_combo_box.setCurrentText(settings['mode'])
+        self.waifu2x_caffe_noise_level_spin_box.setValue(settings['noise_level'])
+        self.waifu2x_caffe_process_combo_box.setCurrentText(settings['process'])
+        self.waifu2x_caffe_crop_size_spin_box.setValue(settings['crop_size'])
+        self.waifu2x_caffe_output_quality_spin_box.setValue(settings['output_quality'])
+        self.waifu2x_caffe_output_depth_spin_box.setValue(settings['output_depth'])
+        self.waifu2x_caffe_batch_size_spin_box.setValue(settings['batch_size'])
+        self.waifu2x_caffe_gpu_spin_box.setValue(settings['gpu'])
+        self.waifu2x_caffe_tta_check_box.setChecked(bool(settings['tta']))
+
+        # waifu2x-converter-cpp
+        settings = self.config['waifu2x_converter_cpp']
+        self.waifu2x_converter_cpp_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.waifu2x_converter_cpp_png_compression_spin_box.setValue(settings['png-compression'])
+        self.waifu2x_converter_cpp_processor_spin_box.setValue(settings['processor'])
+        self.waifu2x_converter_cpp_mode_combo_box.setCurrentText(settings['mode'])
+        self.waifu2x_converter_cpp_disable_gpu_check_box.setChecked(settings['disable-gpu'])
+        self.waifu2x_converter_cpp_tta_check_box.setChecked(bool(settings['tta']))
+
+    def resolve_driver_settings(self):
+        
+        # waifu2x-caffe
+        self.config['waifu2x_caffe']['path'] = self.waifu2x_caffe_path_line_edit.text()
+        self.config['waifu2x_caffe']['mode'] = self.waifu2x_caffe_mode_combo_box.currentText()
+        self.config['waifu2x_caffe']['noise_level'] = self.waifu2x_caffe_noise_level_spin_box.value()
+        self.config['waifu2x_caffe']['process'] = self.waifu2x_caffe_process_combo_box.currentText()
+        self.config['waifu2x_caffe']['model_dir'] = str((pathlib.Path(self.config['waifu2x_caffe']['path']).parent / 'models' / self.waifu2x_caffe_model_combobox.currentText()).absolute())
+        self.config['waifu2x_caffe']['crop_size'] = self.waifu2x_caffe_crop_size_spin_box.value()
+        self.config['waifu2x_caffe']['output_quality'] = self.waifu2x_caffe_output_depth_spin_box.value()
+        self.config['waifu2x_caffe']['output_depth'] = self.waifu2x_caffe_output_depth_spin_box.value()
+        self.config['waifu2x_caffe']['batch_size'] = self.waifu2x_caffe_batch_size_spin_box.value()
+        self.config['waifu2x_caffe']['gpu'] = self.waifu2x_caffe_gpu_spin_box.value()
+        self.config['waifu2x_caffe']['tta'] = int(self.waifu2x_caffe_tta_check_box.checkState())
+
+        # waifu2x-converter-cpp
+        self.config['waifu2x_converter_cpp']['path'] = self.waifu2x_converter_cpp_path_line_edit.text()
+        self.config['waifu2x_converter_cpp']['png-compression'] = self.waifu2x_converter_cpp_png_compression_spin_box.value()
+        self.config['waifu2x_converter_cpp']['processor'] = self.waifu2x_converter_cpp_processor_spin_box.value()
+        self.config['waifu2x_converter_cpp']['model-dir'] = str((pathlib.Path(self.config['waifu2x_converter_cpp']['path']).parent / self.waifu2x_converter_cpp_path_line_edit.currentText()).absolute())
+        self.config['waifu2x_converter_cpp']['mode'] = self.waifu2x_converter_cpp_mode_combo_box.currentText()
+        self.config['waifu2x_converter_cpp']['disable-gpu'] = self.waifu2x_converter_cpp_disable_gpu_check_box.checkState()
+        self.config['waifu2x_converter_cpp']['tta'] = int(self.waifu2x_converter_cpp_tta_check_box.checkState())
 
     def select_input_file(self):
         input_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Input File', )
@@ -251,7 +330,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.load_configurations()
 
     def show_error(self, message: str):
-        QtWidgets.QErrorMessage(self).showMessage(message)
+        QtWidgets.QErrorMessage(self).showMessage(message.replace('\n', '<br>'))
 
     def show_message(self, message: str, custom_icon=None):
         message_box = QtWidgets.QMessageBox()
@@ -285,10 +364,18 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             # start timer
             self.begin_time = time.time()
 
+            # resolve input and output directories from GUI
             input_directory = pathlib.Path(self.input_line_edit.text())
             output_directory = pathlib.Path(self.output_line_edit.text())
 
+            # create thread pool for upscaler workers
             self.threadpool = QThreadPool()
+            self.workers = []
+
+            # load driver settings from GUI
+            self.resolve_driver_settings()
+
+            # load driver settings for the current driver
             self.driver_settings = self.config[AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]]
 
             # if input specified is a single file
@@ -321,13 +408,16 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
                 # start progress bar
                 if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
-                    progress_bar = threading.Thread(target=self.start_progress_bar)
-                    progress_bar.start()
+                    progress_bar_worker = Worker(self.start_progress_bar)
+                    self.threadpool.start(progress_bar_worker)
 
                 # run upscaler
                 worker = Worker(self.upscaler.run)
                 worker.signals.finished.connect(self.upscale_completed)
+                self.workers.append(worker)
                 self.threadpool.start(worker)
+                self.start_button.setEnabled(False)
+                # self.stop_button.setEnabled(True)
 
             # if input specified is a directory
             elif input_directory.is_dir():
@@ -353,17 +443,22 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
                     # start progress bar
                     if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
-                        progress_bar = threading.Thread(target=self.start_progress_bar)
-                        progress_bar.start()
+                        progress_bar_worker = Worker(self.start_progress_bar)
+                        self.threadpool.start(progress_bar_worker)
 
                     # run upscaler
-                    self.upscaler.run()
+                    worker = Worker(self.upscaler.run)
+                    worker.signals.finished.connect(self.upscale_completed)
+                    self.threadpool.start(worker)
+                    self.start_button.setEnabled(False)
             else:
                 self.show_error('Input path is neither a file nor a directory')
                 raise FileNotFoundError(f'{input_directory} is neither file nor directory')
 
-        except Exception as e:
-            self.show_error(f'Upscaler ran into an error:\n{e}')
+        except Exception:
+            error_message = traceback.format_exc()
+            self.show_error(f'Upscaler ran into an error:\n{error_message}')
+            print(error_message, file=sys.stderr)
 
             # try cleaning up temp directories
             with contextlib.suppress(Exception):
@@ -371,14 +466,17 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
                 self.upscaler.cleanup_temp_directories()
 
     def upscale_completed(self):
-        self.show_message('Program completed, taking {} seconds'.format(round((time.time() - self.begin_time), 5)))
-        # remove Video2X cache directory
-        with contextlib.suppress(FileNotFoundError):
-            if not bool(self.preserve_frames_check_box.checkState()):
-                shutil.rmtree(pathlib.Path(self.cache_line_edit.text()))
+        # if all threads have finished
+        if self.threadpool.activeThreadCount() == 0:
+            self.show_message('Program completed, taking {} seconds'.format(round((time.time() - self.begin_time), 5)))
+            # remove Video2X cache directory
+            with contextlib.suppress(FileNotFoundError):
+                if not bool(self.preserve_frames_check_box.checkState()):
+                    shutil.rmtree(pathlib.Path(self.cache_line_edit.text()))
+            self.start_button.setEnabled(True)
 
     def stop(self):
-        # stop execution here
+        # TODO unimplemented yet
         pass
 
 
