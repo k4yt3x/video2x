@@ -2,6 +2,7 @@ avalon_framework
 colorama
 patool
 psutil
+pyqt5
 pyunpack
 pyyaml
 requests
