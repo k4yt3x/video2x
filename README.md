@@ -72,11 +72,15 @@ Watch for the sharper edges in this screenshot around the shadows:
 
 Clip is from trailer of animated movie "千と千尋の神隠し". Copyright belongs to "株式会社スタジオジブリ (STUDIO GHIBLI INC.)". Will delete immediately if use of clip is in violation of copyright.
 
-## Screenshot
+## Screenshots
 
-![video2x_gui](https://user-images.githubusercontent.com/21986859/63219691-ee478400-c166-11e9-8c15-dcf59228bd96.png)
+### Video2X GUI
 
-![screenshot](https://user-images.githubusercontent.com/21986859/81039711-4fe88380-8e99-11ea-9846-175f72100a76.png)
+![Video2X GUI Screenshot](https://user-images.githubusercontent.com/21986859/81157039-19346b00-8f76-11ea-965f-4d7edf6a818e.png)
+
+### Video2X CLI
+
+![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81039711-4fe88380-8e99-11ea-9846-175f72100a76.png)
 
 ---
 
