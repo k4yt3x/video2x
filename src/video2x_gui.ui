@@ -1,0 +1,573 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Video2xQt</class>
+ <widget class="QMainWindow" name="Video2xQt">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>618</width>
+    <height>389</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Video2xQt</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>5</number>
+    </property>
+    <property name="rightMargin">
+     <number>5</number>
+    </property>
+    <property name="bottomMargin">
+     <number>5</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="mainTab">
+       <attribute name="title">
+        <string>Main</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <layout class="QVBoxLayout" name="fileSelectionVerticalLayout">
+          <item>
+           <layout class="QHBoxLayout" name="inputHorizontalLayout">
+            <item>
+             <widget class="QLabel" name="inputLabel">
+              <property name="minimumSize">
+               <size>
+                <width>63</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="lineWidth">
+               <number>1</number>
+              </property>
+              <property name="text">
+               <string>Input</string>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+              <property name="margin">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="inputLineEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inputSelectFileButton">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Select File</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="inputSelectFolderButton">
+              <property name="text">
+               <string>Select Folder</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="outputHorizontalLayout">
+            <item>
+             <widget class="QLabel" name="outputLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>63</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Output</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="outputLineEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="outputSelectFileButton">
+              <property name="text">
+               <string>Select File</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="outputSelectFolderButton">
+              <property name="text">
+               <string>Select Folder</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="configHorizontalLayout">
+            <item>
+             <widget class="QLabel" name="configLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>63</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Config</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="configLineEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="configSelectButton">
+              <property name="text">
+               <string>Select</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="cacheLabel">
+              <property name="minimumSize">
+               <size>
+                <width>63</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Cache Folder</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="cacheLineEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="cacheSelectFolderButton">
+              <property name="text">
+               <string>Select Folder</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="expressSettingsGroupBox">
+          <property name="title">
+           <string>Express Settings</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <layout class="QVBoxLayout" name="expressSettingsVerticalLayout">
+             <item>
+              <layout class="QHBoxLayout" name="driverHorizontalLayout">
+               <item>
+                <widget class="QLabel" name="driverLabel">
+                 <property name="text">
+                  <string>Driver</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="driverComboBox">
+                 <item>
+                  <property name="text">
+                   <string>Waifu2X Caffe</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Waifu2X Converter CPP</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Waifu2X NCNN Vulkan</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>SRMD NCNN Vulkan</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Anime4KCPP</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="processesHorizontalLayout">
+               <item>
+                <widget class="QLabel" name="processesLabel">
+                 <property name="text">
+                  <string>Processes</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="processesSpinBox">
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="scaleRatioHorizontalLayout">
+               <item>
+                <widget class="QLabel" name="scaleRatioLabel">
+                 <property name="text">
+                  <string>Scale Ratio</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="scaleRatioDoubleSpinBox">
+                 <property name="value">
+                  <double>2.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="preserveFramesCheckBox">
+             <property name="text">
+              <string>Preserve Frames</string>
+             </property>
+             <property name="tristate">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="driverSettingsTab">
+       <attribute name="title">
+        <string>Driver Settings</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_10">
+        <item>
+         <widget class="QTabWidget" name="driversTabWidget">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="waifu2xCaffeTab">
+           <attribute name="title">
+            <string>Waifu2X Caffe</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <item>
+             <layout class="QVBoxLayout" name="waifu2xCaffeTabVerticalLayout">
+              <item>
+               <layout class="QHBoxLayout" name="waifu2xCaffePathHorizontalLayout">
+                <item>
+                 <widget class="QLineEdit" name="waifu2xCaffePathLineEdit"/>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="waifu2xCaffePathSelectButton">
+                  <property name="text">
+                   <string>Select Binary Path</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="waifu2xCaffeModeHorizontalLayout">
+                <item>
+                 <widget class="QLabel" name="waifu2xCaffeModeLabel">
+                  <property name="text">
+                   <string>Mode</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="waifu2xCaffeModeComboBox">
+                  <item>
+                   <property name="text">
+                    <string>Noise Scale</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Auto Scale</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Noise</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Scale</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="waifu2xCaffeNoiseLevelHorizontalLayout">
+                <item>
+                 <widget class="QLabel" name="waifu2xCaffeNoiseLevelLabel">
+                  <property name="text">
+                   <string>Noise Level</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="waifu2xCaffeNoiseLevelComboBox">
+                  <item>
+                   <property name="text">
+                    <string>3</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>2</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>1</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="waifu2xCaffeProcessHorizontalLayout">
+                <item>
+                 <widget class="QLabel" name="waifu2xCaffeProcessLabel">
+                  <property name="text">
+                   <string>Process</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="waifu2xCaffeProcessComboBox">
+                  <item>
+                   <property name="text">
+                    <string>GPU</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>cuDNN</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>CPU</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="waifu2xCaffeModelHorizontalLayout">
+                <item>
+                 <widget class="QLabel" name="waifu2xCaffeModelLabel">
+                  <property name="text">
+                   <string>Model</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="waifu2xCaffeModelComboBox">
+                  <item>
+                   <property name="text">
+                    <string>cunet</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>anime_style_art</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>anime_style_art_rgb</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>photo</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>ukbench</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>upconv_7_anime_style_art_rgb</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>upconv_7_photo</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>upresnet10</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="waifu2xConverterCppTab">
+           <attribute name="title">
+            <string>Waifu2X Converter CPP</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="waifu2xNcnnVulkanTab">
+           <attribute name="title">
+            <string>Waifu2X NCNN Vulkan</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="srmdNcnnVulkanTab">
+           <attribute name="title">
+            <string>SRMD NCNN Vulkan</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="anime4kCppTab">
+           <attribute name="title">
+            <string>Anime4K CPP</string>
+           </attribute>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="controlsHorizontalLayout">
+      <item>
+       <widget class="QProgressBar" name="progressBar">
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="startButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="stopButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>618</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuAbout"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,34 +1,35 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Creator: Video2X GUI
+Creator: Video2X QT
 Author: K4YT3X
-Date Created: July 27, 2019
-Last Modified: December 11, 2019
-
-Description: A simple GUI for Video2X made with tkinter.
+Date Created: May 5, 2020
+Last Modified: May 6, 2020
 """
 
 # local imports
-from exceptions import *
 from upscaler import Upscaler
 
 # built-in imports
-from tkinter import *
-from tkinter import messagebox
-from tkinter import ttk
-from tkinter.filedialog import *
-import contextlib
 import pathlib
 import sys
+
+# built-in imports
+import contextlib
+import re
+import shutil
 import tempfile
 import threading
 import time
+import traceback
 import yaml
 
-VERSION = '1.1.3'
+# third-party imports
+from PyQt5 import QtWidgets, QtGui
+from PyQt5 import uic
+from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal, QRunnable, QThreadPool
 
-VIDEO2X_CONFIG = pathlib.Path(sys.argv[0]).parent.absolute() / 'video2x.yaml'
+VERSION = '2.0.0'
 
 LEGAL_INFO = f'''Video2X GUI Version: {VERSION}
 Author: K4YT3X
@@ -36,427 +37,352 @@ License: GNU GPL v3
 Github Page: https://github.com/k4yt3x/video2x
 Contact: k4yt3x@k4yt3x.com'''
 
-# global static variables
-AVAILABLE_METHODS = {
-    'GPU': 'gpu',
-    'CUDNN': 'cudnn',
-    'CPU': 'cpu'
-}
-
 AVAILABLE_DRIVERS = {
     'Waifu2X Caffe': 'waifu2x_caffe',
-    'Waifu2X Converter CPP': 'waifu2x_converter',
+    'Waifu2X Converter CPP': 'waifu2x_converter_cpp',
     'Waifu2x NCNN Vulkan': 'waifu2x_ncnn_vulkan',
-    'Anime4K': 'anime4k'
+    'SRMD NCNN Vulkan': 'srmd_ncnn_vulkan',
+    'Anime4KCPP': 'anime4kcpp'
 }
 
-IMAGE_FORMATS = {'PNG', 'JPG'}
 
-DEMUXER_EXTENSIONS = {'3dostr', '4xm', 'aa', 'aac', 'ac3', 'acm', 'act',
-                      'adf', 'adp', 'ads', 'adx', 'aea', 'afc', 'aiff', 'aix', 'alaw',
-                      'alias_pix', 'alsa', 'amr', 'amrnb', 'amrwb', 'anm', 'apc', 'ape',
-                      'apng', 'aptx', 'aptx_hd', 'aqtitle', 'asf', 'asf_o', 'ass', 'ast',
-                      'au', 'avi', 'avisynth', 'avr', 'avs', 'avs2', 'bethsoftvid', 'bfi',
-                      'bfstm', 'bin', 'bink', 'bit', 'bmp_pipe', 'bmv', 'boa', 'brender_pix',
-                      'brstm', 'c93', 'caf', 'cavsvideo', 'cdg', 'cdxl', 'cine', 'codec2',
-                      'codec2raw', 'concat', 'dash', 'data', 'daud', 'dcstr', 'dds_pipe',
-                      'dfa', 'dirac', 'dnxhd', 'dpx_pipe', 'dsf', 'dsicin', 'dss', 'dts',
-                      'dtshd', 'dv', 'dvbsub', 'dvbtxt', 'dxa', 'ea', 'ea_cdata', 'eac3',
-                      'epaf', 'exr_pipe', 'f32be', 'f32le', 'f64be', 'f64le', 'fbdev',
-                      'ffmetadata', 'film_cpk', 'filmstrip', 'fits', 'flac', 'flic', 'flv',
-                      'frm', 'fsb', 'g722', 'g723_1', 'g726', 'g726le', 'g729', 'gdv', 'genh',
-                      'gif', 'gsm', 'gxf', 'h261', 'h263', 'h264', 'hevc', 'hls', 'applehttp',
-                      'hnm', 'ico', 'idcin', 'idf', 'iec61883', 'iff', 'ilbc', 'image2',
-                      'image2pipe', 'ingenient', 'ipmovie', 'ircam', 'iss', 'iv8', 'ivf',
-                      'ivr', 'j2k_pipe', 'jack', 'jacosub', 'jpeg_pipe', 'jpegls_pipe',
-                      'jv', 'kmsgrab', 'lavfi', 'libcdio', 'libdc1394', 'libgme', 'libopenmpt',
-                      'live_flv', 'lmlm4', 'loas', 'lrc', 'lvf', 'lxf', 'm4v', 'matroska', 'webm',
-                      'mgsts', 'microdvd', 'mjpeg', 'mjpeg_2000', 'mlp', 'mlv', 'mm', 'mmf',
-                      'mov', 'mp4', 'm4a', '3gp', '3g2', 'mj2', 'mp3', 'mpc', 'mpc8', 'mpeg',
-                      'mpegts', 'mpegtsraw', 'mpegvideo', 'mpjpeg', 'mpl2', 'mpsub', 'msf',
-                      'msnwctcp', 'mtaf', 'mtv', 'mulaw', 'musx', 'mv', 'mvi', 'mxf', 'mxg',
-                      'nc', 'nistsphere', 'nsp', 'nsv', 'nut', 'nuv', 'ogg', 'oma', 'openal',
-                      'oss', 'paf', 'pam_pipe', 'pbm_pipe', 'pcx_pipe', 'pgm_pipe', 'pgmyuv_pipe',
-                      'pictor_pipe', 'pjs', 'pmp', 'png_pipe', 'ppm_pipe', 'psd_pipe', 'psxstr',
-                      'pulse', 'pva', 'pvf', 'qcp', 'qdraw_pipe', 'r3d', 'rawvideo', 'realtext',
-                      'redspark', 'rl2', 'rm', 'roq', 'rpl', 'rsd', 'rso', 'rtp', 'rtsp',
-                      's16be', 's16le', 's24be', 's24le', 's32be', 's32le', 's337m', 's8',
-                      'sami', 'sap', 'sbc', 'sbg', 'scc', 'sdp', 'sdr2', 'sds', 'sdx', 'ser',
-                      'sgi_pipe', 'shn', 'siff', 'sln', 'smjpeg', 'smk', 'smush', 'sndio',
-                      'sol', 'sox', 'spdif', 'srt', 'stl', 'subviewer', 'subviewer1', 'sunrast_pipe',
-                      'sup', 'svag', 'svg_pipe', 'swf', 'tak', 'tedcaptions', 'thp', 'tiertexseq',
-                      'tiff_pipe', 'tmv', 'truehd', 'tta', 'tty', 'txd', 'ty', 'u16be', 'u16le',
-                      'u24be', 'u24le', 'u32be', 'u32le', 'u8', 'v210', 'v210x', 'vag', 'vc1',
-                      'vc1test', 'vidc', 'video4linux2', 'v4l2', 'vivo', 'vmd', 'vobsub', 'voc',
-                      'vpk', 'vplayer', 'vqf', 'w64', 'wav', 'wc3movie', 'webm_dash_manifest',
-                      'webp_pipe', 'webvtt', 'wsaud', 'wsd', 'wsvqa', 'wtv', 'wv', 'wve', 'x11grab',
-                      'xa', 'xbin', 'xmv', 'xpm_pipe', 'xvag', 'xwd_pipe', 'xwma', 'yop', 'yuv4mpegpipe'}
+class UpscalerSignals(QObject):
+    finished = pyqtSignal()
+    error = pyqtSignal(tuple)
+    result = pyqtSignal(object)
 
+class Worker(QRunnable):
 
-class Video2xGui():
+    def __init__(self, fn, *args, **kwargs):
+        super(Worker, self).__init__()
 
-    def __init__(self):
+        # Store constructor arguments (re-used for processing)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = UpscalerSignals()
 
-        self.running = False
+    @pyqtSlot()
+    def run(self):
 
-        # create main window
-        self.main_window = Tk()
-        self.main_window.title(f'Video2X GUI {VERSION}')
-        self.main_frame = Frame()
-        self.main_frame.pack(fill=BOTH, expand=True)
-
-        # add menu bar
-        self.menu_bar = Menu(self.main_frame)
-
-        # file menu
-        self.file_menu = Menu(self.menu_bar, tearoff=0)
-        self.file_menu.add_command(label='Exit', command=self.main_frame.quit)
-        self.menu_bar.add_cascade(label='File', menu=self.file_menu)
-
-        # help menu
-        self.help_menu = Menu(self.menu_bar, tearoff=0)
-        self.help_menu.add_command(label='About', command=self._display_help)
-        self.menu_bar.add_cascade(label='Help', menu=self.help_menu)
-
-        self.main_window.config(menu=self.menu_bar)
-
-        # file frame
-        self.file_frame = Frame(self.main_frame)
-        self.file_frame.pack(fill=X, padx=5, pady=5, expand=True)
-
-        # input file
-        self.input_file = StringVar()
-        label_text = StringVar()
-        label_text.set('Input File')
-        Label(self.file_frame, textvariable=label_text, relief=RIDGE, width=10).grid(row=0, column=0, padx=5, pady=5, sticky=W)
-        Entry(self.file_frame, textvariable=self.input_file, width=60).grid(row=0, column=1, padx=5, pady=5, sticky=W)
-        Button(self.file_frame, text='Select', command=self._select_input).grid(row=0, column=2, padx=5, pady=5, sticky=W)
-
-        # output file
-        self.output_file = StringVar()
-        label_text = StringVar()
-        label_text.set('Output File')
-        Label(self.file_frame, textvariable=label_text, relief=RIDGE, width=10).grid(row=1, column=0, padx=5, pady=5, sticky=W)
-        Entry(self.file_frame, textvariable=self.output_file, width=60).grid(row=1, column=1, padx=5, pady=5, sticky=W)
-        Button(self.file_frame, text='Select', command=self._select_output).grid(row=1, column=2, padx=5, pady=5, sticky=W)
-
-        # options
-        self.options_frame = Frame()
-        # self.options_left.pack(fill=X, padx=5, pady=5, expand=True)
-        self.options_frame.pack(fill=X, padx=5, pady=5, expand=True)
-
-        self.options_left = Frame(self.options_frame)
-        # self.options_left.pack(fill=X, padx=5, pady=5, expand=True)
-        self.options_left.grid(row=0, column=0, padx=5, pady=5, sticky=N)
-
-        # width
-        self.width = IntVar()
-        # self.width.set(1920)
-        Label(self.options_left, text='Width', relief=RIDGE, width=15).grid(row=0, column=0, padx=2, pady=3)
-        width_field = Entry(self.options_left, textvariable=self.width)
-        width_field.grid(row=0, column=1, padx=2, pady=3, sticky=W)
-
-        # height
-        self.height = IntVar()
-        # self.height.set(1080)
-        Label(self.options_left, text='Height', relief=RIDGE, width=15).grid(row=1, column=0, padx=2, pady=3)
-        height_field = Entry(self.options_left, textvariable=self.height)
-        height_field.grid(row=1, column=1, padx=2, pady=3, sticky=W)
-
-        # scale ratio
-        self.scale_ratio = DoubleVar()
-        # self.scale_ratio.set(2.0)
-        Label(self.options_left, text='Scale Ratio', relief=RIDGE, width=15).grid(row=2, column=0, padx=2, pady=3)
-        scale_ratio_field = Entry(self.options_left, textvariable=self.scale_ratio)
-        scale_ratio_field.grid(row=2, column=1, padx=2, pady=3, sticky=W)
-
-        # image format
-        self.image_format = StringVar(self.options_left)
-        self.image_format.set('PNG')
-        Label(self.options_left, text='Image Format', relief=RIDGE, width=15).grid(row=3, column=0, padx=2, pady=3)
-        image_format_menu = OptionMenu(self.options_left, self.image_format, *IMAGE_FORMATS)
-        image_format_menu.grid(row=3, column=1, padx=2, pady=3, sticky=W)
-
-        # options
-        self.options_right = Frame(self.options_frame)
-        # self.options_left.pack(fill=X, padx=5, pady=5, expand=True)
-        self.options_right.grid(row=0, column=1, padx=5, pady=5, sticky=N)
-
-        # threads
-        self.threads = IntVar()
-        self.threads.set(1)
-        Label(self.options_right, text='Threads', relief=RIDGE, width=15).grid(row=0, column=0, padx=2, pady=3)
-        threads_field = Entry(self.options_right, textvariable=self.threads)
-        threads_field.grid(row=0, column=1, padx=2, pady=3, sticky=W)
-
-        # method
-        self.method = StringVar(self.options_left)
-        self.method.set('GPU')
-        Label(self.options_right, text='Method', relief=RIDGE, width=15).grid(row=1, column=0, padx=2, pady=3)
-        method_menu = OptionMenu(self.options_right, self.method, *AVAILABLE_METHODS)
-        method_menu.grid(row=1, column=1, padx=2, pady=3, sticky=W)
-
-        # driver
-        self.driver = StringVar(self.options_left)
-        self.driver.set('Waifu2X Caffe')
-        Label(self.options_right, text='Driver', relief=RIDGE, width=15).grid(row=2, column=0, padx=2, pady=3)
-        driver_menu = OptionMenu(self.options_right, self.driver, *AVAILABLE_DRIVERS)
-        driver_menu.grid(row=2, column=1, padx=2, pady=3, sticky=W)
-
-        # preserve frames
-        self.preserve_frames = BooleanVar(self.options_left)
-        self.preserve_frames.set(False)
-        Label(self.options_right, text='Preserve Frames', relief=RIDGE, width=15).grid(row=3, column=0, padx=2, pady=3)
-        preserve_frames_menu = OptionMenu(self.options_right, self.preserve_frames, *{True, False})
-        preserve_frames_menu.grid(row=3, column=1, padx=2, pady=3, sticky=W)
-
-        # progress bar
-        self.progress_bar_frame = Frame()
-        self.progress_bar_frame.pack(fill=X, padx=5, pady=5, expand=True)
-
-        self.progress_bar = ttk.Progressbar(self.progress_bar_frame, orient='horizontal', length=100, mode='determinate')
-        self.progress_bar.pack(fill=X)
-
-        # start button frame
-        self.start_frame = Frame()
-        self.start_frame.pack(fill=X, padx=5, pady=5, expand=True)
-
-        # start button
-        self.start_button_text = StringVar()
-        self.start_button_text.set('Start')
-        Button(self.start_frame, textvariable=self.start_button_text, command=self._launch_upscaling, width=20).pack(side=RIGHT)
-
-        self.main_frame.mainloop()
-    
-    def _display_help(self):
-        messagebox.showinfo('About', LEGAL_INFO)
-    
-    def _launch_upscaling(self):
-
-        # prevent launching multiple instances
-        if self.running:
-            messagebox.showerror('Error', 'Video2X is already running')
-            return
-
-        # arguments sanity check
-        if self.input_file.get() == '':
-            messagebox.showerror('Error', 'You must specify input video file/directory path')
-            return
-        if self.output_file.get() == '':
-            messagebox.showerror('Error', 'You must specify output video file/directory path')
-            return
-        if (self.driver.get() in ['Waifu2X Converter CPP', 'Waifu2x NCNN Vulkan', 'Anime4K']) and self.width.get() and self.height.get():
-            messagebox.showerror('Error', f'Selected driver \"{self.driver.get()}\" accepts only scaling ratio')
-            return
-        if self.driver.get() == 'waifu2x_ncnn_vulkan' and (self.scale_ratio.get() > 2 or not self.scale_ratio.get().is_integer()):
-            messagebox.showerror('Error', 'Scaling ratio must be 1 or 2 for waifu2x_ncnn_vulkan')
-            return
-        if (self.width.get() or self.height.get()) and self.scale_ratio.get():
-            messagebox.showerror('Error', 'You can only specify either scaling ratio or output width and height')
-            return
-        if (self.width.get() and not self.height.get()) or (not self.width.get() and self.height.get()):
-            messagebox.showerror('Error', 'You must specify both width and height')
-            return
-        if (not self.width.get() or not self.height.get()) and not self.scale_ratio.get():
-            messagebox.showerror('Error', 'You must specify either output dimensions or scaling ratio')
-            return
-
-        upscale = threading.Thread(target=self._upscale)
-        upscale.start()
-        self.running = True
-        self.start_button_text.set('Running')
-
-    def _upscale(self):
-
+        # Retrieve args/kwargs here; and fire processing using them
         try:
-            # start timer
-            begin_time = time.time()
+            result = self.fn(*self.args, **self.kwargs)
+        except Exception:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.result.emit(result)  # Return the result of the processing
+        finally:
+            self.signals.finished.emit()  # Done
 
-            # read configuration file
-            config = read_config(VIDEO2X_CONFIG)
-            config = absolutify_paths(config)
+class Video2XMainWindow(QtWidgets.QMainWindow):
 
-            input_file = pathlib.Path(self.input_file.get())
-            output_file = pathlib.Path(self.output_file.get())
-            driver = AVAILABLE_DRIVERS[self.driver.get()]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        uic.loadUi('video2x_gui.ui', self)
 
-            # load specified driver's config into driver_settings
-            driver_settings = config[driver]
+        self.video2x_icon_path = str((pathlib.Path(__file__).parent / 'images' / 'video2x.png').absolute())
+        self.setWindowTitle(f'Video2X GUI {VERSION}')
+        self.setWindowIcon(QtGui.QIcon(self.video2x_icon_path))
 
-            # if executable doesn't exist, show warning
-            if not pathlib.Path(driver_settings['path']).is_file() and not pathlib.Path(f'{driver_settings["path"]}.exe').is_file():
-                messagebox.showerror('Error', 'Specified driver directory doesn\'t exist\nPlease check the configuration file settings')
-                raise FileNotFoundError(driver_settings['path'])
+        # menu bar
+        self.action_exit = self.findChild(QtWidgets.QAction, 'actionExit')
+        self.action_exit.triggered.connect(sys.exit)
 
-            # read FFmpeg configuration
-            ffmpeg_settings = config['ffmpeg']
+        self.action_about = self.findChild(QtWidgets.QAction, 'actionAbout')
+        self.action_about.triggered.connect(lambda: self.show_message(LEGAL_INFO, custom_icon=QtGui.QPixmap(self.video2x_icon_path)))
 
-            # load video2x settings
-            image_format = config['video2x']['image_format'].lower()
-            preserve_frames = config['video2x']['preserve_frames']
+        # main tab
+        # select input file/folder
+        self.input_line_edit = self.findChild(QtWidgets.QLineEdit, 'inputLineEdit')
+        self.input_select_file_button = self.findChild(QtWidgets.QPushButton, 'inputSelectFileButton')
+        self.input_select_file_button.clicked.connect(self.select_input_file)
+        self.input_select_folder_button = self.findChild(QtWidgets.QPushButton, 'inputSelectFolderButton')
+        self.input_select_folder_button.clicked.connect(self.select_input_folder)
+
+        # select output file/folder
+        self.output_line_edit = self.findChild(QtWidgets.QLineEdit, 'outputLineEdit')
+        self.output_select_file_button = self.findChild(QtWidgets.QPushButton, 'outputSelectFileButton')
+        self.output_select_file_button.clicked.connect(self.select_output_file)
+        self.output_select_folder_button = self.findChild(QtWidgets.QPushButton, 'outputSelectFolderButton')
+        self.output_select_folder_button.clicked.connect(self.select_output_folder)
+
+        # config file
+        self.config_line_edit = self.findChild(QtWidgets.QLineEdit, 'configLineEdit')
+        self.config_line_edit.setText(str((pathlib.Path(__file__).parent / 'video2x.yaml').absolute()))
+        self.config_select_file_button = self.findChild(QtWidgets.QPushButton, 'configSelectButton')
+        self.config_select_file_button.clicked.connect(self.select_config_file)
+
+        # cache directory
+        self.cache_line_edit = self.findChild(QtWidgets.QLineEdit, 'cacheLineEdit')
+        self.cache_select_folder_button = self.findChild(QtWidgets.QPushButton, 'cacheSelectFolderButton')
+        self.cache_select_folder_button.clicked.connect(self.select_cache_folder)
+
+        # express settings
+        self.driver_combo_box = self.findChild(QtWidgets.QComboBox, 'driverComboBox')
+        self.processes_spin_box = self.findChild(QtWidgets.QSpinBox, 'processesSpinBox')
+        self.scale_ratio_double_spin_box = self.findChild(QtWidgets.QDoubleSpinBox, 'scaleRatioDoubleSpinBox')
+        self.preserve_frames_check_box = self.findChild(QtWidgets.QCheckBox, 'preserveFramesCheckBox')
+
+        # progress bar and start/stop controls
+        self.progress_bar = self.findChild(QtWidgets.QProgressBar, 'progressBar')
+        self.start_button = self.findChild(QtWidgets.QPushButton, 'startButton')
+        self.start_button.clicked.connect(self.upscale)
+        self.stop_button = self.findChild(QtWidgets.QPushButton, 'stopButton')
+        self.stop_button.clicked.connect(self.stop)
+
+        # load configurations
+        self.load_configurations()
+
+    @staticmethod
+    def read_config(config_file: pathlib.Path) -> dict:
+        """ read video2x configurations from config file
+
+        Arguments:
+            config_file {pathlib.Path} -- video2x configuration file pathlib.Path
+
+        Returns:
+            dict -- dictionary of video2x configuration
+        """
+
+        with open(config_file, 'r') as config:
+            return yaml.load(config, Loader=yaml.FullLoader)
+
+    def load_configurations(self):
+        config_file_path = pathlib.Path(self.config_line_edit.text())
+        if not config_file_path.is_file():
+            QtWidgets.QErrorMessage(self).showMessage('Video2X configuration file not found, please specify manually.')
+        else:
+            self.config = self.read_config(config_file_path)
+            self.ffmpeg_settings = self.config['ffmpeg']
 
             # load cache directory
-            if isinstance(config['video2x']['video2x_cache_directory'], str):
-                video2x_cache_directory = pathlib.Path(config['video2x']['video2x_cache_directory'])
+            if self.config['video2x']['video2x_cache_directory'] is not None:
+                video2x_cache_directory = pathlib.Path(self.config['video2x']['video2x_cache_directory'])
             else:
                 video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
 
             if video2x_cache_directory.exists() and not video2x_cache_directory.is_dir():
-                messagebox.showerror('Error', 'Specified cache directory is a file/link')
+                self.show_error('Specified cache directory is a file/link')
                 raise FileExistsError('Specified cache directory is a file/link')
 
+            # if cache directory doesn't exist
+            # ask the user if it should be created
             elif not video2x_cache_directory.exists():
-                # try creating the cache directory
-                if messagebox.askyesno('Question', f'Specified cache directory {video2x_cache_directory} does not exist\nCreate directory?'):
-                    try:
-                        video2x_cache_directory.mkdir(parents=True, exist_ok=True)
+                try:
+                    video2x_cache_directory.mkdir(parents=True, exist_ok=True)
+                except Exception as exception:
+                    self.show_error(f'Unable to create cache directory: {video2x_cache_directory}')
+                    raise exception
+            self.cache_line_edit.setText(str(video2x_cache_directory.absolute()))
 
-                    # there can be a number of exceptions here
-                    # PermissionError, FileExistsError, etc.
-                    # therefore, we put a catch-them-all here
-                    except Exception as e:
-                        messagebox.showerror('Error', f'Unable to create {video2x_cache_directory}\nAborting...')
-                        raise e
-                else:
-                    raise FileNotFoundError('Could not create cache directory')
+            self.preserve_frames_check_box.setChecked(self.config['video2x']['preserve_frames'])
+        self.start_button.setEnabled(True)
 
-            # load more settings from gui
-            width = self.width.get()
-            height = self.height.get()
-            scale_ratio = self.scale_ratio.get()
-            image_format = self.image_format.get()
-            threads = self.threads.get()
-            method = AVAILABLE_METHODS[self.method.get()]
-            preserve_frames = self.preserve_frames.get()
+    def select_input_file(self):
+        input_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Input File', )
+        if not isinstance(input_file, tuple) or input_file[0] == '':
+            return
 
-            self.upscaler = Upscaler(input_video=input_file, output_video=output_file, method=method, driver_settings=driver_settings, ffmpeg_settings=ffmpeg_settings)
+        input_file = pathlib.Path(input_file[0])
 
-            # set optional options
-            self.upscaler.waifu2x_driver = driver
-            self.upscaler.scale_width = width
-            self.upscaler.scale_height = height
-            self.upscaler.scale_ratio = scale_ratio
-            self.upscaler.model_dir = None
-            self.upscaler.threads = threads
-            self.upscaler.video2x_cache_directory = video2x_cache_directory
-            self.upscaler.image_format = image_format
-            self.upscaler.preserve_frames = preserve_frames
+        self.input_line_edit.setText(str(input_file.absolute()))
 
-            # run upscaler
-            self.upscaler.create_temp_directories()
+        # try to set an output file name automatically
+        output_file = input_file.parent / f'{input_file.stem}_output.mp4'
 
-            # start progress bar
-            progress_bar = threading.Thread(target=self._progress_bar)
-            progress_bar.start()
+        output_file_id = 0
+        while output_file.is_file() and output_file_id <= 10:
+            output_file = input_file.parent / pathlib.Path(f'{input_file.stem}_output_{output_file_id}.mp4')
+            output_file_id += 1
 
-            # start upscaling
-            self.upscaler.run()
-            self.upscaler.cleanup_temp_directories()
+        if not output_file.exists():
+            self.output_line_edit.setText(str(output_file.absolute()))
 
-            # show message when upscaling completes
-            messagebox.showinfo('Info', f'Upscaling Completed\nTime Taken: {round((time.time() - begin_time), 5)} seconds')
-            self.progress_bar['value'] = 100
-            self.running = False
-            self.start_button_text.set('Start')
-        
-        except Exception as e:
-            messagebox.showerror('Error', f'Upscaler ran into an error:\n{e}')
+    def select_input_folder(self):
+        input_folder = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Input Folder')
+        if input_folder == '':
+            return
 
-            # try cleaning up temp directories
-            with contextlib.suppress(Exception):
-                self.upscaler.cleanup_temp_directories()
+        input_folder = pathlib.Path(input_folder)
 
+        self.input_line_edit.setText(str(input_folder.absolute()))
 
-    def _progress_bar(self):
-        """ This method prints a progress bar
+        # try to set an output file name automatically
+        output_folder = input_folder.parent / f'{input_folder.stem}_output'
 
-        This method prints a progress bar by keeping track
-        of the amount of frames in the input directory
-        and the output directory. This is originally
-        suggested by @ArmandBernard.
-        """
+        output_file_id = 0
+        while output_folder.is_dir() and output_file_id <= 10:
+            output_folder = input_folder.parent / pathlib.Path(f'{input_folder.stem}_output_{output_file_id}')
+            output_file_id += 1
+
+        if not output_folder.exists():
+            self.output_line_edit.setText(str(output_folder.absolute()))
+
+    def select_output_file(self):
+        output_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Output File')
+        if not isinstance(output_file, tuple):
+            return
+
+        self.output_line_edit.setText(str(pathlib.Path(output_file[0]).absolute()))
+
+    def select_output_folder(self):
+        output_folder = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Output Folder')
+        if output_folder == '':
+            return
+
+        self.output_line_edit.setText(str(pathlib.Path(output_folder).absolute()))
+
+    def select_cache_folder(self):
+        cache_folder = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Cache Folder')
+        if cache_folder == '':
+            return
+
+        self.cache_line_edit.setText(str(pathlib.Path(cache_folder).absolute()))
+
+    def select_config_file(self):
+        config_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Config File', filter='(YAML files (*.yaml))')
+        if not isinstance(config_file, tuple):
+            return
+
+        self.config_line_edit.setText(str(pathlib.Path(config_file[0]).absolute()))
+        self.load_configurations()
+
+    def show_error(self, message: str):
+        QtWidgets.QErrorMessage(self).showMessage(message)
+
+    def show_message(self, message: str, custom_icon=None):
+        message_box = QtWidgets.QMessageBox()
+        message_box.setWindowTitle('Message')
+        if custom_icon:
+            message_box.setIconPixmap(custom_icon.scaled(64, 64))
+        else:
+            message_box.setIcon(QtWidgets.QMessageBox.Information)
+        message_box.setText(message)
+        message_box.exec_()
+
+    def start_progress_bar(self):
+
         # initialize variables early
         self.upscaler.progress_bar_exit_signal = False
         self.upscaler.total_frames_upscaled = 0
         self.upscaler.total_frames = 1
 
         # initialize progress bar values
-        self.progress_bar['value'] = 0
+        self.progress_bar.setValue(0)
 
         while not self.upscaler.progress_bar_exit_signal:
-            self.progress_bar['value'] = int(100 * self.upscaler.total_frames_upscaled / self.upscaler.total_frames)
+            self.progress_bar.setValue(int(100 * self.upscaler.total_frames_upscaled / self.upscaler.total_frames))
             time.sleep(1)
+        self.progress_bar.setValue(100)
 
-    def _select_input(self):
-        self.input_file.set(askopenfilename(title='Select Input File'))
+    def upscale(self):
 
-        # remove input file extension
-        input_filename = str(self.input_file.get())
-        for extension in DEMUXER_EXTENSIONS:
-            if input_filename.endswith(f'.{extension}'):
-                input_filename = input_filename[:-1 - len(extension)]
+        # start execution
+        try:
+            # start timer
+            self.begin_time = time.time()
 
-        # try to set an output file name automatically
-        output_file = pathlib.Path(f'{input_filename}_output.mp4')
+            input_directory = pathlib.Path(self.input_line_edit.text())
+            output_directory = pathlib.Path(self.output_line_edit.text())
 
-        output_file_id = 0
-        while output_file.is_file() and output_file_id <= 10:
-            output_file = pathlib.Path(f'{input_filename}_output_{output_file_id}.mp4')
-            output_file_id += 1
-        
-        if not output_file.exists():
-            self.output_file.set(str(output_file))
+            self.threadpool = QThreadPool()
+            self.driver_settings = self.config[AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]]
 
-    def _select_output(self):
-        self.output_file.set(asksaveasfilename(title='Select Output File'))
+            # if input specified is a single file
+            if input_directory.is_file():
+
+                # upscale single video file
+
+                # check for input output format mismatch
+                if output_directory.is_dir():
+                    self.show_error('Input and output path type mismatch\n\
+                                     Input is single file but output is directory')
+                    raise Exception('input output path type mismatch')
+                if not re.search(r'.*\..*$', str(output_directory)):
+                    self.show_error('No suffix found in output file path\n\
+                                     Suffix must be specified for FFmpeg')
+                    raise Exception('No suffix specified')
+
+                self.upscaler = Upscaler(input_video=input_directory,
+                                         output_video=output_directory,
+                                         driver_settings=self.driver_settings,
+                                         ffmpeg_settings=self.ffmpeg_settings)
+
+                # set optional options
+                self.upscaler.driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
+                self.upscaler.scale_ratio = self.scale_ratio_double_spin_box.value()
+                self.upscaler.processes = self.processes_spin_box.value()
+                self.upscaler.video2x_cache_directory = pathlib.Path(self.cache_line_edit.text())
+                self.upscaler.image_format = self.config['video2x']['image_format'].lower()
+                self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.checkState())
+
+                # start progress bar
+                if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
+                    progress_bar = threading.Thread(target=self.start_progress_bar)
+                    progress_bar.start()
+
+                # run upscaler
+                worker = Worker(self.upscaler.run)
+                worker.signals.finished.connect(self.upscale_completed)
+                self.threadpool.start(worker)
+
+            # if input specified is a directory
+            elif input_directory.is_dir():
+                # upscale videos in a directory
+
+                # make output directory if it doesn't exist
+                output_directory.mkdir(parents=True, exist_ok=True)
+
+                for input_video in [f for f in input_directory.iterdir() if f.is_file()]:
+                    output_video = output_directory / input_video.name
+                    self.upscaler = Upscaler(input_video=input_video,
+                                             output_video=output_video,
+                                             driver_settings=self.driver_settings,
+                                             ffmpeg_settings=self.ffmpeg_settings)
+
+                    # set optional options
+                    self.upscaler.driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
+                    self.upscaler.scale_ratio = self.scale_ratio_double_spin_box.value()
+                    self.upscaler.processes = self.processes_spin_box.value()
+                    self.upscaler.video2x_cache_directory = pathlib.Path(self.cache_line_edit.text())
+                    self.upscaler.image_format = self.config['video2x']['image_format'].lower()
+                    self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.checkState())
+
+                    # start progress bar
+                    if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
+                        progress_bar = threading.Thread(target=self.start_progress_bar)
+                        progress_bar.start()
+
+                    # run upscaler
+                    self.upscaler.run()
+            else:
+                self.show_error('Input path is neither a file nor a directory')
+                raise FileNotFoundError(f'{input_directory} is neither file nor directory')
+
+        except Exception as e:
+            self.show_error(f'Upscaler ran into an error:\n{e}')
+
+            # try cleaning up temp directories
+            with contextlib.suppress(Exception):
+                self.upscaler.progress_bar_exit_signal = True
+                self.upscaler.cleanup_temp_directories()
+
+    def upscale_completed(self):
+        self.show_message('Program completed, taking {} seconds'.format(round((time.time() - self.begin_time), 5)))
+        # remove Video2X cache directory
+        with contextlib.suppress(FileNotFoundError):
+            if not bool(self.preserve_frames_check_box.checkState()):
+                shutil.rmtree(pathlib.Path(self.cache_line_edit.text()))
+
+    def stop(self):
+        # stop execution here
+        pass
 
 
-def read_config(config_file):
-    """ Reads configuration file
-
-    Returns a dictionary read by parsing Video2X config.
-    """
-    with open(config_file, 'r') as raw_config:
-        config = yaml.load(raw_config, Loader=yaml.FullLoader)
-        return config
-
-
-def absolutify_paths(config):
-    """ Check to see if paths to binaries are absolute
-
-    This function checks if paths to binary files are absolute.
-    If not, then absolutify the path.
-
-    Arguments:
-        config {dict} -- configuration file dictionary
-
-    Returns:
-        dict -- configuration file dictionary
-    """
-    current_directory = pathlib.Path(sys.argv[0]).parent.absolute()
-
-    # check waifu2x-caffe path
-    if not re.match('^[a-z]:', config['waifu2x_caffe']['path'], re.IGNORECASE):
-        config['waifu2x_caffe']['path'] = current_directory / config['waifu2x_caffe']['path']
-
-    # check waifu2x-converter-cpp path
-    if not re.match('^[a-z]:', config['waifu2x_converter']['path'], re.IGNORECASE):
-        config['waifu2x_converter']['path'] = current_directory / config['waifu2x_converter']['path']
-
-    # check waifu2x_ncnn_vulkan path
-    if not re.match('^[a-z]:', config['waifu2x_ncnn_vulkan']['path'], re.IGNORECASE):
-        config['waifu2x_ncnn_vulkan']['path'] = current_directory / config['waifu2x_ncnn_vulkan']['path']
-
-    # check ffmpeg path
-    if not re.match('^[a-z]:', config['ffmpeg']['ffmpeg_path'], re.IGNORECASE):
-        config['ffmpeg']['ffmpeg_path'] = current_directory / config['ffmpeg']['ffmpeg_path']
-
-    # check video2x cache path
-    if config['video2x']['video2x_cache_directory']:
-        if not re.match('^[a-z]:', config['video2x']['video2x_cache_directory'], re.IGNORECASE):
-            config['video2x']['video2x_cache_directory'] = current_directory / config['video2x']['video2x_cache_directory']
-
-    return config
-
-
-video2x_gui = Video2xGui()
+app = QtWidgets.QApplication(sys.argv)
+window = Video2XMainWindow()
+window.show()
+app.exec_()

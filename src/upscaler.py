@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 5, 2020
+Last Modified: May 6, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -20,7 +20,9 @@ from wrappers.ffmpeg import Ffmpeg
 from fractions import Fraction
 import contextlib
 import copy
+import gettext
 import importlib
+import locale
 import os
 import pathlib
 import re
@@ -34,6 +36,16 @@ import traceback
 # third-party imports
 from avalon_framework import Avalon
 from tqdm import tqdm
+
+# internationalization constants
+DOMAIN = 'video2x'
+LOCALE_DIRECTORY = pathlib.Path(__file__).parent.absolute() / 'locale'
+
+# getting default locale settings
+default_locale, encoding = locale.getdefaultlocale()
+language = gettext.translation(DOMAIN, LOCALE_DIRECTORY, [default_locale], fallback=True)
+language.install()
+_ = language.gettext
 
 # these names are consistent for
 # - driver selection in command line
