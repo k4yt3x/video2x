@@ -21,19 +21,26 @@ waifu2x_caffe:
   crop_h: null
 waifu2x_converter_cpp:
   path: 'C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-converter-cpp\waifu2x-converter-cpp'
-  output-format: null
-  png-compression: null
-  image-quality: null
-  block-size: null
-  disable-gpu: null
-  force-OpenCL: null
-  processor: null
-  jobs: null
-  model-dir: null
-  scale-ratio: null
-  noise-level: 3
+  # list-supported-formats: null
+  # list-opencv-formats: null
+  # list-processor
+  output-format: progress_bar_exit_signal
+  png-compression: 5
+  image-quality: -1
+  block-size: 0
+  disable-gpu: false
+  force-OpenCL: false
+  processor: -1
+  jobs: 0
+  model-dir: null # models_rgb
+  scale-ratio: 2.0
+  noise-level: 1
   mode: noise-scale
-  silent: true
+  log-level: 1
+  silent: null
+  tta: 0
+  # generate-subdir: 0
+  # recursive-directory: 0
   output: null
   input: null
 waifu2x_ncnn_vulkan:
@@ -44,7 +51,7 @@ waifu2x_ncnn_vulkan:
   'n': 2
   s: 2
   t: 400
-  m: null # models-cunet
+  m: null # default: models-cunet
   g: 0
   j: '1:2:2'
 srmd_ncnn_vulkan:
@@ -55,7 +62,7 @@ srmd_ncnn_vulkan:
   'n': 3
   s: 2
   t: 400
-  m: null # models-srmd
+  m: null # default: models-srmd
   g: 0
   j: '1:2:2'
   x: null
@@ -113,6 +120,6 @@ ffmpeg:
     '-hwaccel': auto
     '-y': true
 video2x:
-  video2x_cache_directory: null
+  video2x_cache_directory: null # default: %TEMP%\video2x
   image_format: png
   preserve_frames: false
