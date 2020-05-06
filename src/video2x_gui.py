@@ -255,9 +255,9 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['waifu2x_converter_cpp']['path'] = self.waifu2x_converter_cpp_path_line_edit.text()
         self.config['waifu2x_converter_cpp']['png-compression'] = self.waifu2x_converter_cpp_png_compression_spin_box.value()
         self.config['waifu2x_converter_cpp']['processor'] = self.waifu2x_converter_cpp_processor_spin_box.value()
-        self.config['waifu2x_converter_cpp']['model-dir'] = str((pathlib.Path(self.config['waifu2x_converter_cpp']['path']).parent / self.waifu2x_converter_cpp_path_line_edit.currentText()).absolute())
+        self.config['waifu2x_converter_cpp']['model-dir'] = str((pathlib.Path(self.config['waifu2x_converter_cpp']['path']).parent / self.waifu2x_converter_cpp_model_combo_box.currentText()).absolute())
         self.config['waifu2x_converter_cpp']['mode'] = self.waifu2x_converter_cpp_mode_combo_box.currentText()
-        self.config['waifu2x_converter_cpp']['disable-gpu'] = self.waifu2x_converter_cpp_disable_gpu_check_box.checkState()
+        self.config['waifu2x_converter_cpp']['disable-gpu'] = bool(self.waifu2x_converter_cpp_disable_gpu_check_box.checkState())
         self.config['waifu2x_converter_cpp']['tta'] = int(self.waifu2x_converter_cpp_tta_check_box.checkState())
 
     def select_input_file(self):
