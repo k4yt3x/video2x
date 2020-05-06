@@ -45,48 +45,49 @@ waifu2x_converter_cpp:
   input: null
 waifu2x_ncnn_vulkan:
   path: 'C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-ncnn-vulkan\waifu2x-ncnn-vulkan'
-  v: null
-  i: null
-  o: null
-  'n': 2
-  s: 2
-  t: 400
-  m: null # default: models-cunet
-  g: 0
-  j: '1:2:2'
+  v: null # verbose output
+  i: null # input-path: input image path (jpg/png) or directory
+  o: null # output-path: output image path (png) or directory
+  'n': 2 # noise-level: denoise level (-1/0/1/2/3, default=0)
+  s: 2 # scale: upscale ratio (1/2, default=2)
+  t: 400 # tile-size: tile size (>=32, default=400)
+  m: null # model-path: waifu2x model path (default=models-cunet)
+  g: 0 # gpu-id: gpu device to use (default=0)
+  j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
+  x: false # enable tta mode
 srmd_ncnn_vulkan:
   path: 'C:\Users\K4YT3X\AppData\Local\video2x\srmd-ncnn-vulkan\srmd-ncnn-vulkan'
-  v: null
-  i: null
-  o: null
-  'n': 3
-  s: 2
-  t: 400
-  m: null # default: models-srmd
-  g: 0
-  j: '1:2:2'
-  x: null
+  v: null # verbose output
+  i: null # input-path: input image path (jpg/png) or directory
+  o: null # output-path: output image path (png) or directory
+  'n': 3 # noise-level: denoise level (-1/0/1/2/3/4/5/6/7/8/9/10, default=3)
+  s: 2 # upscale ratio (2/3/4, default=2)
+  t: 400 # tile-size: tile size (>=32, default=400)
+  m: null # srmd model path (default=models-srmd)
+  g: 0 # gpu device to use (default=0)
+  j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
+  x: false # enable tta mode
 anime4kcpp:
   path: 'C:\Users\k4yt3x\AppData\Local\video2x\anime4kcpp\CLI\Anime4KCPP_CLI\Anime4KCPP_CLI'
-  input: null
-  output: null
-  passes: 2
-  pushColorCount: 2
-  strengthColor: 0.3
-  strengthGradient: 1
-  zoomFactor: 2
-  threads: 16
-  fastMode: null
-  videoMode: true
-  preview: null
-  preProcessing: null
-  postProcessing: null
-  preFilters: 4
-  postFilters: 40
-  GPUMode: null
-  listGPUs: null
-  platformID: 0
-  deviceID: 0
+  input: null # File for loading (string [=./pic/p1.png])
+  output: null # File for outputting (string [=output.png])
+  passes: 2 # Passes for processing (int [=2])
+  pushColorCount: 2 # Limit the number of color pushes (int [=2])
+  strengthColor: 0.3 # Strength for pushing color,range 0 to 1,higher for thinner (double [=0.3])
+  strengthGradient: 1.0 # Strength for pushing gradient,range 0 to 1,higher for sharper (double [=1])
+  zoomFactor: 2.0 # zoom factor for resizing (double [=2])
+  threads: 16 # Threads count for video processing (unsigned int [=16])
+  fastMode: false # Faster but maybe low quality
+  videoMode: true # Video process
+  preview: null # Preview image
+  preProcessing: False # Enable pre processing
+  postProcessing: False # Enable post processing
+  preFilters: 4 # Enhancement filter, only working when preProcessing is true,there are 5 options by binary:Median blur=0000001, Mean blur=0000010, CAS Sharpening=0000100, Gaussian blur weak=0001000, Gaussian blur=0010000, Bilateral filter=0100000, Bilateral filter faster=1000000, you can freely combine them, eg: Gaussian blur weak + Bilateral filter = 0001000 | 0100000 = 0101000 = 40(D) (unsigned int [=4])
+  postFilters: 40 # Enhancement filter, only working when postProcessing is true,there are 5 options by binary:Median blur=0000001, Mean blur=0000010, CAS Sharpening=0000100, Gaussian blur weak=0001000, Gaussian blur=0010000, Bilateral filter=0100000, Bilateral filter faster=1000000, you can freely combine them, eg: Gaussian blur weak + Bilateral filter = 0001000 | 0100000 = 0101000 = 40(D), so you can put 40 to enable Gaussian blur weak and Bilateral filter, which also is what I recommend for image that < 1080P, 48 for image that >= 1080P, and for performance I recommend to use 72 for video that < 1080P, 80 for video that >=1080P (unsigned int [=40])
+  GPUMode: False # Enable GPU acceleration
+  listGPUs: null # list GPUs
+  platformID: 0 # Specify the platform ID (unsigned int [=0])
+  deviceID: 0 # Specify the device ID (unsigned int [=0])
 ffmpeg:
   ffmpeg_path: 'C:\Users\K4YT3X\AppData\Local\video2x\ffmpeg-latest-win64-static\bin'
   video_to_frames:
