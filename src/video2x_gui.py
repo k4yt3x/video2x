@@ -40,7 +40,7 @@ Contact: k4yt3x@k4yt3x.com'''
 AVAILABLE_DRIVERS = {
     'Waifu2X Caffe': 'waifu2x_caffe',
     'Waifu2X Converter CPP': 'waifu2x_converter_cpp',
-    'Waifu2x NCNN Vulkan': 'waifu2x_ncnn_vulkan',
+    'Waifu2X NCNN Vulkan': 'waifu2x_ncnn_vulkan',
     'SRMD NCNN Vulkan': 'srmd_ncnn_vulkan',
     'Anime4KCPP': 'anime4kcpp'
 }
@@ -122,6 +122,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # express settings
         self.driver_combo_box = self.findChild(QtWidgets.QComboBox, 'driverComboBox')
+        self.driver_combo_box.currentTextChanged.connect(self.update_driver_constraints)
         self.processes_spin_box = self.findChild(QtWidgets.QSpinBox, 'processesSpinBox')
         self.scale_ratio_double_spin_box = self.findChild(QtWidgets.QDoubleSpinBox, 'scaleRatioDoubleSpinBox')
         self.preserve_frames_check_box = self.findChild(QtWidgets.QCheckBox, 'preserveFramesCheckBox')
@@ -367,9 +368,31 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['anime4kcpp']['postProcessing'] = bool(self.anime4kcpp_post_processing_check_box.checkState())
         self.config['anime4kcpp']['GPUMode'] = bool(self.anime4kcpp_gpu_mode_check_box.checkState())
 
+    def update_driver_constraints(self):
+        current_driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
+        if current_driver == 'waifu2x_caffe':
+            self.scale_ratio_double_spin_box.setMinimum(0.0)
+            self.scale_ratio_double_spin_box.setMaximum(999.0)
+            self.scale_ratio_double_spin_box.setValue(2.0)
+        elif current_driver == 'waifu2x_converter_cpp':
+            self.scale_ratio_double_spin_box.setMinimum(0.0)
+            self.scale_ratio_double_spin_box.setMaximum(999.0)
+            self.scale_ratio_double_spin_box.setValue(2.0)
+        elif current_driver == 'waifu2x_ncnn_vulkan':
+            self.scale_ratio_double_spin_box.setMinimum(1.0)
+            self.scale_ratio_double_spin_box.setMaximum(2.0)
+            self.scale_ratio_double_spin_box.setValue(2.0)
+        elif current_driver == 'srmd_ncnn_vulkan':
+            self.scale_ratio_double_spin_box.setMinimum(2.0)
+            self.scale_ratio_double_spin_box.setMaximum(4.0)
+            self.scale_ratio_double_spin_box.setValue(2.0)
+        elif current_driver == 'anime4kcpp':
+            self.scale_ratio_double_spin_box.setMinimum(0)
+            self.scale_ratio_double_spin_box.setMaximum(999.0)
+            self.scale_ratio_double_spin_box.setValue(2.0)
 
     def select_input_file(self):
-        input_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Input File', )
+        input_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Input File')
         if not isinstance(input_file, tuple) or input_file[0] == '':
             return
 
