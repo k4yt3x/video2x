@@ -68,7 +68,7 @@ srmd_ncnn_vulkan:
   j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
   x: false # enable tta mode
 anime4kcpp:
-  path: 'C:\Users\k4yt3x\AppData\Local\video2x\anime4kcpp\CLI\Anime4KCPP_CLI\Anime4KCPP_CLI'
+  path: 'C:\Users\K4YT3X\AppData\Local\video2x\anime4kcpp\CLI\Anime4KCPP_CLI\Anime4KCPP_CLI'
   input: null # File for loading (string [=./pic/p1.png])
   output: null # File for outputting (string [=output.png])
   passes: 2 # Passes for processing (int [=2])
