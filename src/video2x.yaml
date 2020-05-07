@@ -1,5 +1,5 @@
 waifu2x_caffe:
-  path: 'C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-caffe\waifu2x-caffe-cui'
+  path: '%LOCALAPPDATA%\video2x\waifu2x-caffe\waifu2x-caffe-cui'
   input_extention_list: null
   output_extention: null
   mode: noise_scale
@@ -20,11 +20,11 @@ waifu2x_caffe:
   crop_w: null
   crop_h: null
 waifu2x_converter_cpp:
-  path: 'C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-converter-cpp\waifu2x-converter-cpp'
+  path: '%LOCALAPPDATA%\video2x\waifu2x-converter-cpp\waifu2x-converter-cpp'
   # list-supported-formats: null
   # list-opencv-formats: null
   # list-processor
-  output-format: progress_bar_exit_signal
+  output-format: null
   png-compression: 5
   image-quality: -1
   block-size: 0
@@ -37,14 +37,14 @@ waifu2x_converter_cpp:
   noise-level: 1
   mode: noise-scale
   log-level: 1
-  silent: null
+  silent: true
   tta: 0
   # generate-subdir: 0
   # recursive-directory: 0
   output: null
   input: null
 waifu2x_ncnn_vulkan:
-  path: 'C:\Users\K4YT3X\AppData\Local\video2x\waifu2x-ncnn-vulkan\waifu2x-ncnn-vulkan'
+  path: '%LOCALAPPDATA%\video2x\waifu2x-ncnn-vulkan\waifu2x-ncnn-vulkan'
   v: null # verbose output
   i: null # input-path: input image path (jpg/png) or directory
   o: null # output-path: output image path (png) or directory
@@ -56,7 +56,7 @@ waifu2x_ncnn_vulkan:
   j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
   x: false # enable tta mode
 srmd_ncnn_vulkan:
-  path: 'C:\Users\K4YT3X\AppData\Local\video2x\srmd-ncnn-vulkan\srmd-ncnn-vulkan'
+  path: '%LOCALAPPDATA%\video2x\srmd-ncnn-vulkan\srmd-ncnn-vulkan'
   v: null # verbose output
   i: null # input-path: input image path (jpg/png) or directory
   o: null # output-path: output image path (png) or directory
@@ -68,7 +68,7 @@ srmd_ncnn_vulkan:
   j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
   x: false # enable tta mode
 anime4kcpp:
-  path: 'C:\Users\K4YT3X\AppData\Local\video2x\anime4kcpp\CLI\Anime4KCPP_CLI\Anime4KCPP_CLI'
+  path: '%LOCALAPPDATA%\video2x\anime4kcpp\CLI\Anime4KCPP_CLI\Anime4KCPP_CLI'
   input: null # File for loading (string [=./pic/p1.png])
   output: null # File for outputting (string [=output.png])
   passes: 2 # Passes for processing (int [=2])
@@ -80,16 +80,17 @@ anime4kcpp:
   fastMode: false # Faster but maybe low quality
   videoMode: true # Video process
   preview: null # Preview image
-  preProcessing: False # Enable pre processing
-  postProcessing: False # Enable post processing
+  preprocessing: False # Enable pre processing
+  postprocessing: False # Enable post processing
   preFilters: 4 # Enhancement filter, only working when preProcessing is true,there are 5 options by binary:Median blur=0000001, Mean blur=0000010, CAS Sharpening=0000100, Gaussian blur weak=0001000, Gaussian blur=0010000, Bilateral filter=0100000, Bilateral filter faster=1000000, you can freely combine them, eg: Gaussian blur weak + Bilateral filter = 0001000 | 0100000 = 0101000 = 40(D) (unsigned int [=4])
   postFilters: 40 # Enhancement filter, only working when postProcessing is true,there are 5 options by binary:Median blur=0000001, Mean blur=0000010, CAS Sharpening=0000100, Gaussian blur weak=0001000, Gaussian blur=0010000, Bilateral filter=0100000, Bilateral filter faster=1000000, you can freely combine them, eg: Gaussian blur weak + Bilateral filter = 0001000 | 0100000 = 0101000 = 40(D), so you can put 40 to enable Gaussian blur weak and Bilateral filter, which also is what I recommend for image that < 1080P, 48 for image that >= 1080P, and for performance I recommend to use 72 for video that < 1080P, 80 for video that >=1080P (unsigned int [=40])
   GPUMode: False # Enable GPU acceleration
   listGPUs: null # list GPUs
   platformID: 0 # Specify the platform ID (unsigned int [=0])
   deviceID: 0 # Specify the device ID (unsigned int [=0])
+  codec: mp4v # Specify the codec for encoding from mp4v(recommended in Windows), dxva(for Windows), avc1(H264, recommended in Linux), vp09(very slow), hevc(not support in Windowds), av01(not support in Windowds) (string [=mp4v])
 ffmpeg:
-  ffmpeg_path: 'C:\Users\K4YT3X\AppData\Local\video2x\ffmpeg-latest-win64-static\bin'
+  ffmpeg_path: '%LOCALAPPDATA%\video2x\ffmpeg-latest-win64-static\bin'
   video_to_frames:
     output_options:
       '-qscale:v': null
