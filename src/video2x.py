@@ -58,6 +58,7 @@ import contextlib
 import gettext
 import importlib
 import locale
+import os
 import pathlib
 import re
 import shutil
@@ -178,6 +179,7 @@ config = read_config(video2x_args.config)
 
 # load waifu2x configuration
 driver_settings = config[video2x_args.driver]
+driver_settings['path'] = os.path.expandvars(driver_settings['path'])
 
 # overwrite driver_settings with driver_args
 if driver_args is not None:
@@ -195,6 +197,7 @@ if not pathlib.Path(driver_settings['path']).exists():
 
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']
+ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(ffmpeg_settings['ffmpeg_path'])
 
 # load video2x settings
 image_format = config['video2x']['image_format'].lower()
