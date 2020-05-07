@@ -1206,6 +1206,16 @@
                   <string>vp09</string>
                  </property>
                 </item>
+                <item>
+                 <property name="text">
+                  <string>hevc</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>av01</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>

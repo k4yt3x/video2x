@@ -15,7 +15,6 @@ import contextlib
 import os
 import pathlib
 import re
-import shutil
 import sys
 import tempfile
 import time
@@ -54,6 +53,7 @@ def resource_path(relative_path: str) -> pathlib.Path:
 class WorkerSignals(QObject):
     progress = pyqtSignal(tuple)
     error = pyqtSignal(str)
+    interrupted = pyqtSignal()
     finished = pyqtSignal()
 
 class ProgressBarWorker(QRunnable):
@@ -89,11 +89,13 @@ class UpscalerWorker(QRunnable):
         # Retrieve args/kwargs here; and fire processing using them
         try:
             self.fn(*self.args, **self.kwargs)
+        except (KeyboardInterrupt, SystemExit):
+            self.signals.interrupted.emit()
         except Exception:
             error_message = traceback.format_exc()
             print(error_message, file=sys.stderr)
             self.signals.error.emit(error_message)
-        finally:
+        else:
             self.signals.finished.emit()
 
 class Video2XMainWindow(QtWidgets.QMainWindow):
@@ -141,7 +143,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # express settings
         self.driver_combo_box = self.findChild(QtWidgets.QComboBox, 'driverComboBox')
-        self.driver_combo_box.currentTextChanged.connect(self.update_driver_constraints)
+        self.driver_combo_box.currentTextChanged.connect(self.update_gui_for_driver)
         self.processes_spin_box = self.findChild(QtWidgets.QSpinBox, 'processesSpinBox')
         self.scale_ratio_double_spin_box = self.findChild(QtWidgets.QDoubleSpinBox, 'scaleRatioDoubleSpinBox')
         self.preserve_frames_check_box = self.findChild(QtWidgets.QCheckBox, 'preserveFramesCheckBox')
@@ -258,25 +260,10 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.ffmpeg_settings = self.config['ffmpeg']
         self.ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(self.ffmpeg_settings['ffmpeg_path'])
 
-        # load cache directory, create it if necessary
-        if self.config['video2x']['video2x_cache_directory'] is not None:
-            video2x_cache_directory = pathlib.Path(self.config['video2x']['video2x_cache_directory'])
-        else:
-            video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
-
-        if video2x_cache_directory.exists() and not video2x_cache_directory.is_dir():
-            self.show_error('Specified cache directory is a file/link')
-            raise FileExistsError('Specified cache directory is a file/link')
-
-        # if cache directory doesn't exist
-        # ask the user if it should be created
-        elif not video2x_cache_directory.exists():
-            try:
-                video2x_cache_directory.mkdir(parents=True, exist_ok=True)
-            except Exception as exception:
-                self.show_error(f'Unable to create cache directory: {video2x_cache_directory}')
-                raise exception
-        self.cache_line_edit.setText(str(video2x_cache_directory.absolute()))
+        # set cache directory path
+        if self.config['video2x']['video2x_cache_directory'] is None:
+            video2x_cache_directory = str((pathlib.Path(tempfile.gettempdir()) / 'video2x').absolute())
+        self.cache_line_edit.setText(video2x_cache_directory)
 
         # load preserve frames settings
         self.preserve_frames_check_box.setChecked(self.config['video2x']['preserve_frames'])
@@ -399,8 +386,10 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['anime4kcpp']['postprocessing'] = bool(self.anime4kcpp_post_processing_check_box.checkState())
         self.config['anime4kcpp']['GPUMode'] = bool(self.anime4kcpp_gpu_mode_check_box.checkState())
 
-    def update_driver_constraints(self):
+    def update_gui_for_driver(self):
         current_driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
+        
+        # update scale ratio constraints
         if current_driver in ['waifu2x_caffe', 'waifu2x_converter_cpp', 'anime4kcpp']:
             self.scale_ratio_double_spin_box.setMinimum(0.0)
             self.scale_ratio_double_spin_box.setMaximum(999.0)
@@ -413,14 +402,29 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             self.scale_ratio_double_spin_box.setMinimum(2.0)
             self.scale_ratio_double_spin_box.setMaximum(4.0)
             self.scale_ratio_double_spin_box.setValue(2.0)
+        
+        # update preferred processes/threads count
+        if current_driver == 'anime4kcpp':
+            self.processes_spin_box.setValue(16)
+        else:
+            self.processes_spin_box.setValue(1)
+    
+    def select_file(self, *args, **kwargs) -> pathlib.Path:
+        file_selected = QtWidgets.QFileDialog.getOpenFileName(self, *args, **kwargs)
+        if not isinstance(file_selected, tuple) or file_selected[0] == '':
+            return None
+        return pathlib.Path(file_selected[0])
+
+    def select_folder(self, *args, **kwargs) -> pathlib.Path:
+        folder_selected = QtWidgets.QFileDialog.getExistingDirectory(self, *args, **kwargs)
+        if folder_selected == '':
+            return None
+        return pathlib.Path(folder_selected)
 
     def select_input_file(self):
-        input_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Input File')
-        if not isinstance(input_file, tuple) or input_file[0] == '':
+        
+        if (input_file := self.select_file('Select Input File')) is None:
             return
-
-        input_file = pathlib.Path(input_file[0])
-
         self.input_line_edit.setText(str(input_file.absolute()))
 
         # try to set an output file name automatically
@@ -435,11 +439,9 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             self.output_line_edit.setText(str(output_file.absolute()))
 
     def select_input_folder(self):
-        input_folder = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Input Folder')
-        if input_folder == '':
-            return
 
-        input_folder = pathlib.Path(input_folder)
+        if (input_folder := self.select_folder('Select Input Folder')) is None:
+            return
 
         self.input_line_edit.setText(str(input_folder.absolute()))
 
@@ -455,40 +457,30 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             self.output_line_edit.setText(str(output_folder.absolute()))
 
     def select_output_file(self):
-        output_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Output File')
-        if not isinstance(output_file, tuple):
+        if (output_file := self.select_file('Select Output File')) is None:
             return
-
-        self.output_line_edit.setText(str(pathlib.Path(output_file[0]).absolute()))
+        self.output_line_edit.setText(str(output_file.absolute()))
 
     def select_output_folder(self):
-        output_folder = QtWidgets.QFileDialog.getSaveFileName(self, 'Select Output Folder')
-        if output_folder == '':
+        if (output_folder := self.select_folder('Select Output Folder')) is None:
             return
-
-        self.output_line_edit.setText(str(pathlib.Path(output_folder).absolute()))
+        self.output_line_edit.setText(str(output_folder.absolute()))
 
     def select_cache_folder(self):
-        cache_folder = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Cache Folder')
-        if cache_folder == '':
+        if (cache_folder := self.select_folder('Select Cache Folder')) is None:
             return
-
-        self.cache_line_edit.setText(str(pathlib.Path(cache_folder).absolute()))
+        self.cache_line_edit.setText(str(cache_folder.absolute()))
 
     def select_config_file(self):
-        config_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Config File', filter='(YAML files (*.yaml))')
-        if not isinstance(config_file, tuple):
+        if (config_file := self.select_file('Select Config File', filter='(YAML files (*.yaml))')) is None:
             return
-
-        self.config_line_edit.setText(str(pathlib.Path(config_file[0]).absolute()))
+        self.config_line_edit.setText(str(config_file.absolute()))
         self.load_configurations()
     
     def select_driver_binary_path(self, driver_line_edit):
-        driver_binary_path = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Driver Binary File')
-        if not isinstance(driver_binary_path, tuple) or driver_binary_path[0] == '':
+        if (driver_binary_path := self.select_file('Select Driver Binary File')) is None:
             return
-
-        driver_line_edit.setText(str(pathlib.Path(driver_binary_path[0]).absolute()))
+        driver_line_edit.setText(str(driver_binary_path.absolute()))
 
     def show_error(self, message: str):
         QtWidgets.QErrorMessage(self).showMessage(message.replace('\n', '<br>'))
@@ -504,19 +496,24 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         message_box.exec_()
 
     def start_progress_bar(self, progress_callback):
-
-        # initialize variables early
-        self.upscaler.progress_bar_exit_signal = False
-        self.upscaler.total_frames_upscaled = 0
-        self.upscaler.total_frames = 1
+        # wait for progress monitor to come online
+        while 'progress_monitor' not in self.upscaler.__dict__:
+            if self.upscaler.stop_signal:
+                return
+            time.sleep(0.1)
 
         # initialize progress bar values
         upscale_begin_time = time.time()
         progress_callback.emit((0, 0, 0, upscale_begin_time))
 
         # keep querying upscaling process and feed information to callback signal
-        while not self.upscaler.progress_bar_exit_signal:
-            progress_callback.emit((int(100 * self.upscaler.total_frames_upscaled / self.upscaler.total_frames),
+        while self.upscaler.progress_monitor.running:
+            try:
+                progress_percentage = int(100 * self.upscaler.total_frames_upscaled / self.upscaler.total_frames)
+            except ZeroDivisionError:
+                progress_percentage = 0
+
+            progress_callback.emit((progress_percentage,
                                    self.upscaler.total_frames_upscaled,
                                    self.upscaler.total_frames,
                                    upscale_begin_time))
@@ -574,109 +571,60 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             # load driver settings for the current driver
             self.driver_settings = self.config[AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]]
 
-            # if input specified is a single file
-            if input_directory.is_file():
+            self.upscaler = Upscaler(input_path=input_directory,
+                                     output_path=output_directory,
+                                     driver_settings=self.driver_settings,
+                                     ffmpeg_settings=self.ffmpeg_settings)
 
-                # check for input output format mismatch
-                if output_directory.is_dir():
-                    self.show_error('Input and output path type mismatch\n\
-                                     Input is single file but output is directory')
-                    raise Exception('input output path type mismatch')
-                if not re.search(r'.*\..*$', str(output_directory)):
-                    self.show_error('No suffix found in output file path\n\
-                                     Suffix must be specified for FFmpeg')
-                    raise Exception('No suffix specified')
+            # set optional options
+            self.upscaler.driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
+            self.upscaler.scale_ratio = self.scale_ratio_double_spin_box.value()
+            self.upscaler.processes = self.processes_spin_box.value()
+            self.upscaler.video2x_cache_directory = pathlib.Path(os.path.expandvars(self.cache_line_edit.text()))
+            self.upscaler.image_format = self.config['video2x']['image_format'].lower()
+            self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.checkState())
 
-                self.upscaler = Upscaler(input_video=input_directory,
-                                         output_video=output_directory,
-                                         driver_settings=self.driver_settings,
-                                         ffmpeg_settings=self.ffmpeg_settings)
+            # start progress bar
+            if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
+                progress_bar_worker = ProgressBarWorker(self.start_progress_bar)
+                progress_bar_worker.signals.progress.connect(self.set_progress)
+                self.threadpool.start(progress_bar_worker)
 
-                # set optional options
-                self.upscaler.driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
-                self.upscaler.scale_ratio = self.scale_ratio_double_spin_box.value()
-                self.upscaler.processes = self.processes_spin_box.value()
-                self.upscaler.video2x_cache_directory = pathlib.Path(os.path.expandvars(self.cache_line_edit.text()))
-                self.upscaler.image_format = self.config['video2x']['image_format'].lower()
-                self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.checkState())
-
-                # start progress bar
-                if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
-                    progress_bar_worker = ProgressBarWorker(self.start_progress_bar)
-                    progress_bar_worker.signals.progress.connect(self.set_progress)
-                    self.threadpool.start(progress_bar_worker)
-
-                # run upscaler
-                worker = UpscalerWorker(self.upscaler.run)
-                worker.signals.error.connect(self.upscale_errored)
-                worker.signals.finished.connect(self.upscale_completed)
-                self.threadpool.start(worker)
-                self.start_button.setEnabled(False)
-                # self.stop_button.setEnabled(True)
-
-            # if input specified is a directory
-            elif input_directory.is_dir():
-                # upscale videos in a directory
-
-                # make output directory if it doesn't exist
-                output_directory.mkdir(parents=True, exist_ok=True)
-
-                for input_video in [f for f in input_directory.iterdir() if f.is_file()]:
-                    output_video = output_directory / input_video.name
-                    self.upscaler = Upscaler(input_video=input_video,
-                                             output_video=output_video,
-                                             driver_settings=self.driver_settings,
-                                             ffmpeg_settings=self.ffmpeg_settings)
-
-                    # set optional options
-                    self.upscaler.driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
-                    self.upscaler.scale_ratio = self.scale_ratio_double_spin_box.value()
-                    self.upscaler.processes = self.processes_spin_box.value()
-                    self.upscaler.video2x_cache_directory = pathlib.Path(os.path.expandvars(self.cache_line_edit.text()))
-                    self.upscaler.image_format = self.config['video2x']['image_format'].lower()
-                    self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.checkState())
-
-                    # start progress bar
-                    if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
-                        progress_bar_worker = ProgressBarWorker(self.start_progress_bar)
-                        self.threadpool.start(progress_bar_worker)
-
-                    # run upscaler
-                    worker = UpscalerWorker(self.upscaler.run)
-                    worker.signals.error.connect(self.upscale_errored)
-                    worker.signals.finished.connect(self.upscale_completed)
-                    self.threadpool.start(worker)
-                    self.start_button.setEnabled(False)
-                    # self.stop_button.setEnabled(True)
-            else:
-                self.show_error('Input path is neither a file nor a directory')
-                raise FileNotFoundError(f'{input_directory} is neither file nor directory')
+            # run upscaler
+            worker = UpscalerWorker(self.upscaler.run)
+            worker.signals.error.connect(self.upscale_errored)
+            worker.signals.finished.connect(self.upscale_completed)
+            worker.signals.interrupted.connect(self.upscale_interrupted)
+            self.threadpool.start(worker)
+            self.start_button.setEnabled(False)
+            self.stop_button.setEnabled(True)
 
         except Exception:
             self.upscale_errored(traceback.format_exc())
-            self.upscale_completed()
     
     def upscale_errored(self, error_message):
         self.show_error(f'Upscaler ran into an error:\n{error_message}')
-
-        # try cleaning up temp directories
-        with contextlib.suppress(Exception):
-            self.upscaler.progress_bar_exit_signal = True
-            self.upscaler.cleanup_temp_directories()
 
     def upscale_completed(self):
         # if all threads have finished
         if self.threadpool.activeThreadCount() == 0:
             self.show_message('Program completed, taking {} seconds'.format(round((time.time() - self.begin_time), 5)))
-            # remove Video2X cache directory
-            with contextlib.suppress(FileNotFoundError):
-                if not bool(self.preserve_frames_check_box.checkState()):
-                    shutil.rmtree(pathlib.Path(os.path.expandvars(self.cache_line_edit.text())))
             self.start_button.setEnabled(True)
+            self.stop_button.setEnabled(False)
+    
+    def upscale_interrupted(self):
+        self.show_message('Upscale has been interrupted')
+        self.start_button.setEnabled(True)
+        self.stop_button.setEnabled(False)
 
     def stop(self):
-        # TODO unimplemented yet
-        pass
+        with contextlib.suppress(AttributeError):
+            self.upscaler.stop_signal = True
+
+    def closeEvent(self, event):
+        # try cleaning up temp directories
+        self.stop()
+        event.accept()
 
 
 # this file shouldn't be imported

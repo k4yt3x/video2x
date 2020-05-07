@@ -13,6 +13,8 @@ for waifu2x-caffe.
 # built-in imports
 import argparse
 import os
+import pathlib
+import platform
 import shlex
 import subprocess
 import threading
@@ -32,6 +34,7 @@ class WrapperMain:
     @staticmethod
     def parse_arguments(arguments):
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
+        parser.error = lambda message: (_ for _ in ()).throw(AttributeError(message))
         parser.add_argument('--help', action='help', help='show this help message and exit')
         # parser.add_argument('-i', '--input', type=pathlib.Path, help='File for loading')
         # parser.add_argument('-o', '--output', type=pathlib.Path, help='File for outputting')
@@ -70,6 +73,11 @@ class WrapperMain:
         self.driver_settings['output'] = output_file
         self.driver_settings['zoomFactor'] = zoom_factor
         self.driver_settings['threads'] = threads
+        
+        # Anime4KCPP will look for Anime4KCPPKernel.cl under the current working directory
+        # change the CWD to its containing directory so it will find it
+        if platform.system() == 'Windows':
+            os.chdir(pathlib.Path(self.driver_settings['path']).parent)
 
         # list to be executed
         # initialize the list with waifu2x binary path as the first element

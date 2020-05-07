@@ -4,7 +4,7 @@
 Name: SRMD NCNN Vulkan Driver
 Creator: K4YT3X
 Date Created: April 26, 2020
-Last Modified: May 5, 2020
+Last Modified: May 7, 2020
 
 Description: This class is a high-level wrapper
 for srmd_ncnn_vulkan.
@@ -39,6 +39,7 @@ class WrapperMain:
     @staticmethod
     def parse_arguments(arguments):
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
+        parser.error = lambda message: (_ for _ in ()).throw(AttributeError(message))
         parser.add_argument('--help', action='help', help='show this help message and exit')
         parser.add_argument('-v', action='store_true', help='verbose output')
         # parser.add_argument('-i', type=pathlib.Path, help='input image path (jpg/png) or directory')

@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: November 15, 2019
+Last Modified: May 7, 2020
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -131,7 +131,7 @@ class Ffmpeg:
             extracted_frames / f'extracted_%0d.{self.image_format}'
         ])
 
-        self._execute(execute)
+        return(self._execute(execute))
 
     def convert_video(self, framerate, resolution, upscaled_frames):
         """Converts images into videos
@@ -180,7 +180,7 @@ class Ffmpeg:
             upscaled_frames / 'no_audio.mp4'
         ])
 
-        self._execute(execute)
+        return(self._execute(execute))
 
     def migrate_audio_tracks_subtitles(self, input_video, output_video, upscaled_frames):
         """ Migrates audio tracks and subtitles from input video to output video
@@ -209,7 +209,7 @@ class Ffmpeg:
             output_video
         ])
 
-        self._execute(execute)
+        return(self._execute(execute))
 
     def _read_configuration(self, phase, section=None):
         """ read configuration from JSON
@@ -284,4 +284,4 @@ class Ffmpeg:
 
         Avalon.debug_info(f'Executing: {execute}')
 
-        return subprocess.run(execute, check=True).returncode
+        return subprocess.Popen(execute)

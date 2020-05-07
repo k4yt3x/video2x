@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 4, 2020
+Last Modified: May 7, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -37,6 +37,7 @@ class WrapperMain:
     @staticmethod
     def parse_arguments(arguments):
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
+        parser.error = lambda message: (_ for _ in ()).throw(AttributeError(message))
         parser.add_argument('--help', action='help', help='show this help message and exit')
         parser.add_argument('-t', '--tta', type=int, choices=range(2), help='8x slower and slightly high quality')
         parser.add_argument('--gpu', type=int, help='gpu device no')

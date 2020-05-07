@@ -4,7 +4,7 @@
 Name: Waifu2x NCNN Vulkan Driver
 Creator: SAT3LL
 Date Created: June 26, 2019
-Last Modified: May 5, 2020
+Last Modified: May 7, 2020
 
 Editor: K4YT3X
 Last Modified: February 22, 2020
@@ -42,6 +42,7 @@ class WrapperMain:
     @staticmethod
     def parse_arguments(arguments):
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
+        parser.error = lambda message: (_ for _ in ()).throw(AttributeError(message))
         parser.add_argument('--help', action='help', help='show this help message and exit')
         parser.add_argument('-v', action='store_true', help='verbose output')
         # parser.add_argument('-i', type=pathlib.Path, help='input image path (jpg/png) or directory')

@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 4, 2020
+Last Modified: May 7, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -181,20 +181,6 @@ config = read_config(video2x_args.config)
 driver_settings = config[video2x_args.driver]
 driver_settings['path'] = os.path.expandvars(driver_settings['path'])
 
-# overwrite driver_settings with driver_args
-if driver_args is not None:
-    driver_args_dict = vars(driver_args)
-    for key in driver_args_dict:
-        if driver_args_dict[key] is not None:
-            driver_settings[key] = driver_args_dict[key]
-
-# check if driver path exists
-if not pathlib.Path(driver_settings['path']).exists():
-    if not pathlib.Path(f'{driver_settings["path"]}.exe').exists():
-        Avalon.error(_('Specified driver executable directory doesn\'t exist'))
-        Avalon.error(_('Please check the configuration file settings'))
-        raise FileNotFoundError(driver_settings['path'])
-
 # read FFmpeg configuration
 ffmpeg_settings = config['ffmpeg']
 ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(ffmpeg_settings['ffmpeg_path'])
@@ -202,113 +188,41 @@ ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(ffmpeg_settings['ffmpeg_path
 # load video2x settings
 image_format = config['video2x']['image_format'].lower()
 preserve_frames = config['video2x']['preserve_frames']
+video2x_cache_directory = config['video2x']['video2x_cache_directory']
 
-# load cache directory
-if config['video2x']['video2x_cache_directory'] is not None:
-    video2x_cache_directory = pathlib.Path(config['video2x']['video2x_cache_directory'])
-else:
-    video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
-
-if video2x_cache_directory.exists() and not video2x_cache_directory.is_dir():
-    Avalon.error(_('Specified cache directory is a file/link'))
-    raise FileExistsError('Specified cache directory is a file/link')
-
-# if cache directory doesn't exist
-# ask the user if it should be created
-elif not video2x_cache_directory.exists():
-    try:
-        Avalon.debug_info(_('Creating cache directory {}').format(video2x_cache_directory))
-        video2x_cache_directory.mkdir(parents=True, exist_ok=True)
-    # there can be a number of exceptions here
-    # PermissionError, FileExistsError, etc.
-    # therefore, we put a catch-them-all here
-    except Exception as exception:
-        Avalon.error(_('Unable to create {}').format(video2x_cache_directory))
-        raise exception
-
+# overwrite driver_settings with driver_args
+if driver_args is not None:
+    driver_args_dict = vars(driver_args)
+    for key in driver_args_dict:
+        if driver_args_dict[key] is not None:
+            driver_settings[key] = driver_args_dict[key]
 
 # start execution
 try:
     # start timer
     begin_time = time.time()
 
-    # if input specified is a single file
-    if video2x_args.input.is_file():
+    # initialize upscaler object
+    upscaler = Upscaler(input_path=video2x_args.input,
+                        output_path=video2x_args.output,
+                        driver_settings=driver_settings,
+                        ffmpeg_settings=ffmpeg_settings)
 
-        # upscale single video file
-        Avalon.info(_('Upscaling single video file: {}').format(video2x_args.input))
+    # set upscaler optional options
+    upscaler.driver = video2x_args.driver
+    upscaler.scale_width = video2x_args.width
+    upscaler.scale_height = video2x_args.height
+    upscaler.scale_ratio = video2x_args.ratio
+    upscaler.processes = video2x_args.processes
+    upscaler.video2x_cache_directory = video2x_cache_directory
+    upscaler.image_format = image_format
+    upscaler.preserve_frames = preserve_frames
 
-        # check for input output format mismatch
-        if video2x_args.output.is_dir():
-            Avalon.error(_('Input and output path type mismatch'))
-            Avalon.error(_('Input is single file but output is directory'))
-            raise Exception('input output path type mismatch')
-        if not re.search(r'.*\..*$', str(video2x_args.output)):
-            Avalon.error(_('No suffix found in output file path'))
-            Avalon.error(_('Suffix must be specified for FFmpeg'))
-            raise Exception('No suffix specified')
-
-        upscaler = Upscaler(input_video=video2x_args.input,
-                            output_video=video2x_args.output,
-                            driver_settings=driver_settings,
-                            ffmpeg_settings=ffmpeg_settings)
-
-        # set optional options
-        upscaler.driver = video2x_args.driver
-        upscaler.scale_width = video2x_args.width
-        upscaler.scale_height = video2x_args.height
-        upscaler.scale_ratio = video2x_args.ratio
-        upscaler.processes = video2x_args.processes
-        upscaler.video2x_cache_directory = video2x_cache_directory
-        upscaler.image_format = image_format
-        upscaler.preserve_frames = preserve_frames
-
-        # run upscaler
-        upscaler.run()
-
-    # if input specified is a directory
-    elif video2x_args.input.is_dir():
-        # upscale videos in a directory
-        Avalon.info(_('Upscaling videos in directory: {}').format(video2x_args.input))
-
-        # make output directory if it doesn't exist
-        video2x_args.output.mkdir(parents=True, exist_ok=True)
-
-        for input_video in [f for f in video2x_args.input.iterdir() if f.is_file()]:
-            output_video = video2x_args.output / input_video.name
-            upscaler = Upscaler(input_video=input_video,
-                                output_video=output_video,
-                                driver_settings=driver_settings,
-                                ffmpeg_settings=ffmpeg_settings)
-
-            # set optional options
-            upscaler.driver = video2x_args.driver
-            upscaler.scale_width = video2x_args.width
-            upscaler.scale_height = video2x_args.height
-            upscaler.scale_ratio = video2x_args.ratio
-            upscaler.processes = video2x_args.processes
-            upscaler.video2x_cache_directory = video2x_cache_directory
-            upscaler.image_format = image_format
-            upscaler.preserve_frames = preserve_frames
-
-            # run upscaler
-            upscaler.run()
-    else:
-        Avalon.error(_('Input path is neither a file nor a directory'))
-        raise FileNotFoundError(f'{video2x_args.input} is neither file nor directory')
+    # run upscaler
+    upscaler.run()
 
     Avalon.info(_('Program completed, taking {} seconds').format(round((time.time() - begin_time), 5)))
 
 except Exception:
     Avalon.error(_('An exception has occurred'))
     traceback.print_exc()
-
-    # try cleaning up temp directories
-    with contextlib.suppress(Exception):
-        upscaler.cleanup_temp_directories()
-
-finally:
-    # remove Video2X cache directory
-    with contextlib.suppress(FileNotFoundError):
-        if not preserve_frames:
-            shutil.rmtree(video2x_cache_directory)

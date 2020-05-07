@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: May 4, 2020
+Last Modified: May 7, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
@@ -38,6 +38,7 @@ class WrapperMain:
     @staticmethod
     def parse_arguments(arguments):
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
+        parser.error = lambda message: (_ for _ in ()).throw(AttributeError(message))
         parser.add_argument('--help', action='help', help='show this help message and exit')
         parser.add_argument('--list-supported-formats', action='store_true', help='dump currently supported format list')
         parser.add_argument('--list-opencv-formats', action='store_true', help='(deprecated. Use --list-supported-formats) dump opencv supported format list')
