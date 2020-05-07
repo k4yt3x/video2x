@@ -36,7 +36,7 @@ waifu2x_converter_cpp:
   disable-gpu: false # disable GPU
   force-OpenCL: false # force to use OpenCL on Intel Platform
   processor: -1 # set target processor
-  #jobs: 0 # number of threads launching at the same time
+  jobs: 0 # number of threads launching at the same time
   model-dir: null # path to custom model directory (don't append last / ) default: models_rgb 
   #scale-ratio: 2.0 # custom scale ratio
   noise-level: 1 # <0|1|2|3> noise reduction level
@@ -82,7 +82,7 @@ anime4kcpp:
   strengthColor: 0.3 # Strength for pushing color,range 0 to 1,higher for thinner (double [=0.3])
   strengthGradient: 1.0 # Strength for pushing gradient,range 0 to 1,higher for sharper (double [=1])
   zoomFactor: 2.0 # zoom factor for resizing (double [=2])
-  #threads: 16 # Threads count for video processing (unsigned int [=16])
+  threads: 16 # Threads count for video processing (unsigned int [=16])
   fastMode: false # Faster but maybe low quality
   videoMode: true # Video process
   preview: null # Preview image
