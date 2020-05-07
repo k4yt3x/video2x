@@ -11,15 +11,12 @@ Last Modified: May 6, 2020
 from upscaler import Upscaler
 
 # built-in imports
-import pathlib
-import sys
-
-# built-in imports
 import contextlib
+import pathlib
 import re
 import shutil
+import sys
 import tempfile
-import threading
 import time
 import traceback
 import yaml
@@ -45,21 +42,45 @@ AVAILABLE_DRIVERS = {
     'Anime4KCPP': 'anime4kcpp'
 }
 
+def resource_path(relative_path: str) -> pathlib.Path:
+    try:
+        base_path = pathlib.Path(sys._MEIPASS)
+    except Exception:
+        base_path = pathlib.Path(__file__).parent
+    return base_path / relative_path
 
-class UpscalerSignals(QObject):
-    finished = pyqtSignal()
+
+class WorkerSignals(QObject):
+    progress = pyqtSignal(tuple)
     error = pyqtSignal(str)
+    finished = pyqtSignal()
 
-class Worker(QRunnable):
+class ProgressBarWorker(QRunnable):
+    def __init__(self, fn, *args, **kwargs):
+        super(ProgressBarWorker, self).__init__()
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+        self.kwargs['progress_callback'] = self.signals.progress
+
+    @pyqtSlot()
+    def run(self):
+        try:
+            self.fn(*self.args, **self.kwargs)
+        except Exception:
+            pass
+
+class UpscalerWorker(QRunnable):
 
     def __init__(self, fn, *args, **kwargs):
-        super(Worker, self).__init__()
+        super(UpscalerWorker, self).__init__()
 
         # Store constructor arguments (re-used for processing)
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
-        self.signals = UpscalerSignals()
+        self.signals = WorkerSignals()
 
     @pyqtSlot()
     def run(self):
@@ -78,9 +99,9 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        uic.loadUi('video2x_gui.ui', self)
+        uic.loadUi(str(resource_path('video2x_gui.ui')), self)
 
-        self.video2x_icon_path = str((pathlib.Path(__file__).parent / 'images' / 'video2x.png').absolute())
+        self.video2x_icon_path = str(resource_path('images/video2x.png'))
         self.setWindowTitle(f'Video2X GUI {VERSION}')
         self.setWindowIcon(QtGui.QIcon(self.video2x_icon_path))
 
@@ -126,8 +147,11 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # progress bar and start/stop controls
         self.progress_bar = self.findChild(QtWidgets.QProgressBar, 'progressBar')
+        self.time_elapsed_label = self.findChild(QtWidgets.QLabel, 'timeElapsedLabel')
+        self.time_remaining_label = self.findChild(QtWidgets.QLabel, 'timeRemainingLabel')
+        self.rate_label = self.findChild(QtWidgets.QLabel, 'rateLabel')
         self.start_button = self.findChild(QtWidgets.QPushButton, 'startButton')
-        self.start_button.clicked.connect(self.upscale)
+        self.start_button.clicked.connect(self.start)
         self.stop_button = self.findChild(QtWidgets.QPushButton, 'stopButton')
         self.stop_button.clicked.connect(self.stop)
 
@@ -482,7 +506,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         message_box.setText(message)
         message_box.exec_()
 
-    def start_progress_bar(self):
+    def start_progress_bar(self, progress_callback):
 
         # initialize variables early
         self.upscaler.progress_bar_exit_signal = False
@@ -490,14 +514,43 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.upscaler.total_frames = 1
 
         # initialize progress bar values
-        self.progress_bar.setValue(0)
+        upscale_begin_time = time.time()
+        progress_callback.emit((0, 0, 0, upscale_begin_time))
 
+        # keep querying upscaling process and feed information to callback signal
         while not self.upscaler.progress_bar_exit_signal:
-            self.progress_bar.setValue(int(100 * self.upscaler.total_frames_upscaled / self.upscaler.total_frames))
+            progress_callback.emit((int(100 * self.upscaler.total_frames_upscaled / self.upscaler.total_frames),
+                                   self.upscaler.total_frames_upscaled,
+                                   self.upscaler.total_frames,
+                                   upscale_begin_time))
             time.sleep(1)
-        self.progress_bar.setValue(100)
 
-    def upscale(self):
+        # upscale process will stop at 99%
+        # so it's set to 100 manually when all is done
+        progress_callback.emit((100, 0, 0, upscale_begin_time))
+
+    def set_progress(self, progress_information: tuple):
+        progress_percentage = progress_information[0]
+        total_frames_upscaled = progress_information[1]
+        total_frames = progress_information[2]
+        upscale_begin_time = progress_information[3]
+
+        # calculate fields based on frames and time elapsed
+        time_elapsed = time.time() - upscale_begin_time
+        try:
+            rate = total_frames_upscaled / (time.time() - upscale_begin_time)
+            time_remaining = (total_frames - total_frames_upscaled) / rate
+        except Exception:
+            rate = 0.0
+            time_remaining = 0.0
+
+        # set calculated values in GUI
+        self.progress_bar.setValue(progress_percentage)
+        self.time_elapsed_label.setText('Time Elapsed: {}'.format(time.strftime("%H:%M:%S", time.gmtime(time_elapsed))))
+        self.time_remaining_label.setText('Time Remaining: {}'.format(time.strftime("%H:%M:%S", time.gmtime(time_remaining))))
+        self.rate_label.setText('Rate (FPS): {}'.format(round(rate, 2)))
+
+    def start(self):
 
         # start execution
         try:
@@ -505,6 +558,13 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             self.begin_time = time.time()
 
             # resolve input and output directories from GUI
+            if self.input_line_edit.text().strip() == '':
+                self.show_error('Input path not specified')
+                return
+            if self.output_line_edit.text().strip() == '':
+                self.show_error('Output path not specified')
+                return
+
             input_directory = pathlib.Path(self.input_line_edit.text())
             output_directory = pathlib.Path(self.output_line_edit.text())
 
@@ -519,8 +579,6 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
             # if input specified is a single file
             if input_directory.is_file():
-
-                # upscale single video file
 
                 # check for input output format mismatch
                 if output_directory.is_dir():
@@ -547,11 +605,12 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
                 # start progress bar
                 if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
-                    progress_bar_worker = Worker(self.start_progress_bar)
+                    progress_bar_worker = ProgressBarWorker(self.start_progress_bar)
+                    progress_bar_worker.signals.progress.connect(self.set_progress)
                     self.threadpool.start(progress_bar_worker)
 
                 # run upscaler
-                worker = Worker(self.upscaler.run)
+                worker = UpscalerWorker(self.upscaler.run)
                 worker.signals.error.connect(self.upscale_errored)
                 worker.signals.finished.connect(self.upscale_completed)
                 self.threadpool.start(worker)
@@ -582,11 +641,11 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
                     # start progress bar
                     if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
-                        progress_bar_worker = Worker(self.start_progress_bar)
+                        progress_bar_worker = ProgressBarWorker(self.start_progress_bar)
                         self.threadpool.start(progress_bar_worker)
 
                     # run upscaler
-                    worker = Worker(self.upscaler.run)
+                    worker = UpscalerWorker(self.upscaler.run)
                     worker.signals.error.connect(self.upscale_errored)
                     worker.signals.finished.connect(self.upscale_completed)
                     self.threadpool.start(worker)
@@ -598,8 +657,6 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         except Exception:
             self.upscale_errored(traceback.format_exc())
-
-        finally:
             self.upscale_completed()
     
     def upscale_errored(self, error_message):
@@ -623,7 +680,6 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
     def stop(self):
         # TODO unimplemented yet
         pass
-
 
 app = QtWidgets.QApplication(sys.argv)
 window = Video2XMainWindow()

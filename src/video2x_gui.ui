@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>617</width>
-    <height>474</height>
+    <width>691</width>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -194,82 +194,78 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
-            <layout class="QVBoxLayout" name="expressSettingsVerticalLayout">
+            <layout class="QHBoxLayout" name="driverHorizontalLayout">
              <item>
-              <layout class="QHBoxLayout" name="driverHorizontalLayout">
-               <item>
-                <widget class="QLabel" name="driverLabel">
-                 <property name="text">
-                  <string>Driver</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QComboBox" name="driverComboBox">
-                 <item>
-                  <property name="text">
-                   <string>Waifu2X Caffe</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Waifu2X Converter CPP</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Waifu2X NCNN Vulkan</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>SRMD NCNN Vulkan</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Anime4KCPP</string>
-                  </property>
-                 </item>
-                </widget>
-               </item>
-              </layout>
+              <widget class="QLabel" name="driverLabel">
+               <property name="text">
+                <string>Driver</string>
+               </property>
+              </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="processesHorizontalLayout">
+              <widget class="QComboBox" name="driverComboBox">
                <item>
-                <widget class="QLabel" name="processesLabel">
-                 <property name="text">
-                  <string>Processes</string>
-                 </property>
-                </widget>
+                <property name="text">
+                 <string>Waifu2X Caffe</string>
+                </property>
                </item>
                <item>
-                <widget class="QSpinBox" name="processesSpinBox">
-                 <property name="minimum">
-                  <number>1</number>
-                 </property>
-                </widget>
+                <property name="text">
+                 <string>Waifu2X Converter CPP</string>
+                </property>
                </item>
-              </layout>
+               <item>
+                <property name="text">
+                 <string>Waifu2X NCNN Vulkan</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>SRMD NCNN Vulkan</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Anime4KCPP</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="processesHorizontalLayout">
+             <item>
+              <widget class="QLabel" name="processesLabel">
+               <property name="text">
+                <string>Processes</string>
+               </property>
+              </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="scaleRatioHorizontalLayout">
-               <item>
-                <widget class="QLabel" name="scaleRatioLabel">
-                 <property name="text">
-                  <string>Scale Ratio</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="scaleRatioDoubleSpinBox">
-                 <property name="value">
-                  <double>2.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <widget class="QSpinBox" name="processesSpinBox">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="scaleRatioHorizontalLayout">
+             <item>
+              <widget class="QLabel" name="scaleRatioLabel">
+               <property name="text">
+                <string>Scale Ratio</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="scaleRatioDoubleSpinBox">
+               <property name="value">
+                <double>2.000000000000000</double>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -1188,7 +1184,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="controlsHorizontalLayout">
+     <layout class="QVBoxLayout" name="controlsVerticalLayout">
       <item>
        <widget class="QProgressBar" name="progressBar">
         <property name="value">
@@ -1197,24 +1193,61 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="startButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="stopButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Stop</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="timeControlsHorizontalLayout">
+        <item>
+         <widget class="QLabel" name="timeElapsedLabel">
+          <property name="acceptDrops">
+           <bool>false</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="text">
+           <string>Time Elapsed: 00:00:00</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="timeRemainingLabel">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="text">
+           <string>Time Remaining: 00:00:00</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="rateLabel">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="text">
+           <string>Rate (FPS): 0.0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="startButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Start</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="stopButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Stop</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -1225,7 +1258,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>617</width>
+     <width>691</width>
      <height>21</height>
     </rect>
    </property>
