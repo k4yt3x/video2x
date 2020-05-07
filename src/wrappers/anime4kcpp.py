@@ -73,7 +73,7 @@ class WrapperMain:
         self.driver_settings['output'] = output_file
         self.driver_settings['zoomFactor'] = zoom_factor
         self.driver_settings['threads'] = threads
-        
+
         # Anime4KCPP will look for Anime4KCPPKernel.cl under the current working directory
         # change the CWD to its containing directory so it will find it
         if platform.system() == 'Windows':

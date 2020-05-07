@@ -37,7 +37,7 @@ waifu2x_converter_cpp:
   force-OpenCL: false # force to use OpenCL on Intel Platform
   processor: -1 # set target processor
   jobs: 0 # number of threads launching at the same time
-  model-dir: null # path to custom model directory (don't append last / ) default: models_rgb 
+  model-dir: null # path to custom model directory (don't append last / ) default: models_rgb
   #scale-ratio: 2.0 # custom scale ratio
   noise-level: 1 # <0|1|2|3> noise reduction level
   mode: noise-scale # <noise|scale|noise-scale> image processing mode

@@ -103,7 +103,7 @@ class Upscaler:
         if self.video2x_cache_directory.exists() and not self.video2x_cache_directory.is_dir():
             Avalon.error(_('Specified or default cache directory is a file/link'))
             raise FileExistsError('Specified or default cache directory is a file/link')
-        
+
         # if cache directory doesn't exist, try creating it
         if not self.video2x_cache_directory.exists():
             try:
@@ -156,7 +156,7 @@ class Upscaler:
         else:
             Avalon.error(_('Input path is neither a file nor a directory'))
             raise FileNotFoundError(f'{self.input_path} is neither file nor directory')
-        
+
         # check Fmpeg settings
         ffmpeg_path = pathlib.Path(self.ffmpeg_settings['ffmpeg_path'])
         if not ((pathlib.Path(ffmpeg_path / 'ffmpeg.exe').is_file() and
@@ -305,7 +305,7 @@ class Upscaler:
             self.progress_monitor.stop()
 
             Avalon.debug_info(_('Killing upscaled image cleaner'))
-            self.image_cleaner.stop()            
+            self.image_cleaner.stop()
             raise e
 
         # if the driver is waifu2x-converter-cpp
@@ -337,7 +337,7 @@ class Upscaler:
         try:
             # while process pool not empty
             while self.process_pool:
-                
+
                 # if stop signal received, terminate all processes
                 if self.stop_signal is True:
                     raise SystemExit
@@ -376,7 +376,7 @@ class Upscaler:
         This function controls the flow of video conversion
         and handles all necessary functions.
         """
-        
+
         # external stop signal when called in a thread
         self.stop_signal = False
 
