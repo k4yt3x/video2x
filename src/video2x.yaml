@@ -1,53 +1,59 @@
+# Name: Video2X Configuration File
+# Creator: K4YT3X
+# Date Created: October 23, 2018
+# Last Modified: May 7, 2020
+# Items commented out are parameters handled by Video2x.
 waifu2x_caffe:
   path: '%LOCALAPPDATA%\video2x\waifu2x-caffe\waifu2x-caffe-cui'
-  input_extention_list: null
-  output_extention: null
-  mode: noise_scale
-  scale_ratio: null
-  scale_width: null
-  scale_height: null
-  noise_level: 3
-  process: gpu
-  crop_size: 128
-  output_quality: -1
-  output_depth: 8
-  batch_size: 1
-  gpu: 0
-  tta: 0
-  input_path: null
-  output_path: null
-  model_dir: null
-  crop_w: null
-  crop_h: null
+  tta: 0 # <0|1> 8x slower and slightly high quality
+  gpu: 0 # gpu device no
+  batch_size: 1 # input batch size
+  crop_h: null # input image split size(height)
+  crop_w: null # input image split size(width)
+  crop_size: 128 # input image split size
+  output_depth: 8 # output image chaneel depth bit
+  output_quality: -1 # output image quality
+  process: gpu # <cpu|gpu|cudnn> process mode
+  model_dir: null # path to custom model directory (don't append last / )
+  #scale_height: null # custom scale height
+  #scale_width: null # custom scale width
+  #scale_ratio: null # custom scale ratio
+  noise_level: 3 # <0|1|2|3> noise reduction level
+  mode: noise_scale # <noise|scale|noise_scale|auto_scale> image processing mode
+  output_extention: null # extention to output image file when output_path is (auto) or input_path is folder
+  input_extention_list: null # extention to input image file when input_path is folder
+  #output_path: null # path to output image file (when input_path is folder, output_path must be folder)
+  #input_path: null # (required) path to input image file
 waifu2x_converter_cpp:
   path: '%LOCALAPPDATA%\video2x\waifu2x-converter-cpp\waifu2x-converter-cpp'
-  # list-supported-formats: null
-  # list-opencv-formats: null
-  # list-processor
-  output-format: null
-  png-compression: 5
-  image-quality: -1
-  block-size: 0
-  disable-gpu: false
-  force-OpenCL: false
-  processor: -1
-  jobs: 0
-  model-dir: null # models_rgb
-  scale-ratio: 2.0
-  noise-level: 1
-  mode: noise-scale
-  log-level: 1
-  silent: true
-  tta: 0
-  # generate-subdir: 0
-  # recursive-directory: 0
-  output: null
-  input: null
+  #list-supported-formats: null # dump currently supported format list
+  #list-opencv-formats: null # (deprecated. Use --list-supported-formats) dump opencv supported format list
+  #list-processor # dump processor list
+  output-format: null # The format used when running in recursive/folder mode
+  png-compression: 5 # Set PNG compression level (0-9), 9 = Max compression (slowest & smallest)
+  image-quality: -1 # JPEG & WebP Compression quality (0-101, 0 being smallest size and lowest quality), use 101 for lossless WebP
+  block-size: 0 # block size
+  disable-gpu: false # disable GPU
+  force-OpenCL: false # force to use OpenCL on Intel Platform
+  processor: -1 # set target processor
+  #jobs: 0 # number of threads launching at the same time
+  model-dir: null # path to custom model directory (don't append last / ) default: models_rgb 
+  #scale-ratio: 2.0 # custom scale ratio
+  noise-level: 1 # <0|1|2|3> noise reduction level
+  mode: noise-scale # <noise|scale|noise-scale> image processing mode
+  log-level: 1 # <0|1|2|3|4> Set log level
+  silent: true # Enable silent mode. (same as --log-level 1)
+  tta: 0 # Enable Test-Time Augmentation mode. (0 or 1)
+  #generate-subdir: 0 # Generate sub folder when recursive directory is enabled.
+  #auto-naming: 0 # Add postfix to output name when output path is not specified.
+  #recursive-directory: 0 # Search recursively through directories to find more images to process.
+  #output: null # path to output image file or directory  (you should use the full path)
+  #input: null # (required) path to input image file or directory (you should use the full path)
 waifu2x_ncnn_vulkan:
   path: '%LOCALAPPDATA%\video2x\waifu2x-ncnn-vulkan\waifu2x-ncnn-vulkan'
   v: null # verbose output
-  i: null # input-path: input image path (jpg/png) or directory
-  o: null # output-path: output image path (png) or directory
+  #i: null # input-path: input image path (jpg/png) or directory
+  #o: null # output-path: output image path (png) or directory
   'n': 2 # noise-level: denoise level (-1/0/1/2/3, default=0)
   s: 2 # scale: upscale ratio (1/2, default=2)
   t: 400 # tile-size: tile size (>=32, default=400)
@@ -58,8 +64,8 @@ waifu2x_ncnn_vulkan:
 srmd_ncnn_vulkan:
   path: '%LOCALAPPDATA%\video2x\srmd-ncnn-vulkan\srmd-ncnn-vulkan'
   v: null # verbose output
-  i: null # input-path: input image path (jpg/png) or directory
-  o: null # output-path: output image path (png) or directory
+  #i: null # input-path: input image path (jpg/png) or directory
+  #o: null # output-path: output image path (png) or directory
   'n': 3 # noise-level: denoise level (-1/0/1/2/3/4/5/6/7/8/9/10, default=3)
   s: 2 # upscale ratio (2/3/4, default=2)
   t: 400 # tile-size: tile size (>=32, default=400)
@@ -69,14 +75,14 @@ srmd_ncnn_vulkan:
   x: false # enable tta mode
 anime4kcpp:
   path: '%LOCALAPPDATA%\video2x\anime4kcpp\CLI\Anime4KCPP_CLI\Anime4KCPP_CLI'
-  input: null # File for loading (string [=./pic/p1.png])
-  output: null # File for outputting (string [=output.png])
+  #input: null # File for loading (string [=./pic/p1.png])
+  #output: null # File for outputting (string [=output.png])
   passes: 2 # Passes for processing (int [=2])
   pushColorCount: 2 # Limit the number of color pushes (int [=2])
   strengthColor: 0.3 # Strength for pushing color,range 0 to 1,higher for thinner (double [=0.3])
   strengthGradient: 1.0 # Strength for pushing gradient,range 0 to 1,higher for sharper (double [=1])
   zoomFactor: 2.0 # zoom factor for resizing (double [=2])
-  threads: 16 # Threads count for video processing (unsigned int [=16])
+  #threads: 16 # Threads count for video processing (unsigned int [=16])
   fastMode: false # Faster but maybe low quality
   videoMode: true # Video process
   preview: null # Preview image
