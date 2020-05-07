@@ -2,7 +2,7 @@
 Name: Video2X Build Script
 Creator: K4YT3X
 Date Created: May 6, 2020
-Last Modified: May 6, 2020
+Last Modified: May 7, 2020
 
 Description: A PowerShell script that will build Video2X
 executable (PE) releases automatically using PyInstaller.
@@ -13,8 +13,8 @@ powershell –ExecutionPolicy Bypass
 #>
 
 # version number
-$SCRIPT_VERSION = "1.0.0"
-$VIDEO2X_VERSION = "4.0.0"
+$SCRIPT_VERSION = "1.0.1"
+$VIDEO2X_VERSION = "4.0.0_beta2"
 
 Write-Host -ForegroundColor White "Video2X Building Script Version $($SCRIPT_VERSION)
 Starting to build Video2X release packages"
@@ -46,33 +46,33 @@ pyinstaller --noconfirm --log-level=WARN `
     video2x_setup.py
 
 # remove old builds if found
-if (Test-Path "video2x-builds" -PathType any) {
-    Remove-Item -path "video2x-builds" -recurse
+if (Test-Path "$($VIDEO2X_VERSION)" -PathType any) {
+    Remove-Item -path "$($VIDEO2X_VERSION)" -recurse
 }
 
 # create build directory
-New-Item "video2x-builds" -ItemType Directory
+New-Item "$($VIDEO2X_VERSION)" -ItemType Directory
 
 # copy files into corresponding builds
 # full edition
 Write-Host -ForegroundColor White "`nCreating full package"
-New-Item "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-full" -ItemType Directory
-Copy-Item "dist\video2x.exe" -Destination "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-full\"
-Copy-Item "dist\video2x_gui.exe" -Destination "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-full\"
-Copy-Item -Path "$env:LOCALAPPDATA\video2x" -Destination "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-full\dependencies" -Recurse
+New-Item "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-full" -ItemType Directory
+Copy-Item "dist\video2x.exe" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-full\"
+Copy-Item "dist\video2x_gui.exe" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-full\"
+Copy-Item -Path "$env:LOCALAPPDATA\video2x" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-full\dependencies" -Recurse
 
 # overwrite paths to relative paths
-(Get-Content "video2x.yaml").replace("C:\Users\K4YT3X\AppData\Local\video2x\", "dependencies\") | Set-Content "video2x.yaml.relative"
-Move-Item "video2x.yaml.relative" -Destination "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-full\video2x.yaml"
+(Get-Content "video2x.yaml").replace("%LOCALAPPDATA%\video2x", "dependencies") | Set-Content "video2x.yaml.relative"
+Move-Item "video2x.yaml.relative" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-full\video2x.yaml"
 
 # light edition
 Write-Host -ForegroundColor White "`nCreating light package"
-New-Item "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-light" -ItemType Directory
-Copy-Item "dist\video2x.exe" -Destination "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-light\"
-Copy-Item "dist\video2x_gui.exe" -Destination "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-light\"
-Copy-Item "dist\video2x_setup.exe" -Destination "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-light\"
-Copy-Item "video2x.yaml" -Destination "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-light\"
-Copy-Item "requirements.txt" -Destination "video2x-builds\video2x-$($VIDEO2X_VERSION)-win32-light\"
+New-Item "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light" -ItemType Directory
+Copy-Item "dist\video2x.exe" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
+Copy-Item "dist\video2x_gui.exe" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
+Copy-Item "dist\video2x_setup.exe" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
+Copy-Item "video2x.yaml" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
+Copy-Item "requirements.txt" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
 
 # clean up temporary files
 Write-Host -ForegroundColor White "`nDeleting temporary files"
