@@ -1175,6 +1175,41 @@
               </item>
              </layout>
             </item>
+            <item row="7" column="1">
+             <layout class="QHBoxLayout" name="anime4kCppCodecHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppCodecLabel">
+                <property name="text">
+                 <string>Codec</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="anime4kCppCodecComboBox">
+                <item>
+                 <property name="text">
+                  <string>mp4v</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>dxva</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>avc1</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>vp09</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
            </layout>
           </widget>
          </widget>
