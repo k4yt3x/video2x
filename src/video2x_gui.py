@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Creator: Video2X QT
+Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 6, 2020
+Last Modified: May 7, 2020
 """
 
 # local imports
@@ -103,6 +103,9 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         uic.loadUi(str(resource_path('video2x_gui.ui')), self)
+
+        # create thread pool for upscaler workers
+        self.threadpool = QThreadPool()
 
         self.video2x_icon_path = str(resource_path('images/video2x.png'))
         self.setWindowTitle(f'Video2X GUI {VERSION}')
@@ -328,7 +331,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.anime4kcpp_gpu_mode_check_box.setChecked(settings['GPUMode'])
 
     def resolve_driver_settings(self):
-        
+
         # waifu2x-caffe
         self.config['waifu2x_caffe']['path'] = os.path.expandvars(self.waifu2x_caffe_path_line_edit.text())
         self.config['waifu2x_caffe']['mode'] = self.waifu2x_caffe_mode_combo_box.currentText()
@@ -340,7 +343,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['waifu2x_caffe']['output_depth'] = self.waifu2x_caffe_output_depth_spin_box.value()
         self.config['waifu2x_caffe']['batch_size'] = self.waifu2x_caffe_batch_size_spin_box.value()
         self.config['waifu2x_caffe']['gpu'] = self.waifu2x_caffe_gpu_spin_box.value()
-        self.config['waifu2x_caffe']['tta'] = int(self.waifu2x_caffe_tta_check_box.checkState())
+        self.config['waifu2x_caffe']['tta'] = int(self.waifu2x_caffe_tta_check_box.isChecked())
 
         # waifu2x-converter-cpp
         self.config['waifu2x_converter_cpp']['path'] = os.path.expandvars(self.waifu2x_converter_cpp_path_line_edit.text())
@@ -348,8 +351,8 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['waifu2x_converter_cpp']['processor'] = self.waifu2x_converter_cpp_processor_spin_box.value()
         self.config['waifu2x_converter_cpp']['model-dir'] = str((pathlib.Path(self.config['waifu2x_converter_cpp']['path']).parent / self.waifu2x_converter_cpp_model_combo_box.currentText()).absolute())
         self.config['waifu2x_converter_cpp']['mode'] = self.waifu2x_converter_cpp_mode_combo_box.currentText()
-        self.config['waifu2x_converter_cpp']['disable-gpu'] = bool(self.waifu2x_converter_cpp_disable_gpu_check_box.checkState())
-        self.config['waifu2x_converter_cpp']['tta'] = int(self.waifu2x_converter_cpp_tta_check_box.checkState())
+        self.config['waifu2x_converter_cpp']['disable-gpu'] = bool(self.waifu2x_converter_cpp_disable_gpu_check_box.isChecked())
+        self.config['waifu2x_converter_cpp']['tta'] = int(self.waifu2x_converter_cpp_tta_check_box.isChecked())
 
         # waifu2x-ncnn-vulkan
         self.config['waifu2x_ncnn_vulkan']['path'] = os.path.expandvars(self.waifu2x_ncnn_vulkan_path_line_edit.text())
@@ -358,7 +361,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['waifu2x_ncnn_vulkan']['m'] = str((pathlib.Path(self.config['waifu2x_ncnn_vulkan']['path']).parent / self.waifu2x_ncnn_vulkan_model_combo_box.currentText()).absolute())
         self.config['waifu2x_ncnn_vulkan']['g'] = self.waifu2x_ncnn_vulkan_gpu_id_spin_box.value()
         self.config['waifu2x_ncnn_vulkan']['j'] = self.waifu2x_ncnn_vulkan_jobs_line_edit.text()
-        self.config['waifu2x_ncnn_vulkan']['x'] = self.waifu2x_ncnn_vulkan_tta_check_box.checkState()
+        self.config['waifu2x_ncnn_vulkan']['x'] = self.waifu2x_ncnn_vulkan_tta_check_box.isChecked()
 
         # srmd-ncnn-vulkan
         self.config['srmd_ncnn_vulkan']['path'] = os.path.expandvars(self.srmd_ncnn_vulkan_path_line_edit.text())
@@ -367,7 +370,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['srmd_ncnn_vulkan']['m'] = str((pathlib.Path(self.config['srmd_ncnn_vulkan']['path']).parent / self.srmd_ncnn_vulkan_model_combo_box.currentText()).absolute())
         self.config['srmd_ncnn_vulkan']['g'] = self.srmd_ncnn_vulkan_gpu_id_spin_box.value()
         self.config['srmd_ncnn_vulkan']['j'] = self.srmd_ncnn_vulkan_jobs_line_edit.text()
-        self.config['srmd_ncnn_vulkan']['x'] = self.srmd_ncnn_vulkan_tta_check_box.checkState()
+        self.config['srmd_ncnn_vulkan']['x'] = self.srmd_ncnn_vulkan_tta_check_box.isChecked()
 
         # anime4k
         self.config['anime4kcpp']['path'] = os.path.expandvars(self.anime4kcpp_path_line_edit.text())
@@ -381,14 +384,14 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['anime4kcpp']['platformID'] = self.anime4kcpp_platform_id_spin_box.value()
         self.config['anime4kcpp']['deviceID'] = self.anime4kcpp_device_id_spin_box.value()
         self.config['anime4kcpp']['codec'] = self.anime4kcpp_codec_combo_box.currentText()
-        self.config['anime4kcpp']['fastMode'] = bool(self.anime4kcpp_fast_mode_check_box.checkState())
-        self.config['anime4kcpp']['preprocessing'] = bool(self.anime4kcpp_pre_processing_check_box.checkState())
-        self.config['anime4kcpp']['postprocessing'] = bool(self.anime4kcpp_post_processing_check_box.checkState())
-        self.config['anime4kcpp']['GPUMode'] = bool(self.anime4kcpp_gpu_mode_check_box.checkState())
+        self.config['anime4kcpp']['fastMode'] = bool(self.anime4kcpp_fast_mode_check_box.isChecked())
+        self.config['anime4kcpp']['preprocessing'] = bool(self.anime4kcpp_pre_processing_check_box.isChecked())
+        self.config['anime4kcpp']['postprocessing'] = bool(self.anime4kcpp_post_processing_check_box.isChecked())
+        self.config['anime4kcpp']['GPUMode'] = bool(self.anime4kcpp_gpu_mode_check_box.isChecked())
 
     def update_gui_for_driver(self):
         current_driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
-        
+
         # update scale ratio constraints
         if current_driver in ['waifu2x_caffe', 'waifu2x_converter_cpp', 'anime4kcpp']:
             self.scale_ratio_double_spin_box.setMinimum(0.0)
@@ -402,13 +405,13 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             self.scale_ratio_double_spin_box.setMinimum(2.0)
             self.scale_ratio_double_spin_box.setMaximum(4.0)
             self.scale_ratio_double_spin_box.setValue(2.0)
-        
+
         # update preferred processes/threads count
         if current_driver == 'anime4kcpp':
             self.processes_spin_box.setValue(16)
         else:
             self.processes_spin_box.setValue(1)
-    
+
     def select_file(self, *args, **kwargs) -> pathlib.Path:
         file_selected = QtWidgets.QFileDialog.getOpenFileName(self, *args, **kwargs)
         if not isinstance(file_selected, tuple) or file_selected[0] == '':
@@ -422,7 +425,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         return pathlib.Path(folder_selected)
 
     def select_input_file(self):
-        
+
         if (input_file := self.select_file('Select Input File')) is None:
             return
         self.input_line_edit.setText(str(input_file.absolute()))
@@ -476,7 +479,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             return
         self.config_line_edit.setText(str(config_file.absolute()))
         self.load_configurations()
-    
+
     def select_driver_binary_path(self, driver_line_edit):
         if (driver_binary_path := self.select_file('Select Driver Binary File')) is None:
             return
@@ -562,9 +565,6 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             input_directory = pathlib.Path(os.path.expandvars(self.input_line_edit.text()))
             output_directory = pathlib.Path(os.path.expandvars(self.output_line_edit.text()))
 
-            # create thread pool for upscaler workers
-            self.threadpool = QThreadPool()
-
             # load driver settings from GUI
             self.resolve_driver_settings()
 
@@ -582,7 +582,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             self.upscaler.processes = self.processes_spin_box.value()
             self.upscaler.video2x_cache_directory = pathlib.Path(os.path.expandvars(self.cache_line_edit.text()))
             self.upscaler.image_format = self.config['video2x']['image_format'].lower()
-            self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.checkState())
+            self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.isChecked())
 
             # start progress bar
             if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
@@ -593,27 +593,31 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             # run upscaler
             worker = UpscalerWorker(self.upscaler.run)
             worker.signals.error.connect(self.upscale_errored)
-            worker.signals.finished.connect(self.upscale_completed)
             worker.signals.interrupted.connect(self.upscale_interrupted)
+            worker.signals.finished.connect(self.upscale_successful)
             self.threadpool.start(worker)
             self.start_button.setEnabled(False)
             self.stop_button.setEnabled(True)
 
         except Exception:
             self.upscale_errored(traceback.format_exc())
-    
+
     def upscale_errored(self, error_message):
         self.show_error(f'Upscaler ran into an error:\n{error_message}')
+        self.threadpool.waitForDone(5)
+        self.start_button.setEnabled(True)
+        self.stop_button.setEnabled(False)
 
-    def upscale_completed(self):
-        # if all threads have finished
-        if self.threadpool.activeThreadCount() == 0:
-            self.show_message('Program completed, taking {} seconds'.format(round((time.time() - self.begin_time), 5)))
-            self.start_button.setEnabled(True)
-            self.stop_button.setEnabled(False)
-    
     def upscale_interrupted(self):
         self.show_message('Upscale has been interrupted')
+        self.threadpool.waitForDone(5)
+        self.start_button.setEnabled(True)
+        self.stop_button.setEnabled(False)
+
+    def upscale_successful(self):
+        # if all threads have finished
+        self.threadpool.waitForDone(5)
+        self.show_message('Upscale finished successfully, taking {} seconds'.format(round((time.time() - self.begin_time), 5)))
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)
 
