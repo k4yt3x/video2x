@@ -1,9 +1,3 @@
-# Runtime files
-upscaled/
-frames/
-waifu2x-caffe/
-testvid.mp4
-
 # PyCharm
 .idea/
 
