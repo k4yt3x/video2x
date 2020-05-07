@@ -71,6 +71,7 @@ For short: **Video2X enlarges your video without losing details**.
 Watch for the sharper edges in this screenshot around the shadows:
 
 ![preview](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
+*Upscale Comparison Demonstration*
 
 **You can also watch the YouTube video Demo: https://www.youtube.com/watch?v=PG94iPoeoZk**
 
@@ -80,11 +81,16 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 
 ### Video2X GUI
 
-![Video2X GUI Screenshot](https://user-images.githubusercontent.com/21986859/81157039-19346b00-8f76-11ea-965f-4d7edf6a818e.png)
+![Video2X GUI Main Tab Screenshot](https://user-images.githubusercontent.com/21986859/81241806-dcf71e00-8ffa-11ea-88ed-50b062d9bb5e.png)
+*Video2X GUI Main Tab Screenshot*
+
+![Video2X GUI Driver Settings Screenshot](https://user-images.githubusercontent.com/21986859/81241837-f9935600-8ffa-11ea-8b89-5ae098b63de4.png)
+*Video2X GUI Driver Settings Screenshot*
 
 ### Video2X CLI
 
 ![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81039711-4fe88380-8e99-11ea-9846-175f72100a76.png)
+*Video2X CLI Screenshot*
 
 ---
 
@@ -157,6 +163,7 @@ pip install -r requirements.txt
 If you can't find a video clip to begin with, or if you want to see a before-after comparison, we have prepared some sample clips for you. The quick start guide down below will also be based on the name of the sample clips.
 
 ![sample_video](https://user-images.githubusercontent.com/21986859/52905766-d5512b00-3236-11e9-9aea-077636539679.png)
+*Sample Upscale Videos*
 
 - [Sample Video Original (240P) 1.7MB](https://files.k4yt3x.com/Resources/Videos/sample_input.mp4)
 - [Sample Video Upscaled (1080P) 4.8MB](https://files.k4yt3x.com/Resources/Videos/sample_output.mp4)
