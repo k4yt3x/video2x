@@ -12,6 +12,7 @@ from upscaler import Upscaler
 
 # built-in imports
 import contextlib
+import os
 import pathlib
 import re
 import shutil
@@ -45,7 +46,7 @@ AVAILABLE_DRIVERS = {
 def resource_path(relative_path: str) -> pathlib.Path:
     try:
         base_path = pathlib.Path(sys._MEIPASS)
-    except Exception:
+    except AttributeError:
         base_path = pathlib.Path(__file__).parent
     return base_path / relative_path
 
@@ -217,6 +218,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.anime4kcpp_post_filters_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPostFiltersSpinBox')
         self.anime4kcpp_platform_id_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPlatformIdSpinBox')
         self.anime4kcpp_device_id_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppDeviceIdSpinBox')
+        self.anime4kcpp_codec_combo_box = self.findChild(QtWidgets.QComboBox, 'anime4kCppCodecComboBox')
         self.anime4kcpp_fast_mode_check_box = self.findChild(QtWidgets.QCheckBox, 'anime4kCppFastModeCheckBox')
         self.anime4kcpp_pre_processing_check_box = self.findChild(QtWidgets.QCheckBox, 'anime4kCppPreProcessingCheckBox')
         self.anime4kcpp_post_processing_check_box = self.findChild(QtWidgets.QCheckBox, 'anime4kCppPostProcessingCheckBox')
@@ -242,7 +244,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
     def load_configurations(self):
 
         # get config file path from line edit
-        config_file_path = pathlib.Path(self.config_line_edit.text())
+        config_file_path = pathlib.Path(os.path.expandvars(self.config_line_edit.text()))
 
         # if file doesn't exist, return
         if not config_file_path.is_file():
@@ -254,6 +256,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # load FFmpeg settings
         self.ffmpeg_settings = self.config['ffmpeg']
+        self.ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(self.ffmpeg_settings['ffmpeg_path'])
 
         # load cache directory, create it if necessary
         if self.config['video2x']['video2x_cache_directory'] is not None:
@@ -281,7 +284,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-caffe
         settings = self.config['waifu2x_caffe']
-        self.waifu2x_caffe_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.waifu2x_caffe_path_line_edit.setText(os.path.expandvars(settings['path']))
         self.waifu2x_caffe_mode_combo_box.setCurrentText(settings['mode'])
         self.waifu2x_caffe_noise_level_spin_box.setValue(settings['noise_level'])
         self.waifu2x_caffe_process_combo_box.setCurrentText(settings['process'])
@@ -294,7 +297,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-converter-cpp
         settings = self.config['waifu2x_converter_cpp']
-        self.waifu2x_converter_cpp_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.waifu2x_converter_cpp_path_line_edit.setText(os.path.expandvars(settings['path']))
         self.waifu2x_converter_cpp_png_compression_spin_box.setValue(settings['png-compression'])
         self.waifu2x_converter_cpp_processor_spin_box.setValue(settings['processor'])
         self.waifu2x_converter_cpp_mode_combo_box.setCurrentText(settings['mode'])
@@ -303,7 +306,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-ncnn-vulkan
         settings = self.config['waifu2x_ncnn_vulkan']
-        self.waifu2x_ncnn_vulkan_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.waifu2x_ncnn_vulkan_path_line_edit.setText(os.path.expandvars(settings['path']))
         self.waifu2x_ncnn_vulkan_noise_level_spin_box.setValue(settings['n'])
         self.waifu2x_ncnn_vulkan_tile_size_spin_box.setValue(settings['t'])
         self.waifu2x_ncnn_vulkan_gpu_id_spin_box.setValue(settings['g'])
@@ -312,7 +315,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # srmd-ncnn-vulkan
         settings = self.config['srmd_ncnn_vulkan']
-        self.srmd_ncnn_vulkan_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.srmd_ncnn_vulkan_path_line_edit.setText(os.path.expandvars(settings['path']))
         self.srmd_ncnn_vulkan_noise_level_spin_box.setValue(settings['n'])
         self.srmd_ncnn_vulkan_tile_size_spin_box.setValue(settings['t'])
         self.srmd_ncnn_vulkan_gpu_id_spin_box.setValue(settings['g'])
@@ -321,7 +324,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # anime4k
         settings = self.config['anime4kcpp']
-        self.anime4kcpp_path_line_edit.setText(str(pathlib.Path(settings['path']).absolute()))
+        self.anime4kcpp_path_line_edit.setText(os.path.expandvars(settings['path']))
         self.anime4kcpp_passes_spin_box.setValue(settings['passes'])
         self.anime4kcpp_push_color_count_spin_box.setValue(settings['pushColorCount'])
         self.anime4kcpp_strength_color_spin_box.setValue(settings['strengthColor'])
@@ -331,15 +334,16 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.anime4kcpp_post_filters_spin_box.setValue(settings['postFilters'])
         self.anime4kcpp_platform_id_spin_box.setValue(settings['platformID'])
         self.anime4kcpp_device_id_spin_box.setValue(settings['deviceID'])
+        self.anime4kcpp_codec_combo_box.setCurrentText(settings['codec'])
         self.anime4kcpp_fast_mode_check_box.setChecked(settings['fastMode'])
-        self.anime4kcpp_pre_processing_check_box.setChecked(settings['preProcessing'])
-        self.anime4kcpp_post_processing_check_box.setChecked(settings['postProcessing'])
+        self.anime4kcpp_pre_processing_check_box.setChecked(settings['preprocessing'])
+        self.anime4kcpp_post_processing_check_box.setChecked(settings['postprocessing'])
         self.anime4kcpp_gpu_mode_check_box.setChecked(settings['GPUMode'])
 
     def resolve_driver_settings(self):
         
         # waifu2x-caffe
-        self.config['waifu2x_caffe']['path'] = self.waifu2x_caffe_path_line_edit.text()
+        self.config['waifu2x_caffe']['path'] = os.path.expandvars(self.waifu2x_caffe_path_line_edit.text())
         self.config['waifu2x_caffe']['mode'] = self.waifu2x_caffe_mode_combo_box.currentText()
         self.config['waifu2x_caffe']['noise_level'] = self.waifu2x_caffe_noise_level_spin_box.value()
         self.config['waifu2x_caffe']['process'] = self.waifu2x_caffe_process_combo_box.currentText()
@@ -352,7 +356,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['waifu2x_caffe']['tta'] = int(self.waifu2x_caffe_tta_check_box.checkState())
 
         # waifu2x-converter-cpp
-        self.config['waifu2x_converter_cpp']['path'] = self.waifu2x_converter_cpp_path_line_edit.text()
+        self.config['waifu2x_converter_cpp']['path'] = os.path.expandvars(self.waifu2x_converter_cpp_path_line_edit.text())
         self.config['waifu2x_converter_cpp']['png-compression'] = self.waifu2x_converter_cpp_png_compression_spin_box.value()
         self.config['waifu2x_converter_cpp']['processor'] = self.waifu2x_converter_cpp_processor_spin_box.value()
         self.config['waifu2x_converter_cpp']['model-dir'] = str((pathlib.Path(self.config['waifu2x_converter_cpp']['path']).parent / self.waifu2x_converter_cpp_model_combo_box.currentText()).absolute())
@@ -361,7 +365,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['waifu2x_converter_cpp']['tta'] = int(self.waifu2x_converter_cpp_tta_check_box.checkState())
 
         # waifu2x-ncnn-vulkan
-        self.config['waifu2x_ncnn_vulkan']['path'] = self.waifu2x_ncnn_vulkan_path_line_edit.text()
+        self.config['waifu2x_ncnn_vulkan']['path'] = os.path.expandvars(self.waifu2x_ncnn_vulkan_path_line_edit.text())
         self.config['waifu2x_ncnn_vulkan']['n'] = self.waifu2x_ncnn_vulkan_noise_level_spin_box.value()
         self.config['waifu2x_ncnn_vulkan']['t'] = self.waifu2x_ncnn_vulkan_tile_size_spin_box.value()
         self.config['waifu2x_ncnn_vulkan']['m'] = str((pathlib.Path(self.config['waifu2x_ncnn_vulkan']['path']).parent / self.waifu2x_ncnn_vulkan_model_combo_box.currentText()).absolute())
@@ -370,7 +374,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['waifu2x_ncnn_vulkan']['x'] = self.waifu2x_ncnn_vulkan_tta_check_box.checkState()
 
         # srmd-ncnn-vulkan
-        self.config['srmd_ncnn_vulkan']['path'] = self.srmd_ncnn_vulkan_path_line_edit.text()
+        self.config['srmd_ncnn_vulkan']['path'] = os.path.expandvars(self.srmd_ncnn_vulkan_path_line_edit.text())
         self.config['srmd_ncnn_vulkan']['n'] = self.srmd_ncnn_vulkan_noise_level_spin_box.value()
         self.config['srmd_ncnn_vulkan']['t'] = self.srmd_ncnn_vulkan_tile_size_spin_box.value()
         self.config['srmd_ncnn_vulkan']['m'] = str((pathlib.Path(self.config['srmd_ncnn_vulkan']['path']).parent / self.srmd_ncnn_vulkan_model_combo_box.currentText()).absolute())
@@ -379,7 +383,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['srmd_ncnn_vulkan']['x'] = self.srmd_ncnn_vulkan_tta_check_box.checkState()
 
         # anime4k
-        self.config['anime4kcpp']['path'] = self.anime4kcpp_path_line_edit.text()
+        self.config['anime4kcpp']['path'] = os.path.expandvars(self.anime4kcpp_path_line_edit.text())
         self.config['anime4kcpp']['passes'] = self.anime4kcpp_passes_spin_box.value()
         self.config['anime4kcpp']['pushColorCount'] = self.anime4kcpp_push_color_count_spin_box.value()
         self.config['anime4kcpp']['strengthColor'] = self.anime4kcpp_strength_color_spin_box.value()
@@ -389,18 +393,15 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         self.config['anime4kcpp']['postFilters'] = self.anime4kcpp_post_filters_spin_box.value()
         self.config['anime4kcpp']['platformID'] = self.anime4kcpp_platform_id_spin_box.value()
         self.config['anime4kcpp']['deviceID'] = self.anime4kcpp_device_id_spin_box.value()
+        self.config['anime4kcpp']['codec'] = self.anime4kcpp_codec_combo_box.currentText()
         self.config['anime4kcpp']['fastMode'] = bool(self.anime4kcpp_fast_mode_check_box.checkState())
-        self.config['anime4kcpp']['preProcessing'] = bool(self.anime4kcpp_pre_processing_check_box.checkState())
-        self.config['anime4kcpp']['postProcessing'] = bool(self.anime4kcpp_post_processing_check_box.checkState())
+        self.config['anime4kcpp']['preprocessing'] = bool(self.anime4kcpp_pre_processing_check_box.checkState())
+        self.config['anime4kcpp']['postprocessing'] = bool(self.anime4kcpp_post_processing_check_box.checkState())
         self.config['anime4kcpp']['GPUMode'] = bool(self.anime4kcpp_gpu_mode_check_box.checkState())
 
     def update_driver_constraints(self):
         current_driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
-        if current_driver == 'waifu2x_caffe':
-            self.scale_ratio_double_spin_box.setMinimum(0.0)
-            self.scale_ratio_double_spin_box.setMaximum(999.0)
-            self.scale_ratio_double_spin_box.setValue(2.0)
-        elif current_driver == 'waifu2x_converter_cpp':
+        if current_driver in ['waifu2x_caffe', 'waifu2x_converter_cpp', 'anime4kcpp']:
             self.scale_ratio_double_spin_box.setMinimum(0.0)
             self.scale_ratio_double_spin_box.setMaximum(999.0)
             self.scale_ratio_double_spin_box.setValue(2.0)
@@ -411,10 +412,6 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         elif current_driver == 'srmd_ncnn_vulkan':
             self.scale_ratio_double_spin_box.setMinimum(2.0)
             self.scale_ratio_double_spin_box.setMaximum(4.0)
-            self.scale_ratio_double_spin_box.setValue(2.0)
-        elif current_driver == 'anime4kcpp':
-            self.scale_ratio_double_spin_box.setMinimum(0)
-            self.scale_ratio_double_spin_box.setMaximum(999.0)
             self.scale_ratio_double_spin_box.setValue(2.0)
 
     def select_input_file(self):
@@ -565,8 +562,8 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
                 self.show_error('Output path not specified')
                 return
 
-            input_directory = pathlib.Path(self.input_line_edit.text())
-            output_directory = pathlib.Path(self.output_line_edit.text())
+            input_directory = pathlib.Path(os.path.expandvars(self.input_line_edit.text()))
+            output_directory = pathlib.Path(os.path.expandvars(self.output_line_edit.text()))
 
             # create thread pool for upscaler workers
             self.threadpool = QThreadPool()
@@ -599,7 +596,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
                 self.upscaler.driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
                 self.upscaler.scale_ratio = self.scale_ratio_double_spin_box.value()
                 self.upscaler.processes = self.processes_spin_box.value()
-                self.upscaler.video2x_cache_directory = pathlib.Path(self.cache_line_edit.text())
+                self.upscaler.video2x_cache_directory = pathlib.Path(os.path.expandvars(self.cache_line_edit.text()))
                 self.upscaler.image_format = self.config['video2x']['image_format'].lower()
                 self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.checkState())
 
@@ -635,7 +632,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
                     self.upscaler.driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
                     self.upscaler.scale_ratio = self.scale_ratio_double_spin_box.value()
                     self.upscaler.processes = self.processes_spin_box.value()
-                    self.upscaler.video2x_cache_directory = pathlib.Path(self.cache_line_edit.text())
+                    self.upscaler.video2x_cache_directory = pathlib.Path(os.path.expandvars(self.cache_line_edit.text()))
                     self.upscaler.image_format = self.config['video2x']['image_format'].lower()
                     self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.checkState())
 
@@ -674,14 +671,17 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             # remove Video2X cache directory
             with contextlib.suppress(FileNotFoundError):
                 if not bool(self.preserve_frames_check_box.checkState()):
-                    shutil.rmtree(pathlib.Path(self.cache_line_edit.text()))
+                    shutil.rmtree(pathlib.Path(os.path.expandvars(self.cache_line_edit.text())))
             self.start_button.setEnabled(True)
 
     def stop(self):
         # TODO unimplemented yet
         pass
 
-app = QtWidgets.QApplication(sys.argv)
-window = Video2XMainWindow()
-window.show()
-app.exec_()
+
+# this file shouldn't be imported
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    window = Video2XMainWindow()
+    window.show()
+    app.exec_()
