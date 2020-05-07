@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: May 3, 2020
-Last Modified: May 4, 2020
+Last Modified: May 7, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -44,14 +44,15 @@ class WrapperMain:
         parser.add_argument('-f', '--fastMode', action='store_true', help='Faster but maybe low quality')
         # parser.add_argument('-v', '--videoMode', action='store_true', help='Video process')
         parser.add_argument('-s', '--preview', action='store_true', help='Preview image')
-        parser.add_argument('-b', '--preProcessing', action='store_true', help='Enable pre processing')
-        parser.add_argument('-a', '--postProcessing', action='store_true', help='Enable post processing')
+        parser.add_argument('-b', '--preprocessing', action='store_true', help='Enable pre processing')
+        parser.add_argument('-a', '--postprocessing', action='store_true', help='Enable post processing')
         parser.add_argument('-r', '--preFilters', type=int, help='Enhancement filter, only working when preProcessing is true,there are 5 options by binary:Median blur=0000001, Mean blur=0000010, CAS Sharpening=0000100, Gaussian blur weak=0001000, Gaussian blur=0010000, Bilateral filter=0100000, Bilateral filter faster=1000000, you can freely combine them, eg: Gaussian blur weak + Bilateral filter = 0001000 | 0100000 = 0101000 = 40(D)')
         parser.add_argument('-e', '--postFilters', type=int, help='Enhancement filter, only working when postProcessing is true,there are 5 options by binary:Median blur=0000001, Mean blur=0000010, CAS Sharpening=0000100, Gaussian blur weak=0001000, Gaussian blur=0010000, Bilateral filter=0100000, Bilateral filter faster=1000000, you can freely combine them, eg: Gaussian blur weak + Bilateral filter = 0001000 | 0100000 = 0101000 = 40(D), so you can put 40 to enable Gaussian blur weak and Bilateral filter, which also is what I recommend for image that < 1080P, 48 for image that >= 1080P, and for performance I recommend to use 72 for video that < 1080P, 80 for video that >=1080P')
         parser.add_argument('-q', '--GPUMode', action='store_true', help='Enable GPU acceleration')
         parser.add_argument('-l', '--listGPUs', action='store_true', help='list GPUs')
         parser.add_argument('-h', '--platformID', type=int, help='Specify the platform ID')
         parser.add_argument('-d', '--deviceID', type=int, help='Specify the device ID')
+        parser.add_argument('-C', '--codec', type=str, help='Specify the codec for encoding from mp4v(recommended in Windows), dxva(for Windows), avc1(H264, recommended in Linux), vp09(very slow), hevc(not support in Windowds), av01(not support in Windowds) (string [=mp4v])')
         return parser.parse_args(arguments)
 
     def upscale(self, input_file, output_file, zoom_factor, threads):
