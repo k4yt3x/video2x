@@ -258,7 +258,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # load FFmpeg settings
         self.ffmpeg_settings = self.config['ffmpeg']
-        self.ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(self.ffmpeg_settings['ffmpeg_path'])
+        self.ffmpeg_settings['ffmpeg_path'] = str(pathlib.Path(os.path.expandvars(self.ffmpeg_settings['ffmpeg_path'])).absolute())
 
         # set cache directory path
         if self.config['video2x']['video2x_cache_directory'] is None:
@@ -271,7 +271,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-caffe
         settings = self.config['waifu2x_caffe']
-        self.waifu2x_caffe_path_line_edit.setText(os.path.expandvars(settings['path']))
+        self.waifu2x_caffe_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
         self.waifu2x_caffe_mode_combo_box.setCurrentText(settings['mode'])
         self.waifu2x_caffe_noise_level_spin_box.setValue(settings['noise_level'])
         self.waifu2x_caffe_process_combo_box.setCurrentText(settings['process'])
@@ -284,7 +284,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-converter-cpp
         settings = self.config['waifu2x_converter_cpp']
-        self.waifu2x_converter_cpp_path_line_edit.setText(os.path.expandvars(settings['path']))
+        self.waifu2x_converter_cpp_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
         self.waifu2x_converter_cpp_png_compression_spin_box.setValue(settings['png-compression'])
         self.waifu2x_converter_cpp_processor_spin_box.setValue(settings['processor'])
         self.waifu2x_converter_cpp_mode_combo_box.setCurrentText(settings['mode'])
@@ -293,7 +293,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-ncnn-vulkan
         settings = self.config['waifu2x_ncnn_vulkan']
-        self.waifu2x_ncnn_vulkan_path_line_edit.setText(os.path.expandvars(settings['path']))
+        self.waifu2x_ncnn_vulkan_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
         self.waifu2x_ncnn_vulkan_noise_level_spin_box.setValue(settings['n'])
         self.waifu2x_ncnn_vulkan_tile_size_spin_box.setValue(settings['t'])
         self.waifu2x_ncnn_vulkan_gpu_id_spin_box.setValue(settings['g'])
@@ -302,7 +302,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # srmd-ncnn-vulkan
         settings = self.config['srmd_ncnn_vulkan']
-        self.srmd_ncnn_vulkan_path_line_edit.setText(os.path.expandvars(settings['path']))
+        self.srmd_ncnn_vulkan_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
         self.srmd_ncnn_vulkan_noise_level_spin_box.setValue(settings['n'])
         self.srmd_ncnn_vulkan_tile_size_spin_box.setValue(settings['t'])
         self.srmd_ncnn_vulkan_gpu_id_spin_box.setValue(settings['g'])
@@ -311,7 +311,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # anime4k
         settings = self.config['anime4kcpp']
-        self.anime4kcpp_path_line_edit.setText(os.path.expandvars(settings['path']))
+        self.anime4kcpp_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
         self.anime4kcpp_passes_spin_box.setValue(settings['passes'])
         self.anime4kcpp_push_color_count_spin_box.setValue(settings['pushColorCount'])
         self.anime4kcpp_strength_color_spin_box.setValue(settings['strengthColor'])
