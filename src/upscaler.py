@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 7, 2020
+Last Modified: May 8, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -30,9 +30,7 @@ import queue
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
-import threading
 import time
 import traceback
 
@@ -71,8 +69,8 @@ class Upscaler:
 
     def __init__(self, input_path, output_path, driver_settings, ffmpeg_settings):
         # mandatory arguments
-        self.input_path = input_path
-        self.output_path = output_path
+        self.input = input_path
+        self.output = output_path
         self.driver_settings = driver_settings
         self.ffmpeg_settings = ffmpeg_settings
 
@@ -134,20 +132,30 @@ class Upscaler:
                     traceback.print_exc()
 
     def _check_arguments(self):
+        if isinstance(self.input, list):
+            if self.output.exists() and not self.output.is_dir():
+                Avalon.error(_('Input and output path type mismatch'))
+                Avalon.error(_('Input is multiple files but output is not directory'))
+                raise ArgumentError('input output path type mismatch')
+            for input_path in self.input:
+                if not input_path.is_file() and not input_path.is_dir():
+                    Avalon.error(_('Input path {} is neither a file nor a directory'.format(input_path)))
+                    raise FileNotFoundError(f'{input_path} is neither file nor directory')
+
         # if input is a file
-        if self.input_path.is_file():
-            if self.output_path.is_dir():
+        elif self.input.is_file():
+            if self.output.is_dir():
                 Avalon.error(_('Input and output path type mismatch'))
                 Avalon.error(_('Input is single file but output is directory'))
                 raise ArgumentError('input output path type mismatch')
-            if not re.search(r'.*\..*$', str(self.output_path)):
+            if not re.search(r'.*\..*$', str(self.output)):
                 Avalon.error(_('No suffix found in output file path'))
                 Avalon.error(_('Suffix must be specified for FFmpeg'))
                 raise ArgumentError('no output video suffix specified')
 
         # if input is a directory
-        elif self.input_path.is_dir():
-            if self.output_path.is_file():
+        elif self.input.is_dir():
+            if self.output.is_file():
                 Avalon.error(_('Input and output path type mismatch'))
                 Avalon.error(_('Input is directory but output is existing single file'))
                 raise ArgumentError('input output path type mismatch')
@@ -155,7 +163,7 @@ class Upscaler:
         # if input is neither
         else:
             Avalon.error(_('Input path is neither a file nor a directory'))
-            raise FileNotFoundError(f'{self.input_path} is neither file nor directory')
+            raise FileNotFoundError(f'{self.input} is neither file nor directory')
 
         # check Fmpeg settings
         ffmpeg_path = pathlib.Path(self.ffmpeg_settings['ffmpeg_path'])
@@ -259,32 +267,32 @@ class Upscaler:
             # if the driver being used is waifu2x-caffe
             if self.driver == 'waifu2x_caffe':
                 self.process_pool.append(driver.upscale(process_directory,
-                                                         self.upscaled_frames,
-                                                         self.scale_ratio,
-                                                         self.scale_width,
-                                                         self.scale_height,
-                                                         self.image_format,
-                                                         self.bit_depth))
+                                                        self.upscaled_frames,
+                                                        self.scale_ratio,
+                                                        self.scale_width,
+                                                        self.scale_height,
+                                                        self.image_format,
+                                                        self.bit_depth))
 
             # if the driver being used is waifu2x-converter-cpp
             elif self.driver == 'waifu2x_converter_cpp':
                 self.process_pool.append(driver.upscale(process_directory,
-                                                         self.upscaled_frames,
-                                                         self.scale_ratio,
-                                                         self.processes,
-                                                         self.image_format))
+                                                        self.upscaled_frames,
+                                                        self.scale_ratio,
+                                                        self.processes,
+                                                        self.image_format))
 
             # if the driver being used is waifu2x-ncnn-vulkan
             elif self.driver == 'waifu2x_ncnn_vulkan':
                 self.process_pool.append(driver.upscale(process_directory,
-                                                         self.upscaled_frames,
-                                                         self.scale_ratio))
+                                                        self.upscaled_frames,
+                                                        self.scale_ratio))
 
             # if the driver being used is srmd_ncnn_vulkan
             elif self.driver == 'srmd_ncnn_vulkan':
                 self.process_pool.append(driver.upscale(process_directory,
-                                                         self.upscaled_frames,
-                                                         self.scale_ratio))
+                                                        self.upscaled_frames,
+                                                        self.scale_ratio))
 
         # start progress bar in a different thread
         Avalon.debug_info(_('Starting progress monitor'))
@@ -390,18 +398,34 @@ class Upscaler:
         # define processing queue
         processing_queue = queue.Queue()
 
+        # if input is a list of files
+        if isinstance(self.input, list):
+            # make output directory if it doesn't exist
+            self.output.mkdir(parents=True, exist_ok=True)
+
+            for input_path in self.input:
+
+                if input_path.is_file():
+                    output_video = self.output / input_path.name
+                    processing_queue.put((input_path.absolute(), output_video.absolute()))
+
+                elif input_path.is_dir():
+                    for input_video in [f for f in input_path.iterdir() if f.is_file()]:
+                        output_video = self.output / input_video.name
+                        processing_queue.put((input_video.absolute(), output_video.absolute()))
+
         # if input specified is single file
-        if self.input_path.is_file():
-            Avalon.info(_('Upscaling single video file: {}').format(self.input_path))
-            processing_queue.put((self.input_path.absolute(), self.output_path.absolute()))
+        elif self.input.is_file():
+            Avalon.info(_('Upscaling single video file: {}').format(self.input))
+            processing_queue.put((self.input.absolute(), self.output.absolute()))
 
         # if input specified is a directory
-        elif self.input_path.is_dir():
+        elif self.input.is_dir():
 
             # make output directory if it doesn't exist
-            self.output_path.mkdir(parents=True, exist_ok=True)
-            for input_video in [f for f in self.input_path.iterdir() if f.is_file()]:
-                output_video = self.output_path / input_video.name
+            self.output.mkdir(parents=True, exist_ok=True)
+            for input_video in [f for f in self.input.iterdir() if f.is_file()]:
+                output_video = self.output / input_video.name
                 processing_queue.put((input_video.absolute(), output_video.absolute()))
 
         while not processing_queue.empty():

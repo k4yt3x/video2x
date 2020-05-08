@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>691</width>
-    <height>503</height>
+    <width>718</width>
+    <height>668</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -16,7 +16,7 @@
   <property name="windowTitle">
    <string>Video2X GUI</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <property name="leftMargin">
      <number>5</number>
@@ -79,154 +79,160 @@
          </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="fileSelectionVerticalLayout">
-          <item>
-           <layout class="QHBoxLayout" name="inputHorizontalLayout">
-            <item>
-             <widget class="QLabel" name="inputLabel">
-              <property name="minimumSize">
-               <size>
-                <width>63</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="lineWidth">
-               <number>1</number>
-              </property>
-              <property name="text">
-               <string>Input</string>
-              </property>
-              <property name="wordWrap">
-               <bool>false</bool>
-              </property>
-              <property name="margin">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="inputLineEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="inputSelectFileButton">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string>Select File</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="inputSelectFolderButton">
-              <property name="text">
-               <string>Select Folder</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="outputHorizontalLayout">
-            <item>
-             <widget class="QLabel" name="outputLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>63</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Output</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="outputLineEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="outputSelectFileButton">
-              <property name="text">
-               <string>Select File</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="outputSelectFolderButton">
-              <property name="text">
-               <string>Select Folder</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="configHorizontalLayout">
-            <item>
-             <widget class="QLabel" name="configLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>63</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Config</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="configLineEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="configSelectButton">
-              <property name="text">
-               <string>Select</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="cacheHorizontalLayout">
-            <item>
-             <widget class="QLabel" name="cacheLabel">
-              <property name="minimumSize">
-               <size>
-                <width>63</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Cache Folder</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="cacheLineEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="cacheSelectFolderButton">
-              <property name="text">
-               <string>Select Folder</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
+         <widget class="QGroupBox" name="inputSelectionGroupBox">
+          <property name="title">
+           <string>Input Selection</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QTableView" name="inputTableView"/>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="inputButtonsHorizontalLayout">
+             <item>
+              <widget class="QPushButton" name="inputSelectFileButton">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="text">
+                <string>Select File</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="inputSelectFolderButton">
+               <property name="text">
+                <string>Select Folder</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="inputDeleteSelectedButton">
+               <property name="text">
+                <string>Delete Selected</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="inputClearAllButton">
+               <property name="text">
+                <string>Clear All</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="otherPathsSelectionGroupBox">
+          <property name="title">
+           <string>Other Paths Selection</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_9">
+           <item>
+            <layout class="QHBoxLayout" name="outputHorizontalLayout">
+             <item>
+              <widget class="QLabel" name="outputLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>63</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Output</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="outputLineEdit"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="outputSelectFileButton">
+               <property name="text">
+                <string>Select File</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="outputSelectFolderButton">
+               <property name="text">
+                <string>Select Folder</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="configHorizontalLayout">
+             <item>
+              <widget class="QLabel" name="configLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>63</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Config</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="configLineEdit"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="configSelectButton">
+               <property name="text">
+                <string>Select</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="cacheHorizontalLayout">
+             <item>
+              <widget class="QLabel" name="cacheLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>63</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Cache Folder</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="cacheLineEdit"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="cacheSelectFolderButton">
+               <property name="text">
+                <string>Select Folder</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
         </item>
         <item>
          <widget class="QGroupBox" name="expressSettingsGroupBox">
@@ -1344,7 +1350,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>691</width>
+     <width>718</width>
      <height>21</height>
     </rect>
    </property>
