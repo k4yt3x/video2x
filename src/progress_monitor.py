@@ -33,7 +33,7 @@ class ProgressMonitor(threading.Thread):
 
     def run(self):
         self.running = True
-        
+
         # get number of extracted frames
         self.upscaler.total_frames = 0
         for directory in self.extracted_frames_directories:
