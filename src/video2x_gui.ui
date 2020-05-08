@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Video2xQt</class>
- <widget class="QMainWindow" name="Video2xQt">
+ <class>Video2xGui</class>
+ <widget class="QMainWindow" name="Video2xGui">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,8 +10,11 @@
     <height>503</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
-   <string>Video2xQt</string>
+   <string>Video2X GUI</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -37,6 +40,44 @@
         <string>Main</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <widget class="QLabel" name="dragDropLabelTop">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>15</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>**Drag and drop file or folder anywhere in this window to select input file/folder.**</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
+          </property>
+          <property name="wordWrap">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="dragDropLabelBottom">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>15</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>**Drop item on a specific input box to set the value of that box.**</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
+          </property>
+         </widget>
+        </item>
         <item>
          <layout class="QVBoxLayout" name="fileSelectionVerticalLayout">
           <item>

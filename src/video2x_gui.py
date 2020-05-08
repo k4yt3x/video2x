@@ -98,6 +98,7 @@ class UpscalerWorker(QRunnable):
         else:
             self.signals.finished.emit()
 
+
 class Video2XMainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, *args, **kwargs):
@@ -107,6 +108,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         # create thread pool for upscaler workers
         self.threadpool = QThreadPool()
 
+        # set window title and icon
         self.video2x_icon_path = str(resource_path('images/video2x.png'))
         self.setWindowTitle(f'Video2X GUI {VERSION}')
         self.setWindowIcon(QtGui.QIcon(self.video2x_icon_path))
@@ -121,6 +123,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         # main tab
         # select input file/folder
         self.input_line_edit = self.findChild(QtWidgets.QLineEdit, 'inputLineEdit')
+        self.enable_line_edit_file_drop(self.input_line_edit)
         self.input_select_file_button = self.findChild(QtWidgets.QPushButton, 'inputSelectFileButton')
         self.input_select_file_button.clicked.connect(self.select_input_file)
         self.input_select_folder_button = self.findChild(QtWidgets.QPushButton, 'inputSelectFolderButton')
@@ -128,6 +131,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # select output file/folder
         self.output_line_edit = self.findChild(QtWidgets.QLineEdit, 'outputLineEdit')
+        self.enable_line_edit_file_drop(self.output_line_edit)
         self.output_select_file_button = self.findChild(QtWidgets.QPushButton, 'outputSelectFileButton')
         self.output_select_file_button.clicked.connect(self.select_output_file)
         self.output_select_folder_button = self.findChild(QtWidgets.QPushButton, 'outputSelectFolderButton')
@@ -135,12 +139,14 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # config file
         self.config_line_edit = self.findChild(QtWidgets.QLineEdit, 'configLineEdit')
+        self.enable_line_edit_file_drop(self.config_line_edit)
         self.config_line_edit.setText(str((pathlib.Path(__file__).parent / 'video2x.yaml').absolute()))
         self.config_select_file_button = self.findChild(QtWidgets.QPushButton, 'configSelectButton')
         self.config_select_file_button.clicked.connect(self.select_config_file)
 
         # cache directory
         self.cache_line_edit = self.findChild(QtWidgets.QLineEdit, 'cacheLineEdit')
+        self.enable_line_edit_file_drop(self.cache_line_edit)
         self.cache_select_folder_button = self.findChild(QtWidgets.QPushButton, 'cacheSelectFolderButton')
         self.cache_select_folder_button.clicked.connect(self.select_cache_folder)
 
@@ -164,6 +170,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
         # driver settings
         # waifu2x-caffe
         self.waifu2x_caffe_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xCaffePathLineEdit')
+        self.enable_line_edit_file_drop(self.waifu2x_caffe_path_line_edit)
         self.waifu2x_caffe_path_select_button = self.findChild(QtWidgets.QPushButton, 'waifu2xCaffePathSelectButton')
         self.waifu2x_caffe_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.waifu2x_caffe_path_line_edit))
         self.waifu2x_caffe_mode_combo_box = self.findChild(QtWidgets.QComboBox, 'waifu2xCaffeModeComboBox')
@@ -179,6 +186,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-converter-cpp
         self.waifu2x_converter_cpp_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xConverterCppPathLineEdit')
+        self.enable_line_edit_file_drop(self.waifu2x_converter_cpp_path_line_edit)
         self.waifu2x_converter_cpp_path_edit_button = self.findChild(QtWidgets.QPushButton, 'waifu2xConverterCppPathSelectButton')
         self.waifu2x_converter_cpp_path_edit_button.clicked.connect(lambda: self.select_driver_binary_path(self.waifu2x_converter_cpp_path_line_edit))
         self.waifu2x_converter_cpp_png_compression_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xConverterCppPngCompressionSpinBox')
@@ -190,6 +198,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # waifu2x-ncnn-vulkan
         self.waifu2x_ncnn_vulkan_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'waifu2xNcnnVulkanPathLineEdit')
+        self.enable_line_edit_file_drop(self.waifu2x_ncnn_vulkan_path_line_edit)
         self.waifu2x_ncnn_vulkan_path_select_button = self.findChild(QtWidgets.QPushButton, 'waifu2xNcnnVulkanPathSelectButton')
         self.waifu2x_ncnn_vulkan_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.waifu2x_ncnn_vulkan_path_line_edit))
         self.waifu2x_ncnn_vulkan_noise_level_spin_box = self.findChild(QtWidgets.QSpinBox, 'waifu2xNcnnVulkanNoiseLevelSpinBox')
@@ -201,6 +210,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # srmd-ncnn-vulkan
         self.srmd_ncnn_vulkan_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'srmdNcnnVulkanPathLineEdit')
+        self.enable_line_edit_file_drop(self.srmd_ncnn_vulkan_path_line_edit)
         self.srmd_ncnn_vulkan_path_select_button = self.findChild(QtWidgets.QPushButton, 'srmdNcnnVulkanPathSelectButton')
         self.srmd_ncnn_vulkan_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.srmd_ncnn_vulkan_path_line_edit))
         self.srmd_ncnn_vulkan_noise_level_spin_box = self.findChild(QtWidgets.QSpinBox, 'srmdNcnnVulkanNoiseLevelSpinBox')
@@ -212,6 +222,7 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # anime4k
         self.anime4kcpp_path_line_edit = self.findChild(QtWidgets.QLineEdit, 'anime4kCppPathLineEdit')
+        self.enable_line_edit_file_drop(self.anime4kcpp_path_line_edit)
         self.anime4kcpp_path_select_button = self.findChild(QtWidgets.QPushButton, 'anime4kCppPathSelectButton')
         self.anime4kcpp_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.anime4kcpp_path_line_edit))
         self.anime4kcpp_passes_spin_box = self.findChild(QtWidgets.QSpinBox, 'anime4kCppPassesSpinBox')
@@ -231,6 +242,21 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
 
         # load configurations
         self.load_configurations()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        input_path = pathlib.Path(event.mimeData().urls()[0].toLocalFile())
+        self.input_line_edit.setText(str(input_path.absolute()))
+        self.generate_output_path(input_path)
+
+    def enable_line_edit_file_drop(self, line_edit: QtWidgets.QLineEdit):
+        line_edit.dragEnterEvent = self.dragEnterEvent
+        line_edit.dropEvent = lambda event: line_edit.setText(str(pathlib.Path(event.mimeData().urls()[0].toLocalFile()).absolute()))
 
     @staticmethod
     def read_config(config_file: pathlib.Path) -> dict:
@@ -424,40 +450,39 @@ class Video2XMainWindow(QtWidgets.QMainWindow):
             return None
         return pathlib.Path(folder_selected)
 
-    def select_input_file(self):
+    def generate_output_path(self, input_path: pathlib.Path):
+        # give up if input path doesn't exist or isn't a file or a directory
+        if not input_path.exists() or not (input_path.is_file() or input_path.is_dir()):
+            return
 
+        if input_path.is_file():
+            output_path = input_path.parent / f'{input_path.stem}_output.mp4'
+        elif input_path.is_dir():
+            output_path = input_path.parent / f'{input_path.stem}_output'
+
+        # try up to 1000 times
+        output_path_id = 0
+        while output_path.exists() and output_path_id <= 1000:
+            if input_path.is_file():
+                output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_path_id}.mp4')
+            elif input_path.is_dir():
+                output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_file_id}')
+            output_path_id += 1
+
+        if not output_path.exists():
+            self.output_line_edit.setText(str(output_path.absolute()))
+
+    def select_input_file(self):
         if (input_file := self.select_file('Select Input File')) is None:
             return
+        self.generate_output_path(input_file)
         self.input_line_edit.setText(str(input_file.absolute()))
 
-        # try to set an output file name automatically
-        output_file = input_file.parent / f'{input_file.stem}_output.mp4'
-
-        output_file_id = 0
-        while output_file.is_file() and output_file_id <= 10:
-            output_file = input_file.parent / pathlib.Path(f'{input_file.stem}_output_{output_file_id}.mp4')
-            output_file_id += 1
-
-        if not output_file.exists():
-            self.output_line_edit.setText(str(output_file.absolute()))
-
     def select_input_folder(self):
-
         if (input_folder := self.select_folder('Select Input Folder')) is None:
             return
-
+        self.generate_output_path(input_folder)
         self.input_line_edit.setText(str(input_folder.absolute()))
-
-        # try to set an output file name automatically
-        output_folder = input_folder.parent / f'{input_folder.stem}_output'
-
-        output_file_id = 0
-        while output_folder.is_dir() and output_file_id <= 10:
-            output_folder = input_folder.parent / pathlib.Path(f'{input_folder.stem}_output_{output_file_id}')
-            output_file_id += 1
-
-        if not output_folder.exists():
-            self.output_line_edit.setText(str(output_folder.absolute()))
 
     def select_output_file(self):
         if (output_file := self.select_file('Select Output File')) is None:
