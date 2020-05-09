@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: May 7, 2020
+Last Modified: May 8, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -261,7 +261,7 @@ class Video2xSetup:
         # configure only the specified drivers
         if self.driver == 'all':
             template_dict['waifu2x_caffe']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui')
-            template_dict['waifu2x_converter_cpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp')
+            template_dict['waifu2x_converter_cpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp' / 'waifu2x-converter-cpp')
             template_dict['waifu2x_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan')
             template_dict['srmd_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'srmd-ncnn-vulkan' / 'srmd-ncnn-vulkan')
             template_dict['anime4kcpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'anime4kcpp' / 'CLI' / 'Anime4KCPP_CLI' / 'Anime4KCPP_CLI')
