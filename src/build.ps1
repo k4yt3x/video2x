@@ -12,9 +12,14 @@ To start a PowerShell session with execution policy bypass
 powershell –ExecutionPolicy Bypass
 #>
 
+if ($args.count -ne 1){
+    Write-Host -ForegroundColor White "Usage:`n .\build.ps1 VIDEO2X_VERSION"
+    Exit
+}
+
 # version number
 $SCRIPT_VERSION = "1.0.1"
-$VIDEO2X_VERSION = "4.0.0_beta2"
+$VIDEO2X_VERSION = $args[0]
 
 Write-Host -ForegroundColor White "Video2X Building Script Version $($SCRIPT_VERSION)
 Starting to build Video2X release packages"
