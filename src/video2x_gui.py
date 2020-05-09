@@ -219,11 +219,17 @@ class Video2XMainWindow(QMainWindow):
         self.scale_ratio_double_spin_box = self.findChild(QDoubleSpinBox, 'scaleRatioDoubleSpinBox')
         self.preserve_frames_check_box = self.findChild(QCheckBox, 'preserveFramesCheckBox')
 
-        # progress bar and start/stop controls
-        self.progress_bar = self.findChild(QProgressBar, 'progressBar')
+        # currently processing
+        self.currently_processing_label = self.findChild(QLabel, 'currentlyProcessingLabel')
+        self.current_progress_bar = self.findChild(QProgressBar, 'currentProgressBar')
         self.time_elapsed_label = self.findChild(QLabel, 'timeElapsedLabel')
         self.time_remaining_label = self.findChild(QLabel, 'timeRemainingLabel')
         self.rate_label = self.findChild(QLabel, 'rateLabel')
+        self.frames_label = self.findChild(QLabel, 'framesLabel')
+
+        # overall progress
+        self.overall_progress_bar = self.findChild(QProgressBar, 'overallProgressBar')
+        self.overall_progress_label = self.findChild(QLabel, 'overallProgressLabel')
         self.start_button = self.findChild(QPushButton, 'startButton')
         self.start_button.clicked.connect(self.start)
         self.stop_button = self.findChild(QPushButton, 'stopButton')
@@ -625,38 +631,33 @@ class Video2XMainWindow(QMainWindow):
         message_box.exec_()
 
     def start_progress_bar(self, progress_callback):
-        # wait for progress monitor to come online
-        while 'progress_monitor' not in self.upscaler.__dict__:
-            if self.upscaler.stop_signal:
-                return
-            time.sleep(0.1)
 
         # initialize progress bar values
         upscale_begin_time = time.time()
-        progress_callback.emit((0, 0, 0, upscale_begin_time))
+        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path()))
 
         # keep querying upscaling process and feed information to callback signal
-        while self.upscaler.progress_monitor.running:
-            try:
-                progress_percentage = int(100 * self.upscaler.total_frames_upscaled / self.upscaler.total_frames)
-            except ZeroDivisionError:
-                progress_percentage = 0
+        while self.upscaler.running:
 
-            progress_callback.emit((progress_percentage,
+            progress_callback.emit((upscale_begin_time,
                                     self.upscaler.total_frames_upscaled,
                                     self.upscaler.total_frames,
-                                    upscale_begin_time))
+                                    self.upscaler.total_processed,
+                                    self.upscaler.total_videos,
+                                    self.upscaler.current_input_video))
             time.sleep(1)
 
         # upscale process will stop at 99%
         # so it's set to 100 manually when all is done
-        progress_callback.emit((100, 0, 0, upscale_begin_time))
+        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path()))
 
     def set_progress(self, progress_information: tuple):
-        progress_percentage = progress_information[0]
+        upscale_begin_time = progress_information[0]
         total_frames_upscaled = progress_information[1]
         total_frames = progress_information[2]
-        upscale_begin_time = progress_information[3]
+        total_processed = progress_information[3]
+        total_videos = progress_information[4]
+        current_input_video = progress_information[5]
 
         # calculate fields based on frames and time elapsed
         time_elapsed = time.time() - upscale_begin_time
@@ -668,10 +669,29 @@ class Video2XMainWindow(QMainWindow):
             time_remaining = 0.0
 
         # set calculated values in GUI
-        self.progress_bar.setValue(progress_percentage)
+        self.current_progress_bar.setMaximum(total_frames)
+        self.current_progress_bar.setValue(total_frames_upscaled)
+        self.frames_label.setText('Frames: {}/{}'.format(total_frames_upscaled, total_frames))
         self.time_elapsed_label.setText('Time Elapsed: {}'.format(time.strftime("%H:%M:%S", time.gmtime(time_elapsed))))
         self.time_remaining_label.setText('Time Remaining: {}'.format(time.strftime("%H:%M:%S", time.gmtime(time_remaining))))
         self.rate_label.setText('Rate (FPS): {}'.format(round(rate, 2)))
+        self.overall_progress_label.setText('Overall Progress: {}/{}'.format(total_processed, total_videos))
+        self.overall_progress_bar.setMaximum(total_videos)
+        self.overall_progress_bar.setValue(total_processed)
+        self.currently_processing_label.setText('Currently Processing: {}'.format(str(current_input_video.name)))
+
+    def reset_progress_display(self):
+        # reset progress display UI elements
+        self.current_progress_bar.setMaximum(100)
+        self.current_progress_bar.setValue(0)
+        self.frames_label.setText('Frames: {}/{}'.format(0, 0))
+        self.time_elapsed_label.setText('Time Elapsed: {}'.format(time.strftime("%H:%M:%S", time.gmtime(0))))
+        self.time_remaining_label.setText('Time Remaining: {}'.format(time.strftime("%H:%M:%S", time.gmtime(0))))
+        self.rate_label.setText('Rate (FPS): {}'.format(0.0))
+        self.overall_progress_label.setText('Overall Progress: {}/{}'.format(0, 0))
+        self.overall_progress_bar.setMaximum(100)
+        self.overall_progress_bar.setValue(0)
+        self.currently_processing_label.setText('Currently Processing:')
 
     def start(self):
 
@@ -736,12 +756,14 @@ class Video2XMainWindow(QMainWindow):
         self.threadpool.waitForDone(5)
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)
+        self.reset_progress_display()
 
     def upscale_interrupted(self):
         self.show_message('Upscale has been interrupted')
         self.threadpool.waitForDone(5)
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)
+        self.reset_progress_display()
 
     def upscale_successful(self):
         # if all threads have finished
@@ -749,10 +771,11 @@ class Video2XMainWindow(QMainWindow):
         self.show_message('Upscale finished successfully, taking {} seconds'.format(round((time.time() - self.begin_time), 5)))
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)
+        self.reset_progress_display()
 
     def stop(self):
         with contextlib.suppress(AttributeError):
-            self.upscaler.stop_signal = True
+            self.upscaler.running = False
 
     def closeEvent(self, event):
         # try cleaning up temp directories

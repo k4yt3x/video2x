@@ -85,9 +85,12 @@ class Upscaler:
         self.preserve_frames = False
 
         # other internal members and signals
-        self.stop_signal = False
+        self.running = False
         self.total_frames_upscaled = 0
         self.total_frames = 0
+        self.total_videos = 0
+        self.total_processed = 0
+        self.current_input_video = pathlib.Path()
 
     def create_temp_directories(self):
         """create temporary directories
@@ -347,7 +350,7 @@ class Upscaler:
             while self.process_pool:
 
                 # if stop signal received, terminate all processes
-                if self.stop_signal is True:
+                if self.running is False:
                     raise SystemExit
 
                 for process in self.process_pool:
@@ -386,7 +389,7 @@ class Upscaler:
         """
 
         # external stop signal when called in a thread
-        self.stop_signal = False
+        self.running = True
 
         # define process pool to contain processes
         self.process_pool = []
@@ -396,7 +399,7 @@ class Upscaler:
         self._check_arguments()
 
         # define processing queue
-        processing_queue = queue.Queue()
+        self.processing_queue = queue.Queue()
 
         # if input is a list of files
         if isinstance(self.input, list):
@@ -407,17 +410,17 @@ class Upscaler:
 
                 if input_path.is_file():
                     output_video = self.output / input_path.name
-                    processing_queue.put((input_path.absolute(), output_video.absolute()))
+                    self.processing_queue.put((input_path.absolute(), output_video.absolute()))
 
                 elif input_path.is_dir():
                     for input_video in [f for f in input_path.iterdir() if f.is_file()]:
                         output_video = self.output / input_video.name
-                        processing_queue.put((input_video.absolute(), output_video.absolute()))
+                        self.processing_queue.put((input_video.absolute(), output_video.absolute()))
 
         # if input specified is single file
         elif self.input.is_file():
             Avalon.info(_('Upscaling single video file: {}').format(self.input))
-            processing_queue.put((self.input.absolute(), self.output.absolute()))
+            self.processing_queue.put((self.input.absolute(), self.output.absolute()))
 
         # if input specified is a directory
         elif self.input.is_dir():
@@ -426,10 +429,13 @@ class Upscaler:
             self.output.mkdir(parents=True, exist_ok=True)
             for input_video in [f for f in self.input.iterdir() if f.is_file()]:
                 output_video = self.output / input_video.name
-                processing_queue.put((input_video.absolute(), output_video.absolute()))
+                self.processing_queue.put((input_video.absolute(), output_video.absolute()))
 
-        while not processing_queue.empty():
-            input_video, output_video = processing_queue.get()
+        # record video count for external calls
+        self.total_videos = self.processing_queue.qsize()
+
+        while not self.processing_queue.empty():
+            self.current_input_video, output_video = self.processing_queue.get()
             # drivers that have native support for video processing
             if self.driver == 'anime4kcpp':
                 # append FFmpeg path to the end of PATH
@@ -442,7 +448,7 @@ class Upscaler:
                 driver = DriverWrapperMain(copy.deepcopy(self.driver_settings))
 
                 # run Anime4KCPP
-                self.process_pool.append(driver.upscale(input_video, output_video, self.scale_ratio, self.processes))
+                self.process_pool.append(driver.upscale(self.current_input_video, output_video, self.scale_ratio, self.processes))
                 self._wait()
                 Avalon.info(_('Upscaling completed'))
 
@@ -454,7 +460,7 @@ class Upscaler:
                     fm = Ffmpeg(self.ffmpeg_settings, self.image_format)
 
                     Avalon.info(_('Reading video information'))
-                    video_info = fm.get_video_info(input_video)
+                    video_info = fm.get_video_info(self.current_input_video)
                     # analyze original video with ffprobe and retrieve framerate
                     # width, height = info['streams'][0]['width'], info['streams'][0]['height']
 
@@ -471,7 +477,7 @@ class Upscaler:
                         raise StreamNotFoundError('no video stream found')
 
                     # extract frames from video
-                    self.process_pool.append((fm.extract_frames(input_video, self.extracted_frames)))
+                    self.process_pool.append((fm.extract_frames(self.current_input_video, self.extracted_frames)))
                     self._wait()
 
                     # get average frame rate of video stream
@@ -512,7 +518,7 @@ class Upscaler:
 
                     # migrate audio tracks and subtitles
                     Avalon.info(_('Migrating audio tracks and subtitles to upscaled video'))
-                    self.process_pool.append(fm.migrate_audio_tracks_subtitles(input_video, output_video, self.upscaled_frames))
+                    self.process_pool.append(fm.migrate_audio_tracks_subtitles(self.current_input_video, output_video, self.upscaled_frames))
                     self._wait()
 
                     # destroy temp directories
@@ -522,3 +528,9 @@ class Upscaler:
                     with contextlib.suppress(ValueError):
                         self.cleanup_temp_directories()
                     raise e
+
+            # increment total number of videos processed
+            self.total_processed += 1
+
+        # signal upscaling completion
+        self.running = False
