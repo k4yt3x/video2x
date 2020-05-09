@@ -522,14 +522,37 @@ class Upscaler:
                     Avalon.info(_('Converting extracted frames into video'))
 
                     # use user defined output size
-                    self.process_pool.append(fm.convert_video(framerate, f'{self.scale_width}x{self.scale_height}', self.upscaled_frames))
+                    self.process_pool.append(fm.assemble_video(framerate,
+                                                               f'{self.scale_width}x{self.scale_height}',
+                                                               self.upscaled_frames))
                     self._wait()
                     Avalon.info(_('Conversion completed'))
 
-                    # migrate audio tracks and subtitles
-                    Avalon.info(_('Migrating audio tracks and subtitles to upscaled video'))
-                    self.process_pool.append(fm.migrate_audio_tracks_subtitles(self.current_input_video, output_video, self.upscaled_frames))
-                    self._wait()
+                    try:
+                        # migrate audio tracks and subtitles
+                        Avalon.info(_('Migrating audio tracks and subtitles to upscaled video'))
+                        self.process_pool.append(fm.migrate_streams(self.current_input_video,
+                                                                    output_video,
+                                                                    self.upscaled_frames))
+                        self._wait()
+
+                    # if failed to copy streams
+                    # use file with only video stream
+                    except subprocess.CalledProcessError:
+                        Avalon.error(_('Failed to migrate streams'))
+                        Avalon.warning(_('Trying to output video without additional streams'))
+
+                        # construct output file path
+                        output_video_path = output_video.parent / f'{output_video.stem}{fm.intermediate_file_name.suffix}'
+
+                        # if output file already exists, cancel
+                        if output_video_path.exists():
+                            Avalon.error(_('Output video file exists, aborting'))
+
+                        # otherwise, rename intermediate file to the output file
+                        else:
+                            Avalon.info(_('Writing intermediate file to: {}').format(output_video_path.absolute()))
+                            (self.upscaled_frames / fm.intermediate_file_name).rename(output_video_path)
 
                     # destroy temp directories
                     self.cleanup_temp_directories()

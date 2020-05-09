@@ -97,6 +97,7 @@ anime4kcpp:
   codec: mp4v # Specify the codec for encoding from mp4v(recommended in Windows), dxva(for Windows), avc1(H264, recommended in Linux), vp09(very slow), hevc(not support in Windowds), av01(not support in Windowds) (string [=mp4v])
 ffmpeg:
   ffmpeg_path: '%LOCALAPPDATA%\video2x\ffmpeg-latest-win64-static\bin'
+  intermediate_file_name: 'intermediate.mkv'
   # step 1: extract all frames from original video
   # into temporary directory
   video_to_frames:

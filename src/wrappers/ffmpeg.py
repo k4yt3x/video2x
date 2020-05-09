@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 7, 2020
+Last Modified: May 9, 2020
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -32,7 +32,10 @@ class Ffmpeg:
         self.ffmpeg_path = pathlib.Path(self.ffmpeg_settings['ffmpeg_path'])
         self.ffmpeg_binary = self.ffmpeg_path / 'ffmpeg'
         self.ffmpeg_probe_binary = self.ffmpeg_path / 'ffprobe'
+
+        # video metadata
         self.image_format = image_format
+        self.intermediate_file_name = pathlib.Path(self.ffmpeg_settings['intermediate_file_name'])
         self.pixel_format = None
 
     def get_pixel_formats(self):
@@ -133,7 +136,7 @@ class Ffmpeg:
 
         return(self._execute(execute))
 
-    def convert_video(self, framerate, resolution, upscaled_frames):
+    def assemble_video(self, framerate, resolution, upscaled_frames):
         """Converts images into videos
 
         This method converts a set of images into a video
@@ -177,12 +180,12 @@ class Ffmpeg:
 
         # specify output file location
         execute.extend([
-            upscaled_frames / 'no_audio.mp4'
+            upscaled_frames / self.intermediate_file_name
         ])
 
         return(self._execute(execute))
 
-    def migrate_audio_tracks_subtitles(self, input_video, output_video, upscaled_frames):
+    def migrate_streams(self, input_video, output_video, upscaled_frames):
         """ Migrates audio tracks and subtitles from input video to output video
 
         Arguments:
@@ -198,7 +201,7 @@ class Ffmpeg:
 
         execute.extend([
             '-i',
-            upscaled_frames / 'no_audio.mp4',
+            upscaled_frames / self.intermediate_file_name,
             '-i',
             input_video
         ])
