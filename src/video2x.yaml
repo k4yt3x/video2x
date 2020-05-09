@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: May 7, 2020
+# Last Modified: May 8, 2020
 # Items commented out are parameters handled by Video2x.
 waifu2x_caffe:
   path: '%LOCALAPPDATA%\video2x\waifu2x-caffe\waifu2x-caffe-cui'
@@ -31,11 +31,11 @@ waifu2x_converter_cpp:
   #list-processor # dump processor list
   output-format: null # The format used when running in recursive/folder mode
   png-compression: 5 # Set PNG compression level (0-9), 9 = Max compression (slowest & smallest)
-  image-quality: -1 # JPEG & WebP Compression quality (0-101, 0 being smallest size and lowest quality), use 101 for lossless WebP
+  image-quality: -1 # JPEG & WebP Compression quality (-1-101, 0 being smallest size and lowest quality, -1 being default), use 101 for lossless WebP
   block-size: 0 # block size
   disable-gpu: false # disable GPU
   force-OpenCL: false # force to use OpenCL on Intel Platform
-  processor: -1 # set target processor
+  processor: -1 # set target processor (-1 uses default device)
   jobs: 0 # number of threads launching at the same time
   model-dir: null # path to custom model directory (don't append last / ) default: models_rgb
   #scale-ratio: 2.0 # custom scale ratio
@@ -97,12 +97,16 @@ anime4kcpp:
   codec: mp4v # Specify the codec for encoding from mp4v(recommended in Windows), dxva(for Windows), avc1(H264, recommended in Linux), vp09(very slow), hevc(not support in Windowds), av01(not support in Windowds) (string [=mp4v])
 ffmpeg:
   ffmpeg_path: '%LOCALAPPDATA%\video2x\ffmpeg-latest-win64-static\bin'
+  # step 1: extract all frames from original video
+  # into temporary directory
   video_to_frames:
     output_options:
       '-qscale:v': null
       '-pix_fmt': rgba64be
     '-hwaccel': auto
     '-y': true
+  # step 2: stitch all frames back into a video
+  # with only a video track
   frames_to_video:
     input_options:
       '-qscale:v': null
@@ -115,6 +119,8 @@ ffmpeg:
       '-pix_fmt': null
     '-hwaccel': auto
     '-y': true
+  # step 3: migrate audio and subtitle tracks from original
+  # video into the upscaled video
   migrating_tracks:
     output_options:
       '-map':
@@ -125,6 +131,7 @@ ffmpeg:
         - '1:t?'
       '-c': copy
       '-pix_fmt': null
+      '-metadata': 'comment=Upscaled by Video2X'
     '-hwaccel': auto
     '-y': true
 video2x:
