@@ -53,14 +53,14 @@ def resource_path(relative_path: str) -> pathlib.Path:
 
 class WorkerSignals(QObject):
     progress = pyqtSignal(tuple)
-    error = pyqtSignal(str)
+    error = pyqtSignal(Exception)
     interrupted = pyqtSignal()
     finished = pyqtSignal()
 
 
-class ProgressBarWorker(QRunnable):
+class ProgressMonitorWorkder(QRunnable):
     def __init__(self, fn, *args, **kwargs):
-        super(ProgressBarWorker, self).__init__()
+        super(ProgressMonitorWorkder, self).__init__()
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
@@ -94,10 +94,9 @@ class UpscalerWorker(QRunnable):
             self.fn(*self.args, **self.kwargs)
         except (KeyboardInterrupt, SystemExit):
             self.signals.interrupted.emit()
-        except Exception:
-            error_message = traceback.format_exc()
-            print(error_message, file=sys.stderr)
-            self.signals.error.emit(error_message)
+        except Exception as e:
+            traceback.print_exc()
+            self.signals.error.emit(e)
         else:
             self.signals.finished.emit()
 
@@ -164,7 +163,7 @@ class Video2XMainWindow(QMainWindow):
         self.action_exit.triggered.connect(sys.exit)
 
         self.action_about = self.findChild(QAction, 'actionAbout')
-        self.action_about.triggered.connect(lambda: self.show_message(LEGAL_INFO, custom_icon=QtGui.QPixmap(self.video2x_icon_path)))
+        self.action_about.triggered.connect(self.show_about)
 
         # main tab
         # select input file/folder
@@ -617,20 +616,46 @@ class Video2XMainWindow(QMainWindow):
             return
         driver_line_edit.setText(str(driver_binary_path.absolute()))
 
-    def show_error(self, message: str):
-        QErrorMessage(self).showMessage(message.replace('\n', '<br>'))
+    def show_about(self, message: str):
+        message_box = QMessageBox(self)
+        message_box.setWindowTitle('About Video2X')
+        message_box.setIconPixmap(QtGui.QPixmap(self.video2x_icon_path).scaled(64, 64))
+        message_box.setText(LEGAL_INFO)
+        message_box.exec_()
 
-    def show_message(self, message: str, custom_icon=None):
-        message_box = QMessageBox()
-        message_box.setWindowTitle('Message')
-        if custom_icon:
-            message_box.setIconPixmap(custom_icon.scaled(64, 64))
-        else:
-            message_box.setIcon(QMessageBox.Information)
+    def show_information(self, message: str):
+        message_box = QMessageBox(self)
+        message_box.setWindowTitle('Information')
+        message_box.setIcon(QMessageBox.Information)
         message_box.setText(message)
         message_box.exec_()
 
-    def start_progress_bar(self, progress_callback):
+    def show_warning(self, message: str):
+        message_box = QMessageBox(self)
+        message_box.setWindowTitle('Warning')
+        message_box.setIcon(QMessageBox.Warning)
+        message_box.setText(message)
+        message_box.exec_()
+
+    def show_error(self, exception: Exception):
+        # QErrorMessage(self).showMessage(message.replace('\n', '<br>'))
+        message_box = QMessageBox(self)
+        message_box.setWindowTitle('Error')
+        message_box.setIcon(QMessageBox.Critical)
+
+        error_message = '''Upscaler ran into an error:
+{}
+Check the console output for details.
+When reporting an error, please include console output.'''
+
+        try:
+            message_box.setText(error_message.format(exception.args[0]))
+        except (AttributeError, IndexError):
+            message_box.setText(error_message.format(exception))
+
+        message_box.exec_()
+
+    def progress_monitor(self, progress_callback):
 
         # initialize progress bar values
         upscale_begin_time = time.time()
@@ -702,16 +727,18 @@ class Video2XMainWindow(QMainWindow):
 
             # resolve input and output directories from GUI
             if len(self.input_table_data) == 0:
-                self.show_error('Input path unspecified')
+                self.show_warning('Input path unspecified', standard_icon=QMessageBox.Warning)
                 return
             if self.output_line_edit.text().strip() == '':
-                self.show_error('Output path unspecified')
+                self.show_warning('Output path unspecified', standard_icon=QMessageBox.Warning)
                 return
 
             if len(self.input_table_data) == 1:
                 input_directory = self.input_table_data[0]
             else:
                 input_directory = self.input_table_data
+
+            # resolve output directory
             output_directory = pathlib.Path(os.path.expandvars(self.output_line_edit.text()))
 
             # load driver settings from GUI
@@ -733,33 +760,35 @@ class Video2XMainWindow(QMainWindow):
             self.upscaler.image_format = self.config['video2x']['image_format'].lower()
             self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.isChecked())
 
-            # start progress bar
-            if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
-                progress_bar_worker = ProgressBarWorker(self.start_progress_bar)
-                progress_bar_worker.signals.progress.connect(self.set_progress)
-                self.threadpool.start(progress_bar_worker)
-
             # run upscaler
             worker = UpscalerWorker(self.upscaler.run)
             worker.signals.error.connect(self.upscale_errored)
             worker.signals.interrupted.connect(self.upscale_interrupted)
             worker.signals.finished.connect(self.upscale_successful)
             self.threadpool.start(worker)
+
+            # start progress monitoring
+            if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
+                progress_bar_worker = ProgressMonitorWorkder(self.progress_monitor)
+                progress_bar_worker.signals.progress.connect(self.set_progress)
+                self.threadpool.start(progress_bar_worker)
+
             self.start_button.setEnabled(False)
             self.stop_button.setEnabled(True)
 
-        except Exception:
-            self.upscale_errored(traceback.format_exc())
+        except Exception as e:
+            traceback.print_exc()
+            self.upscale_errored(e)
 
-    def upscale_errored(self, error_message):
-        self.show_error(f'Upscaler ran into an error:\n{error_message}')
+    def upscale_errored(self, exception: Exception):
+        self.show_error(exception)
         self.threadpool.waitForDone(5)
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)
         self.reset_progress_display()
 
     def upscale_interrupted(self):
-        self.show_message('Upscale has been interrupted')
+        self.show_information('Upscale has been interrupted')
         self.threadpool.waitForDone(5)
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)
@@ -768,7 +797,7 @@ class Video2XMainWindow(QMainWindow):
     def upscale_successful(self):
         # if all threads have finished
         self.threadpool.waitForDone(5)
-        self.show_message('Upscale finished successfully, taking {} seconds'.format(round((time.time() - self.begin_time), 5)))
+        self.show_information('Upscale finished successfully, taking {} seconds'.format(round((time.time() - self.begin_time), 5)))
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)
         self.reset_progress_display()
@@ -785,7 +814,14 @@ class Video2XMainWindow(QMainWindow):
 
 # this file shouldn't be imported
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = Video2XMainWindow()
-    window.show()
-    app.exec_()
+    try:
+        app = QApplication(sys.argv)
+        window = Video2XMainWindow()
+        window.show()
+        app.exec_()
+
+    # on GUI exception, print error message in console
+    # and hold window open using input()
+    except Exception:
+        traceback.print_exc()
+        input('Press enter to close')

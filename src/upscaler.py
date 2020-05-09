@@ -142,8 +142,12 @@ class Upscaler:
                 raise ArgumentError('input output path type mismatch')
             for input_path in self.input:
                 if not input_path.is_file() and not input_path.is_dir():
-                    Avalon.error(_('Input path {} is neither a file nor a directory'.format(input_path)))
+                    Avalon.error(_('Input path {} is neither a file nor a directory').format(input_path))
                     raise FileNotFoundError(f'{input_path} is neither file nor directory')
+                with contextlib.suppress(FileNotFoundError):
+                    if input_path.samefile(self.output):
+                        Avalon.error(_('Input directory and output directory cannot be the same'))
+                        raise FileExistsError('input directory and output directory are the same')
 
         # if input is a file
         elif self.input.is_file():
@@ -162,6 +166,10 @@ class Upscaler:
                 Avalon.error(_('Input and output path type mismatch'))
                 Avalon.error(_('Input is directory but output is existing single file'))
                 raise ArgumentError('input output path type mismatch')
+            with contextlib.suppress(FileNotFoundError):
+                if self.input.samefile(self.output):
+                    Avalon.error(_('Input directory and output directory cannot be the same'))
+                    raise FileExistsError('input directory and output directory are the same')
 
         # if input is neither
         else:
@@ -461,7 +469,7 @@ class Upscaler:
 
                     Avalon.info(_('Reading video information'))
                     video_info = fm.get_video_info(self.current_input_video)
-                    # analyze original video with ffprobe and retrieve framerate
+                    # analyze original video with FFprobe and retrieve framerate
                     # width, height = info['streams'][0]['width'], info['streams'][0]['height']
 
                     # find index of video stream
