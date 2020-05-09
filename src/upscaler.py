@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 8, 2020
+Last Modified: May 9, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -257,7 +257,7 @@ class Upscaler:
             process_directory.mkdir(parents=True, exist_ok=True)
 
         # waifu2x-converter-cpp will perform multi-threading within its own process
-        if self.driver == 'waifu2x_converter_cpp':
+        if self.driver in ['waifu2x_converter_cpp', 'waifu2x_ncnn_vulkan', 'srmd_ncnn_vulkan']:
             process_directories = [self.extracted_frames]
 
         else:
@@ -297,13 +297,15 @@ class Upscaler:
             elif self.driver == 'waifu2x_ncnn_vulkan':
                 self.process_pool.append(driver.upscale(process_directory,
                                                         self.upscaled_frames,
-                                                        self.scale_ratio))
+                                                        self.scale_ratio,
+                                                        self.processes))
 
             # if the driver being used is srmd_ncnn_vulkan
             elif self.driver == 'srmd_ncnn_vulkan':
                 self.process_pool.append(driver.upscale(process_directory,
                                                         self.upscaled_frames,
-                                                        self.scale_ratio))
+                                                        self.scale_ratio,
+                                                        self.processes))
 
         # start progress bar in a different thread
         Avalon.debug_info(_('Starting progress monitor'))
@@ -489,7 +491,7 @@ class Upscaler:
                     self._wait()
 
                     # get average frame rate of video stream
-                    framerate = float(Fraction(video_info['streams'][video_stream_index]['avg_frame_rate']))
+                    framerate = float(Fraction(video_info['streams'][video_stream_index]['r_frame_rate']))
                     fm.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
 
                     # get a dict of all pixel formats and corresponding bit depth

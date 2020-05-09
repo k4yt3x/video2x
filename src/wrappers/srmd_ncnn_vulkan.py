@@ -4,7 +4,7 @@
 Name: SRMD NCNN Vulkan Driver
 Creator: K4YT3X
 Date Created: April 26, 2020
-Last Modified: May 7, 2020
+Last Modified: May 9, 2020
 
 Description: This class is a high-level wrapper
 for srmd_ncnn_vulkan.
@@ -53,7 +53,7 @@ class WrapperMain:
         parser.add_argument('-x', action='store_true', help='enable tta mode')
         return parser.parse_args(arguments)
 
-    def upscale(self, input_directory, output_directory, scale_ratio):
+    def upscale(self, input_directory, output_directory, scale_ratio, threads):
         """This is the core function for SRMD ncnn Vulkan class
 
         Arguments:
@@ -66,6 +66,7 @@ class WrapperMain:
         self.driver_settings['i'] = input_directory
         self.driver_settings['o'] = output_directory
         self.driver_settings['s'] = scale_ratio
+        self.driver_settings['j'] = '{}:{}:{}'.format(threads, threads, threads)
 
         # by default, srmd-ncnn-vulkan will look for the models under the current working directory
         # change the working directory to its containing folder if model directory not specified
