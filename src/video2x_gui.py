@@ -362,8 +362,8 @@ class Video2XMainWindow(QMainWindow):
 
         # set cache directory path
         if self.config['video2x']['video2x_cache_directory'] is None:
-            video2x_cache_directory = str((pathlib.Path(tempfile.gettempdir()) / 'video2x').absolute())
-        self.cache_line_edit.setText(video2x_cache_directory)
+            self.config['video2x']['video2x_cache_directory'] = str((pathlib.Path(tempfile.gettempdir()) / 'video2x').absolute())
+        self.cache_line_edit.setText(self.config['video2x']['video2x_cache_directory'])
 
         # load preserve frames settings
         self.preserve_frames_check_box.setChecked(self.config['video2x']['preserve_frames'])

@@ -184,7 +184,7 @@ ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(ffmpeg_settings['ffmpeg_path
 # load video2x settings
 image_format = config['video2x']['image_format'].lower()
 preserve_frames = config['video2x']['preserve_frames']
-video2x_cache_directory = config['video2x']['video2x_cache_directory']
+video2x_cache_directory = pathlib.Path(config['video2x']['video2x_cache_directory'])
 
 # overwrite driver_settings with driver_args
 if driver_args is not None:
