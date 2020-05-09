@@ -45,7 +45,7 @@ class WrapperMain:
         parser.add_argument('-z', '--zoomFactor', type=float, help='zoom factor for resizing')
         parser.add_argument('-t', '--threads', type=int, help='Threads count for video processing')
         parser.add_argument('-f', '--fastMode', action='store_true', help='Faster but maybe low quality')
-        # parser.add_argument('-v', '--videoMode', action='store_true', help='Video process')
+        parser.add_argument('-v', '--videoMode', action='store_true', help='Video process')
         parser.add_argument('-s', '--preview', action='store_true', help='Preview image')
         parser.add_argument('-b', '--preprocessing', action='store_true', help='Enable pre processing')
         parser.add_argument('-a', '--postprocessing', action='store_true', help='Enable post processing')

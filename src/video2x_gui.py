@@ -768,10 +768,9 @@ When reporting an error, please include console output.'''
             self.threadpool.start(worker)
 
             # start progress monitoring
-            if AVAILABLE_DRIVERS[self.driver_combo_box.currentText()] != 'anime4kcpp':
-                progress_bar_worker = ProgressMonitorWorkder(self.progress_monitor)
-                progress_bar_worker.signals.progress.connect(self.set_progress)
-                self.threadpool.start(progress_bar_worker)
+            progress_bar_worker = ProgressMonitorWorkder(self.progress_monitor)
+            progress_bar_worker.signals.progress.connect(self.set_progress)
+            self.threadpool.start(progress_bar_worker)
 
             self.start_button.setEnabled(False)
             self.stop_button.setEnabled(True)
