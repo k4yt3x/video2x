@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 7, 2020
+Last Modified: May 9, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -54,16 +54,12 @@ from upscaler import Upscaler
 
 # built-in imports
 import argparse
-import contextlib
 import gettext
 import importlib
 import locale
 import os
 import pathlib
-import re
-import shutil
 import sys
-import tempfile
 import time
 import traceback
 import yaml
