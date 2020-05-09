@@ -60,6 +60,7 @@ import locale
 import os
 import pathlib
 import sys
+import tempfile
 import time
 import traceback
 import yaml
@@ -184,7 +185,11 @@ ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(ffmpeg_settings['ffmpeg_path
 # load video2x settings
 image_format = config['video2x']['image_format'].lower()
 preserve_frames = config['video2x']['preserve_frames']
-video2x_cache_directory = pathlib.Path(config['video2x']['video2x_cache_directory'])
+
+if config['video2x']['video2x_cache_directory'] is None:
+    video2x_cache_directory = (pathlib.Path(tempfile.gettempdir()) / 'video2x')
+else:
+    video2x_cache_directory = pathlib.Path(config['video2x']['video2x_cache_directory'])
 
 # overwrite driver_settings with driver_args
 if driver_args is not None:
