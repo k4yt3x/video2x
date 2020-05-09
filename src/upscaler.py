@@ -530,7 +530,7 @@ class Upscaler:
 
                     try:
                         # migrate audio tracks and subtitles
-                        Avalon.info(_('Migrating audio tracks and subtitles to upscaled video'))
+                        Avalon.info(_('Migrating audio, subtitles and other streams to upscaled video'))
                         self.process_pool.append(fm.migrate_streams(self.current_input_video,
                                                                     output_video,
                                                                     self.upscaled_frames))
