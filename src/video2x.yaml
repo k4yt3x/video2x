@@ -11,7 +11,7 @@ waifu2x_caffe:
   crop_h: null # input image split size(height)
   crop_w: null # input image split size(width)
   crop_size: 128 # input image split size
-  output_depth: 8 # output image chaneel depth bit
+  output_depth: 8 # output image chanel depth bit
   output_quality: -1 # output image quality
   process: gpu # <cpu|gpu|cudnn> process mode
   model_dir: null # path to custom model directory (don't append last / )
@@ -20,8 +20,8 @@ waifu2x_caffe:
   #scale_ratio: null # custom scale ratio
   noise_level: 3 # <0|1|2|3> noise reduction level
   mode: noise_scale # <noise|scale|noise_scale|auto_scale> image processing mode
-  output_extention: null # extention to output image file when output_path is (auto) or input_path is folder
-  input_extention_list: null # extention to input image file when input_path is folder
+  output_extention: null # extension to output image file when output_path is (auto) or input_path is folder
+  input_extention_list: null # extension to input image file when input_path is folder
   #output_path: null # path to output image file (when input_path is folder, output_path must be folder)
   #input_path: null # (required) path to input image file
 waifu2x_converter_cpp:
