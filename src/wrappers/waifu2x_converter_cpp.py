@@ -45,7 +45,7 @@ class WrapperMain:
         parser.add_argument('-l', '--list-processor', action='store_true', help='dump processor list')
         parser.add_argument('-f', '--output-format', choices=['png', 'jpg'], help='The format used when running in recursive/folder mode\nSee --list-supported-formats for a list of supported formats/extensions.')
         parser.add_argument('-c', '--png-compression', type=int, choices=range(10), help='Set PNG compression level (0-9), 9 = Max compression (slowest & smallest)')
-        parser.add_argument('-q', '--image-quality', type=int, choices=range(100), help='JPEG & WebP Compression quality (0-101, 0 being smallest size and lowest quality), use 101 for lossless WebP')
+        parser.add_argument('-q', '--image-quality', type=int, choices=range(-1, 102), help='JPEG & WebP Compression quality (0-101, 0 being smallest size and lowest quality), use 101 for lossless WebP')
         parser.add_argument('--block-size', type=int, help='block size')
         parser.add_argument('--disable-gpu', action='store_true', help='disable GPU')
         parser.add_argument('--force-OpenCL', action='store_true', help='force to use OpenCL on Intel Platform')
