@@ -22,7 +22,8 @@ $SCRIPT_VERSION = "1.0.1"
 $VIDEO2X_VERSION = $args[0]
 
 Write-Host -ForegroundColor White "Video2X Building Script Version $($SCRIPT_VERSION)
-Starting to build Video2X release packages"
+Starting to build Video2X release packages
+Building Video2X release $($VIDEO2X_VERSION)"
 
 # build Video2X CLI
 Write-Host -ForegroundColor White "`nBuilding Video2X CLI"
