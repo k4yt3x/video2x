@@ -27,7 +27,7 @@ Go to the [Quick Start](#quick-start) section for usages.
 
 ## Introduction
 
-Video2X is a video upscaling software based on Waifu2X, Anime4K and SRMD. It upscales videos and restores details from low-resolution videos. Below is a side-by-side preview.
+Video2X is a video upscaling software based on Waifu2X, Anime4K and SRMD written in Python 3. It upscales videos and restores details from low-resolution videos. Below is a side-by-side preview.
 
 ![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
 
@@ -89,6 +89,18 @@ Clip is from anime "さくら荘のペットな彼女". Copyright belongs to "�
 ---
 
 ## Quick Start
+
+### Prerequisites
+
+Before running Video2X, you'll need to ensure you have installed the drivers' external dependencies such as GPU drivers.
+
+- waifu2x-caffe
+  - GPU mode: Nvidia graphics card driver
+  - cuDNN mode: Nvidia CUDA and [cuDNN](https://docs.nvidia.com/deeplearning/sdk/cudnn-install/index.html#install-windows)
+- Other Drivers
+  - GPU driver if you want to use GPU for processing
+
+### Running Video2X
 
 The easiest way to run Video2X is to use the full build. Extract the full release zip file and you'll get these files.
 
