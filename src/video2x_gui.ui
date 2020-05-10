@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>719</width>
-    <height>740</height>
+    <width>667</width>
+    <height>768</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -1113,35 +1113,31 @@
             <string>Anime4K CPP</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout">
-            <item row="3" column="0">
-             <layout class="QHBoxLayout" name="anime4kCppStrengthColorHorizontalLayout">
+            <item row="1" column="1">
+             <layout class="QHBoxLayout" name="anime4kCppPreFiltersHorizontalLayout">
               <item>
-               <widget class="QLabel" name="anime4kCppStrengthColorLabel">
+               <widget class="QLabel" name="anime4kCppPreFiltersLabel">
                 <property name="text">
-                 <string>Strength Color</string>
+                 <string>Pre-Filters</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="anime4kCppStrengthColorSpinBox">
-                <property name="value">
-                 <double>0.300000000000000</double>
-                </property>
-               </widget>
+               <widget class="QSpinBox" name="anime4kCppPreFiltersSpinBox"/>
               </item>
              </layout>
             </item>
-            <item row="0" column="0" colspan="2">
-             <layout class="QHBoxLayout" name="anime4kCppPathHorizontalLayout">
+            <item row="3" column="1">
+             <layout class="QHBoxLayout" name="anime4kCppPlatformIdHorizontalLayout">
               <item>
-               <widget class="QLineEdit" name="anime4kCppPathLineEdit"/>
-              </item>
-              <item>
-               <widget class="QPushButton" name="anime4kCppPathSelectButton">
+               <widget class="QLabel" name="anime4kCppPlatformIdLabel">
                 <property name="text">
-                 <string>Select Binary Path</string>
+                 <string>Platform ID</string>
                 </property>
                </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppPlatformIdSpinBox"/>
               </item>
              </layout>
             </item>
@@ -1166,55 +1162,19 @@
               </item>
              </layout>
             </item>
-            <item row="4" column="0">
-             <layout class="QHBoxLayout" name="anime4kCppStrengthGradientHorizontalLayout">
+            <item row="3" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppStrengthColorHorizontalLayout">
               <item>
-               <widget class="QLabel" name="anime4kCppStrengthGradientLabel">
+               <widget class="QLabel" name="anime4kCppStrengthColorLabel">
                 <property name="text">
-                 <string>Strength Gradient</string>
+                 <string>Strength Color</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="anime4kCppStrengthGradientSpinBox">
+               <widget class="QDoubleSpinBox" name="anime4kCppStrengthColorSpinBox">
                 <property name="value">
-                 <double>1.000000000000000</double>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="1" column="0">
-             <layout class="QHBoxLayout" name="anime4kCppPassesHorizontalLayout">
-              <item>
-               <widget class="QLabel" name="anime4kCppPassesLabel">
-                <property name="text">
-                 <string>Passes</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="anime4kCppPassesSpinBox">
-                <property name="value">
-                 <number>2</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="2" column="0">
-             <layout class="QHBoxLayout" name="anime4kCppPushColorCountHorizontalLayout">
-              <item>
-               <widget class="QLabel" name="anime4kCppPushColorLabel">
-                <property name="text">
-                 <string>Push Color Count</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="anime4kCppPushColorCountSpinBox">
-                <property name="value">
-                 <number>2</number>
+                 <double>0.300000000000000</double>
                 </property>
                </widget>
               </item>
@@ -1257,17 +1217,17 @@
               </layout>
              </widget>
             </item>
-            <item row="1" column="1">
-             <layout class="QHBoxLayout" name="anime4kCppPreFiltersHorizontalLayout">
+            <item row="4" column="1">
+             <layout class="QHBoxLayout" name="anime4kCppDeviceIdHorizontalLayout">
               <item>
-               <widget class="QLabel" name="anime4kCppPreFiltersLabel">
+               <widget class="QLabel" name="anime4kCppDeviceIdLabel">
                 <property name="text">
-                 <string>Pre-Filters</string>
+                 <string>Device ID</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="anime4kCppPreFiltersSpinBox"/>
+               <widget class="QSpinBox" name="anime4kCppDeviceIdSpinBox"/>
               </item>
              </layout>
             </item>
@@ -1282,34 +1242,6 @@
               </item>
               <item>
                <widget class="QSpinBox" name="anime4kCppPostFiltersSpinBox"/>
-              </item>
-             </layout>
-            </item>
-            <item row="3" column="1">
-             <layout class="QHBoxLayout" name="anime4kCppPlatformIdHorizontalLayout">
-              <item>
-               <widget class="QLabel" name="anime4kCppPlatformIdLabel">
-                <property name="text">
-                 <string>Platform ID</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="anime4kCppPlatformIdSpinBox"/>
-              </item>
-             </layout>
-            </item>
-            <item row="4" column="1">
-             <layout class="QHBoxLayout" name="anime4kCppDeviceIdHorizontalLayout">
-              <item>
-               <widget class="QLabel" name="anime4kCppDeviceIdLabel">
-                <property name="text">
-                 <string>Device ID</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="anime4kCppDeviceIdSpinBox"/>
               </item>
              </layout>
             </item>
@@ -1354,6 +1286,74 @@
                   <string>av01</string>
                  </property>
                 </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppPassesHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppPassesLabel">
+                <property name="text">
+                 <string>Passes</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppPassesSpinBox">
+                <property name="value">
+                 <number>2</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <layout class="QHBoxLayout" name="anime4kCppPathHorizontalLayout">
+              <item>
+               <widget class="QLineEdit" name="anime4kCppPathLineEdit"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="anime4kCppPathSelectButton">
+                <property name="text">
+                 <string>Select Binary Path</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppPushColorCountHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppPushColorLabel">
+                <property name="text">
+                 <string>Push Color Count</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppPushColorCountSpinBox">
+                <property name="value">
+                 <number>2</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="4" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppStrengthGradientHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppStrengthGradientLabel">
+                <property name="text">
+                 <string>Strength Gradient</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="anime4kCppStrengthGradientSpinBox">
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
                </widget>
               </item>
              </layout>
@@ -1553,7 +1553,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>719</width>
+     <width>667</width>
      <height>21</height>
     </rect>
    </property>
