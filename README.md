@@ -5,35 +5,108 @@
 ![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-blue?style=flat-square)
 <img alt="Become a Patron!"
 src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png"
-href="https://www.patreon.com/bePatron?u=34970782" 
+href="https://www.patreon.com/bePatron?u=34970782"
 height=20 />
 
-# Video2X Lossless Video Enlarger
+<p align="center">
+   <img src="https://user-images.githubusercontent.com/21986859/81489504-c7d1f780-9265-11ea-86c8-cc0316e2082d.png"/>
+</p>
+
+<!--# Video2X Lossless Video Enlarger-->
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
 
 ## Download Builds (Windows)
 
-You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest builds of `Video2X`. The exe files will require no Python or Python module installation.
+You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest builds of Video2X. The exe files will require no Python or Python module installation. There are two editions available.
 
-The **`full`** package provides all packages that will possibly be needed by `Video2X`, including `FFmpeg`, `waifu2x-caffe`, `waifu2x-converter-cpp`, `waifu2x-ncnn-vulkan`, `srmd-ncnn-vulkan` and `Anime4KCPP`. The config file (`video2x.yaml`) is also already configured for the environment. All you need to do is just to launch `video2x.exe`.
+- **`Full`**: full package comes pre-configured with **all** dependencies like `FFmpeg` and `waifu2x-caffe`.
+- **`Light`**: ligt package comes with only Video2X binaries and a template configuration file. The user will either have to run the setup script or install and configure dependencies themselves.
 
-The **`light`** package provides only the most basic functions of `Video2X`. Only `video2x.exe`, `video2x_setup.exe` and `video2x.yaml` are included. To setup dependencies (e.g. `FFmpeg` and `Waifu2X`) automatically, simply launch `video2x_setup.exe`.
+Go to the [Quick Start](#quick-start) section for usages.
 
-## Prerequisites
+## Introduction
 
-Component names that are **bolded** can be automatically downloaded and configured with the `video2x_setup.py` script.
+Video2X is a video upscaling software based on Waifu2X, Anime4K and SRMD. It upscales videos and restores details from low-resolution videos. Below is a side-by-side preview.
 
-1. Operating System: Windows / Linux
-2. AMD GPU / Nvidia GPU
-3. AMD GPU driver / Nvidia GPU driver / Nvidia CUDNN
-4. [**FFmpeg**](https://ffmpeg.zeranoe.com/builds/)
-5. One of the following drivers
-   - [**waifu2x-caffe**](https://github.com/lltcggie/waifu2x-caffe/releases)
-   - [**waifu2x-converter-cpp**](https://github.com/DeadSix27/waifu2x-converter-cpp/releases)
-   - [**waifu2x-ncnn-vulkan**](https://github.com/nihui/waifu2x-ncnn-vulkan)
-   - [**srmd-ncnn-vulkan**](https://github.com/nihui/srmd-ncnn-vulkan)
-   - [**Anime4KCPP**](https://github.com/TianZerL/Anime4KCPP)
+![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
+
+*Upscale Comparison Demonstration*
+
+**You can watch the whole demo video on YouTube: https://www.youtube.com/watch?v=PG94iPoeoZk**
+
+Clip is from trailer of animated movie "千と千尋の神隠し". Copyright belongs to "株式会社スタジオジブリ (STUDIO GHIBLI INC.)". Will delete immediately if use of clip is in violation of copyright.
+
+## Screenshots
+
+### Video2X GUI
+
+![GUI Preview](https://user-images.githubusercontent.com/21986859/81489729-b1796b00-9268-11ea-9c5a-c6319858751d.png)
+
+*Video2X GUI Screenshot*
+
+### Video2X CLI
+
+![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81039711-4fe88380-8e99-11ea-9846-175f72100a76.png)
+
+*Video2X CLI Screenshot*
+
+---
+
+## Documentations
+
+### [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki)
+
+You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
+
+### [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial)
+
+For those who want a detailed walk-through of how to use Video2X, you can head to the [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
+
+### [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers)
+
+Go to the [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers) wiki page if you want to see a detailed description on the different types of drivers implemented by Video2X. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for Video2X.
+
+### [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A)
+
+If you have any questions, first try visiting our [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A) page to see if your question is answered there. If not, open an issue and we will respond to your questions ASAP. Alternatively, you can also join our [Telegram discussion group](https://t.me/video2x) and ask your questions there.
+
+---
+
+### Sample Videos
+
+If you can't find a video clip to begin with, or if you want to see a before-after comparison, we have prepared some sample clips for you. The quick start guide down below will also be based on the name of the sample clips.
+
+![sample_video](https://user-images.githubusercontent.com/21986859/52905766-d5512b00-3236-11e9-9aea-077636539679.png)
+
+*Sample Upscale Videos*
+
+- [Sample Video Original (240P) 1.7MB](https://files.k4yt3x.com/Resources/Videos/sample_input.mp4)
+- [Sample Video Upscaled (1080P) 4.8MB](https://files.k4yt3x.com/Resources/Videos/sample_output.mp4)
+
+Clip is from anime "さくら荘のペットな彼女". Copyright belongs to "株式会社アニプレックス (Aniplex Inc.)". Will delete immediately if use of clip is in violation of copyright.
+
+---
+
+## Quick Start
+
+The easiest way to run Video2X is to use the full build. Extract the full release zip file and you'll get these files.
+
+![Video2X Release Files](https://user-images.githubusercontent.com/21986859/81489846-28633380-926a-11ea-9e81-fb92f492e14c.png)
+
+Simply double click on video2x_gui.exe to launch the GUI.
+
+![Video2X GUI Main Tab](https://user-images.githubusercontent.com/21986859/81489858-4c267980-926a-11ea-9ab2-38ec738f2fb6.png)
+
+Then, drag the videos you wish to upscale into the window and select the appropriate output path.
+
+![drag-drop](https://user-images.githubusercontent.com/21986859/81489880-7bd58180-926a-11ea-85ae-b72d2f4f5e72.png)
+
+Tweak the settings if you want to, then hit the start button at the bottom and the upscale will start. Now you'll just have to wait for it to complete.
+
+![upscale-started](https://user-images.githubusercontent.com/21986859/81489924-ce16a280-926a-11ea-831c-6c66b950f957.png)
+
+---
 
 ## Recent Changes
 
@@ -62,143 +135,6 @@ Component names that are **bolded** can be automatically downloaded and configur
 
 - Added support for Anime4KCPP
 
-## Description
-
-Video2X is an automation software based on waifu2x image enlarging engine. It extracts frames from a video, enlarge it by a number of times without losing any details or quality, keeping lines smooth and edges sharp.
-
-For short: **Video2X enlarges your video without losing details**.
-
-Watch for the sharper edges in this screenshot around the shadows:
-
-![preview](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
-
-*Upscale Comparison Demonstration*
-
-**You can also watch the YouTube video Demo: https://www.youtube.com/watch?v=PG94iPoeoZk**
-
-Clip is from trailer of animated movie "千と千尋の神隠し". Copyright belongs to "株式会社スタジオジブリ (STUDIO GHIBLI INC.)". Will delete immediately if use of clip is in violation of copyright.
-
-## Screenshots
-
-### Video2X GUI
-
-![Video2X GUI Main Tab Screenshot](https://user-images.githubusercontent.com/21986859/81241806-dcf71e00-8ffa-11ea-88ed-50b062d9bb5e.png)
-
-*Video2X GUI Main Tab Screenshot*
-
-![Video2X GUI Driver Settings Screenshot](https://user-images.githubusercontent.com/21986859/81241837-f9935600-8ffa-11ea-8b89-5ae098b63de4.png)
-
-*Video2X GUI Driver Settings Screenshot*
-
-### Video2X CLI
-
-![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81039711-4fe88380-8e99-11ea-9846-175f72100a76.png)
-
-*Video2X CLI Screenshot*
-
----
-
-## Documentations
-
-### [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki)
-
-You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
-
-### [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial)
-
-For those who want a detailed walk-through of how to use `Video2X`, you can head to the [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
-
-### [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers)
-
-Go to the [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers) wiki page if you want to see a detailed description on the different types of drivers implemented by `Video2X`. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for `Video2X`.
-
-### [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A)
-
-If you have any questions, first try visiting our [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A) page to see if your question is answered there. If not, open an issue and we will respond to your questions ASAP.
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- **Python 3.8**
-Download: https://www.python.org/downloads/windows/
-- **FFmpeg Windows Build**
-Download: https://ffmpeg.org/download.html
-- **waifu2x-caffe** (designed for Nvidia CUDA/cuDNN)
-Download: https://github.com/lltcggie/waifu2x-caffe/releases
-- **waifu2x-converter-cpp**
-Download: https://github.com/DeadSix27/waifu2x-converter-cpp/releases
-- **waifu2x-ncnn-vulkan**
-Download: https://github.com/nihui/waifu2x-ncnn-vulkan/releases
-- **Anime4KCPP**
-Download: https://github.com/TianZerL/Anime4KCPP/releases
-- **srmd-ncnn-vulkan**
-Download: https://github.com/nihui/srmd-ncnn-vulkan/releases
-
-### Installing Dependencies
-
-First, clone the video2x repository.
-
-```shell
-git clone https://github.com/k4yt3x/video2x.git
-cd video2x/src
-```
-
-Then you may run the `video2x_setup.py` script to install and configure the dependencies automatically. This script is designed and tested on Windows 10.
-
-This script will install the newest version of `ffmpeg`, and all upscaling drivers to `%LOCALAPPDATA%\\video2x` and all required python libraries.
-
-```shell
-python video2x_setup.py
-```
-
-Alternatively, you can also install the dependencies manually. Please refer to the prerequisites section to see what's needed.
-
-Then you'll need to install python dependencies before start using video2x. Install simply by executing the following command.
-
-```shell
-pip install -r requirements.txt
-```
-
-### Sample Videos
-
-If you can't find a video clip to begin with, or if you want to see a before-after comparison, we have prepared some sample clips for you. The quick start guide down below will also be based on the name of the sample clips.
-
-![sample_video](https://user-images.githubusercontent.com/21986859/52905766-d5512b00-3236-11e9-9aea-077636539679.png)
-
-*Sample Upscale Videos*
-
-- [Sample Video Original (240P) 1.7MB](https://files.k4yt3x.com/Resources/Videos/sample_input.mp4)
-- [Sample Video Upscaled (1080P) 4.8MB](https://files.k4yt3x.com/Resources/Videos/sample_output.mp4)
-
-Clip is from anime "さくら荘のペットな彼女". Copyright belongs to "株式会社アニプレックス (Aniplex Inc.)". Will delete immediately if use of clip is in violation of copyright.
-
-### Basic Upscale Example
-
-This example command below uses `waifu2x-caffe` to enlarge the video `sample-input.mp4` two double its original size.
-
-```shell
-python video2x.py -i sample-input.mp4 -o sample-output.mp4 -r 2 -d waifu2x_caffe
-```
-
-### Advanced Upscale Example
-
-If you would like to tweak engine-specific settings, either specify the corresponding argument after `--`, or edit the corresponding field in the configuration file `video2x.yaml`. **Command line arguments will overwrite default values in the config file.**
-
-This example below adds enables TTA for `waifu2x-caffe`.
-
-```shell
-python video2x.py -i sample-input.mp4 -o sample-output.mp4 -r 2 -d waifu2x_caffe -- --tta 1
-```
-
-To see a help page for driver-specific settings, use `-d` to select the driver and append `-- --help` as demonstrated below. This will print all driver-specific settings and descriptions.
-
-```shell
-python video2x.py -d waifu2x_caffe -- --help
-```
-
 ---
 
 # Full Usage
@@ -217,8 +153,16 @@ python video2x.py -d waifu2x_caffe -- --help
 ### -c CONFIG, --config CONFIG
     video2x config file path
 
-### -d {waifu2x_caffe,waifu2x_converter_cpp,waifu2x_ncnn_vulkan,srmd_ncnn_vulkan,anime4kcpp}, --driver {waifu2x_caffe,waifu2x_converter_cpp,waifu2x_ncnn_vulkan,srmd_ncnn_vulkan,anime4kcpp}
+### -d DRIVER, --driver DRIVER
     upscaling driver (default: waifu2x_caffe)
+
+Available options are:
+
+- waifu2x_caffe
+- waifu2x_converter_cpp
+- waifu2x_ncnn_vulkan
+- srmd_ncnn_vulkan
+- anime4kcpp
 
 ### -p PROCESSES, --processes PROCESSES
     number of processes to use for upscaling (default: 1)
