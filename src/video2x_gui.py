@@ -257,11 +257,16 @@ class Video2XMainWindow(QMainWindow):
         self.waifu2x_converter_cpp_path_edit_button = self.findChild(QPushButton, 'waifu2xConverterCppPathSelectButton')
         self.waifu2x_converter_cpp_path_edit_button.clicked.connect(lambda: self.select_driver_binary_path(self.waifu2x_converter_cpp_path_line_edit))
         self.waifu2x_converter_cpp_png_compression_spin_box = self.findChild(QSpinBox, 'waifu2xConverterCppPngCompressionSpinBox')
+        self.waifu2x_converter_cpp_image_quality_spin_box = self.findChild(QSpinBox, 'waifu2xConverterCppImageQualitySpinBox')
+        self.waifu2x_converter_cpp_block_size_spin_box = self.findChild(QSpinBox, 'waifu2xConverterCppBlockSizeSpinBox')
         self.waifu2x_converter_cpp_processor_spin_box = self.findChild(QSpinBox, 'waifu2xConverterCppProcessorSpinBox')
         self.waifu2x_converter_cpp_model_combo_box = self.findChild(QComboBox, 'waifu2xConverterCppModelComboBox')
+        self.waifu2x_converter_cpp_noise_level_spin_box = self.findChild(QSpinBox, 'waifu2xConverterCppNoiseLevelSpinBox')
         self.waifu2x_converter_cpp_mode_combo_box = self.findChild(QComboBox, 'waifu2xConverterCppModeComboBox')
-        self.waifu2x_converter_cpp_disable_gpu_check_box = self.findChild(QCheckBox, 'disableGpuCheckBox')
-        self.waifu2x_converter_cpp_tta_check_box = self.findChild(QCheckBox, 'ttaCheckBox')
+        self.waifu2x_converter_cpp_log_level_spin_box = self.findChild(QSpinBox, 'waifu2xConverterCppLogLevelSpinBox')
+        self.waifu2x_converter_cpp_disable_gpu_check_box = self.findChild(QCheckBox, 'waifu2xConverterCppDisableGpuCheckBox')
+        self.waifu2x_converter_cpp_force_opencl_check_box = self.findChild(QCheckBox, 'waifu2xConverterCppForceOpenclCheckBox')
+        self.waifu2x_converter_cpp_tta_check_box = self.findChild(QCheckBox, 'waifu2xConverterCppTtaCheckBox')
 
         # waifu2x-ncnn-vulkan
         self.waifu2x_ncnn_vulkan_path_line_edit = self.findChild(QLineEdit, 'waifu2xNcnnVulkanPathLineEdit')
@@ -386,9 +391,14 @@ class Video2XMainWindow(QMainWindow):
         settings = self.config['waifu2x_converter_cpp']
         self.waifu2x_converter_cpp_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
         self.waifu2x_converter_cpp_png_compression_spin_box.setValue(settings['png-compression'])
+        self.waifu2x_converter_cpp_image_quality_spin_box.setValue(settings['image-quality'])
+        self.waifu2x_converter_cpp_block_size_spin_box.setValue(settings['block-size'])
         self.waifu2x_converter_cpp_processor_spin_box.setValue(settings['processor'])
+        self.waifu2x_converter_cpp_noise_level_spin_box.setValue(settings['noise-level'])
         self.waifu2x_converter_cpp_mode_combo_box.setCurrentText(settings['mode'])
+        self.waifu2x_converter_cpp_log_level_spin_box.setValue(settings['log-level'])
         self.waifu2x_converter_cpp_disable_gpu_check_box.setChecked(settings['disable-gpu'])
+        self.waifu2x_converter_cpp_force_opencl_check_box.setChecked(settings['force-OpenCL'])
         self.waifu2x_converter_cpp_tta_check_box.setChecked(bool(settings['tta']))
 
         # waifu2x-ncnn-vulkan
@@ -445,10 +455,15 @@ class Video2XMainWindow(QMainWindow):
         # waifu2x-converter-cpp
         self.config['waifu2x_converter_cpp']['path'] = os.path.expandvars(self.waifu2x_converter_cpp_path_line_edit.text())
         self.config['waifu2x_converter_cpp']['png-compression'] = self.waifu2x_converter_cpp_png_compression_spin_box.value()
+        self.config['waifu2x_converter_cpp']['image-quality'] = self.waifu2x_converter_cpp_image_quality_spin_box.value()
+        self.config['waifu2x_converter_cpp']['block-size'] = self.waifu2x_converter_cpp_block_size_spin_box.value()
         self.config['waifu2x_converter_cpp']['processor'] = self.waifu2x_converter_cpp_processor_spin_box.value()
         self.config['waifu2x_converter_cpp']['model-dir'] = str((pathlib.Path(self.config['waifu2x_converter_cpp']['path']).parent / self.waifu2x_converter_cpp_model_combo_box.currentText()).absolute())
+        self.config['waifu2x_converter_cpp']['noise-level'] = self.waifu2x_converter_cpp_noise_level_spin_box.value()
         self.config['waifu2x_converter_cpp']['mode'] = self.waifu2x_converter_cpp_mode_combo_box.currentText()
+        self.config['waifu2x_converter_cpp']['log-level'] = self.waifu2x_converter_cpp_log_level_spin_box.value()
         self.config['waifu2x_converter_cpp']['disable-gpu'] = bool(self.waifu2x_converter_cpp_disable_gpu_check_box.isChecked())
+        self.config['waifu2x_converter_cpp']['force-OpenCL'] = bool(self.waifu2x_converter_cpp_force_opencl_check_box.isChecked())
         self.config['waifu2x_converter_cpp']['tta'] = int(self.waifu2x_converter_cpp_tta_check_box.isChecked())
 
         # waifu2x-ncnn-vulkan

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>718</width>
+    <width>719</width>
     <height>740</height>
    </rect>
   </property>
@@ -653,6 +653,48 @@
              </layout>
             </item>
             <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppImageQualityHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xConverterCppImageQualityLabel">
+                <property name="text">
+                 <string>Image Quality</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xConverterCppImageQualitySpinBox">
+                <property name="minimum">
+                 <number>-1</number>
+                </property>
+                <property name="maximum">
+                 <number>101</number>
+                </property>
+                <property name="value">
+                 <number>-1</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppBlockSizeHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xConverterCppBlockSizeLabel">
+                <property name="text">
+                 <string>Block Size</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xConverterCppBlockSizeSpinBox">
+                <property name="maximum">
+                 <number>9999</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="waifu2xConverterCppProcessorHorizontalLayout">
               <item>
                <widget class="QLabel" name="waifu2xConverterCppProcessorLabel">
@@ -697,6 +739,27 @@
              </layout>
             </item>
             <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppNoiseLevelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xConverterCppNoiseLevelLabel">
+                <property name="text">
+                 <string>Noise Level</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xConverterCppNoiseLevelSpinBox">
+                <property name="maximum">
+                 <number>3</number>
+                </property>
+                <property name="value">
+                 <number>1</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="waifu2xConverterCppModeHorizontalLayout">
               <item>
                <widget class="QLabel" name="waifu2xConverterCppModeLabel">
@@ -727,16 +790,44 @@
              </layout>
             </item>
             <item>
+             <layout class="QHBoxLayout" name="waifu2xConverterCppLogLevelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xConverterCppLogLevelLabel">
+                <property name="text">
+                 <string>Log Level</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xConverterCppLogLevelSpinBox">
+                <property name="maximum">
+                 <number>4</number>
+                </property>
+                <property name="value">
+                 <number>1</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="waifu2xConverterCppOptionsHorizontalLayout">
               <item>
-               <widget class="QCheckBox" name="disableGpuCheckBox">
+               <widget class="QCheckBox" name="waifu2xConverterCppDisableGpuCheckBox">
                 <property name="text">
                  <string>Disable GPU</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="ttaCheckBox">
+               <widget class="QCheckBox" name="waifu2xConverterCppForceOpenclCheckBox">
+                <property name="text">
+                 <string>Force OpenCL</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="waifu2xConverterCppTtaCheckBox">
                 <property name="text">
                  <string>TTA (Test-Time Augmentation)</string>
                 </property>
@@ -1462,7 +1553,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>718</width>
+     <width>719</width>
      <height>21</height>
     </rect>
    </property>
