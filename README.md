@@ -1,3 +1,7 @@
+<p align="center">
+   <img src="https://user-images.githubusercontent.com/21986859/81489504-c7d1f780-9265-11ea-86c8-cc0316e2082d.png"/>
+</p>
+
 ![Master Branch Version](https://img.shields.io/badge/master-v4.0.0-9cf?style=flat-square)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square)
 ![GitHub All Releases](https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square)
@@ -7,10 +11,6 @@
 src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png"
 href="https://www.patreon.com/bePatron?u=34970782"
 height=20 />
-
-<p align="center">
-   <img src="https://user-images.githubusercontent.com/21986859/81489504-c7d1f780-9265-11ea-86c8-cc0316e2082d.png"/>
-</p>
 
 <!--# Video2X Lossless Video Enlarger-->
 
