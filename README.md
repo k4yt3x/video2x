@@ -59,6 +59,10 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 
 You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
 
+### [Run From Source](https://github.com/k4yt3x/video2x/wiki/Run-From-Source)
+
+Instructions for how to run this program from source code.
+
 ### [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial)
 
 For those who want a detailed walk-through of how to use Video2X, you can head to the [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
@@ -100,7 +104,7 @@ Before running Video2X, you'll need to ensure you have installed the drivers' ex
 - Other Drivers
   - GPU driver if you want to use GPU for processing
 
-### Running Video2X
+### Running Video2X (GUI)
 
 The easiest way to run Video2X is to use the full build. Extract the full release zip file and you'll get these files.
 
@@ -117,6 +121,32 @@ Then, drag the videos you wish to upscale into the window and select the appropr
 Tweak the settings if you want to, then hit the start button at the bottom and the upscale will start. Now you'll just have to wait for it to complete.
 
 ![upscale-started](https://user-images.githubusercontent.com/21986859/81489924-ce16a280-926a-11ea-831c-6c66b950f957.png)
+
+### Running Video2X (CLI)
+
+#### Basic Upscale Example
+
+This example command below uses `waifu2x-caffe` to enlarge the video `sample-input.mp4` two double its original size.
+
+```shell
+python video2x.py -i sample-input.mp4 -o sample-output.mp4 -r 2 -d waifu2x_caffe
+```
+
+#### Advanced Upscale Example
+
+If you would like to tweak engine-specific settings, either specify the corresponding argument after `--`, or edit the corresponding field in the configuration file `video2x.yaml`. **Command line arguments will overwrite default values in the config file.**
+
+This example below adds enables TTA for `waifu2x-caffe`.
+
+```shell
+python video2x.py -i sample-input.mp4 -o sample-output.mp4 -r 2 -d waifu2x_caffe -- --tta 1
+```
+
+To see a help page for driver-specific settings, use `-d` to select the driver and append `-- --help` as demonstrated below. This will print all driver-specific settings and descriptions.
+
+```shell
+python video2x.py -d waifu2x_caffe -- --help
+```
 
 ---
 
