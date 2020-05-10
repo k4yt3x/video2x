@@ -16,7 +16,7 @@ height=20 />
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
 
-## Download Builds (Windows)
+## [Download Builds](https://github.com/k4yt3x/video2x/releases) (Windows)
 
 You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest builds of Video2X. The exe files will require no Python or Python module installation. There are two editions available.
 
