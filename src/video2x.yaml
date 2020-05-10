@@ -1,8 +1,11 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: May 8, 2020
-# Items commented out are parameters handled by Video2x.
+# Last Modified: May 9, 2020
+# Values here are the default values. Change the value here to
+#   save the default value permanently.
+# Items commented out are parameters irrelevant to this context
+#   or parameters handled by Video2X internally.
 waifu2x_caffe:
   path: '%LOCALAPPDATA%\video2x\waifu2x-caffe\waifu2x-caffe-cui'
   tta: 0 # <0|1> 8x slower and slightly high quality
