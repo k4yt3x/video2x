@@ -18,6 +18,7 @@ import sys
 import tempfile
 import time
 import traceback
+import urllib
 import yaml
 
 # third-party imports
@@ -28,11 +29,11 @@ from PyQt5.QtWidgets import *
 
 VERSION = '2.0.0'
 
-LEGAL_INFO = f'''Video2X GUI Version: {VERSION}
-Author: K4YT3X
-License: GNU GPL v3
-Github Page: https://github.com/k4yt3x/video2x
-Contact: k4yt3x@k4yt3x.com'''
+LEGAL_INFO = f'''Video2X GUI Version: {VERSION}\\
+Author: K4YT3X\\
+License: GNU GPL v3\\
+Github Page: [https://github.com/k4yt3x/video2x](https://github.com/k4yt3x/video2x)\\
+Contact: [k4yt3x@k4yt3x.com](mailto:k4yt3x@k4yt3x.com)'''
 
 AVAILABLE_DRIVERS = {
     'Waifu2X Caffe': 'waifu2x_caffe',
@@ -635,6 +636,7 @@ class Video2XMainWindow(QMainWindow):
         message_box = QMessageBox(self)
         message_box.setWindowTitle('About Video2X')
         message_box.setIconPixmap(QtGui.QPixmap(self.video2x_icon_path).scaled(64, 64))
+        message_box.setTextFormat(Qt.MarkdownText)
         message_box.setText(LEGAL_INFO)
         message_box.exec_()
 
@@ -657,17 +659,14 @@ class Video2XMainWindow(QMainWindow):
         message_box = QMessageBox(self)
         message_box.setWindowTitle('Error')
         message_box.setIcon(QMessageBox.Critical)
+        message_box.setTextFormat(Qt.MarkdownText)
 
-        error_message = '''Upscaler ran into an error:
-{}
-Check the console output for details.
-When reporting an error, please include console output.'''
-
-        try:
-            message_box.setText(error_message.format(exception.args[0]))
-        except (AttributeError, IndexError):
-            message_box.setText(error_message.format(exception))
-
+        error_message = '''Upscaler ran into an error:\\
+**{}**\\
+Check the console output for details.\\
+When reporting an error, please include console output.\\
+You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new?assignees=K4YT3X&labels=bug&template=bug-report.md&title={}) to report this error.'''
+        message_box.setText(error_message.format(exception, urllib.parse.quote(str(exception))))
         message_box.exec_()
 
     def progress_monitor(self, progress_callback):
