@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: May 3, 2020
-Last Modified: May 7, 2020
+Last Modified: May 11, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -32,16 +32,23 @@ class WrapperMain:
         self.print_lock = threading.Lock()
 
     @staticmethod
+    def zero_to_one_float(value):
+        value = float(value)
+        if value < 0.0 or value > 1.0:
+            raise argparse.ArgumentTypeError(f'{value} is not between 0.0 and 1.0')
+        return value
+
+    @staticmethod
     def parse_arguments(arguments):
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
         parser.error = lambda message: (_ for _ in ()).throw(AttributeError(message))
         parser.add_argument('--help', action='help', help='show this help message and exit')
-        # parser.add_argument('-i', '--input', type=pathlib.Path, help='File for loading')
-        # parser.add_argument('-o', '--output', type=pathlib.Path, help='File for outputting')
+        parser.add_argument('-i', '--input', type=str, help=argparse.SUPPRESS)  # help='File for loading')
+        parser.add_argument('-o', '--output', type=str, help=argparse.SUPPRESS)  # help='File for outputting')
         parser.add_argument('-p', '--passes', type=int, help='Passes for processing')
         parser.add_argument('-n', '--pushColorCount', type=int, help='Limit the number of color pushes')
-        parser.add_argument('-c', '--strengthColor', type=float, help='Strength for pushing color,range 0 to 1,higher for thinner')
-        parser.add_argument('-g', '--strengthGradient', type=float, help='Strength for pushing gradient,range 0 to 1,higher for sharper')
+        parser.add_argument('-c', '--strengthColor', type=WrapperMain.zero_to_one_float, help='Strength for pushing color,range 0 to 1,higher for thinner')
+        parser.add_argument('-g', '--strengthGradient', type=WrapperMain.zero_to_one_float, help='Strength for pushing gradient,range 0 to 1,higher for sharper')
         parser.add_argument('-z', '--zoomFactor', type=float, help='zoom factor for resizing')
         parser.add_argument('-t', '--threads', type=int, help='Threads count for video processing')
         parser.add_argument('-f', '--fastMode', action='store_true', help='Faster but maybe low quality')
@@ -58,7 +65,11 @@ class WrapperMain:
         parser.add_argument('-C', '--codec', type=str, help='Specify the codec for encoding from mp4v(recommended in Windows), dxva(for Windows), avc1(H264, recommended in Linux), vp09(very slow), hevc(not support in Windowds), av01(not support in Windowds) (string [=mp4v])')
         return parser.parse_args(arguments)
 
-    def upscale(self, input_file, output_file, zoom_factor, threads):
+    def load_configurations(self, upscaler):
+        self.driver_settings['zoomFactor'] = upscaler.scale_ratio
+        self.driver_settings['threads'] = upscaler.processes
+
+    def upscale(self, input_file, output_file):
         """This is the core function for WAIFU2X class
 
         Arguments:
@@ -71,8 +82,6 @@ class WrapperMain:
         # overwrite config file settings
         self.driver_settings['input'] = input_file
         self.driver_settings['output'] = output_file
-        self.driver_settings['zoomFactor'] = zoom_factor
-        self.driver_settings['threads'] = threads
 
         # Anime4KCPP will look for Anime4KCPPKernel.cl under the current working directory
         # change the CWD to its containing directory so it will find it

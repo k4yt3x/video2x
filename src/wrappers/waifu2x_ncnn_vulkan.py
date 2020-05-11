@@ -4,7 +4,7 @@
 Name: Waifu2x NCNN Vulkan Driver
 Creator: SAT3LL
 Date Created: June 26, 2019
-Last Modified: May 9, 2020
+Last Modified: May 11, 2020
 
 Editor: K4YT3X
 Last Modified: February 22, 2020
@@ -45,8 +45,8 @@ class WrapperMain:
         parser.error = lambda message: (_ for _ in ()).throw(AttributeError(message))
         parser.add_argument('--help', action='help', help='show this help message and exit')
         parser.add_argument('-v', action='store_true', help='verbose output')
-        # parser.add_argument('-i', type=pathlib.Path, help='input image path (jpg/png) or directory')
-        # parser.add_argument('-o', type=pathlib.Path, help='output image path (png) or directory')
+        parser.add_argument('-i', type=str, help=argparse.SUPPRESS)  # help='input image path (jpg/png) or directory')
+        parser.add_argument('-o', type=str, help=argparse.SUPPRESS)  # help='output image path (png) or directory')
         parser.add_argument('-n', type=int, choices=range(-1, 4), help='denoise level')
         parser.add_argument('-s', type=int, choices=range(1, 3), help='upscale ratio')
         parser.add_argument('-t', type=int, help='tile size (>=32)')
@@ -56,7 +56,11 @@ class WrapperMain:
         parser.add_argument('-x', action='store_true', help='enable tta mode')
         return parser.parse_args(arguments)
 
-    def upscale(self, input_directory, output_directory, scale_ratio, threads):
+    def load_configurations(self, upscaler):
+        self.driver_settings['s'] = int(upscaler.scale_ratio)
+        self.driver_settings['j'] = '{}:{}:{}'.format(upscaler.processes, upscaler.processes, upscaler.processes)
+
+    def upscale(self, input_directory, output_directory):
         """This is the core function for WAIFU2X class
 
         Arguments:
@@ -68,8 +72,6 @@ class WrapperMain:
         # overwrite config file settings
         self.driver_settings['i'] = input_directory
         self.driver_settings['o'] = output_directory
-        self.driver_settings['s'] = int(scale_ratio)
-        self.driver_settings['j'] = '{}:{}:{}'.format(threads, threads, threads)
 
         # by default, waifu2x-ncnn-vulkan will look for the models under the current working directory
         # change the working directory to its containing folder if model directory not specified

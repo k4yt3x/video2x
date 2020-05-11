@@ -18,8 +18,8 @@ waifu2x_caffe:
   output_quality: -1 # output image quality
   process: gpu # <cpu|gpu|cudnn> process mode
   model_dir: null # path to custom model directory (don't append last / )
-  #scale_height: null # custom scale height
-  #scale_width: null # custom scale width
+  scale_height: 0 # custom scale height (specifying this will overwrite scale_ratio)
+  scale_width: 0 # custom scale width (specifying this will overwrite scale_ratio)
   #scale_ratio: null # custom scale ratio
   noise_level: 3 # <0|1|2|3> noise reduction level
   mode: noise_scale # <noise|scale|noise_scale|auto_scale> image processing mode

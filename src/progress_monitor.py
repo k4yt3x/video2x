@@ -4,7 +4,7 @@
 Name: Video2X Upscale Progress Monitor
 Author: BrianPetkovsek
 Date Created: May 7, 2020
-Last Modified: May 7, 2020
+Last Modified: May 10, 2020
 """
 
 # built-in imports
@@ -47,7 +47,10 @@ class ProgressMonitor(threading.Thread):
             while self.running:
 
                 with contextlib.suppress(FileNotFoundError):
-                    self.upscaler.total_frames_upscaled = len([f for f in self.upscaler.upscaled_frames.iterdir() if str(f).lower().endswith(self.upscaler.image_format.lower())])
+                    upscaled_frames = [f for f in self.upscaler.upscaled_frames.iterdir() if str(f).lower().endswith(self.upscaler.image_format.lower())]
+                    if len(upscaled_frames) >= 1:
+                        self.upscaler.last_frame_upscaled = sorted(upscaled_frames)[-1]
+                    self.upscaler.total_frames_upscaled = len(upscaled_frames)
 
                     # update progress bar
                     delta = self.upscaler.total_frames_upscaled - previous_cycle_frames

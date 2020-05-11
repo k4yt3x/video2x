@@ -235,99 +235,172 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="expressSettingsGroupBox">
-          <property name="title">
-           <string>Express Settings</string>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
-            <layout class="QHBoxLayout" name="driverHorizontalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QGroupBox" name="expressSettingsGroupBox">
+            <property name="title">
+             <string>Express Settings</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
-              <widget class="QLabel" name="driverLabel">
-               <property name="text">
-                <string>Driver</string>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="driverHorizontalLayout">
+               <item>
+                <widget class="QLabel" name="driverLabel">
+                 <property name="text">
+                  <string>Driver</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="driverComboBox">
+                 <item>
+                  <property name="text">
+                   <string>Waifu2X Caffe</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Waifu2X Converter CPP</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Waifu2X NCNN Vulkan</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>SRMD NCNN Vulkan</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Anime4KCPP</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QComboBox" name="driverComboBox">
+              <layout class="QHBoxLayout" name="processesHorizontalLayout">
                <item>
-                <property name="text">
-                 <string>Waifu2X Caffe</string>
-                </property>
+                <widget class="QLabel" name="processesLabel">
+                 <property name="text">
+                  <string>Processes</string>
+                 </property>
+                </widget>
                </item>
                <item>
-                <property name="text">
-                 <string>Waifu2X Converter CPP</string>
-                </property>
+                <widget class="QSpinBox" name="processesSpinBox">
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="scaleRatioHorizontalLayout">
+               <item>
+                <widget class="QLabel" name="scaleRatioLabel">
+                 <property name="text">
+                  <string>Scale Ratio</string>
+                 </property>
+                </widget>
                </item>
                <item>
-                <property name="text">
-                 <string>Waifu2X NCNN Vulkan</string>
-                </property>
+                <widget class="QDoubleSpinBox" name="scaleRatioDoubleSpinBox">
+                 <property name="minimum">
+                  <double>0.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>9999.989999999999782</double>
+                 </property>
+                 <property name="singleStep">
+                  <double>0.500000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>2.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item>
-                <property name="text">
-                 <string>SRMD NCNN Vulkan</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Anime4KCPP</string>
-                </property>
-               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="preserveFramesCheckBox">
+               <property name="text">
+                <string>Preserve Frames</string>
+               </property>
+               <property name="tristate">
+                <bool>false</bool>
+               </property>
               </widget>
              </item>
             </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="processesHorizontalLayout">
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="framePreviewGroupBox">
+            <property name="title">
+             <string>Frame Preview</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_14">
              <item>
-              <widget class="QLabel" name="processesLabel">
-               <property name="text">
-                <string>Processes</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="processesSpinBox">
-               <property name="minimum">
-                <number>1</number>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="framPreviewHorizontalLayout">
+               <item>
+                <layout class="QVBoxLayout" name="framePreviewOptionsVerticalLayout">
+                 <item>
+                  <widget class="QCheckBox" name="framePreviewShowPreviewCheckBox">
+                   <property name="text">
+                    <string>Show Preview</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="framePreviewKeepAspectRatioCheckBox">
+                   <property name="text">
+                    <string>Keep Aspect Ratio</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="framePreviewOptionsVerticalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QLabel" name="framePreviewLabel">
+                 <property name="frameShape">
+                  <enum>QFrame::StyledPanel</enum>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="scaleRatioHorizontalLayout">
-             <item>
-              <widget class="QLabel" name="scaleRatioLabel">
-               <property name="text">
-                <string>Scale Ratio</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="scaleRatioDoubleSpinBox">
-               <property name="value">
-                <double>2.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="preserveFramesCheckBox">
-             <property name="text">
-              <string>Preserve Frames</string>
-             </property>
-             <property name="tristate">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -355,6 +428,42 @@
                <widget class="QPushButton" name="waifu2xCaffePathSelectButton">
                 <property name="text">
                  <string>Select Binary Path</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeScaleWidthHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeScaleWidthLabel">
+                <property name="text">
+                 <string>Scale Width</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xCaffeScaleWidthSpinBox">
+                <property name="maximum">
+                 <number>999999</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="waifu2xCaffeScaleHeightHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="waifu2xCaffeScaleHeightLabel">
+                <property name="text">
+                 <string>Scale Height</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="waifu2xCaffeScaleHeightSpinBox">
+                <property name="maximum">
+                 <number>999999</number>
                 </property>
                </widget>
               </item>
@@ -1123,7 +1232,17 @@
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="anime4kCppPreFiltersSpinBox"/>
+               <widget class="QSpinBox" name="anime4kCppPreFiltersSpinBox">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+                <property name="value">
+                 <number>4</number>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -1137,7 +1256,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="anime4kCppPlatformIdSpinBox"/>
+               <widget class="QSpinBox" name="anime4kCppPlatformIdSpinBox">
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -1153,7 +1276,7 @@
               <item>
                <widget class="QSpinBox" name="anime4kCppThreadsSpinBox">
                 <property name="maximum">
-                 <number>999</number>
+                 <number>99999</number>
                 </property>
                 <property name="value">
                  <number>16</number>
@@ -1173,6 +1296,12 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="anime4kCppStrengthColorSpinBox">
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
                 <property name="value">
                  <double>0.300000000000000</double>
                 </property>
@@ -1227,7 +1356,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="anime4kCppDeviceIdSpinBox"/>
+               <widget class="QSpinBox" name="anime4kCppDeviceIdSpinBox">
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -1241,7 +1374,17 @@
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="anime4kCppPostFiltersSpinBox"/>
+               <widget class="QSpinBox" name="anime4kCppPostFiltersSpinBox">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+                <property name="value">
+                 <number>40</number>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -1301,6 +1444,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="anime4kCppPassesSpinBox">
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
                 <property name="value">
                  <number>2</number>
                 </property>
@@ -1333,6 +1479,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="anime4kCppPushColorCountSpinBox">
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
                 <property name="value">
                  <number>2</number>
                 </property>
@@ -1351,6 +1500,12 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="anime4kCppStrengthGradientSpinBox">
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
                 <property name="value">
                  <double>1.000000000000000</double>
                 </property>

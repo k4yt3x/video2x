@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 7, 2020
+Last Modified: May 11, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -53,35 +53,29 @@ class WrapperMain:
         parser.add_argument('-w', '--scale_width', type=int, help='custom scale width')
         parser.add_argument('-s', '--scale_ratio', type=float, help='custom scale ratio')
         parser.add_argument('-n', '--noise_level', type=int, choices=range(4), help='noise reduction level')
-        parser.add_argument('-m', '--mode', choices=['noise', 'scale', 'noise_scale'], help='image processing mode')
-        parser.add_argument('-e', '--output_extension', type=str, help='extention to output image file when output_path is (auto) or input_path is folder')
+        parser.add_argument('-m', '--mode', choices=['noise', 'scale', 'noise_scale', 'auto_scale'], help='image processing mode')
+        parser.add_argument('-e', '--output_extention', type=str, help='extention to output image file when output_path is (auto) or input_path is folder')
         parser.add_argument('-l', '--input_extention_list', type=str, help='extention to input image file when input_path is folder')
-        # parser.add_argument('-o', '--output', type=pathlib.Path, help='path to output image file (when input_path is folder, output_path must be folder)')
-        # parser.add_argument('-i', '--input_file', type=pathlib.Path, help='(required)  path to input image file')
+        parser.add_argument('-o', '--output', type=str, help=argparse.SUPPRESS)  # help='path to output image file (when input_path is folder, output_path must be folder)')
+        parser.add_argument('-i', '--input_file', type=str, help=argparse.SUPPRESS)  # help='(required) path to input image file')
         return parser.parse_args(arguments)
 
-    def upscale(self, input_directory, output_directory, scale_ratio, scale_width, scale_height, image_format, bit_depth):
-        """This is the core function for WAIFU2X class
+    def load_configurations(self, upscaler):
+        # use scale width and scale height if specified
+        self.driver_settings['scale_ratio'] = upscaler.scale_ratio
+        self.driver_settings['output_extention'] = upscaler.image_format
 
-        Arguments:
-            input_directory {string} -- source directory path
-            output_directory {string} -- output directory path
-            width {int} -- output video width
-            height {int} -- output video height
+        # bit_depth will be 12 at this point
+        # it will up updated later
+        self.driver_settings['output_depth'] = 12
+
+    def upscale(self, input_directory, output_directory):
+        """ start upscaling process
         """
 
         # overwrite config file settings
         self.driver_settings['input_path'] = input_directory
         self.driver_settings['output_path'] = output_directory
-
-        if scale_ratio:
-            self.driver_settings['scale_ratio'] = scale_ratio
-        elif scale_width and scale_height:
-            self.driver_settings['scale_width'] = scale_width
-            self.driver_settings['scale_height'] = scale_height
-
-        self.driver_settings['output_extention'] = image_format
-        self.driver_settings['output_depth'] = bit_depth
 
         # list to be executed
         # initialize the list with waifu2x binary path as the first element

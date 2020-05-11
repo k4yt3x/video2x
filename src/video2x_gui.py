@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 8, 2020
+Last Modified: May 10, 2020
 """
 
 # local imports
@@ -219,6 +219,11 @@ class Video2XMainWindow(QMainWindow):
         self.scale_ratio_double_spin_box = self.findChild(QDoubleSpinBox, 'scaleRatioDoubleSpinBox')
         self.preserve_frames_check_box = self.findChild(QCheckBox, 'preserveFramesCheckBox')
 
+        # frame preview
+        self.frame_preview_show_preview_check_box = self.findChild(QCheckBox, 'framePreviewShowPreviewCheckBox')
+        self.frame_preview_keep_aspect_ratio_check_box = self.findChild(QCheckBox, 'framePreviewKeepAspectRatioCheckBox')
+        self.frame_preview_label = self.findChild(QLabel, 'framePreviewLabel')
+
         # currently processing
         self.currently_processing_label = self.findChild(QLabel, 'currentlyProcessingLabel')
         self.current_progress_bar = self.findChild(QProgressBar, 'currentProgressBar')
@@ -241,6 +246,8 @@ class Video2XMainWindow(QMainWindow):
         self.enable_line_edit_file_drop(self.waifu2x_caffe_path_line_edit)
         self.waifu2x_caffe_path_select_button = self.findChild(QPushButton, 'waifu2xCaffePathSelectButton')
         self.waifu2x_caffe_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.waifu2x_caffe_path_line_edit))
+        self.waifu2x_caffe_scale_width_spin_box = self.findChild(QSpinBox, 'waifu2xCaffeScaleWidthSpinBox')
+        self.waifu2x_caffe_scale_height_spin_box = self.findChild(QSpinBox, 'waifu2xCaffeScaleHeightSpinBox')
         self.waifu2x_caffe_mode_combo_box = self.findChild(QComboBox, 'waifu2xCaffeModeComboBox')
         self.waifu2x_caffe_noise_level_spin_box = self.findChild(QSpinBox, 'waifu2xCaffeNoiseLevelSpinBox')
         self.waifu2x_caffe_process_combo_box = self.findChild(QComboBox, 'waifu2xCaffeProcessComboBox')
@@ -377,6 +384,8 @@ class Video2XMainWindow(QMainWindow):
 
         # waifu2x-caffe
         settings = self.config['waifu2x_caffe']
+        self.waifu2x_caffe_scale_width_spin_box.setValue(settings['scale_width'])
+        self.waifu2x_caffe_scale_height_spin_box.setValue(settings['scale_height'])
         self.waifu2x_caffe_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
         self.waifu2x_caffe_mode_combo_box.setCurrentText(settings['mode'])
         self.waifu2x_caffe_noise_level_spin_box.setValue(settings['noise_level'])
@@ -441,6 +450,8 @@ class Video2XMainWindow(QMainWindow):
     def resolve_driver_settings(self):
 
         # waifu2x-caffe
+        self.config['waifu2x_caffe']['scale_width'] = self.waifu2x_caffe_scale_width_spin_box.value()
+        self.config['waifu2x_caffe']['scale_height'] = self.waifu2x_caffe_scale_height_spin_box.value()
         self.config['waifu2x_caffe']['path'] = os.path.expandvars(self.waifu2x_caffe_path_line_edit.text())
         self.config['waifu2x_caffe']['mode'] = self.waifu2x_caffe_mode_combo_box.currentText()
         self.config['waifu2x_caffe']['noise_level'] = self.waifu2x_caffe_noise_level_spin_box.value()
@@ -673,7 +684,7 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
 
         # initialize progress bar values
         upscale_begin_time = time.time()
-        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path()))
+        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path(), pathlib.Path()))
 
         # keep querying upscaling process and feed information to callback signal
         while self.upscaler.running:
@@ -683,12 +694,13 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
                                     self.upscaler.total_frames,
                                     self.upscaler.total_processed,
                                     self.upscaler.total_videos,
-                                    self.upscaler.current_input_video))
+                                    self.upscaler.current_input_video,
+                                    self.upscaler.last_frame_upscaled))
             time.sleep(1)
 
         # upscale process will stop at 99%
         # so it's set to 100 manually when all is done
-        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path()))
+        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path(), pathlib.Path()))
 
     def set_progress(self, progress_information: tuple):
         upscale_begin_time = progress_information[0]
@@ -697,6 +709,7 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
         total_processed = progress_information[3]
         total_videos = progress_information[4]
         current_input_video = progress_information[5]
+        last_frame_upscaled = progress_information[6]
 
         # calculate fields based on frames and time elapsed
         time_elapsed = time.time() - upscale_begin_time
@@ -718,6 +731,27 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
         self.overall_progress_bar.setMaximum(total_videos)
         self.overall_progress_bar.setValue(total_processed)
         self.currently_processing_label.setText('Currently Processing: {}'.format(str(current_input_video.name)))
+
+        # if show frame is checked, show preview image
+        if self.frame_preview_show_preview_check_box.isChecked() and last_frame_upscaled.is_file():
+            last_frame_pixmap = QtGui.QPixmap(str(last_frame_upscaled.absolute()))
+            # the -2 here behind geometry subtracts frame size from width and height
+            self.frame_preview_label.setPixmap(last_frame_pixmap.scaled(self.frame_preview_label.width() - 2,
+                                                                        self.frame_preview_label.height() - 2,
+                                                                        Qt.KeepAspectRatio))
+
+            # if keep aspect ratio is checked, don't stretch image
+            if self.frame_preview_keep_aspect_ratio_check_box.isChecked():
+                self.frame_preview_label.setScaledContents(False)
+            else:
+                self.frame_preview_label.setScaledContents(True)
+
+            # display image in label
+            self.frame_preview_label.show()
+
+        # if show frame is unchecked, clear image
+        elif self.frame_preview_show_preview_check_box.isChecked() is False:
+            self.frame_preview_label.clear()
 
     def reset_progress_display(self):
         # reset progress display UI elements
@@ -741,10 +775,10 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
 
             # resolve input and output directories from GUI
             if len(self.input_table_data) == 0:
-                self.show_warning('Input path unspecified', standard_icon=QMessageBox.Warning)
+                self.show_warning('Input path unspecified')
                 return
             if self.output_line_edit.text().strip() == '':
-                self.show_warning('Output path unspecified', standard_icon=QMessageBox.Warning)
+                self.show_warning('Output path unspecified')
                 return
 
             if len(self.input_table_data) == 1:

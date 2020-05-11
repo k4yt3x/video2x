@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: May 7, 2020
+Last Modified: May 11, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
@@ -61,12 +61,17 @@ class WrapperMain:
         parser.add_argument('-g', '--generate-subdir', type=int, choices=range(2), help='Generate sub folder when recursive directory is enabled.')
         parser.add_argument('-a', '--auto-naming', type=int, choices=range(2), help='Add postfix to output name when output path is not specified.\nSet 0 to disable this.')
         parser.add_argument('-r', '--recursive-directory', type=int, choices=range(2), help='Search recursively through directories to find more images to process.')
-        # parser.add_argument('-o', '--output', type=pathlib.Pathh, help='path to output image file or directory  (you should use the full path)')
-        # parser.add_argument('-i', '--input', type=pathlib.Path, help='(required)  path to input image file or directory (you should use the full path)')
+        parser.add_argument('-o', '--output', type=str, help=argparse.SUPPRESS)  # help='path to output image file or directory  (you should use the full path)')
+        parser.add_argument('-i', '--input', type=str, help=argparse.SUPPRESS)  # help='(required)  path to input image file or directory (you should use the full path)')
         parser.add_argument('--version', action='store_true', help='Displays version information and exits.')
         return parser.parse_args(arguments)
 
-    def upscale(self, input_directory, output_directory, scale_ratio, jobs, image_format):
+    def load_configurations(self, upscaler):
+        self.driver_settings['scale-ratio'] = upscaler.scale_ratio
+        self.driver_settings['jobs'] = upscaler.processes
+        self.driver_settings['output-format'] = upscaler.image_format.lower()
+
+    def upscale(self, input_directory, output_directory):
         """ Waifu2x Converter Driver Upscaler
         This method executes the upscaling of extracted frames.
 
@@ -80,9 +85,6 @@ class WrapperMain:
         # overwrite config file settings
         self.driver_settings['input'] = input_directory
         self.driver_settings['output'] = output_directory
-        self.driver_settings['scale-ratio'] = scale_ratio
-        self.driver_settings['jobs'] = jobs
-        self.driver_settings['output-format'] = image_format
 
         # models_rgb must be specified manually for waifu2x-converter-cpp
         # if it's not specified in the arguments, create automatically

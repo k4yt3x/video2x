@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 9, 2020
+Last Modified: May 10, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -103,21 +103,20 @@ def parse_arguments():
     parser = argparse.ArgumentParser(prog='video2x', formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
 
     # video options
-    general_options = parser.add_argument_group(_('General Options'))
-    general_options.add_argument('-h', '--help', action='help', help=_('show this help message and exit'))
-    general_options.add_argument('-i', '--input', type=pathlib.Path, help=_('source video file/directory'))
-    general_options.add_argument('-o', '--output', type=pathlib.Path, help=_('output video file/directory'))
-    general_options.add_argument('-c', '--config', type=pathlib.Path, help=_('video2x config file path'), action='store',
+    video2x_options = parser.add_argument_group(_('Video2X Options'))
+    video2x_options.add_argument('-h', '--help', action='help', help=_('show this help message and exit'))
+    video2x_options.add_argument('-i', '--input', type=pathlib.Path, help=_('source video file/directory'))
+    video2x_options.add_argument('-o', '--output', type=pathlib.Path, help=_('output video file/directory'))
+    video2x_options.add_argument('-c', '--config', type=pathlib.Path, help=_('video2x config file path'), action='store',
                                  default=pathlib.Path(__file__).parent.absolute() / 'video2x.yaml')
-    general_options.add_argument('-d', '--driver', help=_('upscaling driver'), choices=AVAILABLE_DRIVERS, default='waifu2x_caffe')
-    general_options.add_argument('-p', '--processes', help=_('number of processes to use for upscaling'), action='store', type=int, default=1)
-    general_options.add_argument('-v', '--version', help=_('display version, lawful information and exit'), action='store_true')
+    video2x_options.add_argument('-v', '--version', help=_('display version, lawful information and exit'), action='store_true')
 
     # scaling options
-    scaling_options = parser.add_argument_group(_('Scaling Options'))
-    scaling_options.add_argument('--width', help=_('output video width'), action='store', type=int)
-    scaling_options.add_argument('--height', help=_('output video height'), action='store', type=int)
-    scaling_options.add_argument('-r', '--ratio', help=_('scaling ratio'), action='store', type=float)
+    upscaling_options = parser.add_argument_group(_('Upscaling Options'))
+    upscaling_options.add_argument('-d', '--driver', help=_('upscaling driver'), choices=AVAILABLE_DRIVERS, default='waifu2x_caffe')
+    upscaling_options.add_argument('-r', '--ratio', help=_('scaling ratio'), action='store', type=float, default=2.0)
+    upscaling_options.add_argument('-p', '--processes', help=_('number of processes to use for upscaling'), action='store', type=int, default=1)
+    upscaling_options.add_argument('--preserve_frames', help=_('preserve extracted and upscaled frames'), action='store_true')
 
     # if no driver arguments are specified
     if '--' not in sys.argv:
@@ -186,6 +185,13 @@ ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(ffmpeg_settings['ffmpeg_path
 image_format = config['video2x']['image_format'].lower()
 preserve_frames = config['video2x']['preserve_frames']
 
+# if preserve frames specified in command line
+# overwrite config file options
+if video2x_args.preserve_frames is True:
+    preserve_frames = True
+
+# if cache directory not specified
+# use default path: %TEMP%\video2x
 if config['video2x']['video2x_cache_directory'] is None:
     video2x_cache_directory = (pathlib.Path(tempfile.gettempdir()) / 'video2x')
 else:
@@ -211,8 +217,6 @@ try:
 
     # set upscaler optional options
     upscaler.driver = video2x_args.driver
-    upscaler.scale_width = video2x_args.width
-    upscaler.scale_height = video2x_args.height
     upscaler.scale_ratio = video2x_args.ratio
     upscaler.processes = video2x_args.processes
     upscaler.video2x_cache_directory = video2x_cache_directory
