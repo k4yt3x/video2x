@@ -222,9 +222,9 @@ class Upscaler:
             raise e
 
         # waifu2x-caffe scale_ratio, scale_width and scale_height check
-        if self.driver == 'waifu2x-caffe':
-            if (driver_settings['scale_width'] != 0 and driver_settings['scale_width'] == 0 or
-                    driver_settings['scale_width'] == 0 and driver_settings['scale_width'] != 0):
+        if self.driver == 'waifu2x_caffe':
+            if (driver_settings['scale_width'] != 0 and driver_settings['scale_height'] == 0 or
+                    driver_settings['scale_width'] == 0 and driver_settings['scale_height'] != 0):
                 Avalon.error('Only one of scale_width and scale_height is specified for waifu2x-caffe')
                 raise AttributeError('only one of scale_width and scale_height is specified for waifu2x-caffe')
 
