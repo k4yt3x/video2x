@@ -33,9 +33,22 @@ Video2X is a video upscaling software based on Waifu2X, Anime4K and SRMD written
 
 *Upscale Comparison Demonstration*
 
-**You can watch the whole demo video on YouTube: https://www.youtube.com/watch?v=PG94iPoeoZk**
+**You can watch the whole demo video on YouTube: https://youtu.be/mGEfasQl2Zo**
 
 Clip is from trailer of animated movie "千と千尋の神隠し". Copyright belongs to "株式会社スタジオジブリ (STUDIO GHIBLI INC.)". Will delete immediately if use of clip is in violation of copyright.
+
+## Demo Videos
+
+Below is a list of all the demo videos available.
+
+- **Spirited Away (360P to 4K)**
+  - Original name: 千と千尋の神隠し
+  - YouTube: https://youtu.be/mGEfasQl2Zo
+  - Bilibili: https://www.bilibili.com/video/BV1V5411471i/
+- **The Pet Girl of Sakurasou 240P to 1080P 60FPS**
+  - Original name: さくら荘のペットな彼女
+  - YouTube: https://youtu.be/M0vDI1HH2_Y
+  - Bilibili: https://www.bilibili.com/video/BV14k4y167KP/
 
 ## Screenshots
 
