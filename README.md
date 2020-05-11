@@ -54,7 +54,7 @@ Below is a list of all the demo videos available.
 
 ### Video2X GUI
 
-![GUI Preview](https://user-images.githubusercontent.com/21986859/81489729-b1796b00-9268-11ea-9c5a-c6319858751d.png)
+![GUI Preview](https://user-images.githubusercontent.com/21986859/81546668-3bf5c380-936a-11ea-9583-c969ea0d862b.png)
 
 *Video2X GUI Screenshot*
 
