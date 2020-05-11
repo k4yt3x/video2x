@@ -195,7 +195,7 @@ python video2x.py -d waifu2x_caffe -- --help
 
 # Full Usage
 
-## General Options:
+## Video2X Options
 
 ### -h, --help
     show this help message and exit
@@ -209,6 +209,11 @@ python video2x.py -d waifu2x_caffe -- --help
 ### -c CONFIG, --config CONFIG
     video2x config file path
 
+### -v, --version
+    display version, lawful information and exit
+
+## Upscaling Options
+
 ### -d DRIVER, --driver DRIVER
     upscaling driver (default: waifu2x_caffe)
 
@@ -220,22 +225,14 @@ Available options are:
 - srmd_ncnn_vulkan
 - anime4kcpp
 
+### -r RATIO, --ratio RATIO
+    scaling ratio
+
 ### -p PROCESSES, --processes PROCESSES
     number of processes to use for upscaling (default: 1)
 
-### -v, --version
-    display version, lawful information and exit
-
-## Scaling Options
-
-### --width WIDTH
-    output video width
-
-### --height HEIGHT
-    output video height
-
-### -r RATIO, --ratio RATIO
-    scaling ratio
+### --preserve_frames
+    preserve extracted and upscaled frames (default: False)
 
 ---
 
