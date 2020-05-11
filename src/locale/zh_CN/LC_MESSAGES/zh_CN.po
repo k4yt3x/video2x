@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-05-09 19:34-0400\n"
-"PO-Revision-Date: 2020-05-09 19:38-0400\n"
+"POT-Creation-Date: 2020-05-11 04:39-0400\n"
+"PO-Revision-Date: 2020-05-11 04:40-0400\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -14,186 +14,186 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.3.1\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: progress_monitor.py:42
 msgid "Upscaling Progress"
 msgstr "放大进度"
 
-#: upscaler.py:105
+#: upscaler.py:104
 msgid "Specified or default cache directory is a file/link"
 msgstr "指定或默认的缓存目录是文件/链接"
 
-#: upscaler.py:111
+#: upscaler.py:110
 msgid "Creating cache directory {}"
 msgstr "创建缓存目录 {}"
 
-#: upscaler.py:114
+#: upscaler.py:113
 msgid "Unable to create {}"
 msgstr "无法创建 {}"
 
-#: upscaler.py:119
+#: upscaler.py:118
 msgid "Extracted frames are being saved to: {}"
 msgstr "提取的帧将被保存到：{}"
 
-#: upscaler.py:121
+#: upscaler.py:120
 msgid "Upscaled frames are being saved to: {}"
 msgstr "已放大的帧将被保存到：{}"
 
-#: upscaler.py:131
+#: upscaler.py:130
 msgid "Cleaning up cache directory: {}"
 msgstr "清理缓存目录：{}"
 
-#: upscaler.py:134
+#: upscaler.py:133
 msgid "Unable to delete: {}"
 msgstr "无法删除：{}"
 
-#: upscaler.py:140 upscaler.py:155 upscaler.py:166
+#: upscaler.py:139 upscaler.py:154 upscaler.py:165
 msgid "Input and output path type mismatch"
 msgstr "输入和输出路径类型不匹配"
 
-#: upscaler.py:141
+#: upscaler.py:140
 msgid "Input is multiple files but output is not directory"
 msgstr "输入是多个文件，但输出不是目录"
 
-#: upscaler.py:145
+#: upscaler.py:144
 msgid "Input path {} is neither a file nor a directory"
 msgstr "输入路径 {} 既不是文件也不是目录"
 
-#: upscaler.py:149 upscaler.py:171
+#: upscaler.py:148 upscaler.py:170
 msgid "Input directory and output directory cannot be the same"
 msgstr "输入目录和输出目录不能相同"
 
-#: upscaler.py:156
+#: upscaler.py:155
 msgid "Input is single file but output is directory"
 msgstr "所选的输入路径是单个文件，但输出路径是目录"
 
-#: upscaler.py:159
+#: upscaler.py:158
 msgid "No suffix found in output file path"
 msgstr "在输出文件路径中未找到后缀"
 
-#: upscaler.py:160
+#: upscaler.py:159
 msgid "Suffix must be specified for FFmpeg"
 msgstr "必须为 FFmpeg 指定后缀"
 
-#: upscaler.py:167
+#: upscaler.py:166
 msgid "Input is directory but output is existing single file"
 msgstr "输入是目录，但输出是现有的单个文件"
 
-#: upscaler.py:176
+#: upscaler.py:175
 msgid "Input path is neither a file nor a directory"
 msgstr "输入路径既不是文件也不是目录"
 
-#: upscaler.py:185
+#: upscaler.py:184
 msgid "FFmpeg or FFprobe cannot be found under the specified path"
 msgstr "在指定的路径下找不到 FFmpeg 或 FFprobe"
 
-#: upscaler.py:186 upscaler.py:196
+#: upscaler.py:185 upscaler.py:195
 msgid "Please check the configuration file settings"
 msgstr "请检查配置文件设置"
 
-#: upscaler.py:195
+#: upscaler.py:194
 msgid "Specified driver executable directory doesn't exist"
 msgstr "指定驱动的可执行文件不存在"
 
-#: upscaler.py:222
+#: upscaler.py:221
 msgid "Failed to parse driver argument: {}"
 msgstr "解析驱动程序参数失败：{}"
 
-#: upscaler.py:237
+#: upscaler.py:253
 msgid "Unrecognized driver: {}"
 msgstr "无法识别的驱动名称：{}"
 
-#: upscaler.py:311
+#: upscaler.py:293
 msgid "Starting progress monitor"
 msgstr "启动进度监视器"
 
-#: upscaler.py:316
+#: upscaler.py:298
 msgid "Starting upscaled image cleaner"
 msgstr "启动已放大图像清理程序"
 
-#: upscaler.py:325 upscaler.py:342
+#: upscaler.py:307 upscaler.py:324
 msgid "Killing progress monitor"
 msgstr "终结进度监视器"
 
-#: upscaler.py:328 upscaler.py:345
+#: upscaler.py:310 upscaler.py:327
 msgid "Killing upscaled image cleaner"
 msgstr "终结已放大图像清理程序"
 
-#: upscaler.py:349
+#: upscaler.py:331
 msgid "Terminating all processes"
 msgstr "正在终止所有进程"
 
-#: upscaler.py:356
+#: upscaler.py:338
 msgid "Main process waiting for subprocesses to exit"
 msgstr "主进程开始等待子进程结束"
 
-#: upscaler.py:375 upscaler.py:379
+#: upscaler.py:357 upscaler.py:361
 msgid "Subprocess {} exited with code {}"
 msgstr "子进程 {} 结束，返回码 {}"
 
-#: upscaler.py:385
+#: upscaler.py:367
 msgid "Stop signal received"
 msgstr "收到停止信号"
 
-#: upscaler.py:390
+#: upscaler.py:372
 msgid "Subprocess execution ran into an error"
 msgstr "子进程执行遇到错误"
 
-#: upscaler.py:432
+#: upscaler.py:421
 msgid "Upscaling single video file: {}"
 msgstr "放大单个视频文件：{}"
 
-#: upscaler.py:454 upscaler.py:517
+#: upscaler.py:443 upscaler.py:502
 msgid "Starting to upscale extracted images"
 msgstr "开始对提取的帧进行放大"
 
-#: upscaler.py:463 upscaler.py:519
+#: upscaler.py:448 upscaler.py:504
 msgid "Upscaling completed"
 msgstr "放大完成"
 
-#: upscaler.py:472
+#: upscaler.py:457
 msgid "Reading video information"
 msgstr "读取视频信息"
 
-#: upscaler.py:486
+#: upscaler.py:471
 msgid "Aborting: No video stream found"
 msgstr "程序中止：文件中未找到视频流"
 
-#: upscaler.py:504
+#: upscaler.py:490
 msgid "Unsupported pixel format: {}"
 msgstr "不支持的像素格式：{}"
 
-#: upscaler.py:507
+#: upscaler.py:493
 msgid "Framerate: {}"
 msgstr "帧率：{}"
 
-#: upscaler.py:522
+#: upscaler.py:507
 msgid "Converting extracted frames into video"
 msgstr "正在将提取的帧转换为视频"
 
-#: upscaler.py:529
+#: upscaler.py:514
 msgid "Conversion completed"
 msgstr "转换已完成"
 
-#: upscaler.py:533
+#: upscaler.py:518
 msgid "Migrating audio, subtitles and other streams to upscaled video"
 msgstr "正在将音频、字幕和其他流迁移到放大后的视频"
 
-#: upscaler.py:542
+#: upscaler.py:527
 msgid "Failed to migrate streams"
 msgstr "迁移流失败"
 
-#: upscaler.py:543
+#: upscaler.py:528
 msgid "Trying to output video without additional streams"
 msgstr "正在尝试输出不含其他流的视频"
 
-#: upscaler.py:550
+#: upscaler.py:535
 msgid "Output video file exists, aborting"
 msgstr "输出目标文件已存在，取消输出"
 
-#: upscaler.py:554
+#: upscaler.py:539
 msgid "Writing intermediate file to: {}"
 msgstr "正在将中间视频文件写入至：{}"
 
@@ -212,8 +212,8 @@ msgstr ""
 "联系方式：k4yt3x@k4yt3x.com"
 
 #: video2x.py:106
-msgid "General Options"
-msgstr "通用选项"
+msgid "Video2X Options"
+msgstr "Video2X 选项"
 
 #: video2x.py:107
 msgid "show this help message and exit"
@@ -232,44 +232,46 @@ msgid "video2x config file path"
 msgstr "video2x 配置文件路径"
 
 #: video2x.py:112
-msgid "upscaling driver"
-msgstr "视频放大驱动"
-
-#: video2x.py:113
-msgid "number of processes to use for upscaling"
-msgstr "并发进程数"
-
-#: video2x.py:114
 msgid "display version, lawful information and exit"
 msgstr "显示版本和法律信息并退出"
 
+#: video2x.py:115
+msgid "Upscaling Options"
+msgstr "视频放大选项"
+
+#: video2x.py:116
+msgid "upscaling driver"
+msgstr "视频放大驱动"
+
 #: video2x.py:117
-msgid "Scaling Options"
-msgstr "缩放选项"
-
-#: video2x.py:118
-msgid "output video width"
-msgstr "输出视频宽度"
-
-#: video2x.py:119
-msgid "output video height"
-msgstr "输出视频高度"
-
-#: video2x.py:120
 msgid "scaling ratio"
 msgstr "缩放比"
 
-#: video2x.py:160
+#: video2x.py:118
+msgid "number of processes to use for upscaling"
+msgstr "并发进程数"
+
+#: video2x.py:119
+msgid "preserve extracted and upscaled frames"
+msgstr "保留提取的和放大的帧"
+
+#: video2x.py:159
 msgid "This file cannot be imported"
 msgstr "此文件无法被当作模块导入"
 
-#: video2x.py:225
+#: video2x.py:229
 msgid "Program completed, taking {} seconds"
 msgstr "程序执行完毕，总计花费 {} 秒"
 
-#: video2x.py:228
+#: video2x.py:232
 msgid "An exception has occurred"
 msgstr "发生了异常"
+
+#~ msgid "output video width"
+#~ msgstr "输出视频宽度"
+
+#~ msgid "output video height"
+#~ msgstr "输出视频高度"
 
 #~ msgid "You must specify input video file/directory path"
 #~ msgstr "您必须指定输入视频文件/目录路径"

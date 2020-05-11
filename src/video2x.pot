@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2020-05-09 19:34-0400\n"
+"POT-Creation-Date: 2020-05-11 04:39-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,179 +19,179 @@ msgstr ""
 msgid "Upscaling Progress"
 msgstr ""
 
-#: upscaler.py:105
+#: upscaler.py:104
 msgid "Specified or default cache directory is a file/link"
 msgstr ""
 
-#: upscaler.py:111
+#: upscaler.py:110
 msgid "Creating cache directory {}"
 msgstr ""
 
-#: upscaler.py:114
+#: upscaler.py:113
 msgid "Unable to create {}"
 msgstr ""
 
-#: upscaler.py:119
+#: upscaler.py:118
 msgid "Extracted frames are being saved to: {}"
 msgstr ""
 
-#: upscaler.py:121
+#: upscaler.py:120
 msgid "Upscaled frames are being saved to: {}"
 msgstr ""
 
-#: upscaler.py:131
+#: upscaler.py:130
 msgid "Cleaning up cache directory: {}"
 msgstr ""
 
-#: upscaler.py:134
+#: upscaler.py:133
 msgid "Unable to delete: {}"
 msgstr ""
 
-#: upscaler.py:140 upscaler.py:155 upscaler.py:166
+#: upscaler.py:139 upscaler.py:154 upscaler.py:165
 msgid "Input and output path type mismatch"
 msgstr ""
 
-#: upscaler.py:141
+#: upscaler.py:140
 msgid "Input is multiple files but output is not directory"
 msgstr ""
 
-#: upscaler.py:145
+#: upscaler.py:144
 msgid "Input path {} is neither a file nor a directory"
 msgstr ""
 
-#: upscaler.py:149 upscaler.py:171
+#: upscaler.py:148 upscaler.py:170
 msgid "Input directory and output directory cannot be the same"
 msgstr ""
 
-#: upscaler.py:156
+#: upscaler.py:155
 msgid "Input is single file but output is directory"
 msgstr ""
 
-#: upscaler.py:159
+#: upscaler.py:158
 msgid "No suffix found in output file path"
 msgstr ""
 
-#: upscaler.py:160
+#: upscaler.py:159
 msgid "Suffix must be specified for FFmpeg"
 msgstr ""
 
-#: upscaler.py:167
+#: upscaler.py:166
 msgid "Input is directory but output is existing single file"
 msgstr ""
 
-#: upscaler.py:176
+#: upscaler.py:175
 msgid "Input path is neither a file nor a directory"
 msgstr ""
 
-#: upscaler.py:185
+#: upscaler.py:184
 msgid "FFmpeg or FFprobe cannot be found under the specified path"
 msgstr ""
 
-#: upscaler.py:186 upscaler.py:196
+#: upscaler.py:185 upscaler.py:195
 msgid "Please check the configuration file settings"
 msgstr ""
 
-#: upscaler.py:195
+#: upscaler.py:194
 msgid "Specified driver executable directory doesn't exist"
 msgstr ""
 
-#: upscaler.py:222
+#: upscaler.py:221
 msgid "Failed to parse driver argument: {}"
 msgstr ""
 
-#: upscaler.py:237
+#: upscaler.py:253
 msgid "Unrecognized driver: {}"
 msgstr ""
 
-#: upscaler.py:311
+#: upscaler.py:293
 msgid "Starting progress monitor"
 msgstr ""
 
-#: upscaler.py:316
+#: upscaler.py:298
 msgid "Starting upscaled image cleaner"
 msgstr ""
 
-#: upscaler.py:325 upscaler.py:342
+#: upscaler.py:307 upscaler.py:324
 msgid "Killing progress monitor"
 msgstr ""
 
-#: upscaler.py:328 upscaler.py:345
+#: upscaler.py:310 upscaler.py:327
 msgid "Killing upscaled image cleaner"
 msgstr ""
 
-#: upscaler.py:349
+#: upscaler.py:331
 msgid "Terminating all processes"
 msgstr ""
 
-#: upscaler.py:356
+#: upscaler.py:338
 msgid "Main process waiting for subprocesses to exit"
 msgstr ""
 
-#: upscaler.py:375 upscaler.py:379
+#: upscaler.py:357 upscaler.py:361
 msgid "Subprocess {} exited with code {}"
 msgstr ""
 
-#: upscaler.py:385
+#: upscaler.py:367
 msgid "Stop signal received"
 msgstr ""
 
-#: upscaler.py:390
+#: upscaler.py:372
 msgid "Subprocess execution ran into an error"
 msgstr ""
 
-#: upscaler.py:432
+#: upscaler.py:421
 msgid "Upscaling single video file: {}"
 msgstr ""
 
-#: upscaler.py:454 upscaler.py:517
+#: upscaler.py:443 upscaler.py:502
 msgid "Starting to upscale extracted images"
 msgstr ""
 
-#: upscaler.py:463 upscaler.py:519
+#: upscaler.py:448 upscaler.py:504
 msgid "Upscaling completed"
 msgstr ""
 
-#: upscaler.py:472
+#: upscaler.py:457
 msgid "Reading video information"
 msgstr ""
 
-#: upscaler.py:486
+#: upscaler.py:471
 msgid "Aborting: No video stream found"
 msgstr ""
 
-#: upscaler.py:504
+#: upscaler.py:490
 msgid "Unsupported pixel format: {}"
 msgstr ""
 
-#: upscaler.py:507
+#: upscaler.py:493
 msgid "Framerate: {}"
 msgstr ""
 
-#: upscaler.py:522
+#: upscaler.py:507
 msgid "Converting extracted frames into video"
 msgstr ""
 
-#: upscaler.py:529
+#: upscaler.py:514
 msgid "Conversion completed"
 msgstr ""
 
-#: upscaler.py:533
+#: upscaler.py:518
 msgid "Migrating audio, subtitles and other streams to upscaled video"
 msgstr ""
 
-#: upscaler.py:542
+#: upscaler.py:527
 msgid "Failed to migrate streams"
 msgstr ""
 
-#: upscaler.py:543
+#: upscaler.py:528
 msgid "Trying to output video without additional streams"
 msgstr ""
 
-#: upscaler.py:550
+#: upscaler.py:535
 msgid "Output video file exists, aborting"
 msgstr ""
 
-#: upscaler.py:554
+#: upscaler.py:539
 msgid "Writing intermediate file to: {}"
 msgstr ""
 
@@ -205,7 +205,7 @@ msgid ""
 msgstr ""
 
 #: video2x.py:106
-msgid "General Options"
+msgid "Video2X Options"
 msgstr ""
 
 #: video2x.py:107
@@ -225,42 +225,38 @@ msgid "video2x config file path"
 msgstr ""
 
 #: video2x.py:112
-msgid "upscaling driver"
-msgstr ""
-
-#: video2x.py:113
-msgid "number of processes to use for upscaling"
-msgstr ""
-
-#: video2x.py:114
 msgid "display version, lawful information and exit"
 msgstr ""
 
+#: video2x.py:115
+msgid "Upscaling Options"
+msgstr ""
+
+#: video2x.py:116
+msgid "upscaling driver"
+msgstr ""
+
 #: video2x.py:117
-msgid "Scaling Options"
-msgstr ""
-
-#: video2x.py:118
-msgid "output video width"
-msgstr ""
-
-#: video2x.py:119
-msgid "output video height"
-msgstr ""
-
-#: video2x.py:120
 msgid "scaling ratio"
 msgstr ""
 
-#: video2x.py:160
+#: video2x.py:118
+msgid "number of processes to use for upscaling"
+msgstr ""
+
+#: video2x.py:119
+msgid "preserve extracted and upscaled frames"
+msgstr ""
+
+#: video2x.py:159
 msgid "This file cannot be imported"
 msgstr ""
 
-#: video2x.py:225
+#: video2x.py:229
 msgid "Program completed, taking {} seconds"
 msgstr ""
 
-#: video2x.py:228
+#: video2x.py:232
 msgid "An exception has occurred"
 msgstr ""
 
