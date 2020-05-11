@@ -98,8 +98,9 @@ If you can't find a video clip to begin with, or if you want to see a before-aft
 
 *Sample Upscale Videos*
 
-- [Sample Video Original (240P) 1.7MB](https://files.k4yt3x.com/Resources/Videos/sample_input.mp4)
-- [Sample Video Upscaled (1080P) 4.8MB](https://files.k4yt3x.com/Resources/Videos/sample_output.mp4)
+- [Sample Video (240P) 4.54MB](https://files.k4yt3x.com/Resources/Videos/sample_input.mp4)
+- [Sample Video Upscaled (1080P) 4.54MB](https://files.k4yt3x.com/Resources/Videos/sample_output.mp4)
+- [Sample Video Original (1080P) 22.2MB](https://files.k4yt3x.com/Resources/Videos/sample_original.mp4)
 
 Clip is from anime "さくら荘のペットな彼女". Copyright belongs to "株式会社アニプレックス (Aniplex Inc.)". Will delete immediately if use of clip is in violation of copyright.
 
