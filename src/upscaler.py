@@ -479,7 +479,7 @@ class Upscaler:
                     framerate = float(Fraction(video_info['streams'][video_stream_index]['r_frame_rate']))
                     fm.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
 
-                    if self.driver == 'waifu2x-caffe':
+                    if self.driver == 'waifu2x_caffe':
                         # get a dict of all pixel formats and corresponding bit depth
                         pixel_formats = fm.get_pixel_formats()
 
