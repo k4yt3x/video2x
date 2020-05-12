@@ -1,0 +1,44 @@
+name: Video2X Build Binaries
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          if [ -f src/requirements.txt ]; then pip install -r src/requirements.txt; fi
+      - name: Build Video2X CLI
+        run: |
+          pyinstaller --noconfirm --log-level=WARN \
+              --onefile \
+              --add-data="wrappers;wrappers" \
+              --icon="images\video2x.ico" \
+              src/video2x.py
+      - name: Build Video2X GUI
+        run: |
+          pyinstaller --noconfirm --log-level=WARN \
+              --onefile \
+              --add-data="images;images" \
+              --add-data="locale;locale" \
+              --add-data="video2x_gui.ui;." \
+              --add-data="wrappers;wrappers" \
+              --icon="images\video2x.ico" \
+              src/video2x_gui.py
+      - name: Build Video2X Setup Script
+        run: |
+          pyinstaller --noconfirm --log-level=WARN \
+              --onefile \
+              --icon="images\video2x.ico" \
+              src/video2x_setup.py
