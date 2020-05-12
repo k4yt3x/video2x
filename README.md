@@ -1,5 +1,5 @@
 <p align="center">
-   <img src="https://user-images.githubusercontent.com/21986859/81489504-c7d1f780-9265-11ea-86c8-cc0316e2082d.png"/>
+   <img src="https://user-images.githubusercontent.com/21986859/81626588-ae5ab800-93eb-11ea-918f-ebe98c2de40a.png"/>
 </p>
 
 ![Master Branch Version](https://img.shields.io/badge/master-v4.0.0-9cf?style=flat-square)
