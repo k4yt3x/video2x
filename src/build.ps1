@@ -48,7 +48,6 @@ pyinstaller --noconfirm --log-level=WARN `
 Write-Host -ForegroundColor White "`nBuilding Video2X setup script"
 pyinstaller --noconfirm --log-level=WARN `
     --onefile `
-    --hidden-import=patool `
     --icon="images\video2x.ico" `
     video2x_setup.py
 

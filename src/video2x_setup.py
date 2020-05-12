@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: May 8, 2020
+Last Modified: May 12, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -217,7 +217,7 @@ class Video2xSetup:
         """
         print('\nInstalling Anime4KCPP')
 
-        import pyunpack
+        import patoolib
         import requests
 
         # get latest release of Anime4KCPP via Github API
@@ -227,13 +227,14 @@ class Video2xSetup:
 
         for a in latest_release['assets']:
             if re.search(r'Anime4KCPP_CLI-.*-Win64-msvc\.7z', a['browser_download_url']):
-                anime4kcpp_zip = download(a['browser_download_url'], tempfile.gettempdir())
-                self.trash.append(anime4kcpp_zip)
+                anime4kcpp_7z = download(a['browser_download_url'], tempfile.gettempdir())
+                self.trash.append(anime4kcpp_7z)
 
-        # extract and rename
-        # with py7zr.SevenZipFile(anime4kcpp_zip, mode='r') as archive:
-        (LOCALAPPDATA / 'video2x' / 'anime4kcpp').mkdir(parents=True, exist_ok=True)
-        pyunpack.Archive(anime4kcpp_zip).extractall(LOCALAPPDATA / 'video2x' / 'anime4kcpp')
+        # (LOCALAPPDATA / 'video2x' / 'anime4kcpp').mkdir(parents=True, exist_ok=True)
+        # pyunpack.Archive(anime4kcpp_7z).extractall(LOCALAPPDATA / 'video2x' / 'anime4kcpp')
+        if (LOCALAPPDATA / 'video2x' / 'anime4kcpp').exists():
+            shutil.rmtree(LOCALAPPDATA / 'video2x' / 'anime4kcpp')
+        patoolib.extract_archive(str(anime4kcpp_7z), outdir=str(LOCALAPPDATA / 'video2x' / 'anime4kcpp'))
 
     def _install_srmd_ncnn_vulkan(self):
         """ Install srmd-ncnn-vulkan
