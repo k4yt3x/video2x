@@ -87,12 +87,12 @@ The list is sorted from new to old.
 
 ### Video2X GUI
 
-![GUI Preview](https://user-images.githubusercontent.com/21986859/81546668-3bf5c380-936a-11ea-9583-c969ea0d862b.png)\
+![GUI Preview](https://user-images.githubusercontent.com/21986859/81662226-cacb1480-942c-11ea-831f-2f0827f9cd11.png)\
 *Video2X GUI Screenshot*
 
 ### Video2X CLI
 
-![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81039711-4fe88380-8e99-11ea-9846-175f72100a76.png)\
+![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81662415-0c5bbf80-942d-11ea-8aa6-aacf813f9368.png)\
 *Video2X CLI Screenshot*
 
 ---
