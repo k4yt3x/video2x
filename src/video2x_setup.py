@@ -43,7 +43,7 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '2.0.0'
+VERSION = '2.0.1'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
@@ -229,6 +229,11 @@ class Video2xSetup:
             if re.search(r'Anime4KCPP_CLI-.*-Win64-msvc\.7z', a['browser_download_url']):
                 anime4kcpp_7z = download(a['browser_download_url'], tempfile.gettempdir())
                 self.trash.append(anime4kcpp_7z)
+
+        # if running in PyInstaller, add sys._MEIPASS\7z to path
+        # this directory contains 7za.exe and its DLL files
+        with contextlib.suppress(AttributeError):
+            os.environ['PATH'] += f';{sys._MEIPASS}\\7z'
 
         # (LOCALAPPDATA / 'video2x' / 'anime4kcpp').mkdir(parents=True, exist_ok=True)
         # pyunpack.Archive(anime4kcpp_7z).extractall(LOCALAPPDATA / 'video2x' / 'anime4kcpp')

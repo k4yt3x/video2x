@@ -44,6 +44,8 @@ jobs:
         run: |
           pyinstaller --noconfirm --log-level=WARN `
               --onefile `
+              --additional-hooks-dir "pyinstaller\hooks" `
+              --add-data="pyinstaller\7z1900-extra;7z" `
               --icon="images\video2x.ico" `
               video2x_setup.py
       - name: Collect artifacts into folder
