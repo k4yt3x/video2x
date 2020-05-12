@@ -608,9 +608,9 @@ class Upscaler:
                                 output_video_path = temporary_directory / output_file_name
                                 Avalon.info(_('Created temporary directory to contain file'))
 
-                            # copy file to new destination
+                            # move file to new destination
                             Avalon.info(_('Writing intermediate file to: {}').format(output_video_path.absolute()))
-                            shutil.copy(self.upscaled_frames / self.ffmpeg_object.intermediate_file_name, output_video_path)
+                            shutil.move(self.upscaled_frames / self.ffmpeg_object.intermediate_file_name, output_video_path)
 
                 # increment total number of files processed
                 self.cleanup_temp_directories()
