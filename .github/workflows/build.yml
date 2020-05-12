@@ -57,4 +57,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: nightly-light
-          path: nightly-light/
+          path: src/nightly-light/
