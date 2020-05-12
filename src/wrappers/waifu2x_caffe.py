@@ -56,8 +56,8 @@ class WrapperMain:
         parser.add_argument('-m', '--mode', choices=['noise', 'scale', 'noise_scale', 'auto_scale'], help='image processing mode')
         parser.add_argument('-e', '--output_extention', type=str, help='extention to output image file when output_path is (auto) or input_path is folder')
         parser.add_argument('-l', '--input_extention_list', type=str, help='extention to input image file when input_path is folder')
-        parser.add_argument('-o', '--output', type=str, help=argparse.SUPPRESS)  # help='path to output image file (when input_path is folder, output_path must be folder)')
-        parser.add_argument('-i', '--input_file', type=str, help=argparse.SUPPRESS)  # help='(required) path to input image file')
+        parser.add_argument('-o', '--output_path', type=str, help=argparse.SUPPRESS)  # help='path to output image file (when input_path is folder, output_path must be folder)')
+        parser.add_argument('-i', '--input_path', type=str, help=argparse.SUPPRESS)  # help='(required) path to input image file')
         return parser.parse_args(arguments)
 
     def load_configurations(self, upscaler):
@@ -79,14 +79,14 @@ class WrapperMain:
 
         # list to be executed
         # initialize the list with waifu2x binary path as the first element
-        execute = [self.driver_settings.pop('path')]
+        execute = [self.driver_settings['path']]
 
         for key in self.driver_settings.keys():
 
             value = self.driver_settings[key]
 
             # null or None means that leave this option out (keep default)
-            if value is None or value is False:
+            if key == 'path' or value is None or value is False:
                 continue
             else:
                 if len(key) == 1:

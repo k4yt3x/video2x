@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 10, 2020
+Last Modified: May 11, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -16,6 +16,7 @@ from exceptions import *
 from image_cleaner import ImageCleaner
 from progress_monitor import ProgressMonitor
 from wrappers.ffmpeg import Ffmpeg
+from wrappers.gifski import Gifski
 
 # built-in imports
 from fractions import Fraction
@@ -24,7 +25,6 @@ import copy
 import gettext
 import importlib
 import locale
-import os
 import pathlib
 import queue
 import re
@@ -36,6 +36,7 @@ import traceback
 
 # third-party imports
 from avalon_framework import Avalon
+import magic
 
 # internationalization constants
 DOMAIN = 'video2x'
@@ -67,12 +68,13 @@ class Upscaler:
         ArgumentError -- if argument is not valid
     """
 
-    def __init__(self, input_path, output_path, driver_settings, ffmpeg_settings):
+    def __init__(self, input_path, output_path, driver_settings, ffmpeg_settings, gifski_settings):
         # mandatory arguments
         self.input = input_path
         self.output = output_path
         self.driver_settings = driver_settings
         self.ffmpeg_settings = ffmpeg_settings
+        self.gifski_settings = gifski_settings
 
         # optional arguments
         self.driver = 'waifu2x_caffe'
@@ -86,9 +88,9 @@ class Upscaler:
         self.running = False
         self.total_frames_upscaled = 0
         self.total_frames = 0
-        self.total_videos = 0
+        self.total_files = 0
         self.total_processed = 0
-        self.current_input_video = pathlib.Path()
+        self.current_input_file = pathlib.Path()
         self.last_frame_upscaled = pathlib.Path()
 
     def create_temp_directories(self):
@@ -154,10 +156,10 @@ class Upscaler:
                 Avalon.error(_('Input and output path type mismatch'))
                 Avalon.error(_('Input is single file but output is directory'))
                 raise ArgumentError('input output path type mismatch')
-            if not re.search(r'.*\..*$', str(self.output)):
+            if self.output.suffix == '':
                 Avalon.error(_('No suffix found in output file path'))
-                Avalon.error(_('Suffix must be specified for FFmpeg'))
-                raise ArgumentError('no output video suffix specified')
+                Avalon.error(_('Suffix must be specified'))
+                raise ArgumentError('no output file suffix specified')
 
         # if input is a directory
         elif self.input.is_dir():
@@ -237,6 +239,14 @@ class Upscaler:
             else:
                 self.driver_settings['scale_width'] = None
                 self.driver_settings['scale_height'] = None
+
+        # temporary file type check for Anime4KCPP
+        # it doesn't support GIF processing yet
+        if self.driver == 'anime4kcpp':
+            for task in self.processing_queue.queue:
+                if task[0].suffix.lower() == '.gif':
+                    Avalon.error(_('Anime4KCPP doesn\'t yet support GIF processing'))
+                    raise AttributeError('Anime4KCPP doesn\'t yet support GIF file processing')
 
     def _upscale_frames(self):
         """ Upscale video frames with waifu2x-caffe
@@ -393,9 +403,8 @@ class Upscaler:
         # load options from upscaler class into driver settings
         self.driver_object.load_configurations(self)
 
-        # parse arguments for waifu2x
-        # check argument sanity
-        self._check_arguments()
+        # initialize FFmpeg object
+        self.ffmpeg_object = Ffmpeg(self.ffmpeg_settings, self.image_format)
 
         # define processing queue
         self.processing_queue = queue.Queue()
@@ -408,17 +417,17 @@ class Upscaler:
             for input_path in self.input:
 
                 if input_path.is_file():
-                    output_video = self.output / input_path.name
-                    self.processing_queue.put((input_path.absolute(), output_video.absolute()))
+                    output_path = self.output / input_path.name
+                    self.processing_queue.put((input_path.absolute(), output_path.absolute()))
 
                 elif input_path.is_dir():
-                    for input_video in [f for f in input_path.iterdir() if f.is_file()]:
-                        output_video = self.output / input_video.name
-                        self.processing_queue.put((input_video.absolute(), output_video.absolute()))
+                    for input_path in [f for f in input_path.iterdir() if f.is_file()]:
+                        output_path = self.output / input_path.name
+                        self.processing_queue.put((input_path.absolute(), output_path.absolute()))
 
         # if input specified is single file
         elif self.input.is_file():
-            Avalon.info(_('Upscaling single video file: {}').format(self.input))
+            Avalon.info(_('Upscaling single file: {}').format(self.input))
             self.processing_queue.put((self.input.absolute(), self.output.absolute()))
 
         # if input specified is a directory
@@ -426,99 +435,147 @@ class Upscaler:
 
             # make output directory if it doesn't exist
             self.output.mkdir(parents=True, exist_ok=True)
-            for input_video in [f for f in self.input.iterdir() if f.is_file()]:
-                output_video = self.output / input_video.name
-                self.processing_queue.put((input_video.absolute(), output_video.absolute()))
+            for input_path in [f for f in self.input.iterdir() if f.is_file()]:
+                output_path = self.output / input_path.name
+                self.processing_queue.put((input_path.absolute(), output_path.absolute()))
 
-        # record video count for external calls
-        self.total_videos = self.processing_queue.qsize()
+        # check argument sanity before running
+        self._check_arguments()
 
-        while not self.processing_queue.empty():
-            self.current_input_video, output_video = self.processing_queue.get()
-            # drivers that have native support for video processing
-            if self.driver == 'anime4kcpp':
-                # append FFmpeg path to the end of PATH
-                # Anime4KCPP will then use FFmpeg to migrate audio tracks
-                os.environ['PATH'] += f';{self.ffmpeg_settings["ffmpeg_path"]}'
-                Avalon.info(_('Starting to upscale extracted images'))
+        # record file count for external calls
+        self.total_files = self.processing_queue.qsize()
 
-                # run Anime4KCPP
-                self.process_pool.append(self.driver_object.upscale(self.current_input_video, output_video))
-                self._wait()
-                Avalon.info(_('Upscaling completed'))
+        try:
+            while not self.processing_queue.empty():
 
-            else:
-                try:
-                    self.create_temp_directories()
+                # reset current processing progress for new job
+                self.total_frames_upscaled = 0
+                self.total_frames = 0
 
-                    # initialize objects for ffmpeg and waifu2x-caffe
-                    fm = Ffmpeg(self.ffmpeg_settings, self.image_format)
+                # get new job from queue
+                self.current_input_file, output_path = self.processing_queue.get()
 
-                    Avalon.info(_('Reading video information'))
-                    video_info = fm.get_video_info(self.current_input_video)
-                    # analyze original video with FFprobe and retrieve framerate
-                    # width, height = info['streams'][0]['width'], info['streams'][0]['height']
+                # get file type
+                input_file_mime_type = magic.from_file(str(self.current_input_file.absolute()), mime=True)
+                input_file_type = input_file_mime_type.split('/')[0]
+                input_file_subtype = input_file_mime_type.split('/')[1]
 
-                    # find index of video stream
-                    video_stream_index = None
-                    for stream in video_info['streams']:
-                        if stream['codec_type'] == 'video':
-                            video_stream_index = stream['index']
-                            break
-
-                    # exit if no video stream found
-                    if video_stream_index is None:
-                        Avalon.error(_('Aborting: No video stream found'))
-                        raise StreamNotFoundError('no video stream found')
-
-                    # extract frames from video
-                    self.process_pool.append((fm.extract_frames(self.current_input_video, self.extracted_frames)))
+                # start handling input
+                # if input file is a static image
+                if input_file_type == 'image' and input_file_subtype != 'gif':
+                    Avalon.info(_('Starting to upscale image'))
+                    self.process_pool.append(self.driver_object.upscale(self.current_input_file, output_path))
                     self._wait()
-
-                    # get average frame rate of video stream
-                    framerate = float(Fraction(video_info['streams'][video_stream_index]['r_frame_rate']))
-                    fm.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
-
-                    if self.driver == 'waifu2x_caffe':
-                        # get a dict of all pixel formats and corresponding bit depth
-                        pixel_formats = fm.get_pixel_formats()
-
-                        # try getting pixel format's corresponding bti depth
-                        try:
-                            self.driver_settings['output_depth'] = pixel_formats[fm.pixel_format]
-                        except KeyError:
-                            Avalon.error(_('Unsupported pixel format: {}').format(fm.pixel_format))
-                            raise UnsupportedPixelError(f'unsupported pixel format {fm.pixel_format}')
-
-                    Avalon.info(_('Framerate: {}').format(framerate))
-
-                    # width/height will be coded width/height x upscale factor
-                    original_width = video_info['streams'][video_stream_index]['width']
-                    original_height = video_info['streams'][video_stream_index]['height']
-                    scale_width = int(self.scale_ratio * original_width)
-                    scale_height = int(self.scale_ratio * original_height)
-
-                    # upscale images one by one using waifu2x
-                    Avalon.info(_('Starting to upscale extracted images'))
-                    self._upscale_frames()
                     Avalon.info(_('Upscaling completed'))
 
-                    # frames to Video
-                    Avalon.info(_('Converting extracted frames into video'))
+                    # static images don't require GIF or video encoding
+                    # go to the next task
+                    self.processing_queue.task_done()
+                    self.total_processed += 1
+                    continue
 
-                    # use user defined output size
-                    self.process_pool.append(fm.assemble_video(framerate,
-                                                               f'{scale_width}x{scale_height}',
-                                                               self.upscaled_frames))
+                # if input file is a image/gif file or a video
+                elif input_file_mime_type == 'image/gif' or input_file_type == 'video':
+
+                    # drivers that have native support for video processing
+                    if input_file_type == 'video' and self.driver == 'anime4kcpp':
+                        Avalon.info(_('Starting to upscale video with Anime4KCPP'))
+                        # enable video processing mode for Anime4KCPP
+                        self.driver_settings['videoMode'] = True
+                        self.process_pool.append(self.driver_object.upscale(self.current_input_file, output_path))
+                        self._wait()
+                        Avalon.info(_('Upscaling completed'))
+
+                    else:
+                        self.create_temp_directories()
+
+                        # get video information JSON using FFprobe
+                        Avalon.info(_('Reading video information'))
+                        video_info = self.ffmpeg_object.probe_file_info(self.current_input_file)
+                        # analyze original video with FFprobe and retrieve framerate
+                        # width, height = info['streams'][0]['width'], info['streams'][0]['height']
+
+                        # find index of video stream
+                        video_stream_index = None
+                        for stream in video_info['streams']:
+                            if stream['codec_type'] == 'video':
+                                video_stream_index = stream['index']
+                                break
+
+                        # exit if no video stream found
+                        if video_stream_index is None:
+                            Avalon.error(_('Aborting: No video stream found'))
+                            raise StreamNotFoundError('no video stream found')
+
+                        # get average frame rate of video stream
+                        framerate = float(Fraction(video_info['streams'][video_stream_index]['r_frame_rate']))
+                        # self.ffmpeg_object.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
+
+                        # extract frames from video
+                        self.process_pool.append((self.ffmpeg_object.extract_frames(self.current_input_file, self.extracted_frames)))
+                        self._wait()
+
+                        # if driver is waifu2x-caffe
+                        # pass pixel format output depth information
+                        if self.driver == 'waifu2x_caffe':
+                            # get a dict of all pixel formats and corresponding bit depth
+                            pixel_formats = self.ffmpeg_object.get_pixel_formats()
+
+                            # try getting pixel format's corresponding bti depth
+                            try:
+                                self.driver_settings['output_depth'] = pixel_formats[self.ffmpeg_object.pixel_format]
+                            except KeyError:
+                                Avalon.error(_('Unsupported pixel format: {}').format(self.ffmpeg_object.pixel_format))
+                                raise UnsupportedPixelError(f'unsupported pixel format {self.ffmpeg_object.pixel_format}')
+
+                        Avalon.info(_('Framerate: {}').format(framerate))
+
+                        # width/height will be coded width/height x upscale factor
+                        # original_width = video_info['streams'][video_stream_index]['width']
+                        # original_height = video_info['streams'][video_stream_index]['height']
+                        # scale_width = int(self.scale_ratio * original_width)
+                        # scale_height = int(self.scale_ratio * original_height)
+
+                        # upscale images one by one using waifu2x
+                        Avalon.info(_('Starting to upscale extracted frames'))
+                        self._upscale_frames()
+                        Avalon.info(_('Upscaling completed'))
+
+                # if file is none of: image, image/gif, video
+                # skip to the next task
+                else:
+                    Avalon.error(_('File {} ({}) neither an image of a video').format(self.current_input_file, input_file_mime_type))
+                    Avalon.warning(_('Skipping this file'))
+                    self.processing_queue.task_done()
+                    self.total_processed += 1
+                    continue
+
+                # start handling output
+                # output can be either GIF or video
+
+                # if the desired output is gif file
+                if output_path.suffix.lower() == '.gif':
+                    Avalon.info(_('Converting extracted frames into GIF image'))
+                    gifski_object = Gifski(self.gifski_settings)
+                    self.process_pool.append(gifski_object.make_gif(self.upscaled_frames, output_path, framerate, self.image_format))
+                    self._wait()
+                    Avalon.info(_('Conversion completed'))
+
+                # if the desired output is video
+                else:
+                    # frames to video
+                    Avalon.info(_('Converting extracted frames into video'))
+                    self.process_pool.append(self.ffmpeg_object.assemble_video(framerate, self.upscaled_frames))
+                    # f'{scale_width}x{scale_height}',
                     self._wait()
                     Avalon.info(_('Conversion completed'))
 
                     try:
                         # migrate audio tracks and subtitles
                         Avalon.info(_('Migrating audio, subtitles and other streams to upscaled video'))
-                        self.process_pool.append(fm.migrate_streams(self.current_input_video,
-                                                                    output_video,
-                                                                    self.upscaled_frames))
+                        self.process_pool.append(self.ffmpeg_object.migrate_streams(self.current_input_file,
+                                                                                    output_path,
+                                                                                    self.upscaled_frames))
                         self._wait()
 
                     # if failed to copy streams
@@ -527,29 +584,32 @@ class Upscaler:
                         Avalon.error(_('Failed to migrate streams'))
                         Avalon.warning(_('Trying to output video without additional streams'))
 
-                        # construct output file path
-                        output_video_path = output_video.parent / f'{output_video.stem}{fm.intermediate_file_name.suffix}'
+                        if input_file_mime_type == 'image/gif':
+                            (self.upscaled_frames / self.ffmpeg_object.intermediate_file_name).replace(output_path)
 
-                        # if output file already exists, cancel
-                        if output_video_path.exists():
-                            Avalon.error(_('Output video file exists, aborting'))
-
-                        # otherwise, rename intermediate file to the output file
                         else:
-                            Avalon.info(_('Writing intermediate file to: {}').format(output_video_path.absolute()))
-                            (self.upscaled_frames / fm.intermediate_file_name).rename(output_video_path)
+                            # construct output file path
+                            output_video_path = output_path.parent / f'{output_path.stem}{self.ffmpeg_object.intermediate_file_name.suffix}'
 
-                    # destroy temp directories
-                    self.cleanup_temp_directories()
+                            # if output file already exists, cancel
+                            if output_video_path.exists():
+                                Avalon.error(_('Output video file exists, aborting'))
 
-                except (Exception, KeyboardInterrupt, SystemExit) as e:
-                    with contextlib.suppress(ValueError):
-                        self.cleanup_temp_directories()
-                        self.running = False
-                    raise e
+                            # otherwise, rename intermediate file to the output file
+                            else:
+                                Avalon.info(_('Writing intermediate file to: {}').format(output_video_path.absolute()))
+                                (self.upscaled_frames / self.ffmpeg_object.intermediate_file_name).rename(output_video_path)
 
-            # increment total number of videos processed
-            self.total_processed += 1
+                # increment total number of files processed
+                self.cleanup_temp_directories()
+                self.processing_queue.task_done()
+                self.total_processed += 1
+
+        except (Exception, KeyboardInterrupt, SystemExit) as e:
+            with contextlib.suppress(ValueError):
+                self.cleanup_temp_directories()
+                self.running = False
+            raise e
 
         # signal upscaling completion
         self.running = False

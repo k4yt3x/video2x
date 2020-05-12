@@ -31,6 +31,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import time
 import traceback
@@ -42,12 +43,19 @@ import zipfile
 # later in the script.
 # import requests
 
-VERSION = '1.8.0'
+VERSION = '2.0.0'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
 VIDEO2X_CONFIG = pathlib.Path(__file__).parent.absolute() / 'video2x.yaml'
-DRIVER_OPTIONS = ['all', 'ffmpeg', 'waifu2x_caffe', 'waifu2x_converter_cpp', 'waifu2x_ncnn_vulkan', 'anime4kcpp', 'srmd_ncnn_vulkan']
+DRIVER_OPTIONS = ['all',
+                  'ffmpeg',
+                  'gifski',
+                  'waifu2x_caffe',
+                  'waifu2x_converter_cpp',
+                  'waifu2x_ncnn_vulkan',
+                  'anime4kcpp',
+                  'srmd_ncnn_vulkan']
 
 
 def parse_arguments():
@@ -76,32 +84,21 @@ class Video2xSetup:
         self.trash = []
 
     def run(self):
+        # regardless of which driver to install
+        # always ensure Python modules are installed and up-to-date
         if self.download_python_modules:
             print('\nInstalling Python libraries')
             self._install_python_requirements()
 
+        # if all drivers are to be installed
         if self.driver == 'all':
-            self._install_ffmpeg()
-            self._install_waifu2x_caffe()
-            self._install_waifu2x_converter_cpp()
-            self._install_waifu2x_ncnn_vulkan()
-            self._install_anime4kcpp()
-            self._install_srmd_ncnn_vulkan()
-        elif self.driver == 'ffmpeg':
-            self._install_ffmpeg()
-        elif self.driver == 'waifu2x_caffe':
-            self._install_waifu2x_caffe()
-        elif self.driver == 'waifu2x_converter_cpp':
-            self._install_waifu2x_converter_cpp()
-        elif self.driver == 'waifu2x_ncnn_vulkan':
-            self._install_waifu2x_ncnn_vulkan()
-        elif self.driver == 'anime4kcpp':
-            self._install_anime4kcpp()
-        elif self.driver == 'srmd_ncnn_vulkan':
-            self._install_srmd_ncnn_vulkan()
+            DRIVER_OPTIONS.remove('all')
+            for driver in DRIVER_OPTIONS:
+                getattr(self, f'_install_{driver}')()
 
-        print('\nGenerating Video2X configuration file')
-        self._generate_config()
+        # install only the selected driver
+        else:
+            getattr(self, f'_install_{self.driver}')()
 
         print('\nCleaning up temporary files')
         self._cleanup()
@@ -138,6 +135,22 @@ class Video2xSetup:
 
         with zipfile.ZipFile(ffmpeg_zip) as zipf:
             zipf.extractall(LOCALAPPDATA / 'video2x')
+
+    def _install_gifski(self):
+        print('\nInstalling Gifski')
+        import requests
+
+        # Get latest release of waifu2x-ncnn-vulkan via Github API
+        latest_release = requests.get('https://api.github.com/repos/ImageOptim/gifski/releases/latest').json()
+
+        for a in latest_release['assets']:
+            if re.search(r'gifski-.*\.tar\.xz', a['browser_download_url']):
+                gifski_tar_gz = download(a['browser_download_url'], tempfile.gettempdir())
+                self.trash.append(gifski_tar_gz)
+
+        # extract and rename
+        with tarfile.open(gifski_tar_gz) as archive:
+            archive.extractall(LOCALAPPDATA / 'video2x' / 'gifski')
 
     def _install_waifu2x_caffe(self):
         """ Install waifu2x_caffe
@@ -247,42 +260,6 @@ class Video2xSetup:
 
             # rename the newly extracted directory
             (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(srmd_ncnn_vulkan_directory)
-
-    def _generate_config(self):
-        """ Generate video2x config
-        """
-        import yaml
-
-        # open current video2x configuration file as template
-        with open(VIDEO2X_CONFIG, 'r') as template:
-            template_dict = yaml.load(template, Loader=yaml.FullLoader)
-            template.close()
-
-        # configure only the specified drivers
-        if self.driver == 'all':
-            template_dict['waifu2x_caffe']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui')
-            template_dict['waifu2x_converter_cpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp' / 'waifu2x-converter-cpp')
-            template_dict['waifu2x_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan')
-            template_dict['srmd_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'srmd-ncnn-vulkan' / 'srmd-ncnn-vulkan')
-            template_dict['anime4kcpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'anime4kcpp' / 'CLI' / 'Anime4KCPP_CLI' / 'Anime4KCPP_CLI')
-        elif self.driver == 'waifu2x_caffe':
-            template_dict['waifu2x_caffe']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-caffe' / 'waifu2x-caffe-cui')
-        elif self.driver == 'waifu2x_converter_cpp':
-            template_dict['waifu2x_converter_cpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-converter-cpp' / 'waifu2x-converter-cpp')
-        elif self.driver == 'waifu2x_ncnn_vulkan':
-            template_dict['waifu2x_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'waifu2x-ncnn-vulkan' / 'waifu2x-ncnn-vulkan')
-        elif self.driver == 'srmd_ncnn_vulkan':
-            template_dict['srmd_ncnn_vulkan']['path'] = str(LOCALAPPDATA / 'video2x' / 'srmd-ncnn-vulkan' / 'srmd-ncnn-vulkan')
-        elif self.driver == 'anime4kcpp':
-            template_dict['anime4kcpp']['path'] = str(LOCALAPPDATA / 'video2x' / 'anime4kcpp' / 'CLI' / 'Anime4KCPP_CLI' / 'Anime4KCPP_CLI')
-
-        template_dict['ffmpeg']['ffmpeg_path'] = str(LOCALAPPDATA / 'video2x' / 'ffmpeg-latest-win64-static' / 'bin')
-        template_dict['video2x']['video2x_cache_directory'] = None
-        template_dict['video2x']['preserve_frames'] = False
-
-        # write configuration into file
-        with open(VIDEO2X_CONFIG, 'w') as config:
-            yaml.dump(template_dict, config)
 
 
 def download(url, save_path, chunk_size=4096):

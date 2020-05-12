@@ -69,6 +69,10 @@ class WrapperMain:
         self.driver_settings['zoomFactor'] = upscaler.scale_ratio
         self.driver_settings['threads'] = upscaler.processes
 
+        # append FFmpeg path to the end of PATH
+        # Anime4KCPP will then use FFmpeg to migrate audio tracks
+        os.environ['PATH'] += f';{upscaler.ffmpeg_settings["ffmpeg_path"]}'
+
     def upscale(self, input_file, output_file):
         """This is the core function for WAIFU2X class
 
@@ -90,14 +94,14 @@ class WrapperMain:
 
         # list to be executed
         # initialize the list with waifu2x binary path as the first element
-        execute = [self.driver_settings.pop('path')]
+        execute = [self.driver_settings['path']]
 
         for key in self.driver_settings.keys():
 
             value = self.driver_settings[key]
 
             # null or None means that leave this option out (keep default)
-            if value is None or value is False:
+            if key == 'path' or value is None or value is False:
                 continue
             else:
                 if len(key) == 1:

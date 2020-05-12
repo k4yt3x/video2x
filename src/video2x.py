@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 10, 2020
+Last Modified: May 11, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -181,6 +181,10 @@ driver_settings['path'] = os.path.expandvars(driver_settings['path'])
 ffmpeg_settings = config['ffmpeg']
 ffmpeg_settings['ffmpeg_path'] = os.path.expandvars(ffmpeg_settings['ffmpeg_path'])
 
+# read Gifski configuration
+gifski_settings = config['gifski']
+gifski_settings['gifski_path'] = os.path.expandvars(gifski_settings['gifski_path'])
+
 # load video2x settings
 image_format = config['video2x']['image_format'].lower()
 preserve_frames = config['video2x']['preserve_frames']
@@ -213,7 +217,8 @@ try:
     upscaler = Upscaler(input_path=video2x_args.input,
                         output_path=video2x_args.output,
                         driver_settings=driver_settings,
-                        ffmpeg_settings=ffmpeg_settings)
+                        ffmpeg_settings=ffmpeg_settings,
+                        gifski_settings=gifski_settings)
 
     # set upscaler optional options
     upscaler.driver = video2x_args.driver

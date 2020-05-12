@@ -3,6 +3,8 @@ colorama
 patool
 psutil
 pyqt5
+python-magic
+python-magic-bin
 pyunpack
 pyyaml
 requests

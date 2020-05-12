@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: May 9, 2020
+# Last Modified: May 11, 2020
 # Values here are the default values. Change the value here to
 #   save the default value permanently.
 # Items commented out are parameters irrelevant to this context
@@ -87,7 +87,7 @@ anime4kcpp:
   zoomFactor: 2.0 # zoom factor for resizing (double [=2])
   threads: 16 # Threads count for video processing (unsigned int [=16])
   fastMode: false # Faster but maybe low quality
-  videoMode: true # Video process
+  videoMode: false # Video process
   preview: null # Preview image
   preprocessing: False # Enable pre processing
   postprocessing: False # Enable post processing
@@ -101,9 +101,9 @@ anime4kcpp:
 ffmpeg:
   ffmpeg_path: '%LOCALAPPDATA%\video2x\ffmpeg-latest-win64-static\bin'
   intermediate_file_name: 'intermediate.mkv'
-  # step 1: extract all frames from original video
+  # step 1: extract all frames from original input
   # into temporary directory
-  video_to_frames:
+  input_to_frames:
     output_options:
       '-qscale:v': null
       '-pix_fmt': rgba64be
@@ -138,6 +138,17 @@ ffmpeg:
       '-metadata': 'comment=Upscaled by Video2X'
     '-hwaccel': auto
     '-y': true
+gifski:
+  gifski_path: '%LOCALAPPDATA%\video2x\gifski\win\gifski'
+  # output: null # Destination file to write to
+  # fps: 20 # Animation frames per second (for PNG frames only) [default: 20]
+  fast: false # 3 times faster encoding, but 10% lower quality and bigger file
+  quality: 100 # Lower quality may give smaller file
+  width: null # Maximum width
+  height: null # Maximum height (if width is also set)
+  once: false # Do not loop the GIF
+  nosort: false # Use files exactly in the order given, rather than sorted
+  quiet: false # Do not show a progress bar
 video2x:
   video2x_cache_directory: null # default: %TEMP%\video2x
   image_format: png

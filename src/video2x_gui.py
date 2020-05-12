@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 10, 2020
+Last Modified: May 11, 2020
 """
 
 # local imports
@@ -25,6 +25,7 @@ import yaml
 from PyQt5 import QtGui, uic
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+import magic
 # QObject, pyqtSlot, pyqtSignal, QRunnable, QThreadPool, QAbstractTableModel, Qt
 
 VERSION = '2.0.0'
@@ -110,13 +111,34 @@ class InputTableModel(QAbstractTableModel):
     def data(self, index, role):
         if role == Qt.DisplayRole:
 
+            file_path = self._data[index.row()]
+
             if index.column() == 0:
-                return str(self._data[index.row()].absolute())
+                return str(file_path.absolute())
             else:
-                if self._data[index.row()].is_file():
-                    return 'File'
-                elif self._data[index.row()].is_dir():
+
+                # determine file type
+                # if path is a folder
+                if file_path.is_dir():
                     return 'Folder'
+
+                # if path is single file
+                # determine file type
+                elif file_path.is_file():
+                    input_file_mime_type = magic.from_file(str(file_path.absolute()), mime=True)
+                    input_file_type = input_file_mime_type.split('/')[0]
+                    input_file_subtype = input_file_mime_type.split('/')[1]
+                    if input_file_type == 'image':
+                        if input_file_subtype == 'gif':
+                            return 'GIF'
+                        return 'Image'
+
+                    elif input_file_type == 'video':
+                        return 'Video'
+
+                    else:
+                        return 'Unknown'
+
                 else:
                     return 'Unknown'
 
@@ -373,6 +395,10 @@ class Video2XMainWindow(QMainWindow):
         self.ffmpeg_settings = self.config['ffmpeg']
         self.ffmpeg_settings['ffmpeg_path'] = str(pathlib.Path(os.path.expandvars(self.ffmpeg_settings['ffmpeg_path'])).absolute())
 
+        # read Gifski configuration
+        self.gifski_settings = self.config['gifski']
+        self.gifski_settings['gifski_path'] = str(pathlib.Path(os.path.expandvars(self.gifski_settings['gifski_path'])).absolute())
+
         # set cache directory path
         if self.config['video2x']['video2x_cache_directory'] is None:
             self.config['video2x']['video2x_cache_directory'] = str((pathlib.Path(tempfile.gettempdir()) / 'video2x').absolute())
@@ -585,7 +611,34 @@ class Video2XMainWindow(QMainWindow):
             return
 
         if input_path.is_file():
-            output_path = input_path.parent / f'{input_path.stem}_output.mp4'
+
+            # generate suffix automatically
+            input_file_mime_type = magic.from_file(str(input_path.absolute()), mime=True)
+            input_file_type = input_file_mime_type.split('/')[0]
+            input_file_subtype = input_file_mime_type.split('/')[1]
+
+            # if input file is an image
+            if input_file_type == 'image':
+
+                # if file is a gif, use .gif
+                if input_file_subtype == 'gif':
+                    suffix = '.gif'
+
+                # otherwise, use .png by default for all images
+                else:
+                    suffix = '.png'
+
+            # if input is video, use .mp4 as output by default
+            elif input_file_type == 'video':
+                suffix = '.mp4'
+
+            # if failed to detect file type
+            # use input file's suffix
+            else:
+                suffix = input_path.suffix
+
+            output_path = input_path.parent / f'{input_path.stem}_output{suffix}'
+
         elif input_path.is_dir():
             output_path = input_path.parent / f'{input_path.stem}_output'
 
@@ -593,7 +646,7 @@ class Video2XMainWindow(QMainWindow):
         output_path_id = 0
         while output_path.exists() and output_path_id <= 1000:
             if input_path.is_file():
-                output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_path_id}.mp4')
+                output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_path_id}{suffix}')
             elif input_path.is_dir():
                 output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_path_id}')
             output_path_id += 1
@@ -693,8 +746,8 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
                                     self.upscaler.total_frames_upscaled,
                                     self.upscaler.total_frames,
                                     self.upscaler.total_processed,
-                                    self.upscaler.total_videos,
-                                    self.upscaler.current_input_video,
+                                    self.upscaler.total_files,
+                                    self.upscaler.current_input_file,
                                     self.upscaler.last_frame_upscaled))
             time.sleep(1)
 
@@ -707,8 +760,8 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
         total_frames_upscaled = progress_information[1]
         total_frames = progress_information[2]
         total_processed = progress_information[3]
-        total_videos = progress_information[4]
-        current_input_video = progress_information[5]
+        total_files = progress_information[4]
+        current_input_file = progress_information[5]
         last_frame_upscaled = progress_information[6]
 
         # calculate fields based on frames and time elapsed
@@ -727,10 +780,10 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
         self.time_elapsed_label.setText('Time Elapsed: {}'.format(time.strftime("%H:%M:%S", time.gmtime(time_elapsed))))
         self.time_remaining_label.setText('Time Remaining: {}'.format(time.strftime("%H:%M:%S", time.gmtime(time_remaining))))
         self.rate_label.setText('Rate (FPS): {}'.format(round(rate, 2)))
-        self.overall_progress_label.setText('Overall Progress: {}/{}'.format(total_processed, total_videos))
-        self.overall_progress_bar.setMaximum(total_videos)
+        self.overall_progress_label.setText('Overall Progress: {}/{}'.format(total_processed, total_files))
+        self.overall_progress_bar.setMaximum(total_files)
         self.overall_progress_bar.setValue(total_processed)
-        self.currently_processing_label.setText('Currently Processing: {}'.format(str(current_input_video.name)))
+        self.currently_processing_label.setText('Currently Processing: {}'.format(str(current_input_file.name)))
 
         # if show frame is checked, show preview image
         if self.frame_preview_show_preview_check_box.isChecked() and last_frame_upscaled.is_file():
@@ -798,7 +851,8 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
             self.upscaler = Upscaler(input_path=input_directory,
                                      output_path=output_directory,
                                      driver_settings=self.driver_settings,
-                                     ffmpeg_settings=self.ffmpeg_settings)
+                                     ffmpeg_settings=self.ffmpeg_settings,
+                                     gifski_settings=self.gifski_settings)
 
             # set optional options
             self.upscaler.driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]

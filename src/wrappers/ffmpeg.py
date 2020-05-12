@@ -12,6 +12,7 @@ Description: This class handles all FFmpeg related operations.
 # built-in imports
 import json
 import pathlib
+import shlex
 import subprocess
 
 # third-party imports
@@ -36,7 +37,7 @@ class Ffmpeg:
         # video metadata
         self.image_format = image_format
         self.intermediate_file_name = pathlib.Path(self.ffmpeg_settings['intermediate_file_name'])
-        self.pixel_format = None
+        self.pixel_format = self.ffmpeg_settings['input_to_frames']['output_options']['-pix_fmt']
 
     def get_pixel_formats(self):
         """ Get a dictionary of supported pixel formats
@@ -49,8 +50,8 @@ class Ffmpeg:
         """
         execute = [
             self.ffmpeg_probe_binary,
-            '-v',
-            'quiet',
+            # '-v',
+            # 'quiet',
             '-pix_fmts'
         ]
 
@@ -74,7 +75,7 @@ class Ffmpeg:
 
         return pixel_formats
 
-    def get_video_info(self, input_video):
+    def probe_file_info(self, input_video):
         """ Gets input video information
 
         This method reads input video information
@@ -104,31 +105,25 @@ class Ffmpeg:
         # turn elements into str
         execute = [str(e) for e in execute]
 
-        Avalon.debug_info(f'Executing: {" ".join(execute)}')
+        Avalon.debug_info(f'Executing: {shlex.join(execute)}')
         json_str = subprocess.run(execute, check=True, stdout=subprocess.PIPE).stdout
         return json.loads(json_str.decode('utf-8'))
 
-    def extract_frames(self, input_video, extracted_frames):
-        """Extract every frame from original videos
-
-        This method extracts every frame from input video using FFmpeg
-
-        Arguments:
-            input_video {string} -- input video path
-            extracted_frames {string} -- video output directory
+    def extract_frames(self, input_file, extracted_frames):
+        """ extract frames from video or GIF file
         """
         execute = [
             self.ffmpeg_binary
         ]
 
-        execute.extend(self._read_configuration(phase='video_to_frames'))
+        execute.extend(self._read_configuration(phase='input_to_frames'))
 
         execute.extend([
             '-i',
-            input_video
+            input_file
         ])
 
-        execute.extend(self._read_configuration(phase='video_to_frames', section='output_options'))
+        execute.extend(self._read_configuration(phase='input_to_frames', section='output_options'))
 
         execute.extend([
             extracted_frames / f'extracted_%0d.{self.image_format}'
@@ -136,7 +131,7 @@ class Ffmpeg:
 
         return(self._execute(execute))
 
-    def assemble_video(self, framerate, resolution, upscaled_frames):
+    def assemble_video(self, framerate, upscaled_frames):
         """Converts images into videos
 
         This method converts a set of images into a video
@@ -149,9 +144,9 @@ class Ffmpeg:
         execute = [
             self.ffmpeg_binary,
             '-r',
-            str(framerate),
-            '-s',
-            resolution
+            str(framerate)
+            # '-s',
+            # resolution
         ]
 
         # read other options
@@ -274,17 +269,9 @@ class Ffmpeg:
         return configuration
 
     def _execute(self, execute):
-        """ execute command
-
-        Arguments:
-            execute {list} -- list of arguments to be executed
-
-        Returns:
-            int -- execution return code
-        """
         # turn all list elements into string to avoid errors
         execute = [str(e) for e in execute]
 
-        Avalon.debug_info(f'Executing: {execute}')
+        Avalon.debug_info(f'Executing: {shlex.join(execute)}')
 
         return subprocess.Popen(execute)
