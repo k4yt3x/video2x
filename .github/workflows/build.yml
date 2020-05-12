@@ -1,4 +1,4 @@
-name: Video2X Build Binaries
+name: Video2X Nightly Build
 
 on:
   push:
