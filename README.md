@@ -38,7 +38,7 @@ Video2X is a video/GIF/image upscaling software based on Waifu2X, Anime4K and SR
 
 ### Video Upscaling
 
-![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
+![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)\
 *Upscale Comparison Demonstration*
 
 **You can watch the whole demo video on YouTube: https://youtu.be/mGEfasQl2Zo**
@@ -49,17 +49,17 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 
 This original input GIF is 160x120 in size. This image is downsized and accelerated to 20 FPS from its [original image](https://gfycat.com/craftyeasygoingankole-capoo-bug-cat).
 
-![catfru](https://user-images.githubusercontent.com/21986859/81631069-96d4fc80-93f6-11ea-92fb-33d6545055e7.gif)
+![catfru](https://user-images.githubusercontent.com/21986859/81631069-96d4fc80-93f6-11ea-92fb-33d6545055e7.gif)\
 *Catfru original 160x120 GIF image*
 
 Below is what it looks like after getting upscaled to 640x480 (4x) using Video2X.
 
-![catfru4x](https://user-images.githubusercontent.com/21986859/81631070-976d9300-93f6-11ea-9137-072a3b386110.gif)
+![catfru4x](https://user-images.githubusercontent.com/21986859/81631070-976d9300-93f6-11ea-9137-072a3b386110.gif)\
 *Catfru 4x upscaled GIF*
 
 ### Image Upscaling
 
-![jill_comparison](https://user-images.githubusercontent.com/21986859/81631903-79a12d80-93f8-11ea-9c3c-f340240cf08c.png)
+![jill_comparison](https://user-images.githubusercontent.com/21986859/81631903-79a12d80-93f8-11ea-9c3c-f340240cf08c.png)\
 *Image upscaling example*
 
 [Original image](https://72915.tumblr.com/post/173793265673) from [nananicu@twitter](https://twitter.com/nananicu/status/994546266968281088), edited by K4YT3X.
@@ -87,12 +87,12 @@ The list is sorted from new to old.
 
 ### Video2X GUI
 
-![GUI Preview](https://user-images.githubusercontent.com/21986859/81546668-3bf5c380-936a-11ea-9583-c969ea0d862b.png)
+![GUI Preview](https://user-images.githubusercontent.com/21986859/81546668-3bf5c380-936a-11ea-9583-c969ea0d862b.png)\
 *Video2X GUI Screenshot*
 
 ### Video2X CLI
 
-![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81039711-4fe88380-8e99-11ea-9846-175f72100a76.png)
+![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81039711-4fe88380-8e99-11ea-9846-175f72100a76.png)\
 *Video2X CLI Screenshot*
 
 ---
@@ -101,7 +101,7 @@ The list is sorted from new to old.
 
 If you can't find a video clip to begin with, or if you want to see a before-after comparison, we have prepared some sample clips for you. The quick start guide down below will also be based on the name of the sample clips.
 
-![sample_video](https://user-images.githubusercontent.com/21986859/52905766-d5512b00-3236-11e9-9aea-077636539679.png)
+![sample_video](https://user-images.githubusercontent.com/21986859/52905766-d5512b00-3236-11e9-9aea-077636539679.png)\
 *Sample Upscale Videos*
 
 - [Sample Video (240P) 4.54MB](https://files.k4yt3x.com/Resources/Videos/sample_input.mp4)
@@ -128,22 +128,22 @@ Before running Video2X, you'll need to ensure you have installed the drivers' ex
 
 The easiest way to run Video2X is to use the full build. Extract the full release zip file and you'll get these files.
 
-![Video2X Release Files](https://user-images.githubusercontent.com/21986859/81489846-28633380-926a-11ea-9e81-fb92f492e14c.png)
+![Video2X Release Files](https://user-images.githubusercontent.com/21986859/81489846-28633380-926a-11ea-9e81-fb92f492e14c.png)\
 *Video2X release files*
 
 Simply double click on video2x_gui.exe to launch the GUI.
 
-![Video2X GUI Main Tab](https://user-images.githubusercontent.com/21986859/81489858-4c267980-926a-11ea-9ab2-38ec738f2fb6.png)
+![Video2X GUI Main Tab](https://user-images.githubusercontent.com/21986859/81489858-4c267980-926a-11ea-9ab2-38ec738f2fb6.png)\
 *Video2X GUI main tab*
 
 Then, drag the videos you wish to upscale into the window and select the appropriate output path.
 
-![drag-drop](https://user-images.githubusercontent.com/21986859/81489880-7bd58180-926a-11ea-85ae-b72d2f4f5e72.png)
+![drag-drop](https://user-images.githubusercontent.com/21986859/81489880-7bd58180-926a-11ea-85ae-b72d2f4f5e72.png)\
 *Drag and drop file into Video2X GUI*
 
 Tweak the settings if you want to, then hit the start button at the bottom and the upscale will start. Now you'll just have to wait for it to complete.
 
-![upscale-started](https://user-images.githubusercontent.com/21986859/81489924-ce16a280-926a-11ea-831c-6c66b950f957.png)
+![upscale-started](https://user-images.githubusercontent.com/21986859/81489924-ce16a280-926a-11ea-831c-6c66b950f957.png)\
 *Video2X started processing input files*
 
 ### Running Video2X (CLI)
