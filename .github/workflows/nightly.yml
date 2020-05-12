@@ -44,6 +44,7 @@ jobs:
         run: |
           pyinstaller --noconfirm --log-level=WARN `
               --onefile `
+              --hidden-import=patool `
               --icon="images\video2x.ico" `
               video2x_setup.py
       - name: Collect artifacts into folder

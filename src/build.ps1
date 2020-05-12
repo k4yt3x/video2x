@@ -2,7 +2,7 @@
 Name: Video2X Build Script
 Creator: K4YT3X
 Date Created: May 6, 2020
-Last Modified: May 7, 2020
+Last Modified: May 12, 2020
 
 Description: A PowerShell script that will build Video2X
 executable (PE) releases automatically using PyInstaller.
@@ -48,6 +48,7 @@ pyinstaller --noconfirm --log-level=WARN `
 Write-Host -ForegroundColor White "`nBuilding Video2X setup script"
 pyinstaller --noconfirm --log-level=WARN `
     --onefile `
+    --hidden-import=patool `
     --icon="images\video2x.ico" `
     video2x_setup.py
 
