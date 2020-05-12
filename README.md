@@ -174,37 +174,6 @@ python video2x.py -d waifu2x_caffe -- --help
 
 ---
 
-## Recent Changes
-
-### 4.0.0 (May 5, 2020)
-
-- Added internationalization support
-  - Added language zh_CN (简体中文)
-  - Language will change automatically according to system locale settings
-- Added support for [Anime4KCPP](https://github.com/TianZerL/Anime4KCPP) in replacement for Anime4K (Java)
-- Driver-specific settings can now be specified in the command line by specifying them after a `--`
-- All driver-specific settings are parsed by the corresponding driver
-- Modularized driver wrappers in Video2X
-- Cleaned up some clutters in the code
-
-### 3.2.0 (April 26, 2020)
-
-- Added support for [SRMD-NCNN-Vulkan](https://github.com/nihui/srmd-ncnn-vulkan)
-
-### 3.1.0 (February 26, 2020)
-
-- Removed the redundant layer of multi-threading since multi-process has to be implemented for launching Windows PE files in sub-processes
-- Added support for graceful exit upon `KeyboardInterrupt` or termination signals
-- Other minor improvements such as replacing `' '.join(execute)` with `shlex.join(execute)`
-
-### Setup Script 2.0.0 (May 5, 2020)
-
-- Added support for Gifski
-- Removed configuration building section since config now supports environment variables
-- Shortened code
-
----
-
 ## Documentations
 
 ### [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki)
