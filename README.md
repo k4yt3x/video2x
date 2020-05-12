@@ -4,6 +4,7 @@
 
 ![Master Branch Version](https://img.shields.io/badge/master-v4.0.0-9cf?style=flat-square)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/k4yt3x/video2x/Video2X%20Nightly%20Build?label=Nightly&style=flat-square)
 ![GitHub All Releases](https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square)
 ![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-blue?style=flat-square)
@@ -16,14 +17,20 @@ height=20 />
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
 
-## [Download Builds](https://github.com/k4yt3x/video2x/releases) (Windows)
+## [Download Stable/Beta Builds](https://github.com/k4yt3x/video2x/releases) (Windows)
 
-You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest builds of Video2X. The exe files will require no Python or Python module installation. There are two editions available.
+You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest stable and beta builds of Video2X. The exe files will require no Python or Python module installation. There are two editions available.
 
 - **`Full`**: full package comes pre-configured with **all** dependencies like `FFmpeg` and `waifu2x-caffe`.
 - **`Light`**: ligt package comes with only Video2X binaries and a template configuration file. The user will either have to run the setup script or install and configure dependencies themselves.
 
-Go to the [Quick Start](#quick-start) section for usages.
+Go to the **[Quick Start](#quick-start)** section for usages.
+
+## [Download Nightly Builds](https://github.com/k4yt3x/video2x/actions) (Windows)
+
+Nightly builds are built automatically every time a new commit is pushed to the master branch. The lates nightly build is always up-to-date with the latest version of the code, but is less stable and may contain bugs. Nightly builds are handled by GitHub's integrated CI/CD tool, GitHub Actions.
+
+To download the latest nightly build, go to the [GitHub Actions](https://github.com/k4yt3x/video2x/actions) tab, enter the last run of workflow "Video2X Nightly Build, and download the artifacts generated from the run.
 
 ## Introduction
 
@@ -32,7 +39,6 @@ Video2X is a video/GIF/image upscaling software based on Waifu2X, Anime4K and SR
 ### Video Upscaling
 
 ![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
-
 *Upscale Comparison Demonstration*
 
 **You can watch the whole demo video on YouTube: https://youtu.be/mGEfasQl2Zo**
@@ -44,10 +50,12 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 This original input GIF is 160x120 in size. This image is downsized and accelerated to 20 FPS from its [original image](https://gfycat.com/craftyeasygoingankole-capoo-bug-cat).
 
 ![catfru](https://user-images.githubusercontent.com/21986859/81631069-96d4fc80-93f6-11ea-92fb-33d6545055e7.gif)
+*Catfru original 160x120 GIF image*
 
 Below is what it looks like after getting upscaled to 640x480 (4x) using Video2X.
 
 ![catfru4x](https://user-images.githubusercontent.com/21986859/81631070-976d9300-93f6-11ea-9137-072a3b386110.gif)
+*Catfru 4x upscaled GIF*
 
 ### Image Upscaling
 
@@ -94,7 +102,6 @@ The list is sorted from new to old.
 If you can't find a video clip to begin with, or if you want to see a before-after comparison, we have prepared some sample clips for you. The quick start guide down below will also be based on the name of the sample clips.
 
 ![sample_video](https://user-images.githubusercontent.com/21986859/52905766-d5512b00-3236-11e9-9aea-077636539679.png)
-
 *Sample Upscale Videos*
 
 - [Sample Video (240P) 4.54MB](https://files.k4yt3x.com/Resources/Videos/sample_input.mp4)
@@ -122,18 +129,22 @@ Before running Video2X, you'll need to ensure you have installed the drivers' ex
 The easiest way to run Video2X is to use the full build. Extract the full release zip file and you'll get these files.
 
 ![Video2X Release Files](https://user-images.githubusercontent.com/21986859/81489846-28633380-926a-11ea-9e81-fb92f492e14c.png)
+*Video2X release files*
 
 Simply double click on video2x_gui.exe to launch the GUI.
 
 ![Video2X GUI Main Tab](https://user-images.githubusercontent.com/21986859/81489858-4c267980-926a-11ea-9ab2-38ec738f2fb6.png)
+*Video2X GUI main tab*
 
 Then, drag the videos you wish to upscale into the window and select the appropriate output path.
 
 ![drag-drop](https://user-images.githubusercontent.com/21986859/81489880-7bd58180-926a-11ea-85ae-b72d2f4f5e72.png)
+*Drag and drop file into Video2X GUI*
 
 Tweak the settings if you want to, then hit the start button at the bottom and the upscale will start. Now you'll just have to wait for it to complete.
 
 ![upscale-started](https://user-images.githubusercontent.com/21986859/81489924-ce16a280-926a-11ea-831c-6c66b950f957.png)
+*Video2X started processing input files*
 
 ### Running Video2X (CLI)
 
@@ -186,9 +197,11 @@ python video2x.py -d waifu2x_caffe -- --help
 - Added support for graceful exit upon `KeyboardInterrupt` or termination signals
 - Other minor improvements such as replacing `' '.join(execute)` with `shlex.join(execute)`
 
-### Setup Script 1.8.0 (May 5, 2020)
+### Setup Script 2.0.0 (May 5, 2020)
 
-- Added support for Anime4KCPP
+- Added support for Gifski
+- Removed configuration building section since config now supports environment variables
+- Shortened code
 
 ---
 
@@ -198,13 +211,13 @@ python video2x.py -d waifu2x_caffe -- --help
 
 You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
 
-### [Run From Source](https://github.com/k4yt3x/video2x/wiki/Run-From-Source)
-
-Instructions for how to run this program from source code.
-
 ### [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial)
 
 For those who want a detailed walk-through of how to use Video2X, you can head to the [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
+
+### [Run From Source](https://github.com/k4yt3x/video2x/wiki/Run-From-Source)
+
+This wiki page contains all instructions for how you can run Video2X directly from Python source code.
 
 ### [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers)
 
@@ -213,6 +226,10 @@ Go to the [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers) wiki page if
 ### [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A)
 
 If you have any questions, first try visiting our [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A) page to see if your question is answered there. If not, open an issue and we will respond to your questions ASAP. Alternatively, you can also join our [Telegram discussion group](https://t.me/video2x) and ask your questions there.
+
+### [History](https://github.com/k4yt3x/video2x/wiki/History)
+
+Are you interested in how the idea of Video2X was born? Do you want to know the stories and histories behind Video2X's development? Come into this page.
 
 ---
 
@@ -277,7 +294,9 @@ This project relies on the following software and projects.
 - [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
 - [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)
 - [srmd-ncnn-vulkan](https://github.com/nihui/srmd-ncnn-vulkan)
+- [Anime4K](https://github.com/bloc97/Anime4K)
 - [Anime4KCPP](https://github.com/TianZerL/Anime4KCPP)
+- [Gifski](https://github.com/ImageOptim/gifski)
 
 ## Special Thanks
 
