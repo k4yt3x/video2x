@@ -4,6 +4,10 @@ on:
   push:
     branches: [master]
 
+defaults:
+  run:
+    working-directory: src
+
 jobs:
   build:
     runs-on: windows-latest
@@ -25,7 +29,7 @@ jobs:
               --onefile `
               --add-data="wrappers;wrappers" `
               --icon="images\video2x.ico" `
-              src/video2x.py
+              video2x.py
       - name: Build Video2X GUI
         run: |
           pyinstaller --noconfirm --log-level=WARN `
@@ -35,10 +39,10 @@ jobs:
               --add-data="video2x_gui.ui;." `
               --add-data="wrappers;wrappers" `
               --icon="images\video2x.ico" `
-              src/video2x_gui.py
+              video2x_gui.py
       - name: Build Video2X Setup Script
         run: |
           pyinstaller --noconfirm --log-level=WARN `
               --onefile `
               --icon="images\video2x.ico" `
-              src/video2x_setup.py
+              video2x_setup.py
