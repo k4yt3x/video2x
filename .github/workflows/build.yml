@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.8
+      - name: Setup Python 3.8
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
@@ -40,9 +40,21 @@ jobs:
               --add-data="wrappers;wrappers" `
               --icon="images\video2x.ico" `
               video2x_gui.py
-      - name: Build Video2X Setup Script
+      - name: Build Video2X setup script
         run: |
           pyinstaller --noconfirm --log-level=WARN `
               --onefile `
               --icon="images\video2x.ico" `
               video2x_setup.py
+      - name: Collect artifacts into folder
+        run: |
+          New-Item "nightly-light\" -ItemType Directory
+          Copy-Item "dist\video2x.exe" -Destination "nightly-light\"
+          Copy-Item "dist\video2x_gui.exe" -Destination "nightly-light\"
+          Copy-Item "dist\video2x_setup.exe" -Destination "nightly-light\"
+          Copy-Item "video2x.yaml" -Destination "nightly-light\"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: nightly-light
+          path: nightly-light/
