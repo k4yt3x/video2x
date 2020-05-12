@@ -485,6 +485,9 @@ class Upscaler:
                         self.process_pool.append(self.driver_object.upscale(self.current_input_file, output_path))
                         self._wait()
                         Avalon.info(_('Upscaling completed'))
+                        self.processing_queue.task_done()
+                        self.total_processed += 1
+                        continue
 
                     else:
                         self.create_temp_directories()
@@ -606,7 +609,7 @@ class Upscaler:
                 self.total_processed += 1
 
         except (Exception, KeyboardInterrupt, SystemExit) as e:
-            with contextlib.suppress(ValueError):
+            with contextlib.suppress(ValueError, AttributeError):
                 self.cleanup_temp_directories()
                 self.running = False
             raise e
