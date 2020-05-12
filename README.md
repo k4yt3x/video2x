@@ -27,7 +27,9 @@ Go to the [Quick Start](#quick-start) section for usages.
 
 ## Introduction
 
-Video2X is a video upscaling software based on Waifu2X, Anime4K and SRMD written in Python 3. It upscales videos and restores details from low-resolution videos. Below is a side-by-side preview.
+Video2X is a video/GIF/image upscaling software based on Waifu2X, Anime4K and SRMD written in Python 3. It upscales videos, GIFs and images, restoring details from low-resolution inputs. Video2X also accepts GIF input to video output and video input to GIF output.
+
+### Video Upscaling
 
 ![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)
 
@@ -37,7 +39,24 @@ Video2X is a video upscaling software based on Waifu2X, Anime4K and SRMD written
 
 Clip is from trailer of animated movie "千と千尋の神隠し". Copyright belongs to "株式会社スタジオジブリ (STUDIO GHIBLI INC.)". Will delete immediately if use of clip is in violation of copyright.
 
-## Demo Videos
+### GIF Upscaling
+
+This original input GIF is 160x120 in size. This image is downsized and accelerated to 20 FPS from its [original image](https://gfycat.com/craftyeasygoingankole-capoo-bug-cat).
+
+![catfru](https://user-images.githubusercontent.com/21986859/81631069-96d4fc80-93f6-11ea-92fb-33d6545055e7.gif)
+
+Below is what it looks like after getting upscaled to 640x480 (4x) using Video2X.
+
+![catfru4x](https://user-images.githubusercontent.com/21986859/81631070-976d9300-93f6-11ea-9137-072a3b386110.gif)
+
+### Image Upscaling
+
+![jill_comparison](https://user-images.githubusercontent.com/21986859/81631903-79a12d80-93f8-11ea-9c3c-f340240cf08c.png)
+*Image upscaling example*
+
+[Original image](https://72915.tumblr.com/post/173793265673) from [nananicu@twitter](https://twitter.com/nananicu/status/994546266968281088), edited by K4YT3X.
+
+## All Demo Videos
 
 Below is a list of all the demo videos available.
 The list is sorted from new to old.
@@ -54,43 +73,19 @@ The list is sorted from new to old.
   - YouTube: https://youtu.be/mGEfasQl2Zo
   - Bilibili: https://www.bilibili.com/video/BV1V5411471i/
 
+---
+
 ## Screenshots
 
 ### Video2X GUI
 
 ![GUI Preview](https://user-images.githubusercontent.com/21986859/81546668-3bf5c380-936a-11ea-9583-c969ea0d862b.png)
-
 *Video2X GUI Screenshot*
 
 ### Video2X CLI
 
 ![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81039711-4fe88380-8e99-11ea-9846-175f72100a76.png)
-
 *Video2X CLI Screenshot*
-
----
-
-## Documentations
-
-### [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki)
-
-You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
-
-### [Run From Source](https://github.com/k4yt3x/video2x/wiki/Run-From-Source)
-
-Instructions for how to run this program from source code.
-
-### [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial)
-
-For those who want a detailed walk-through of how to use Video2X, you can head to the [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
-
-### [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers)
-
-Go to the [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers) wiki page if you want to see a detailed description on the different types of drivers implemented by Video2X. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for Video2X.
-
-### [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A)
-
-If you have any questions, first try visiting our [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A) page to see if your question is answered there. If not, open an issue and we will respond to your questions ASAP. Alternatively, you can also join our [Telegram discussion group](https://t.me/video2x) and ask your questions there.
 
 ---
 
@@ -194,6 +189,30 @@ python video2x.py -d waifu2x_caffe -- --help
 ### Setup Script 1.8.0 (May 5, 2020)
 
 - Added support for Anime4KCPP
+
+---
+
+## Documentations
+
+### [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki)
+
+You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
+
+### [Run From Source](https://github.com/k4yt3x/video2x/wiki/Run-From-Source)
+
+Instructions for how to run this program from source code.
+
+### [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial)
+
+For those who want a detailed walk-through of how to use Video2X, you can head to the [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
+
+### [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers)
+
+Go to the [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers) wiki page if you want to see a detailed description on the different types of drivers implemented by Video2X. This wiki page contains detailed difference between different drivers, and how to download and set each of them up for Video2X.
+
+### [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A)
+
+If you have any questions, first try visiting our [Q&A](https://github.com/k4yt3x/video2x/wiki/Q&A) page to see if your question is answered there. If not, open an issue and we will respond to your questions ASAP. Alternatively, you can also join our [Telegram discussion group](https://t.me/video2x) and ask your questions there.
 
 ---
 
