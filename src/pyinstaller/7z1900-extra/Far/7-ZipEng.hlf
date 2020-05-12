@@ -1,0 +1,85 @@
+.Language=English,English
+.PluginContents=7-Zip Plugin
+
+@Contents
+$^#7-Zip Plugin 19.00#
+$^#Copyright (c) 1999-2019 Igor Pavlov#
+    This FAR module performs transparent #archive# processing.
+Files in the archive are handled in the same manner as if they
+were in a folder.
+
+   ~Extracting from the archive~@Extract@
+
+   ~Add files to the archive~@Update@
+
+   ~7-Zip Plugin configuration~@Config@
+
+
+ Web site:  #www.7-zip.org#
+
+@Extract
+$ #Extracting from the archive#
+
+In this dialog you may enter extracting mode.
+
+          Path mode
+
+  #Full pathnames#       Extract files with full pathnames.
+
+  #Current pathnames#    Extract files with all relative paths.
+
+  #No pathnames#         Extract files without folder paths.
+
+
+          Overwrite mode
+
+  #Ask before overwrite#       Ask before overwriting existing files.
+
+  #Overwrite without prompt#   Overwrite existing files without prompt.
+
+  #Skip existing files#        Skip extracting of existing files.
+
+
+           Files
+
+  #Selected files#    Extract only selected files.
+
+  #All files#         Extract all files from archive.
+
+@Update
+$ #Add files to the archive#
+
+This dialog allows you to specify options for process of updating archive.
+
+
+      Compression method
+
+  #Store#     Files will be copied to archive without compression.
+
+  #Normal#    Files will be compressed.
+
+  #Maximum#   Files will be compressed with method that gives
+            maximum compression ratio.
+
+
+      Update mode
+
+  #Add and replace files#    Add all specified files to the archive.
+
+  #Update and add files#     Update older files in the archive and add
+                           files that are new to the archive.
+
+  #Freshen existing files#   Update specified files in the archive that
+                           are older than the selected disk files.
+
+  #Synchronize files#        Replace specified files only if
+                           added files are newer. Always add those
+                           files, which are not present in the
+                           archive. Delete from archive those files,
+                           which are not present on the disk.
+
+@Config
+$ #7-Zip Plugin configuration#
+    In this dialog you may change following parameters:
+
+ #Plugin is used by default#  Plugin is used by default.

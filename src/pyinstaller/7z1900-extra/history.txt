@@ -1,0 +1,111 @@
+7-Zip Extra history
+-------------------
+
+This file contains only information about changes related to that package exclusively.
+The full history of changes is listed in history.txt in main 7-Zip program.
+
+
+19.00          2019-02-21
+-------------------------
+- Encryption strength for 7z archives was increased:
+  the size of random initialization vector was increased from 64-bit to 128-bit,
+  and the pseudo-random number generator was improved.
+- Some bugs were fixed.
+
+
+18.06          2018-12-30
+-------------------------
+- The speed for LZMA/LZMA2 compressing was increased by 3-10%,
+  and there are minor changes in compression ratio.
+- Some bugs were fixed.
+
+
+18.05          2018-04-30
+-------------------------
+- The speed for LZMA/LZMA2 compressing was increased 
+    by 8% for fastest/fast compression levels and 
+    by 3% for normal/maximum compression levels.
+
+
+18.03 beta     2018-03-04
+-------------------------
+- The speed for single-thread LZMA/LZMA2 decoding
+  was increased  by 30% in x64 version and by 3% in x86 version.
+- 7-Zip now can use multi-threading for 7z/LZMA2 decoding,
+  if there are multiple independent data chunks in LZMA2 stream.
+
+
+9.35 beta           2014-12-07
+------------------------------
+  - SFX modules were moved to LZMA SDK package.
+
+
+9.34 alpha          2014-06-22
+------------------------------
+  - Minimum supported system now is Windows 2000 for EXE and DLL files.
+  - all EXE and DLL files use msvcrt.dll.
+  - 7zr.exe now support AES encryption.
+
+
+9.18                2010-11-02
+------------------------------
+  - New small SFX module for installers.
+
+
+9.17                2010-10-04
+------------------------------
+  - New 7-Zip plugin for FAR Manager x64.
+
+
+9.10                2009-12-30
+------------------------------
+  - 7-Zip for installers now supports LZMA2.
+
+
+9.09                2009-12-12
+------------------------------
+  - LZMA2 compression method support.
+  - Some bugs were fixed.
+
+
+4.65                2009-02-03
+------------------------------
+  - Some bugs were fixed.
+
+
+4.38 beta           2006-04-13
+------------------------------
+  - SFX for installers now supports new properties in config file:
+    Progress, Directory, ExecuteFile, ExecuteParameters.
+
+
+4.34 beta           2006-02-27
+------------------------------
+  - ISetProperties::SetProperties:
+      it's possible to specify desirable number of CPU threads: 
+           PROPVARIANT: name=L"mt", vt = VT_UI4, ulVal = NumberOfThreads
+      If "mt" is not defined, 7za.dll will check number of processors in system to set 
+      number of desirable threads. 
+      Now 7za.dll can use:
+        2 threads for LZMA compressing
+        N threads for BZip2 compressing
+        4 threads for BZip2 decompressing
+      Other codecs use only one thread. 
+      Note: 7za.dll can use additional "small" threads with low CPU load.
+  - It's possible to call ISetProperties::SetProperties to specify "mt" property for decoder.
+
+
+4.33 beta           2006-02-05
+------------------------------
+  - Compressing speed and Memory requirements were increased.
+    Default dictionary size was increased: Fastest: 64 KB, Fast: 1 MB, 
+    Normal: 4 MB, Max: 16 MB, Ultra: 64 MB.
+  - 7z/LZMA now can use only these match finders: HC4, BT2, BT3, BT4
+
+
+4.27                2005-09-21
+------------------------------
+ - Some GUIDs/interfaces were changed.
+   IStream.h:
+     ISequentialInStream::Read now works as old ReadPart
+     ISequentialOutStream::Write now works as old WritePart
