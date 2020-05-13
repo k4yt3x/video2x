@@ -4,14 +4,16 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 11, 2020
+Last Modified: May 12, 2020
 """
 
 # local imports
 from upscaler import Upscaler
+from wrappers.ffmpeg import Ffmpeg
 
 # built-in imports
 import contextlib
+import json
 import os
 import pathlib
 import sys
@@ -342,7 +344,14 @@ class Video2XMainWindow(QMainWindow):
         self.anime4kcpp_post_processing_check_box = self.findChild(QCheckBox, 'anime4kCppPostProcessingCheckBox')
         self.anime4kcpp_gpu_mode_check_box = self.findChild(QCheckBox, 'anime4kCppGpuModeCheckBox')
 
-        # load configurations
+        # FFmpeg settings
+        pass
+
+        # Tools
+        self.ffprobe_plain_text_edit = self.findChild(QPlainTextEdit, 'ffprobePlainTextEdit')
+        self.ffprobe_plain_text_edit.dropEvent = self.show_ffprobe_output
+
+        # load configurations after GUI initialization
         self.load_configurations()
 
     def dragEnterEvent(self, event):
@@ -363,6 +372,15 @@ class Video2XMainWindow(QMainWindow):
     def enable_line_edit_file_drop(self, line_edit: QLineEdit):
         line_edit.dragEnterEvent = self.dragEnterEvent
         line_edit.dropEvent = lambda event: line_edit.setText(str(pathlib.Path(event.mimeData().urls()[0].toLocalFile()).absolute()))
+
+    def show_ffprobe_output(self, event):
+        input_paths = [pathlib.Path(u.toLocalFile()) for u in event.mimeData().urls()]
+        if not input_paths[0].is_file():
+            return
+
+        ffmpeg_object = Ffmpeg(self.ffmpeg_settings)
+        file_info_json = ffmpeg_object.probe_file_info(input_paths[0])
+        self.ffprobe_plain_text_edit.setPlainText(json.dumps(file_info_json, indent=2))
 
     @staticmethod
     def read_config(config_file: pathlib.Path) -> dict:
