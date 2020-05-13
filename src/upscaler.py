@@ -404,7 +404,7 @@ class Upscaler:
         self.driver_object.load_configurations(self)
 
         # initialize FFmpeg object
-        self.ffmpeg_object = Ffmpeg(self.ffmpeg_settings, self.image_format)
+        self.ffmpeg_object = Ffmpeg(self.ffmpeg_settings, image_format=self.image_format)
 
         # define processing queue
         self.processing_queue = queue.Queue()
@@ -512,6 +512,7 @@ class Upscaler:
 
                         # get average frame rate of video stream
                         framerate = float(Fraction(video_info['streams'][video_stream_index]['r_frame_rate']))
+                        Avalon.info(_('Framerate: {}').format(framerate))
                         # self.ffmpeg_object.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
 
                         # extract frames from video
@@ -531,7 +532,6 @@ class Upscaler:
                                 Avalon.error(_('Unsupported pixel format: {}').format(self.ffmpeg_object.pixel_format))
                                 raise UnsupportedPixelError(f'unsupported pixel format {self.ffmpeg_object.pixel_format}')
 
-                        Avalon.info(_('Framerate: {}').format(framerate))
 
                         # width/height will be coded width/height x upscale factor
                         # original_width = video_info['streams'][video_stream_index]['width']
