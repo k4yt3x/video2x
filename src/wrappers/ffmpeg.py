@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 9, 2020
+Last Modified: May 12, 2020
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -27,7 +27,7 @@ class Ffmpeg:
     and inserting audio tracks to videos.
     """
 
-    def __init__(self, ffmpeg_settings, image_format):
+    def __init__(self, ffmpeg_settings, image_format='png'):
         self.ffmpeg_settings = ffmpeg_settings
 
         self.ffmpeg_path = pathlib.Path(self.ffmpeg_settings['ffmpeg_path'])
