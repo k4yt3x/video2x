@@ -116,14 +116,14 @@ class Ffmpeg:
             self.ffmpeg_binary
         ]
 
-        execute.extend(self._read_configuration(phase='input_to_frames'))
+        execute.extend(self._read_configuration(phase='extract_frames'))
 
         execute.extend([
             '-i',
             input_file
         ])
 
-        execute.extend(self._read_configuration(phase='input_to_frames', section='output_options'))
+        execute.extend(self._read_configuration(phase='extract_frames', section='output_options'))
 
         execute.extend([
             extracted_frames / f'extracted_%0d.{self.image_format}'
@@ -150,10 +150,10 @@ class Ffmpeg:
         ]
 
         # read other options
-        execute.extend(self._read_configuration(phase='frames_to_video'))
+        execute.extend(self._read_configuration(phase='assemble_video'))
 
         # read FFmpeg input options
-        execute.extend(self._read_configuration(phase='frames_to_video', section='input_options'))
+        execute.extend(self._read_configuration(phase='assemble_video', section='input_options'))
 
         # WORKAROUND FOR WAIFU2X-NCNN-VULKAN
         # Dev: SAT3LL
@@ -171,7 +171,7 @@ class Ffmpeg:
         ])
 
         # read FFmpeg output options
-        execute.extend(self._read_configuration(phase='frames_to_video', section='output_options'))
+        execute.extend(self._read_configuration(phase='assemble_video', section='output_options'))
 
         # specify output file location
         execute.extend([
@@ -192,7 +192,7 @@ class Ffmpeg:
             self.ffmpeg_binary
         ]
 
-        execute.extend(self._read_configuration(phase='migrating_tracks'))
+        execute.extend(self._read_configuration(phase='migrate_streams'))
 
         execute.extend([
             '-i',
@@ -201,7 +201,7 @@ class Ffmpeg:
             input_video
         ])
 
-        execute.extend(self._read_configuration(phase='migrating_tracks', section='output_options'))
+        execute.extend(self._read_configuration(phase='migrate_streams', section='output_options'))
 
         execute.extend([
             output_video

@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: May 11, 2020
+# Last Modified: May 12, 2020
 # Values here are the default values. Change the value here to
 #   save the default value permanently.
 # Items commented out are parameters irrelevant to this context
@@ -101,17 +101,17 @@ anime4kcpp:
 ffmpeg:
   ffmpeg_path: '%LOCALAPPDATA%\video2x\ffmpeg-latest-win64-static\bin'
   intermediate_file_name: 'intermediate.mkv'
-  # step 1: extract all frames from original input
-  # into temporary directory
-  input_to_frames:
+  # Step 1: Frame Extraction
+  # extract all frames from original input into temporary directory
+  extract_frames:
     output_options:
       '-qscale:v': null
       '-pix_fmt': rgba64be
     '-hwaccel': auto
     '-y': true
-  # step 2: stitch all frames back into a video
-  # with only a video track
-  frames_to_video:
+  # Step 2: Video Assembly
+  # assemble all frames back into a video with only a video track
+  assemble_video:
     input_options:
       '-qscale:v': null
       '-qscale:a': null
@@ -123,9 +123,10 @@ ffmpeg:
       '-pix_fmt': null
     '-hwaccel': auto
     '-y': true
-  # step 3: migrate audio and subtitle tracks from original
-  # video into the upscaled video
-  migrating_tracks:
+  # Step 3: Streams Migration
+  # migrate audio and subtitle streams from original
+  #   video into the upscaled video
+  migrate_streams:
     output_options:
       '-map':
         - '0:v?'
