@@ -104,14 +104,16 @@ ffmpeg:
   # Step 1: Frame Extraction
   # extract all frames from original input into temporary directory
   extract_frames:
+    '-hwaccel': auto
+    '-y': true
     output_options:
       '-qscale:v': null
       '-pix_fmt': rgba64be
-    '-hwaccel': auto
-    '-y': true
   # Step 2: Video Assembly
   # assemble all frames back into a video with only a video track
   assemble_video:
+    '-hwaccel': auto
+    '-y': true
     input_options:
       '-qscale:v': null
       '-qscale:a': null
@@ -121,12 +123,12 @@ ffmpeg:
       '-crf': 17
       '-b:v': null
       '-pix_fmt': null
-    '-hwaccel': auto
-    '-y': true
   # Step 3: Streams Migration
   # migrate audio and subtitle streams from original
   #   video into the upscaled video
   migrate_streams:
+    '-hwaccel': auto
+    '-y': true
     output_options:
       '-map':
         - '0:v?'
@@ -137,8 +139,6 @@ ffmpeg:
       '-c': copy
       '-pix_fmt': null
       '-metadata': 'comment=Upscaled by Video2X'
-    '-hwaccel': auto
-    '-y': true
 gifski:
   gifski_path: '%LOCALAPPDATA%\video2x\gifski\win\gifski'
   # output: null # Destination file to write to
