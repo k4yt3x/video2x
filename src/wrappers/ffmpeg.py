@@ -37,7 +37,7 @@ class Ffmpeg:
         # video metadata
         self.image_format = image_format
         self.intermediate_file_name = pathlib.Path(self.ffmpeg_settings['intermediate_file_name'])
-        self.pixel_format = self.ffmpeg_settings['input_to_frames']['output_options']['-pix_fmt']
+        self.pixel_format = self.ffmpeg_settings['extract_frames']['output_options']['-pix_fmt']
 
     def get_pixel_formats(self):
         """ Get a dictionary of supported pixel formats
