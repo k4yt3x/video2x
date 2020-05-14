@@ -104,39 +104,41 @@ ffmpeg:
   # Step 1: Frame Extraction
   # extract all frames from original input into temporary directory
   extract_frames:
-    '-hwaccel': auto
+    '-hwaccel': auto # automatically select hardware acceleration method
     '-y': true
+    input_options: {} # empty dict, expand if necessary
     output_options:
-      '-qscale:v': null
-      '-pix_fmt': rgba64be
+      '-pix_fmt': rgba64be # extracted frames pixel format
+      '-qscale:v': null # output image quality control for JPEG (1-31, 1 being highest)
   # Step 2: Video Assembly
   # assemble all frames back into a video with only a video track
   assemble_video:
-    '-hwaccel': auto
+    '-hwaccel': auto # automatically select hardware acceleration method
     '-y': true
     input_options:
-      '-qscale:v': null
-      '-qscale:a': null
-      '-f': image2
+      '-f': image2 # force image2 format
     output_options:
-      '-vcodec': libx264
-      '-crf': 17
-      '-b:v': null
-      '-pix_fmt': null
+      '-vcodec': libx264 # video codec
+      '-pix_fmt': 'yuv444p10le' # overwrite default pixel format
+      '-crf': 17 # H.264 Constant Rate Factor
+      '-b:v': null # target average bitrate
   # Step 3: Streams Migration
   # migrate audio and subtitle streams from original
   #   video into the upscaled video
   migrate_streams:
-    '-hwaccel': auto
+    '-hwaccel': auto # automatically select hardware acceleration method
     '-y': true
+    input_options: {} # empty dict, expand if necessary
     output_options:
       '-map':
-        - '0:v?'
-        - '1:a?'
-        - '1:s?'
-        - '1:d?'
-        - '1:t?'
-      '-c': copy
+        - '0:v?' # copy video streams
+        - '1:a?' # copy audio streams
+        - '1:s?' # copy subtitle streams
+        - '1:d?' # copy data streams
+        - '1:t?' # copy fonts
+      '-c': copy # copy codec for all streams
+      '-map_metadata': 0 # copy known metadata tags
+      # '-movflags': 'use_metadata_tags' # copy custom/arbitrary metadata tags
       '-pix_fmt': null
       '-metadata': 'comment=Upscaled by Video2X'
 gifski:
