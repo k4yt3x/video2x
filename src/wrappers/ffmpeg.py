@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 12, 2020
+Last Modified: May 14, 2020
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -50,15 +50,15 @@ class Ffmpeg:
         """
         execute = [
             self.ffmpeg_probe_binary,
-            # '-v',
-            # 'quiet',
+            '-v',
+            'quiet',
             '-pix_fmts'
         ]
 
         # turn elements into str
         execute = [str(e) for e in execute]
 
-        Avalon.debug_info(f'Executing: {" ".join(execute)}')
+        Avalon.debug_info(f'Executing: {shlex.join(execute)}')
 
         # initialize dictionary to store pixel formats
         pixel_formats = {}
@@ -116,15 +116,22 @@ class Ffmpeg:
             self.ffmpeg_binary
         ]
 
+        # load general options
         execute.extend(self._read_configuration(phase='extract_frames'))
 
+        # load input_options
+        execute.extend(self._read_configuration(phase='extract_frames', section='input_options'))
+
+        # specify input file
         execute.extend([
             '-i',
             input_file
         ])
 
+        # load output options
         execute.extend(self._read_configuration(phase='extract_frames', section='output_options'))
 
+        # specify output file
         execute.extend([
             extracted_frames / f'extracted_%0d.{self.image_format}'
         ])
@@ -152,7 +159,7 @@ class Ffmpeg:
         # read other options
         execute.extend(self._read_configuration(phase='assemble_video'))
 
-        # read FFmpeg input options
+        # read input options
         execute.extend(self._read_configuration(phase='assemble_video', section='input_options'))
 
         # WORKAROUND FOR WAIFU2X-NCNN-VULKAN
@@ -192,17 +199,28 @@ class Ffmpeg:
             self.ffmpeg_binary
         ]
 
+        # load general options
         execute.extend(self._read_configuration(phase='migrate_streams'))
 
+        # load input options
+        execute.extend(self._read_configuration(phase='migrate_streams', section='input_options'))
+
+        # load input file names
         execute.extend([
+
+            # input 1: upscaled intermediate file without sound
             '-i',
             upscaled_frames / self.intermediate_file_name,
+
+            # input 2: original video with streams to copy over
             '-i',
             input_video
         ])
 
+        # load output options
         execute.extend(self._read_configuration(phase='migrate_streams', section='output_options'))
 
+        # load output video path
         execute.extend([
             output_video
         ])
@@ -227,16 +245,10 @@ class Ffmpeg:
         # from only that section
         if section:
             source = self.ffmpeg_settings[phase][section].keys()
-
-            # if pixel format is not specified, use the source pixel format
-            try:
-                if self.ffmpeg_settings[phase][section].get('-pix_fmt') is None:
-                    self.ffmpeg_settings[phase][section]['-pix_fmt'] = self.pixel_format
-            except KeyError:
-                pass
         else:
             source = self.ffmpeg_settings[phase].keys()
 
+        # for each key in the section's dict
         for key in source:
 
             if section:
@@ -271,7 +283,5 @@ class Ffmpeg:
     def _execute(self, execute):
         # turn all list elements into string to avoid errors
         execute = [str(e) for e in execute]
-
         Avalon.debug_info(f'Executing: {shlex.join(execute)}')
-
         return subprocess.Popen(execute)
