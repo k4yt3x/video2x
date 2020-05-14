@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
-    <height>768</height>
+    <width>671</width>
+    <height>802</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="mainTab">
        <attribute name="title">
@@ -72,6 +72,22 @@
           </property>
           <property name="text">
            <string>**Drop item on a specific input box to set the value of that box.**</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="hoverTooltipLabel">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>15</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>**Hover over an item to see its description (if applicable).**</string>
           </property>
           <property name="textFormat">
            <enum>Qt::MarkdownText</enum>
@@ -253,6 +269,9 @@
                </item>
                <item>
                 <widget class="QComboBox" name="driverComboBox">
+                 <property name="toolTip">
+                  <string>Driver to use for upscaling. Waifu2x Caffe is only for Nvidia GPUs.</string>
+                 </property>
                  <item>
                   <property name="text">
                    <string>Waifu2X Caffe</string>
@@ -293,6 +312,9 @@
                </item>
                <item>
                 <widget class="QSpinBox" name="processesSpinBox">
+                 <property name="toolTip">
+                  <string>Number of processes/threads to launch. Going to high for Waifu2X drivers might GPU's VRAM space.</string>
+                 </property>
                  <property name="minimum">
                   <number>1</number>
                  </property>
@@ -311,6 +333,9 @@
                </item>
                <item>
                 <widget class="QDoubleSpinBox" name="scaleRatioDoubleSpinBox">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of times to enlarge the video. Larger values will increase the time needed drastically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="minimum">
                   <double>0.000000000000000</double>
                  </property>
@@ -329,6 +354,9 @@
              </item>
              <item>
               <widget class="QCheckBox" name="preserveFramesCheckBox">
+               <property name="toolTip">
+                <string>Check this to prevent Video2X from cleaning up its cache folder containing extracted and upscaled frames.</string>
+               </property>
                <property name="text">
                 <string>Preserve Frames</string>
                </property>
@@ -444,6 +472,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="waifu2xCaffeScaleWidthSpinBox">
+                <property name="toolTip">
+                 <string>custom scale width (specifying this will overwrite scale_ratio)</string>
+                </property>
                 <property name="maximum">
                  <number>999999</number>
                 </property>
@@ -462,6 +493,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="waifu2xCaffeScaleHeightSpinBox">
+                <property name="toolTip">
+                 <string>custom scale height (specifying this will overwrite scale_ratio)</string>
+                </property>
                 <property name="maximum">
                  <number>999999</number>
                 </property>
@@ -480,6 +514,9 @@
               </item>
               <item>
                <widget class="QComboBox" name="waifu2xCaffeModeComboBox">
+                <property name="toolTip">
+                 <string>image processing mode</string>
+                </property>
                 <item>
                  <property name="text">
                   <string>noise_scale</string>
@@ -515,6 +552,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="waifu2xCaffeNoiseLevelSpinBox">
+                <property name="toolTip">
+                 <string>noise reduction level</string>
+                </property>
                 <property name="maximum">
                  <number>3</number>
                 </property>
@@ -536,6 +576,9 @@
               </item>
               <item>
                <widget class="QComboBox" name="waifu2xCaffeProcessComboBox">
+                <property name="toolTip">
+                 <string>process mode, cudnn requires CUDA and cuDNN to be installed</string>
+                </property>
                 <item>
                  <property name="text">
                   <string>gpu</string>
@@ -566,6 +609,9 @@
               </item>
               <item>
                <widget class="QComboBox" name="waifu2xCaffeModelComboBox">
+                <property name="toolTip">
+                 <string>name of the built-in model to use</string>
+                </property>
                 <item>
                  <property name="text">
                   <string>cunet</string>
@@ -621,6 +667,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="waifu2xCaffeCropSizeSpinBox">
+                <property name="toolTip">
+                 <string>input image split size</string>
+                </property>
                 <property name="maximum">
                  <number>9999</number>
                 </property>
@@ -642,6 +691,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="waifu2xCaffeOutputQualitySpinBox">
+                <property name="toolTip">
+                 <string>output image quality</string>
+                </property>
                 <property name="minimum">
                  <number>-1</number>
                 </property>
@@ -663,6 +715,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="waifu2xCaffeOutputDepthSpinBox">
+                <property name="toolTip">
+                 <string>output image chanel depth bit</string>
+                </property>
                 <property name="maximum">
                  <number>9999</number>
                 </property>
@@ -684,6 +739,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="waifu2xCaffeBatchSizeSpinBox">
+                <property name="toolTip">
+                 <string>input batch size</string>
+                </property>
                 <property name="maximum">
                  <number>9999</number>
                 </property>
@@ -704,7 +762,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="waifu2xCaffeGpuSpinBox"/>
+               <widget class="QSpinBox" name="waifu2xCaffeGpuSpinBox">
+                <property name="toolTip">
+                 <string>gpu device no</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -712,12 +774,28 @@
              <layout class="QHBoxLayout" name="waifu2xCaffeOptionsHorizontalLayout">
               <item>
                <widget class="QCheckBox" name="waifu2xCaffeTtaCheckBox">
+                <property name="toolTip">
+                 <string>8x slower and slightly high quality</string>
+                </property>
                 <property name="text">
-                 <string>TTA (Test-Time Augmentation)</string>
+                 <string>TTA</string>
                 </property>
                </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <spacer name="waifu2xCaffeVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -938,11 +1016,24 @@
               <item>
                <widget class="QCheckBox" name="waifu2xConverterCppTtaCheckBox">
                 <property name="text">
-                 <string>TTA (Test-Time Augmentation)</string>
+                 <string>TTA</string>
                 </property>
                </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <spacer name="waifu2xConverterCppVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -1077,11 +1168,24 @@
               <item>
                <widget class="QCheckBox" name="waifu2xNcnnVulkanTtaCheckBox">
                 <property name="text">
-                 <string>TTA (Test-Time Augmentation)</string>
+                 <string>TTA</string>
                 </property>
                </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <spacer name="waifu2xNcnnVulkanVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -1209,11 +1313,24 @@
               <item>
                <widget class="QCheckBox" name="srmdNcnnVulkanTtaCheckBox">
                 <property name="text">
-                 <string>TTA (Test-Time Augmentation)</string>
+                 <string>TTA</string>
                 </property>
                </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <spacer name="srmdNcnnVulkanVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -1222,6 +1339,48 @@
             <string>Anime4K CPP</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout">
+            <item row="7" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppThreadsHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppThreadsLabel">
+                <property name="text">
+                 <string>Threads</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppThreadsSpinBox">
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+                <property name="value">
+                 <number>16</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppPassesHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="anime4kCppPassesLabel">
+                <property name="text">
+                 <string>Passes</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="anime4kCppPassesSpinBox">
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+                <property name="value">
+                 <number>2</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
             <item row="1" column="1">
              <layout class="QHBoxLayout" name="anime4kCppPreFiltersHorizontalLayout">
               <item>
@@ -1264,22 +1423,25 @@
               </item>
              </layout>
             </item>
-            <item row="7" column="0">
-             <layout class="QHBoxLayout" name="anime4kCppThreadsHorizontalLayout">
+            <item row="4" column="0">
+             <layout class="QHBoxLayout" name="anime4kCppStrengthGradientHorizontalLayout">
               <item>
-               <widget class="QLabel" name="anime4kCppThreadsLabel">
+               <widget class="QLabel" name="anime4kCppStrengthGradientLabel">
                 <property name="text">
-                 <string>Threads</string>
+                 <string>Strength Gradient</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="anime4kCppThreadsSpinBox">
+               <widget class="QDoubleSpinBox" name="anime4kCppStrengthGradientSpinBox">
                 <property name="maximum">
-                 <number>99999</number>
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
                 </property>
                 <property name="value">
-                 <number>16</number>
+                 <double>1.000000000000000</double>
                 </property>
                </widget>
               </item>
@@ -1364,30 +1526,6 @@
               </item>
              </layout>
             </item>
-            <item row="2" column="1">
-             <layout class="QHBoxLayout" name="anime4kCppPostFiltersHorizontalLayout">
-              <item>
-               <widget class="QLabel" name="anime4kCppPostFiltersLabel">
-                <property name="text">
-                 <string>Post-Filters</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="anime4kCppPostFiltersSpinBox">
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <number>99999</number>
-                </property>
-                <property name="value">
-                 <number>40</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
             <item row="7" column="1">
              <layout class="QHBoxLayout" name="anime4kCppCodecHorizontalLayout">
               <item>
@@ -1433,27 +1571,6 @@
               </item>
              </layout>
             </item>
-            <item row="1" column="0">
-             <layout class="QHBoxLayout" name="anime4kCppPassesHorizontalLayout">
-              <item>
-               <widget class="QLabel" name="anime4kCppPassesLabel">
-                <property name="text">
-                 <string>Passes</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="anime4kCppPassesSpinBox">
-                <property name="maximum">
-                 <number>99999</number>
-                </property>
-                <property name="value">
-                 <number>2</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
             <item row="0" column="0" colspan="2">
              <layout class="QHBoxLayout" name="anime4kCppPathHorizontalLayout">
               <item>
@@ -1489,29 +1606,42 @@
               </item>
              </layout>
             </item>
-            <item row="4" column="0">
-             <layout class="QHBoxLayout" name="anime4kCppStrengthGradientHorizontalLayout">
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="anime4kCppPostFiltersHorizontalLayout">
               <item>
-               <widget class="QLabel" name="anime4kCppStrengthGradientLabel">
+               <widget class="QLabel" name="anime4kCppPostFiltersLabel">
                 <property name="text">
-                 <string>Strength Gradient</string>
+                 <string>Post-Filters</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="anime4kCppStrengthGradientSpinBox">
-                <property name="maximum">
-                 <double>1.000000000000000</double>
+               <widget class="QSpinBox" name="anime4kCppPostFiltersSpinBox">
+                <property name="minimum">
+                 <number>1</number>
                 </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
+                <property name="maximum">
+                 <number>99999</number>
                 </property>
                 <property name="value">
-                 <double>1.000000000000000</double>
+                 <number>40</number>
                 </property>
                </widget>
               </item>
              </layout>
+            </item>
+            <item row="10" column="0" colspan="2">
+             <spacer name="anime4kCppVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -1523,6 +1653,628 @@
        <attribute name="title">
         <string>FFmpeg Settings</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_17">
+        <item>
+         <widget class="QTabWidget" name="ffmpegSettingsTabWidget">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="ffmpegGlobalOptionsTab">
+           <attribute name="title">
+            <string>Global Options</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_33">
+            <item>
+             <layout class="QHBoxLayout" name="ffmpegPathHboxLayout">
+              <item>
+               <widget class="QLineEdit" name="ffmpegPathLineEdit"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="ffmpegPathSelectButton">
+                <property name="text">
+                 <string>Select FFmpeg Binary Directory</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="ffmpegIntermediateFileNameHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="ffmpegIntermediateFileNameLabel">
+                <property name="text">
+                 <string>Intermediate File Name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="ffmpegIntermediateFileNameLineEdit">
+                <property name="text">
+                 <string>intermediate.mkv</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="ffmpegGeneralOptionsVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="ffmpegExtractFramesTab">
+           <attribute name="title">
+            <string>Frame Extraction</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_18">
+            <item>
+             <widget class="QGroupBox" name="ffmpegExtractFramesInputOptionsGroupBox">
+              <property name="title">
+               <string>Input Options</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_27">
+               <item>
+                <widget class="QLabel" name="ffmpegExtractFramesInputOptionsLabel">
+                 <property name="text">
+                  <string>There are no input options for this stage.</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="ffmpegExtractFramesOutputOptionsGroupBox">
+              <property name="title">
+               <string>Output Options</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_24">
+               <item>
+                <layout class="QHBoxLayout" name="ffmpegExtractFramesOutputOptionsPixelFormatHorizontalLayout">
+                 <item>
+                  <widget class="QLabel" name="ffmpegExtractFramesOutputOptionsPixelFormatLabel">
+                   <property name="text">
+                    <string>Pixel Format (-pix_fmt)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="ffmpegExtractFramesOutputOptionsPixelFormatLineEdit">
+                   <property name="text">
+                    <string>rgba64be</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="ffmpegExtractFramesGeneralGroupBox">
+              <property name="title">
+               <string>General</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_19">
+               <item>
+                <widget class="QCheckBox" name="ffmpegExtractFramesHardwareAccelerationCheckBox">
+                 <property name="text">
+                  <string>Hardware Acceleration (-hwaccel auto)</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="ffmpegExtractFramesVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="ffmpegAssembleVideoTab">
+           <attribute name="title">
+            <string>Video Assembly</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_23">
+            <item>
+             <widget class="QGroupBox" name="ffmpegAssembleVideoInputOptionsGroupBox">
+              <property name="title">
+               <string>Input Options</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_25">
+               <item>
+                <layout class="QHBoxLayout" name="ffmpegAssembleVideoInputOptionsForceFormatHorizontalLayout">
+                 <item>
+                  <widget class="QLabel" name="ffmpegAssembleVideoInputOptionsForceFormatLabel">
+                   <property name="text">
+                    <string>Force Format (-f)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="ffmpegAssembleVideoInputOptionsForceFormatLineEdit">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>image2</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="ffmpegAssembleVideoOutputOptionsGroupBox">
+              <property name="title">
+               <string>Output Options</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_26">
+               <item>
+                <layout class="QHBoxLayout" name="ffmpegAssembleVideoOutputOptionsVideoCodecHorizontalLayout">
+                 <item>
+                  <widget class="QLabel" name="ffmpegAssembleVideoOutputOptionsVideoCodecLabel">
+                   <property name="text">
+                    <string>Video Codec (-vcodec)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="ffmpegAssembleVideoOutputOptionsVideoCodecLineEdit">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>libx264</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="ffmpegAssembleVideoOutputOptionsPixelFormatHorizontalLayout">
+                 <item>
+                  <widget class="QLabel" name="ffmpegAssembleVideoOutputOptionsPixelFormatLabel">
+                   <property name="text">
+                    <string>Pixel Format (-pix_fmt)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="ffmpegAssembleVideoOutputOptionsPixelFormatLineEdit">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>yuv444p10le</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="ffmpegAssembleVideoOutputOptionsCrfHorizontalLayout">
+                 <item>
+                  <widget class="QLabel" name="ffmpegAssembleVideoOutputOptionsCrfLabel">
+                   <property name="text">
+                    <string>H.264/H.265 Constant Rate Factor (-crf)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="ffmpegAssembleVideoOutputOptionsCrfSpinBox">
+                   <property name="maximum">
+                    <number>51</number>
+                   </property>
+                   <property name="value">
+                    <number>17</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="ffmpegAssembleVideoOutputOptionsBitrateHorizontalLayout">
+                 <item>
+                  <widget class="QLabel" name="ffmpegAssembleVideoOutputOptionsBitrateLabel">
+                   <property name="text">
+                    <string>Target Average Bitrate (-b:v)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="ffmpegAssembleVideoOutputOptionsBitrateLineEdit">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="ffmpegAssembleVideoGeneralGroupBox">
+              <property name="title">
+               <string>General</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_22">
+               <item>
+                <widget class="QCheckBox" name="ffmpegAssembleVideoHardwareAccelerationCheckBox">
+                 <property name="text">
+                  <string>Hardware Acceleration (-hwaccel auto)</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="ffmpegAssembleVideoOutputOptionsVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="ffmpegMigrateStreamsTab">
+           <attribute name="title">
+            <string>Streams Migration</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_30">
+            <item>
+             <widget class="QGroupBox" name="ffmpegMigrateStreamsInputOptionsGroupBox">
+              <property name="title">
+               <string>Input Options</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_28">
+               <item>
+                <widget class="QLabel" name="ffmpegMigrateStreamsInputOptionsLabel">
+                 <property name="text">
+                  <string>There are no input options for this stage.</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="ffmpegMigrateStreamsOutputOptionsGroupBox">
+              <property name="title">
+               <string>Output Options</string>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QGroupBox" name="ffmpegMigrateStreamsOutputOptionsMappingGroupBox">
+                 <property name="title">
+                  <string>Mapping</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_31">
+                  <item>
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsMappingVideoCheckBox">
+                    <property name="text">
+                     <string>Copy additional video streams (-map 0:v?)</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsMappingAudioCheckBox">
+                    <property name="text">
+                     <string>Copy audio streams (-map 1:a?)</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsMappingSubtitleCheckBox">
+                    <property name="text">
+                     <string>Copy subtitle streams (-map 1:s?)</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsMappingDataCheckBox">
+                    <property name="text">
+                     <string>Copy data streams (-map 1:d?)</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsMappingFontCheckBox">
+                    <property name="text">
+                     <string>Copy fonts (-map 1:t?)</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="ffmpegMigrateStreamsOutputOptionsOtherGroupBox">
+                 <property name="title">
+                  <string>Other Options</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_32">
+                  <item>
+                   <layout class="QHBoxLayout" name="ffmpegMigrateStreamsOutputOptionsOtherPixelFormatHorizontalLayout">
+                    <item>
+                     <widget class="QLabel" name="ffmpegMigrateStreamsOutputOptionsOtherPixelFormatLabel">
+                      <property name="text">
+                       <string>Pixel Format (-pix_fmt)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="ffmpegMigrateStreamsOutputOptionsPixelFormatLineEdit"/>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsCopyCodecCheckBox">
+                    <property name="text">
+                     <string>Copy codec</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsOtherCopyKnownMetadataTagsCheckBox">
+                    <property name="text">
+                     <string>Copy known metadata tags</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsOtherCopyArbitraryMetadataTagsCheckBox">
+                    <property name="text">
+                     <string>Copy arbitrary metadata tags</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="ffmpegMigrateStreamsGeneralGroupBox">
+              <property name="title">
+               <string>Switches</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_29">
+               <item>
+                <widget class="QCheckBox" name="ffmpegMigrateStreamsHardwareAccelerationCheckBox">
+                 <property name="text">
+                  <string>Hardware Acceleration (-hwaccel auto)</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="ffmpegMigrateStreamsVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="gifskiSettingsTab">
+       <attribute name="title">
+        <string>Gifski Settings</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_20">
+        <item>
+         <layout class="QHBoxLayout" name="gifskiPathHorizontalLayout">
+          <item>
+           <widget class="QLineEdit" name="gifskiPathLineEdit"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="gifskiPathSelectButton">
+            <property name="text">
+             <string>Select Gifski Binary</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="gifskiQualityHorizontalLayout">
+          <item>
+           <widget class="QLabel" name="gifskiQualityLabel">
+            <property name="text">
+             <string>Quality</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="gifskiQualitySpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>100</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="gifskiWidthHorizontalLayout">
+          <item>
+           <widget class="QLabel" name="gifskiWidthLabel">
+            <property name="text">
+             <string>Width</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="gifskiWidthSpinBox"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="gifskiHeightHorizontalLayout">
+          <item>
+           <widget class="QLabel" name="gifskiHeightLabel">
+            <property name="text">
+             <string>Height</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="gifskiHeightSpinBox"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="gifskiSwitchesGroupBox">
+          <property name="title">
+           <string>Switches</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_21">
+           <item>
+            <widget class="QCheckBox" name="gifskiFastCheckBox">
+             <property name="text">
+              <string>Fast</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="gifskiOnceCheckBox">
+             <property name="text">
+              <string>Once</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="gifskiQuietCheckBox">
+             <property name="text">
+              <string>Quiet</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="gifskiVerticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="toolsTab">
        <attribute name="title">
@@ -1540,7 +2292,11 @@
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_16">
             <item>
-             <widget class="QPlainTextEdit" name="ffprobePlainTextEdit"/>
+             <widget class="QPlainTextEdit" name="ffprobePlainTextEdit">
+              <property name="plainText">
+               <string>Drop a file in this box to get its FFprobe output.</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -1737,7 +2493,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>667</width>
+     <width>671</width>
      <height>21</height>
     </rect>
    </property>

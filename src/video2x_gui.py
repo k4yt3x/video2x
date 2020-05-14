@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 12, 2020
+Last Modified: May 14, 2020
 """
 
 # local imports
@@ -30,7 +30,7 @@ from PyQt5.QtWidgets import *
 import magic
 # QObject, pyqtSlot, pyqtSignal, QRunnable, QThreadPool, QAbstractTableModel, Qt
 
-VERSION = '2.0.0'
+VERSION = '2.1.0'
 
 LEGAL_INFO = f'''Video2X GUI Version: {VERSION}\\
 Author: K4YT3X\\
@@ -345,7 +345,38 @@ class Video2XMainWindow(QMainWindow):
         self.anime4kcpp_gpu_mode_check_box = self.findChild(QCheckBox, 'anime4kCppGpuModeCheckBox')
 
         # FFmpeg settings
-        pass
+        # global options
+        self.ffmpeg_path_line_edit = self.findChild(QLineEdit, 'ffmpegPathLineEdit')
+        self.enable_line_edit_file_drop(self.ffmpeg_path_line_edit)
+        self.ffmpeg_path_select_button = self.findChild(QPushButton, 'ffmpegPathSelectButton')
+        self.ffmpeg_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.ffmpeg_path_line_edit))
+        self.ffmpeg_intermediate_file_name_line_edit = self.findChild(QLineEdit, 'ffmpegIntermediateFileNameLineEdit')
+
+        # extract frames
+        self.ffmpeg_extract_frames_output_options_pixel_format_line_edit = self.findChild(QLineEdit, 'ffmpegExtractFramesOutputOptionsPixelFormatLineEdit')
+        self.ffmpeg_extract_frames_hardware_acceleration_check_box = self.findChild(QCheckBox, 'ffmpegExtractFramesHardwareAccelerationCheckBox')
+
+        # assemble video
+        self.ffmpeg_assemble_video_input_options_force_format_line_edit = self.findChild(QLineEdit, 'ffmpegAssembleVideoInputOptionsForceFormatLineEdit')
+        self.ffmpeg_assemble_video_output_options_video_codec_line_edit = self.findChild(QLineEdit, 'ffmpegAssembleVideoOutputOptionsVideoCodecLineEdit')
+        self.ffmpeg_assemble_video_output_options_pixel_format_line_edit = self.findChild(QLineEdit, 'ffmpegAssembleVideoOutputOptionsPixelFormatLineEdit')
+        self.ffmpeg_assemble_video_output_options_crf_spin_box = self.findChild(QSpinBox, 'ffmpegAssembleVideoOutputOptionsCrfSpinBox')
+        self.ffmpeg_assemble_video_output_options_bitrate_line_edit = self.findChild(QLineEdit, 'ffmpegAssembleVideoOutputOptionsBitrateLineEdit')
+        self.ffmpeg_assemble_video_hardware_acceleration_check_box = self.findChild(QCheckBox, 'ffmpegAssembleVideoHardwareAccelerationCheckBox')
+
+        # migrate_streams
+        self.ffmpeg_migrate_streams_output_options_mapping_video_check_box_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsMappingVideoCheckBox')
+        self.ffmpeg_migrate_streams_output_options_mapping_audio_check_box_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsMappingAudioCheckBox')
+        self.ffmpeg_migrate_streams_output_options_mapping_subtitle_check_box_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsMappingSubtitleCheckBox')
+        self.ffmpeg_migrate_streams_output_options_mapping_data_check_box_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsMappingDataCheckBox')
+        self.ffmpeg_migrate_streams_output_options_mapping_font_check_box_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsMappingFontCheckBox')
+        self.ffmpeg_migrate_streams_output_options_pixel_format_line_edit = self.findChild(QLineEdit, 'ffmpegMigrateStreamsOutputOptionsPixelFormatLineEdit')
+        self.ffmpeg_migrate_streams_output_options_copy_codec_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsCopyCodecCheckBox')
+        self.ffmpeg_migrate_streams_output_options_copy_known_metadata_tags_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsOtherCopyKnownMetadataTagsCheckBox')
+        self.ffmpeg_migrate_streams_output_options_copy_arbitrary_metadata_tags_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsOtherCopyArbitraryMetadataTagsCheckBox')
+        self.ffmpeg_migrate_streams_hardware_acceleration_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsHardwareAccelerationCheckBox')
+
+        # Gifski settings
 
         # Tools
         self.ffprobe_plain_text_edit = self.findChild(QPlainTextEdit, 'ffprobePlainTextEdit')
@@ -491,6 +522,28 @@ class Video2XMainWindow(QMainWindow):
         self.anime4kcpp_post_processing_check_box.setChecked(settings['postprocessing'])
         self.anime4kcpp_gpu_mode_check_box.setChecked(settings['GPUMode'])
 
+        # ffmpeg
+        # global options
+        settings = self.config['ffmpeg']
+        self.ffmpeg_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['ffmpeg_path'])).absolute()))
+        self.ffmpeg_intermediate_file_name_line_edit.setText(settings['intermediate_file_name'])
+
+        # extract frames
+        settings = self.config['ffmpeg']['extract_frames']
+        self.ffmpeg_extract_frames_output_options_pixel_format_line_edit.setText(settings['output_options']['-pix_fmt'])
+
+        # assemble video
+        settings = self.config['ffmpeg']['assemble_video']
+        self.ffmpeg_assemble_video_input_options_force_format_line_edit.setText(settings['input_options']['-f'])
+        self.ffmpeg_assemble_video_output_options_video_codec_line_edit.setText(settings['output_options']['-vcodec'])
+        self.ffmpeg_assemble_video_output_options_pixel_format_line_edit.setText(settings['output_options']['-pix_fmt'])
+        self.ffmpeg_assemble_video_output_options_crf_spin_box.setValue(settings['output_options']['-crf'])
+        self.ffmpeg_assemble_video_output_options_bitrate_line_edit.setText(settings['output_options']['-b:v'])
+
+        # migrate streams
+        settings = self.config['ffmpeg']['migrate_streams']
+        self.ffmpeg_migrate_streams_output_options_pixel_format_line_edit.setText(settings['output_options']['-pix_fmt'])
+
     def resolve_driver_settings(self):
 
         # waifu2x-caffe
@@ -556,6 +609,76 @@ class Video2XMainWindow(QMainWindow):
         self.config['anime4kcpp']['preprocessing'] = bool(self.anime4kcpp_pre_processing_check_box.isChecked())
         self.config['anime4kcpp']['postprocessing'] = bool(self.anime4kcpp_post_processing_check_box.isChecked())
         self.config['anime4kcpp']['GPUMode'] = bool(self.anime4kcpp_gpu_mode_check_box.isChecked())
+
+        # ffmpeg
+        self.config['ffmpeg']['ffmpeg_path'] = os.path.expandvars(self.ffmpeg_path_line_edit.text())
+        self.config['ffmpeg']['intermediate_file_name'] = self.ffmpeg_intermediate_file_name_line_edit.text()
+
+        # extract frames
+        self.config['ffmpeg']['extract_frames']['output_options']['-pix_fmt'] = self.ffmpeg_extract_frames_output_options_pixel_format_line_edit.text()
+        if self.ffmpeg_extract_frames_hardware_acceleration_check_box.isChecked():
+            self.config['ffmpeg']['extract_frames']['-hwaccel'] = 'auto'
+        else:
+            self.config['ffmpeg']['extract_frames'].pop('-hwaccel', None)
+
+        # assemble video
+        self.config['ffmpeg']['assemble_video']['input_options']['-f'] = self.ffmpeg_assemble_video_input_options_force_format_line_edit.text()
+        self.config['ffmpeg']['assemble_video']['output_options']['-vcodec'] = self.ffmpeg_assemble_video_output_options_video_codec_line_edit.text()
+        self.config['ffmpeg']['assemble_video']['output_options']['-pix_fmt'] = self.ffmpeg_assemble_video_output_options_pixel_format_line_edit.text()
+        self.config['ffmpeg']['assemble_video']['output_options']['-crf'] = self.ffmpeg_assemble_video_output_options_crf_spin_box.value()
+        if self.ffmpeg_assemble_video_output_options_bitrate_line_edit.text() != '':
+            self.config['ffmpeg']['assemble_video']['output_options']['-b:v'] = self.ffmpeg_assemble_video_output_options_bitrate_line_edit.text()
+        else:
+            self.config['ffmpeg']['assemble_video']['output_options']['-b:v'] = None
+        if self.ffmpeg_assemble_video_hardware_acceleration_check_box.isChecked():
+            self.config['ffmpeg']['assemble_video']['-hwaccel'] = 'auto'
+        else:
+            self.config['ffmpeg']['assemble_video'].pop('-hwaccel', None)
+
+        # migrate streams
+
+        self.config['ffmpeg']['migrate_streams']['output_options']['-map'] = []
+        if self.ffmpeg_migrate_streams_output_options_mapping_video_check_box_check_box.isChecked():
+            self.config['ffmpeg']['migrate_streams']['output_options']['-map'].append('0:v?')
+        if self.ffmpeg_migrate_streams_output_options_mapping_audio_check_box_check_box.isChecked():
+            self.config['ffmpeg']['migrate_streams']['output_options']['-map'].append('1:a?')
+        if self.ffmpeg_migrate_streams_output_options_mapping_subtitle_check_box_check_box.isChecked():
+            self.config['ffmpeg']['migrate_streams']['output_options']['-map'].append('1:s?')
+        if self.ffmpeg_migrate_streams_output_options_mapping_data_check_box_check_box.isChecked():
+            self.config['ffmpeg']['migrate_streams']['output_options']['-map'].append('1:d?')
+        if self.ffmpeg_migrate_streams_output_options_mapping_font_check_box_check_box.isChecked():
+            self.config['ffmpeg']['migrate_streams']['output_options']['-map'].append('1:t?')
+
+        # if the list is empty, delete the key
+        # otherwise parser will run into an error (key with no value)
+        if len(self.config['ffmpeg']['migrate_streams']['output_options']['-map']) == 0:
+            self.config['ffmpeg']['migrate_streams']['output_options'].pop('-map', None)
+
+        self.config['ffmpeg']['migrate_streams']['output_options']['-pix_fmt'] = self.ffmpeg_migrate_streams_output_options_pixel_format_line_edit.text()
+
+        # copy source codec
+        if self.ffmpeg_migrate_streams_output_options_copy_codec_check_box.isChecked():
+            self.config['ffmpeg']['migrate_streams']['output_options']['-c'] = 'copy'
+        else:
+            self.config['ffmpeg']['migrate_streams']['output_options'].pop('-c', None)
+
+        # copy known metadata
+        if self.ffmpeg_migrate_streams_output_options_copy_known_metadata_tags_check_box.isChecked():
+            self.config['ffmpeg']['migrate_streams']['output_options']['-map_metadata'] = 0
+        else:
+            self.config['ffmpeg']['migrate_streams']['output_options'].pop('-map_metadata', None)
+
+        # copy arbitrary metadata
+        if self.ffmpeg_migrate_streams_output_options_copy_arbitrary_metadata_tags_check_box.isChecked():
+            self.config['ffmpeg']['migrate_streams']['output_options']['-movflags'] = 'use_metadata_tags'
+        else:
+            self.config['ffmpeg']['migrate_streams']['output_options'].pop('-movflags', None)
+
+        # hardware acceleration
+        if self.ffmpeg_migrate_streams_hardware_acceleration_check_box.isChecked():
+            self.config['ffmpeg']['migrate_streams']['-hwaccel'] = 'auto'
+        else:
+            self.config['ffmpeg']['migrate_streams'].pop('-hwaccel', None)
 
     def update_gui_for_driver(self):
         current_driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
