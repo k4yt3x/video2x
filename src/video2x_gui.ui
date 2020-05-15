@@ -1930,6 +1930,16 @@
                  </item>
                 </layout>
                </item>
+               <item>
+                <widget class="QCheckBox" name="ffmpegAssembleVideoOutputOptionsEnsureDivisibleCheckBox">
+                 <property name="text">
+                  <string>Ensure output width and height are divisible by 2</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
             </item>

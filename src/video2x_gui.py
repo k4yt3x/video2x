@@ -362,6 +362,7 @@ class Video2XMainWindow(QMainWindow):
         self.ffmpeg_assemble_video_output_options_pixel_format_line_edit = self.findChild(QLineEdit, 'ffmpegAssembleVideoOutputOptionsPixelFormatLineEdit')
         self.ffmpeg_assemble_video_output_options_crf_spin_box = self.findChild(QSpinBox, 'ffmpegAssembleVideoOutputOptionsCrfSpinBox')
         self.ffmpeg_assemble_video_output_options_bitrate_line_edit = self.findChild(QLineEdit, 'ffmpegAssembleVideoOutputOptionsBitrateLineEdit')
+        self.ffmpeg_assemble_video_output_options_ensure_divisible_check_box = self.findChild(QCheckBox, 'ffmpegAssembleVideoOutputOptionsEnsureDivisibleCheckBox')
         self.ffmpeg_assemble_video_hardware_acceleration_check_box = self.findChild(QCheckBox, 'ffmpegAssembleVideoHardwareAccelerationCheckBox')
 
         # migrate_streams
@@ -649,6 +650,19 @@ class Video2XMainWindow(QMainWindow):
             self.config['ffmpeg']['assemble_video']['output_options']['-b:v'] = self.ffmpeg_assemble_video_output_options_bitrate_line_edit.text()
         else:
             self.config['ffmpeg']['assemble_video']['output_options']['-b:v'] = None
+
+        if self.ffmpeg_assemble_video_output_options_ensure_divisible_check_box.isChecked():
+            # if video filter is enabled and is not empty and is not equal to divisible by two filter
+            # append divisible by two filter to the end of existing filter
+            if ('-vf' in self.config['ffmpeg']['assemble_video']['output_options'] and
+                    len(self.config['ffmpeg']['assemble_video']['output_options']['-vf']) > 0 and
+                    self.config['ffmpeg']['assemble_video']['output_options']['-vf'] != 'pad=ceil(iw/2)*2:ceil(ih/2)*2'):
+                self.config['ffmpeg']['assemble_video']['output_options']['-vf'] += ',pad=ceil(iw/2)*2:ceil(ih/2)*2'
+            else:
+                self.config['ffmpeg']['assemble_video']['output_options']['-vf'] = 'pad=ceil(iw/2)*2:ceil(ih/2)*2'
+        else:
+            self.config['ffmpeg']['assemble_video']['output_options'].pop('-vf', None)
+
         if self.ffmpeg_assemble_video_hardware_acceleration_check_box.isChecked():
             self.config['ffmpeg']['assemble_video']['-hwaccel'] = 'auto'
         else:
