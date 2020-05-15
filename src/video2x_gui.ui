@@ -2213,7 +2213,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="gifskiWidthSpinBox"/>
+           <widget class="QSpinBox" name="gifskiWidthSpinBox">
+            <property name="maximum">
+             <number>99999</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -2227,7 +2231,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="gifskiHeightSpinBox"/>
+           <widget class="QSpinBox" name="gifskiHeightSpinBox">
+            <property name="maximum">
+             <number>99999</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

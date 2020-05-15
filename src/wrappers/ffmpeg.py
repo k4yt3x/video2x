@@ -257,7 +257,7 @@ class Ffmpeg:
                 value = self.ffmpeg_settings[phase][key]
 
             # null or None means that leave this option out (keep default)
-            if value is None or value is False or isinstance(value, dict):
+            if value is None or value is False or isinstance(value, dict) or value == '':
                 continue
 
             # if the value is a list, append the same argument and all values
