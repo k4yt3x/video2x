@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 11, 2020
+Last Modified: May 15, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -50,6 +50,7 @@ smooth and edges sharp.
 
 # local imports
 from upscaler import AVAILABLE_DRIVERS
+from upscaler import UPSCALER_VERSION
 from upscaler import Upscaler
 
 # built-in imports
@@ -79,13 +80,14 @@ language.install()
 _ = language.gettext
 
 
-VERSION = '4.0.0'
+CLI_VERSION = '4.0.0'
 
-LEGAL_INFO = _('''Video2X Version: {}
+LEGAL_INFO = _('''Video2X CLI Version: {}
+Upscaler Version: {}
 Author: K4YT3X
 License: GNU GPL v3
 Github Page: https://github.com/k4yt3x/video2x
-Contact: k4yt3x@k4yt3x.com''').format(VERSION)
+Contact: k4yt3x@k4yt3x.com''').format(CLI_VERSION, UPSCALER_VERSION)
 
 LOGO = r'''
     __      __  _       _                  ___   __   __
@@ -135,7 +137,7 @@ def print_logo():
     """print video2x logo"""
     print(LOGO)
     print(f'\n{"Video2X Video Enlarger".rjust(40, " ")}')
-    print(f'\n{Avalon.FM.BD}{f"Version {VERSION}".rjust(36, " ")}{Avalon.FM.RST}\n')
+    print(f'\n{Avalon.FM.BD}{f"Version {CLI_VERSION}".rjust(36, " ")}{Avalon.FM.RST}\n')
 
 
 def read_config(config_file: pathlib.Path) -> dict:

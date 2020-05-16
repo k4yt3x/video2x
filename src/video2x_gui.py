@@ -4,10 +4,11 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 14, 2020
+Last Modified: May 15, 2020
 """
 
 # local imports
+from upscaler import UPSCALER_VERSION
 from upscaler import Upscaler
 from wrappers.ffmpeg import Ffmpeg
 
@@ -30,9 +31,10 @@ from PyQt5.QtWidgets import *
 import magic
 # QObject, pyqtSlot, pyqtSignal, QRunnable, QThreadPool, QAbstractTableModel, Qt
 
-VERSION = '2.1.0'
+GUI_VERSION = '2.1.0'
 
-LEGAL_INFO = f'''Video2X GUI Version: {VERSION}\\
+LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
+Upscaler Version: {UPSCALER_VERSION}\\
 Author: K4YT3X\\
 License: GNU GPL v3\\
 Github Page: [https://github.com/k4yt3x/video2x](https://github.com/k4yt3x/video2x)\\
@@ -180,7 +182,7 @@ class Video2XMainWindow(QMainWindow):
 
         # set window title and icon
         self.video2x_icon_path = str(resource_path('images/video2x.png'))
-        self.setWindowTitle(f'Video2X GUI {VERSION}')
+        self.setWindowTitle(f'Video2X GUI {GUI_VERSION}')
         self.setWindowIcon(QtGui.QIcon(self.video2x_icon_path))
 
         # menu bar

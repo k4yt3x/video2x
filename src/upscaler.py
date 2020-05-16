@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 12, 2020
+Last Modified: May 15, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -47,6 +47,9 @@ default_locale, encoding = locale.getdefaultlocale()
 language = gettext.translation(DOMAIN, LOCALE_DIRECTORY, [default_locale], fallback=True)
 language.install()
 _ = language.gettext
+
+# version information
+UPSCALER_VERSION = '4.0.0'
 
 # these names are consistent for
 # - driver selection in command line
