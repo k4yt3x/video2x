@@ -86,7 +86,7 @@ The list is sorted from new to old.
 
 ### Video2X GUI
 
-![GUI Preview](https://user-images.githubusercontent.com/21986859/81662226-cacb1480-942c-11ea-831f-2f0827f9cd11.png)\
+![GUI Preview](https://user-images.githubusercontent.com/21986859/82119295-bc526500-976c-11ea-9ea8-53264689023e.png)\
 *Video2X GUI Screenshot*
 
 ### Video2X CLI
