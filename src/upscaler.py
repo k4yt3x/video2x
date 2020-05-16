@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 15, 2020
+Last Modified: May 16, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -49,7 +49,7 @@ language.install()
 _ = language.gettext
 
 # version information
-UPSCALER_VERSION = '4.0.0'
+UPSCALER_VERSION = '4.1.0'
 
 # these names are consistent for
 # - driver selection in command line
@@ -242,14 +242,6 @@ class Upscaler:
             else:
                 self.driver_settings['scale_width'] = None
                 self.driver_settings['scale_height'] = None
-
-        # temporary file type check for Anime4KCPP
-        # it doesn't support GIF processing yet
-        if self.driver == 'anime4kcpp':
-            for task in self.processing_queue.queue:
-                if task[0].suffix.lower() == '.gif':
-                    Avalon.error(_('Anime4KCPP doesn\'t yet support GIF processing'))
-                    raise AttributeError('Anime4KCPP doesn\'t yet support GIF file processing')
 
     def _upscale_frames(self):
         """ Upscale video frames with waifu2x-caffe
@@ -480,72 +472,58 @@ class Upscaler:
                 # if input file is a image/gif file or a video
                 elif input_file_mime_type == 'image/gif' or input_file_type == 'video':
 
-                    # drivers that have native support for video processing
-                    if input_file_type == 'video' and self.driver == 'anime4kcpp':
-                        Avalon.info(_('Starting to upscale video with Anime4KCPP'))
-                        # enable video processing mode for Anime4KCPP
-                        self.driver_settings['videoMode'] = True
-                        self.process_pool.append(self.driver_object.upscale(self.current_input_file, output_path))
-                        self._wait()
-                        Avalon.info(_('Upscaling completed'))
-                        self.processing_queue.task_done()
-                        self.total_processed += 1
-                        continue
+                    self.create_temp_directories()
 
-                    else:
-                        self.create_temp_directories()
+                    # get video information JSON using FFprobe
+                    Avalon.info(_('Reading video information'))
+                    video_info = self.ffmpeg_object.probe_file_info(self.current_input_file)
+                    # analyze original video with FFprobe and retrieve framerate
+                    # width, height = info['streams'][0]['width'], info['streams'][0]['height']
 
-                        # get video information JSON using FFprobe
-                        Avalon.info(_('Reading video information'))
-                        video_info = self.ffmpeg_object.probe_file_info(self.current_input_file)
-                        # analyze original video with FFprobe and retrieve framerate
-                        # width, height = info['streams'][0]['width'], info['streams'][0]['height']
+                    # find index of video stream
+                    video_stream_index = None
+                    for stream in video_info['streams']:
+                        if stream['codec_type'] == 'video':
+                            video_stream_index = stream['index']
+                            break
 
-                        # find index of video stream
-                        video_stream_index = None
-                        for stream in video_info['streams']:
-                            if stream['codec_type'] == 'video':
-                                video_stream_index = stream['index']
-                                break
+                    # exit if no video stream found
+                    if video_stream_index is None:
+                        Avalon.error(_('Aborting: No video stream found'))
+                        raise StreamNotFoundError('no video stream found')
 
-                        # exit if no video stream found
-                        if video_stream_index is None:
-                            Avalon.error(_('Aborting: No video stream found'))
-                            raise StreamNotFoundError('no video stream found')
+                    # get average frame rate of video stream
+                    framerate = float(Fraction(video_info['streams'][video_stream_index]['r_frame_rate']))
+                    Avalon.info(_('Framerate: {}').format(framerate))
+                    # self.ffmpeg_object.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
 
-                        # get average frame rate of video stream
-                        framerate = float(Fraction(video_info['streams'][video_stream_index]['r_frame_rate']))
-                        Avalon.info(_('Framerate: {}').format(framerate))
-                        # self.ffmpeg_object.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
+                    # extract frames from video
+                    self.process_pool.append((self.ffmpeg_object.extract_frames(self.current_input_file, self.extracted_frames)))
+                    self._wait()
 
-                        # extract frames from video
-                        self.process_pool.append((self.ffmpeg_object.extract_frames(self.current_input_file, self.extracted_frames)))
-                        self._wait()
+                    # if driver is waifu2x-caffe
+                    # pass pixel format output depth information
+                    if self.driver == 'waifu2x_caffe':
+                        # get a dict of all pixel formats and corresponding bit depth
+                        pixel_formats = self.ffmpeg_object.get_pixel_formats()
 
-                        # if driver is waifu2x-caffe
-                        # pass pixel format output depth information
-                        if self.driver == 'waifu2x_caffe':
-                            # get a dict of all pixel formats and corresponding bit depth
-                            pixel_formats = self.ffmpeg_object.get_pixel_formats()
+                        # try getting pixel format's corresponding bti depth
+                        try:
+                            self.driver_settings['output_depth'] = pixel_formats[self.ffmpeg_object.pixel_format]
+                        except KeyError:
+                            Avalon.error(_('Unsupported pixel format: {}').format(self.ffmpeg_object.pixel_format))
+                            raise UnsupportedPixelError(f'unsupported pixel format {self.ffmpeg_object.pixel_format}')
 
-                            # try getting pixel format's corresponding bti depth
-                            try:
-                                self.driver_settings['output_depth'] = pixel_formats[self.ffmpeg_object.pixel_format]
-                            except KeyError:
-                                Avalon.error(_('Unsupported pixel format: {}').format(self.ffmpeg_object.pixel_format))
-                                raise UnsupportedPixelError(f'unsupported pixel format {self.ffmpeg_object.pixel_format}')
+                    # width/height will be coded width/height x upscale factor
+                    # original_width = video_info['streams'][video_stream_index]['width']
+                    # original_height = video_info['streams'][video_stream_index]['height']
+                    # scale_width = int(self.scale_ratio * original_width)
+                    # scale_height = int(self.scale_ratio * original_height)
 
-
-                        # width/height will be coded width/height x upscale factor
-                        # original_width = video_info['streams'][video_stream_index]['width']
-                        # original_height = video_info['streams'][video_stream_index]['height']
-                        # scale_width = int(self.scale_ratio * original_width)
-                        # scale_height = int(self.scale_ratio * original_height)
-
-                        # upscale images one by one using waifu2x
-                        Avalon.info(_('Starting to upscale extracted frames'))
-                        self._upscale_frames()
-                        Avalon.info(_('Upscaling completed'))
+                    # upscale images one by one using waifu2x
+                    Avalon.info(_('Starting to upscale extracted frames'))
+                    self._upscale_frames()
+                    Avalon.info(_('Upscaling completed'))
 
                 # if file is none of: image, image/gif, video
                 # skip to the next task
@@ -572,7 +550,7 @@ class Upscaler:
                     # frames to video
                     Avalon.info(_('Converting extracted frames into video'))
                     self.process_pool.append(self.ffmpeg_object.assemble_video(framerate, self.upscaled_frames))
-                    # f'{scale_width}x{scale_height}',
+                    # f'{scale_width}x{scale_height}'
                     self._wait()
                     Avalon.info(_('Conversion completed'))
 
