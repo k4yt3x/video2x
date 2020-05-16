@@ -1,3 +1,10 @@
+# set rendering style to be GitHub flavor
+kramdown:
+  input: GFM
+
+# use Minimal Mistakes theme
 remote_theme: mmistakes/minimal-mistakes
+
+# plugin required for the Minimal Mistakes theme
 plugins:
   - jekyll-include-cache
