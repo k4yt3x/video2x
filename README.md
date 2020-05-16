@@ -8,10 +8,7 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square)
 ![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-blue?style=flat-square)
-<img alt="Become a Patron!"
-src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png"
-href="https://www.patreon.com/bePatron?u=34970782"
-height=20 />
+<img alt="Become a Patron!" src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" href="https://www.patreon.com/bePatron?u=34970782" height=20>
 
 <!--# Video2X Lossless Video Enlarger-->
 
@@ -19,12 +16,14 @@ height=20 />
 
 ## [Download Stable/Beta Builds](https://github.com/k4yt3x/video2x/releases) (Windows)
 
-You can go to the [releases page](https://github.com/k4yt3x/video2x/releases) to download the latest stable and beta builds of Video2X. The exe files will require no Python or Python module installation. There are two editions available.
-
 - **`Full`**: full package comes pre-configured with **all** dependencies like `FFmpeg` and `waifu2x-caffe`.
 - **`Light`**: ligt package comes with only Video2X binaries and a template configuration file. The user will either have to run the setup script or install and configure dependencies themselves.
 
 Go to the **[Quick Start](#quick-start)** section for usages.
+
+### [Download From Mirror](https://files.k4yt3x.com/Projects/Video2X/)
+
+In case you're unable to download the releases directly from GitHub, you can try downloading from the mirror site hosted by the author. Only releases will be updated in this directory, not nightly builds.
 
 ## [Download Nightly Builds](https://github.com/k4yt3x/video2x/actions) (Windows)
 
