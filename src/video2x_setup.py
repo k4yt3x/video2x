@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: May 12, 2020
+Last Modified: May 16, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -27,6 +27,7 @@ import argparse
 import contextlib
 import os
 import pathlib
+import platform
 import re
 import shutil
 import subprocess
@@ -38,12 +39,11 @@ import traceback
 import urllib
 import zipfile
 
-# Requests doesn't come with windows, therefore
-# it will be installed as a dependency and imported
-# later in the script.
-# import requests
+# Some libraries don't come with default Python installation.
+# Therefore, they will be installed during the Python dependency
+#   installation step and imported later in the script.
 
-VERSION = '2.0.1'
+SETUP_VERSION = '2.1.0'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
@@ -59,20 +59,17 @@ DRIVER_OPTIONS = ['all',
 
 
 def parse_arguments():
-    """Processes CLI arguments
+    """ parse command line arguments
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    # video options
-    general_options = parser.add_argument_group('General Options')
-    general_options.add_argument('-d', '--driver', help='driver to download and configure', action='store', choices=DRIVER_OPTIONS, default='all')
-
+    parser.add_argument('-d', '--driver', help='driver to download and configure', choices=DRIVER_OPTIONS, default='all')
+    parser.add_argument('-u', '--uninstall', help='uninstall Video2X dependencies from default location', action='store_true')
     # parse arguments
     return parser.parse_args()
 
 
 class Video2xSetup:
-    """ Install dependencies for video2x video enlarger
+    """ install dependencies for video2x video enlarger
 
     This library is meant to be executed as a stand-alone
     script. All files will be installed under %LOCALAPPDATA%\\video2x.
@@ -330,25 +327,41 @@ def pip_install(file):
     return subprocess.run([sys.executable, '-m', 'pip', 'install', '-U', '-r', file]).returncode
 
 
-if __name__ == '__main__':
-    try:
-        # set default exit code
-        EXIT_CODE = 0
+if __name__ != '__main__':
+    raise ImportError('video2x_setup cannot be imported')
 
-        # get start time
-        start_time = time.time()
+try:
+    # set default exit code
+    EXIT_CODE = 0
 
-        # check platform
-        if sys.platform != 'win32':
-            print('This script is currently only compatible with Windows')
-            EXIT_CODE = 1
-            sys.exit(1)
+    # get start time
+    start_time = time.time()
 
-        # parse command line arguments
-        args = parse_arguments()
-        print('Video2X Setup Script')
-        print(f'Version: {VERSION}')
+    # check platform
+    if platform.system() != 'Windows':
+        print('This script is currently only compatible with Windows')
+        EXIT_CODE = 1
+        sys.exit(1)
 
+    # parse command line arguments
+    args = parse_arguments()
+    print('Video2X Setup Script')
+    print(f'Version: {SETUP_VERSION}')
+
+    # uninstall video2x dependencies
+    if args.uninstall:
+        if input('Are you sure you want to uninstall all Video2X dependencies? [y/N]: ').lower() == 'y':
+            try:
+                print(f'Removing: {LOCALAPPDATA / "video2x"}')
+                shutil.rmtree(LOCALAPPDATA / 'video2x')
+                print('Successfully uninstalled all dependencies')
+            except FileNotFoundError:
+                print(f'Dependency folder does not exist: {LOCALAPPDATA / "video2x"}')
+        else:
+            print('Uninstallation aborted')
+
+    # run installation
+    else:
         # do not install pip modules if script
         # is packaged in exe format
         download_python_modules = True
@@ -356,40 +369,49 @@ if __name__ == '__main__':
             print('\nScript is packaged as exe, skipping pip module download')
             download_python_modules = False
 
+        # create setup install instance and run installer
         setup = Video2xSetup(args.driver, download_python_modules)
         setup.run()
+
         print('\nScript finished successfully')
 
-    except SystemExit:
-        pass
+# let SystemExit signals pass through
+except SystemExit as e:
+    raise e
 
-    # if PermissionError is raised
-    # user needs to run this with higher privilege
-    except PermissionError:
-        traceback.print_exc()
-        print('You might have insufficient privilege for this script to run')
-        print('Try running this script with Administrator privileges')
-        EXIT_CODE = 1
+# if PermissionError is raised
+# user needs to run this with higher privilege
+except PermissionError:
+    traceback.print_exc()
+    print('You might have insufficient privilege for this script to run')
+    print('Try running this script with Administrator privileges')
+    EXIT_CODE = 1
 
-    # for any exception in the script
+# for any exception in the script
+except Exception:
+    traceback.print_exc()
+    print('An error has occurred')
+    print('Video2X Automatic Setup has failed')
+
+    # in case of a failure, try cleaning up temp files
+    try:
+        setup._cleanup()
     except Exception:
         traceback.print_exc()
-        print('An error has occurred')
-        print('Video2X Automatic Setup has failed')
+        print('An error occurred while trying to cleanup files')
 
-        # in case of a failure, try cleaning up temp files
-        try:
-            setup._cleanup()
-        except Exception:
-            traceback.print_exc()
-            print('An error occurred while trying to cleanup files')
+    EXIT_CODE = 1
 
-        EXIT_CODE = 1
+# regardless if script finishes successfully or not
+# print script execution summary
+finally:
+    print('Script finished')
+    print(f'Time taken: {timedelta(seconds=round(time.time() - start_time))}')
 
-    # regardless if script finishes successfully or not
-    # print script execution summary
-    finally:
-        print('Script finished')
-        print(f'Time taken: {timedelta(seconds=round(time.time() - start_time))}')
+    # if the program is launched as an Windows PE file
+    # it might be launched from double clicking
+    # pause the window before it closes automatically
+    if sys.argv[0].endswith('.exe'):
         input('Press [ENTER] to exit script')
-        sys.exit(EXIT_CODE)
+
+    sys.exit(EXIT_CODE)
