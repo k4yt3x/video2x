@@ -184,7 +184,7 @@ You can find all detailed user-facing and developer-facing documentations in the
 
 For those who want a detailed walk-through of how to use Video2X, you can head to the [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
 
-### [Run From Source](https://github.com/k4yt3x/video2x/wiki/Run-From-Source)
+### [Run From Source Code](https://github.com/k4yt3x/video2x/wiki/Run-From-Source-Code)
 
 This wiki page contains all instructions for how you can run Video2X directly from Python source code.
 
