@@ -1933,7 +1933,7 @@
                <item>
                 <widget class="QCheckBox" name="ffmpegAssembleVideoOutputOptionsEnsureDivisibleCheckBox">
                  <property name="text">
-                  <string>Ensure output width and height are divisible by 2</string>
+                  <string>Ensure output width and height are divisible by 2 (-vf: &quot;pad=ceil(iw/2)*2:ceil(ih/2)*2&quot;)</string>
                  </property>
                  <property name="checked">
                   <bool>true</bool>
@@ -2070,9 +2070,9 @@
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_32">
                   <item>
-                   <layout class="QHBoxLayout" name="ffmpegMigrateStreamsOutputOptionsOtherPixelFormatHorizontalLayout">
+                   <layout class="QHBoxLayout" name="ffmpegMigrateStreamsOutputOptionsPixelFormatHorizontalLayout">
                     <item>
-                     <widget class="QLabel" name="ffmpegMigrateStreamsOutputOptionsOtherPixelFormatLabel">
+                     <widget class="QLabel" name="ffmpegMigrateStreamsOutputOptionsPixelFormatLabel">
                       <property name="text">
                        <string>Pixel Format (-pix_fmt)</string>
                       </property>
@@ -2084,9 +2084,27 @@
                    </layout>
                   </item>
                   <item>
+                   <layout class="QHBoxLayout" name="ffmpegMigrateStreamsOutputOptionsFrameInterpolationHorizontalLayout">
+                    <item>
+                     <widget class="QLabel" name="ffmpegMigrateStreamsOutputOptionsFrameInterpolationLabel">
+                      <property name="text">
+                       <string>Frame Interpolation (-filter &quot;minterpolate='fps=n'&quot;)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="ffmpegMigrateStreamsOutputOptionsFrameInterpolationSpinBox">
+                      <property name="maximum">
+                       <number>9999</number>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
                    <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsCopyCodecCheckBox">
                     <property name="text">
-                     <string>Copy codec</string>
+                     <string>Stream copy (-c copy)</string>
                     </property>
                     <property name="checked">
                      <bool>true</bool>
@@ -2094,9 +2112,9 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsOtherCopyKnownMetadataTagsCheckBox">
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsCopyKnownMetadataTagsCheckBox">
                     <property name="text">
-                     <string>Copy known metadata tags</string>
+                     <string>Copy known metadata tags (-map_metadata 0)</string>
                     </property>
                     <property name="checked">
                      <bool>true</bool>
@@ -2104,9 +2122,9 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsOtherCopyArbitraryMetadataTagsCheckBox">
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsCopyArbitraryMetadataTagsCheckBox">
                     <property name="text">
-                     <string>Copy arbitrary metadata tags</string>
+                     <string>Copy arbitrary metadata tags (-movflags use_metadata_tags)</string>
                     </property>
                     <property name="checked">
                      <bool>true</bool>
@@ -2114,7 +2132,7 @@
                    </widget>
                   </item>
                   <item>
-                   <spacer name="verticalSpacer">
+                   <spacer name="ffmpegMigrateStreamsOutputOptionsOtherVerticalSpacer">
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>
                     </property>

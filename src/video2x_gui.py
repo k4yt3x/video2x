@@ -31,7 +31,7 @@ from PyQt5.QtWidgets import *
 import magic
 # QObject, pyqtSlot, pyqtSignal, QRunnable, QThreadPool, QAbstractTableModel, Qt
 
-GUI_VERSION = '2.1.0'
+GUI_VERSION = '2.2.0'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -374,9 +374,10 @@ class Video2XMainWindow(QMainWindow):
         self.ffmpeg_migrate_streams_output_options_mapping_data_check_box_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsMappingDataCheckBox')
         self.ffmpeg_migrate_streams_output_options_mapping_font_check_box_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsMappingFontCheckBox')
         self.ffmpeg_migrate_streams_output_options_pixel_format_line_edit = self.findChild(QLineEdit, 'ffmpegMigrateStreamsOutputOptionsPixelFormatLineEdit')
+        self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box = self.findChild(QSpinBox, 'ffmpegMigrateStreamsOutputOptionsFrameInterpolationSpinBox')
         self.ffmpeg_migrate_streams_output_options_copy_codec_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsCopyCodecCheckBox')
-        self.ffmpeg_migrate_streams_output_options_copy_known_metadata_tags_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsOtherCopyKnownMetadataTagsCheckBox')
-        self.ffmpeg_migrate_streams_output_options_copy_arbitrary_metadata_tags_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsOtherCopyArbitraryMetadataTagsCheckBox')
+        self.ffmpeg_migrate_streams_output_options_copy_known_metadata_tags_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsCopyKnownMetadataTagsCheckBox')
+        self.ffmpeg_migrate_streams_output_options_copy_arbitrary_metadata_tags_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsCopyArbitraryMetadataTagsCheckBox')
         self.ffmpeg_migrate_streams_hardware_acceleration_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsHardwareAccelerationCheckBox')
 
         # Gifski settings
@@ -690,6 +691,16 @@ class Video2XMainWindow(QMainWindow):
             self.config['ffmpeg']['migrate_streams']['output_options'].pop('-map', None)
 
         self.config['ffmpeg']['migrate_streams']['output_options']['-pix_fmt'] = self.ffmpeg_migrate_streams_output_options_pixel_format_line_edit.text()
+
+        if (fps := self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box.value()) > 0:
+            if ('-vf' in self.config['ffmpeg']['migrate_streams']['output_options'] and
+                    len(self.config['ffmpeg']['migrate_streams']['output_options']['-vf']) > 0 and
+                    self.config['ffmpeg']['migrate_streams']['output_options']['-vf'] != f'minterpolate=\'fps={fps}\''):
+                self.config['ffmpeg']['migrate_streams']['output_options']['-vf'] += f',minterpolate=\'fps={fps}\''
+            else:
+                self.config['ffmpeg']['migrate_streams']['output_options']['-vf'] = f'minterpolate=\'fps={fps}\''
+        else:
+            self.config['ffmpeg']['migrate_streams']['output_options'].pop('-vf', None)
 
         # copy source codec
         if self.ffmpeg_migrate_streams_output_options_copy_codec_check_box.isChecked():
