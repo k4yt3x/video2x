@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 16, 2020
+Last Modified: May 17, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -134,7 +134,9 @@ class Upscaler:
                     # therefore, plain print is used
                     print(_('Cleaning up cache directory: {}').format(directory))
                     shutil.rmtree(directory)
-                except (OSError, FileNotFoundError):
+                except FileNotFoundError:
+                    pass
+                except OSError:
                     print(_('Unable to delete: {}').format(directory))
                     traceback.print_exc()
 
