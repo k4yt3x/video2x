@@ -30,7 +30,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.2.0'
+GUI_VERSION = '2.3.0'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
