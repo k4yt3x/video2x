@@ -29,7 +29,6 @@ from PyQt5 import QtGui, uic
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import magic
-# QObject, pyqtSlot, pyqtSignal, QRunnable, QThreadPool, QAbstractTableModel, Qt
 
 GUI_VERSION = '2.2.0'
 
@@ -375,7 +374,9 @@ class Video2XMainWindow(QMainWindow):
         self.ffmpeg_migrate_streams_output_options_mapping_font_check_box_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsMappingFontCheckBox')
         self.ffmpeg_migrate_streams_output_options_pixel_format_line_edit = self.findChild(QLineEdit, 'ffmpegMigrateStreamsOutputOptionsPixelFormatLineEdit')
         self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box = self.findChild(QSpinBox, 'ffmpegMigrateStreamsOutputOptionsFrameInterpolationSpinBox')
-        self.ffmpeg_migrate_streams_output_options_copy_codec_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsCopyCodecCheckBox')
+        self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box.valueChanged.connect(self.mutually_exclude_frame_interpolation_stream_copy)
+        self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box.textChanged.connect(self.mutually_exclude_frame_interpolation_stream_copy)
+        self.ffmpeg_migrate_streams_output_options_copy_streams_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsCopyStreamsCheckBox')
         self.ffmpeg_migrate_streams_output_options_copy_known_metadata_tags_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsCopyKnownMetadataTagsCheckBox')
         self.ffmpeg_migrate_streams_output_options_copy_arbitrary_metadata_tags_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsOutputOptionsCopyArbitraryMetadataTagsCheckBox')
         self.ffmpeg_migrate_streams_hardware_acceleration_check_box = self.findChild(QCheckBox, 'ffmpegMigrateStreamsHardwareAccelerationCheckBox')
@@ -396,48 +397,6 @@ class Video2XMainWindow(QMainWindow):
 
         # load configurations after GUI initialization
         self.load_configurations()
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.accept()
-        else:
-            event.ignore()
-
-    def dropEvent(self, event):
-        input_paths = [pathlib.Path(u.toLocalFile()) for u in event.mimeData().urls()]
-        for path in input_paths:
-            if (path.is_file() or path.is_dir()) and not self.input_table_path_exists(path):
-                self.input_table_data.append(path)
-
-        self.update_input_table()
-        self.update_output_path()
-
-    def enable_line_edit_file_drop(self, line_edit: QLineEdit):
-        line_edit.dragEnterEvent = self.dragEnterEvent
-        line_edit.dropEvent = lambda event: line_edit.setText(str(pathlib.Path(event.mimeData().urls()[0].toLocalFile()).absolute()))
-
-    def show_ffprobe_output(self, event):
-        input_paths = [pathlib.Path(u.toLocalFile()) for u in event.mimeData().urls()]
-        if not input_paths[0].is_file():
-            return
-
-        ffmpeg_object = Ffmpeg(self.ffmpeg_settings)
-        file_info_json = ffmpeg_object.probe_file_info(input_paths[0])
-        self.ffprobe_plain_text_edit.setPlainText(json.dumps(file_info_json, indent=2))
-
-    @staticmethod
-    def read_config(config_file: pathlib.Path) -> dict:
-        """ read video2x configurations from config file
-
-        Arguments:
-            config_file {pathlib.Path} -- video2x configuration file pathlib.Path
-
-        Returns:
-            dict -- dictionary of video2x configuration
-        """
-
-        with open(config_file, 'r') as config:
-            return yaml.load(config, Loader=yaml.FullLoader)
 
     def load_configurations(self):
 
@@ -695,7 +654,7 @@ class Video2XMainWindow(QMainWindow):
         if (fps := self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box.value()) > 0:
             if ('-vf' in self.config['ffmpeg']['migrate_streams']['output_options'] and
                     len(self.config['ffmpeg']['migrate_streams']['output_options']['-vf']) > 0 and
-                    self.config['ffmpeg']['migrate_streams']['output_options']['-vf'] != f'minterpolate=\'fps={fps}\''):
+                    'minterpolate=' not in self.config['ffmpeg']['migrate_streams']['output_options']['-vf']):
                 self.config['ffmpeg']['migrate_streams']['output_options']['-vf'] += f',minterpolate=\'fps={fps}\''
             else:
                 self.config['ffmpeg']['migrate_streams']['output_options']['-vf'] = f'minterpolate=\'fps={fps}\''
@@ -703,7 +662,7 @@ class Video2XMainWindow(QMainWindow):
             self.config['ffmpeg']['migrate_streams']['output_options'].pop('-vf', None)
 
         # copy source codec
-        if self.ffmpeg_migrate_streams_output_options_copy_codec_check_box.isChecked():
+        if self.ffmpeg_migrate_streams_output_options_copy_streams_check_box.isChecked():
             self.config['ffmpeg']['migrate_streams']['output_options']['-c'] = 'copy'
         else:
             self.config['ffmpeg']['migrate_streams']['output_options'].pop('-c', None)
@@ -738,6 +697,56 @@ class Video2XMainWindow(QMainWindow):
         self.config['gifski']['fast'] = self.gifski_fast_check_box.isChecked()
         self.config['gifski']['once'] = self.gifski_once_check_box.isChecked()
         self.config['gifski']['quiet'] = self.gifski_quiet_check_box.isChecked()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        input_paths = [pathlib.Path(u.toLocalFile()) for u in event.mimeData().urls()]
+        for path in input_paths:
+            if (path.is_file() or path.is_dir()) and not self.input_table_path_exists(path):
+                self.input_table_data.append(path)
+
+        self.update_output_path()
+        self.update_input_table()
+
+    def enable_line_edit_file_drop(self, line_edit: QLineEdit):
+        line_edit.dragEnterEvent = self.dragEnterEvent
+        line_edit.dropEvent = lambda event: line_edit.setText(str(pathlib.Path(event.mimeData().urls()[0].toLocalFile()).absolute()))
+
+    def show_ffprobe_output(self, event):
+        input_paths = [pathlib.Path(u.toLocalFile()) for u in event.mimeData().urls()]
+        if not input_paths[0].is_file():
+            return
+
+        ffmpeg_object = Ffmpeg(self.ffmpeg_settings)
+        file_info_json = ffmpeg_object.probe_file_info(input_paths[0])
+        self.ffprobe_plain_text_edit.setPlainText(json.dumps(file_info_json, indent=2))
+
+    @staticmethod
+    def read_config(config_file: pathlib.Path) -> dict:
+        """ read video2x configurations from config file
+
+        Arguments:
+            config_file {pathlib.Path} -- video2x configuration file pathlib.Path
+
+        Returns:
+            dict -- dictionary of video2x configuration
+        """
+
+        with open(config_file, 'r') as config:
+            return yaml.load(config, Loader=yaml.FullLoader)
+
+    def mutually_exclude_frame_interpolation_stream_copy(self):
+        if self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box.value() > 0:
+            self.ffmpeg_migrate_streams_output_options_copy_streams_check_box.setChecked(False)
+            self.ffmpeg_migrate_streams_output_options_copy_streams_check_box.setDisabled(True)
+        else:
+            self.ffmpeg_migrate_streams_output_options_copy_streams_check_box.setChecked(True)
+            self.ffmpeg_migrate_streams_output_options_copy_streams_check_box.setDisabled(False)
 
     def update_gui_for_driver(self):
         current_driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
@@ -775,13 +784,16 @@ class Video2XMainWindow(QMainWindow):
 
         for item in items_to_delete:
             self.input_table_data.remove(item)
+
+        self.update_output_path()
         self.update_input_table()
 
     def input_table_clear_all(self):
         self.input_table_data = []
+        self.update_output_path()
         self.update_input_table()
 
-    def input_table_path_exists(self, input_path):
+    def input_table_path_exists(self, input_path: pathlib.Path) -> bool:
         for path in self.input_table_data:
             # not using Path.samefile since file may not exist
             if str(path.absolute()) == str(input_path.absolute()):
@@ -801,58 +813,67 @@ class Video2XMainWindow(QMainWindow):
         return pathlib.Path(folder_selected)
 
     def update_output_path(self):
-        # if there is more than one input
-        if len(self.input_table_data) != 1:
-            return
+        # if input list is empty
+        # clear output path
+        if len(self.input_table_data) == 0:
+            self.output_line_edit.setText('')
 
-        input_path = self.input_table_data[0]
-        # give up if input path doesn't exist or isn't a file or a directory
-        if not input_path.exists() or not (input_path.is_file() or input_path.is_dir()):
-            return
+        # if there are multiple output files
+        # use cwd/output directory for output
+        elif len(self.input_table_data) > 1:
+            self.output_line_edit.setText(str((pathlib.Path.cwd() / 'output').absolute()))
 
-        if input_path.is_file():
+        # if there's only one input file
+        # generate output file/directory name automatically
+        elif len(self.input_table_data) == 1:
+            input_path = self.input_table_data[0]
+            # give up if input path doesn't exist or isn't a file or a directory
+            if not input_path.exists() or not (input_path.is_file() or input_path.is_dir()):
+                return
 
-            # generate suffix automatically
-            input_file_mime_type = magic.from_file(str(input_path.absolute()), mime=True)
-            input_file_type = input_file_mime_type.split('/')[0]
-            input_file_subtype = input_file_mime_type.split('/')[1]
-
-            # if input file is an image
-            if input_file_type == 'image':
-
-                # if file is a gif, use .gif
-                if input_file_subtype == 'gif':
-                    suffix = '.gif'
-
-                # otherwise, use .png by default for all images
-                else:
-                    suffix = '.png'
-
-            # if input is video, use .mp4 as output by default
-            elif input_file_type == 'video':
-                suffix = '.mp4'
-
-            # if failed to detect file type
-            # use input file's suffix
-            else:
-                suffix = input_path.suffix
-
-            output_path = input_path.parent / f'{input_path.stem}_output{suffix}'
-
-        elif input_path.is_dir():
-            output_path = input_path.parent / f'{input_path.stem}_output'
-
-        # try up to 1000 times
-        output_path_id = 0
-        while output_path.exists() and output_path_id <= 1000:
             if input_path.is_file():
-                output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_path_id}{suffix}')
-            elif input_path.is_dir():
-                output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_path_id}')
-            output_path_id += 1
 
-        if not output_path.exists():
-            self.output_line_edit.setText(str(output_path.absolute()))
+                # generate suffix automatically
+                input_file_mime_type = magic.from_file(str(input_path.absolute()), mime=True)
+                input_file_type = input_file_mime_type.split('/')[0]
+                input_file_subtype = input_file_mime_type.split('/')[1]
+
+                # if input file is an image
+                if input_file_type == 'image':
+
+                    # if file is a gif, use .gif
+                    if input_file_subtype == 'gif':
+                        suffix = '.gif'
+
+                    # otherwise, use .png by default for all images
+                    else:
+                        suffix = '.png'
+
+                # if input is video, use .mp4 as output by default
+                elif input_file_type == 'video':
+                    suffix = '.mp4'
+
+                # if failed to detect file type
+                # use input file's suffix
+                else:
+                    suffix = input_path.suffix
+
+                output_path = input_path.parent / f'{input_path.stem}_output{suffix}'
+
+            elif input_path.is_dir():
+                output_path = input_path.parent / f'{input_path.stem}_output'
+
+            # try up to 1000 times
+            output_path_id = 0
+            while output_path.exists() and output_path_id <= 1000:
+                if input_path.is_file():
+                    output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_path_id}{suffix}')
+                elif input_path.is_dir():
+                    output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_path_id}')
+                output_path_id += 1
+
+            if not output_path.exists():
+                self.output_line_edit.setText(str(output_path.absolute()))
 
     def select_input_file(self):
         if ((input_file := self.select_file('Select Input File')) is None or
@@ -891,7 +912,7 @@ class Video2XMainWindow(QMainWindow):
         self.config_line_edit.setText(str(config_file.absolute()))
         self.load_configurations()
 
-    def select_driver_binary_path(self, driver_line_edit):
+    def select_driver_binary_path(self, driver_line_edit: QLineEdit):
         if (driver_binary_path := self.select_file('Select Driver Binary File')) is None:
             return
         driver_line_edit.setText(str(driver_binary_path.absolute()))
@@ -933,7 +954,7 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
         message_box.setText(error_message.format(exception, urllib.parse.quote(str(exception))))
         message_box.exec_()
 
-    def progress_monitor(self, progress_callback):
+    def progress_monitor(self, progress_callback: pyqtSignal):
 
         # initialize progress bar values
         upscale_begin_time = time.time()
@@ -1131,7 +1152,7 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
         except AttributeError:
             return True
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QtGui.QCloseEvent):
         # try cleaning up temp directories
         if self.stop():
             event.accept()
