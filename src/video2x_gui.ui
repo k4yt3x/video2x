@@ -2102,7 +2102,7 @@
                    </layout>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsCopyCodecCheckBox">
+                   <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsCopyStreamsCheckBox">
                     <property name="toolTip">
                      <string>Copy streams without re-encoding</string>
                     </property>
