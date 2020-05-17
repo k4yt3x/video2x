@@ -270,7 +270,57 @@
                <item>
                 <widget class="QComboBox" name="driverComboBox">
                  <property name="toolTip">
-                  <string>Driver to use for upscaling. Waifu2x Caffe is only for Nvidia GPUs.</string>
+                  <string>&lt;p style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Driver to use for
+        upscaling. &lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+    &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Waifu2X Caffe&lt;/span&gt;
+        &lt;ul&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span
+                    style=&quot;font-size: 8pt; font-weight: 600;&quot;&gt;requires Nvidia GPU and CUDA/cuDNN&lt;/span&gt;&lt;/li&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Caffe
+                    implementation of waifu2x which is classic and stable&lt;/span&gt;&lt;/li&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Lots of models
+                    available&lt;/span&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Waifu2X Converter
+            CPP&lt;/span&gt;
+        &lt;ul&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;CPP
+                    implementation of waifu2x&lt;/span&gt;&lt;/li&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Uses OpenCL
+                    and OpenCV for graphical processing&lt;/span&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Waifu2X NCNN
+            Vulkan&lt;/span&gt;
+        &lt;ul&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;NCNN
+                    implementation of waifu2x&lt;/span&gt;&lt;/li&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Uses Vulkan
+                    API for graphical processing&lt;/span&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;SRMD NCNN
+            Vulkan&lt;/span&gt;
+        &lt;ul&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;NCNN
+                    implementation of SRMD&lt;/span&gt;&lt;/li&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Uses Vulkan
+                    API for graphical processing&lt;/span&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Anime4KCPP&lt;/span&gt;
+        &lt;ul&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;CPP
+                    implementation of Anime4K&lt;/span&gt;&lt;/li&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Very fast but
+                    low quality&lt;/span&gt;&lt;/li&gt;
+            &lt;li style=&quot;-qt-block-indent: 0; text-indent: 0px; margin: 0px;&quot;&gt;&lt;span style=&quot;font-size: 8pt;&quot;&gt;Multithreading
+                    is preferred&lt;/span&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;</string>
                  </property>
                  <item>
                   <property name="text">
