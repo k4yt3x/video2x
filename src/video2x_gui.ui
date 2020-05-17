@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>671</width>
+    <width>673</width>
     <height>802</height>
    </rect>
   </property>
@@ -2103,8 +2103,11 @@
                   </item>
                   <item>
                    <widget class="QCheckBox" name="ffmpegMigrateStreamsOutputOptionsCopyCodecCheckBox">
+                    <property name="toolTip">
+                     <string>Copy streams without re-encoding</string>
+                    </property>
                     <property name="text">
-                     <string>Stream copy (-c copy)</string>
+                     <string>Copy streams (-c copy)</string>
                     </property>
                     <property name="checked">
                      <bool>true</bool>
@@ -2529,7 +2532,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>671</width>
+     <width>673</width>
      <height>21</height>
     </rect>
    </property>

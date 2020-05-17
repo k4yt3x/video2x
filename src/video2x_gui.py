@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 15, 2020
+Last Modified: May 17, 2020
 """
 
 # local imports
@@ -1104,13 +1104,39 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
         self.reset_progress_display()
 
     def stop(self):
-        with contextlib.suppress(AttributeError):
-            self.upscaler.running = False
+
+        try:
+            # if upscaler is running, ask the user for confirmation
+            if self.upscaler.running is True:
+                confirmation = QMessageBox.question(self,
+                                                    'Stopping Confirmation',
+                                                    'Are you sure you want to want to stop the upscaling process?',
+                                                    QMessageBox.Yes,
+                                                    QMessageBox.No)
+                # if the user indeed wants to stop processing
+                if confirmation == QMessageBox.Yes:
+                    with contextlib.suppress(AttributeError):
+                        self.upscaler.running = False
+                    return True
+                # if the user doesn't want ot stop processing
+                else:
+                    return False
+
+            # if the upscaler is not running
+            else:
+                return True
+
+        # if an AttributeError happens
+        # that means the upscaler object haven't been created yet
+        except AttributeError:
+            return True
 
     def closeEvent(self, event):
         # try cleaning up temp directories
-        self.stop()
-        event.accept()
+        if self.stop():
+            event.accept()
+        else:
+            event.ignore()
 
 
 # this file shouldn't be imported
