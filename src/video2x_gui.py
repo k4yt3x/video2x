@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 17, 2020
+Last Modified: May 22, 2020
 """
 
 # local imports
@@ -15,6 +15,7 @@ from wrappers.ffmpeg import Ffmpeg
 # built-in imports
 import contextlib
 import json
+import mimetypes
 import os
 import pathlib
 import sys
@@ -131,6 +132,14 @@ class InputTableModel(QAbstractTableModel):
                     input_file_mime_type = magic.from_file(str(file_path.absolute()), mime=True)
                     input_file_type = input_file_mime_type.split('/')[0]
                     input_file_subtype = input_file_mime_type.split('/')[1]
+
+                    # in case python-magic fails to detect file type
+                    # try guessing file mime type with mimetypes
+                    if input_file_type not in ['image', 'video']:
+                        input_file_mime_type = mimetypes.guess_type(file_path.name)[0]
+                        input_file_type = input_file_mime_type.split('/')[0]
+                        input_file_subtype = input_file_mime_type.split('/')[1]
+
                     if input_file_type == 'image':
                         if input_file_subtype == 'gif':
                             return 'GIF'
@@ -837,6 +846,13 @@ class Video2XMainWindow(QMainWindow):
                 input_file_mime_type = magic.from_file(str(input_path.absolute()), mime=True)
                 input_file_type = input_file_mime_type.split('/')[0]
                 input_file_subtype = input_file_mime_type.split('/')[1]
+
+                # in case python-magic fails to detect file type
+                # try guessing file mime type with mimetypes
+                if input_file_type not in ['image', 'video']:
+                    input_file_mime_type = mimetypes.guess_type(input_path.name)[0]
+                    input_file_type = input_file_mime_type.split('/')[0]
+                    input_file_subtype = input_file_mime_type.split('/')[1]
 
                 # if input file is an image
                 if input_file_type == 'image':

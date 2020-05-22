@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 17, 2020
+Last Modified: May 22, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -25,6 +25,7 @@ import copy
 import gettext
 import importlib
 import locale
+import mimetypes
 import pathlib
 import queue
 import re
@@ -457,6 +458,13 @@ class Upscaler:
                 input_file_type = input_file_mime_type.split('/')[0]
                 input_file_subtype = input_file_mime_type.split('/')[1]
 
+                # in case python-magic fails to detect file type
+                # try guessing file mime type with mimetypes
+                if input_file_type not in ['image', 'video']:
+                    input_file_mime_type = mimetypes.guess_type(self.current_input_file.name)[0]
+                    input_file_type = input_file_mime_type.split('/')[0]
+                    input_file_subtype = input_file_mime_type.split('/')[1]
+
                 # start handling input
                 # if input file is a static image
                 if input_file_type == 'image' and input_file_subtype != 'gif':
@@ -530,7 +538,7 @@ class Upscaler:
                 # if file is none of: image, image/gif, video
                 # skip to the next task
                 else:
-                    Avalon.error(_('File {} ({}) neither an image of a video').format(self.current_input_file, input_file_mime_type))
+                    Avalon.error(_('File {} ({}) neither an image nor a video').format(self.current_input_file, input_file_mime_type))
                     Avalon.warning(_('Skipping this file'))
                     self.processing_queue.task_done()
                     self.total_processed += 1
