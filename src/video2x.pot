@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2020-05-17 10:10-0400\n"
+"POT-Creation-Date: 2020-05-22 16:28-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,199 +19,199 @@ msgstr ""
 msgid "Upscaling Progress"
 msgstr ""
 
-#: upscaler.py:109
+#: upscaler.py:110
 msgid "Specified or default cache directory is a file/link"
 msgstr ""
 
-#: upscaler.py:115
+#: upscaler.py:116
 msgid "Creating cache directory {}"
 msgstr ""
 
-#: upscaler.py:118
+#: upscaler.py:119
 msgid "Unable to create {}"
 msgstr ""
 
-#: upscaler.py:123
+#: upscaler.py:124
 msgid "Extracted frames are being saved to: {}"
 msgstr ""
 
-#: upscaler.py:125
+#: upscaler.py:126
 msgid "Upscaled frames are being saved to: {}"
 msgstr ""
 
-#: upscaler.py:135
+#: upscaler.py:136
 msgid "Cleaning up cache directory: {}"
 msgstr ""
 
-#: upscaler.py:138
+#: upscaler.py:141
 msgid "Unable to delete: {}"
 msgstr ""
 
-#: upscaler.py:144 upscaler.py:159 upscaler.py:170
+#: upscaler.py:147 upscaler.py:162 upscaler.py:173
 msgid "Input and output path type mismatch"
 msgstr ""
 
-#: upscaler.py:145
+#: upscaler.py:148
 msgid "Input is multiple files but output is not directory"
 msgstr ""
 
-#: upscaler.py:149
+#: upscaler.py:152
 msgid "Input path {} is neither a file nor a directory"
 msgstr ""
 
-#: upscaler.py:153 upscaler.py:175
+#: upscaler.py:156 upscaler.py:178
 msgid "Input directory and output directory cannot be the same"
 msgstr ""
 
-#: upscaler.py:160
+#: upscaler.py:163
 msgid "Input is single file but output is directory"
 msgstr ""
 
-#: upscaler.py:163
+#: upscaler.py:166
 msgid "No suffix found in output file path"
 msgstr ""
 
-#: upscaler.py:164
+#: upscaler.py:167
 msgid "Suffix must be specified"
 msgstr ""
 
-#: upscaler.py:171
+#: upscaler.py:174
 msgid "Input is directory but output is existing single file"
 msgstr ""
 
-#: upscaler.py:180
+#: upscaler.py:183
 msgid "Input path is neither a file nor a directory"
 msgstr ""
 
-#: upscaler.py:189
+#: upscaler.py:192
 msgid "FFmpeg or FFprobe cannot be found under the specified path"
 msgstr ""
 
-#: upscaler.py:190 upscaler.py:200
+#: upscaler.py:193 upscaler.py:203
 msgid "Please check the configuration file settings"
 msgstr ""
 
-#: upscaler.py:199
+#: upscaler.py:202
 msgid "Specified driver executable directory doesn't exist"
 msgstr ""
 
-#: upscaler.py:226
+#: upscaler.py:229
 msgid "Failed to parse driver argument: {}"
 msgstr ""
 
-#: upscaler.py:258
+#: upscaler.py:261
 msgid "Unrecognized driver: {}"
 msgstr ""
 
-#: upscaler.py:298
+#: upscaler.py:301
 msgid "Starting progress monitor"
 msgstr ""
 
-#: upscaler.py:303
+#: upscaler.py:306
 msgid "Starting upscaled image cleaner"
 msgstr ""
 
-#: upscaler.py:312 upscaler.py:329
+#: upscaler.py:315 upscaler.py:332
 msgid "Killing progress monitor"
 msgstr ""
 
-#: upscaler.py:315 upscaler.py:332
+#: upscaler.py:318 upscaler.py:335
 msgid "Killing upscaled image cleaner"
 msgstr ""
 
-#: upscaler.py:336
+#: upscaler.py:339
 msgid "Terminating all processes"
 msgstr ""
 
-#: upscaler.py:343
+#: upscaler.py:346
 msgid "Main process waiting for subprocesses to exit"
 msgstr ""
 
-#: upscaler.py:362 upscaler.py:366
+#: upscaler.py:365 upscaler.py:369
 msgid "Subprocess {} exited with code {}"
 msgstr ""
 
-#: upscaler.py:372
+#: upscaler.py:375
 msgid "Stop signal received"
 msgstr ""
 
-#: upscaler.py:377
+#: upscaler.py:380
 msgid "Subprocess execution ran into an error"
 msgstr ""
 
-#: upscaler.py:425
+#: upscaler.py:428
 msgid "Upscaling single file: {}"
 msgstr ""
 
-#: upscaler.py:461
+#: upscaler.py:471
 msgid "Starting to upscale image"
 msgstr ""
 
-#: upscaler.py:464 upscaler.py:526
+#: upscaler.py:474 upscaler.py:536
 msgid "Upscaling completed"
 msgstr ""
 
-#: upscaler.py:478
+#: upscaler.py:488
 msgid "Reading video information"
 msgstr ""
 
-#: upscaler.py:492
+#: upscaler.py:502
 msgid "Aborting: No video stream found"
 msgstr ""
 
-#: upscaler.py:497
+#: upscaler.py:507
 msgid "Framerate: {}"
 msgstr ""
 
-#: upscaler.py:514
+#: upscaler.py:524
 msgid "Unsupported pixel format: {}"
 msgstr ""
 
-#: upscaler.py:524
+#: upscaler.py:534
 msgid "Starting to upscale extracted frames"
 msgstr ""
 
-#: upscaler.py:531
-msgid "File {} ({}) neither an image of a video"
-msgstr ""
-
-#: upscaler.py:532
-msgid "Skipping this file"
+#: upscaler.py:541
+msgid "File {} ({}) neither an image nor a video"
 msgstr ""
 
 #: upscaler.py:542
+msgid "Skipping this file"
+msgstr ""
+
+#: upscaler.py:552
 msgid "Converting extracted frames into GIF image"
 msgstr ""
 
-#: upscaler.py:546 upscaler.py:555
+#: upscaler.py:556 upscaler.py:565
 msgid "Conversion completed"
 msgstr ""
 
-#: upscaler.py:551
+#: upscaler.py:561
 msgid "Converting extracted frames into video"
 msgstr ""
 
-#: upscaler.py:559
+#: upscaler.py:569
 msgid "Migrating audio, subtitles and other streams to upscaled video"
 msgstr ""
 
-#: upscaler.py:569
+#: upscaler.py:579
 msgid "Failed to migrate streams"
 msgstr ""
 
-#: upscaler.py:570
+#: upscaler.py:580
 msgid "Trying to output video without additional streams"
 msgstr ""
 
-#: upscaler.py:586
+#: upscaler.py:596
 msgid "Output video file exists"
 msgstr ""
 
-#: upscaler.py:590
+#: upscaler.py:600
 msgid "Created temporary directory to contain file"
 msgstr ""
 
-#: upscaler.py:593
+#: upscaler.py:603
 msgid "Writing intermediate file to: {}"
 msgstr ""
 
