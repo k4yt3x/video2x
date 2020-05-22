@@ -26,12 +26,13 @@ import urllib
 import yaml
 
 # third-party imports
-from PyQt5 import QtGui, uic
+from PyQt5 import uic
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.3.0'
+GUI_VERSION = '2.3.1'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -191,11 +192,22 @@ class Video2XMainWindow(QMainWindow):
         # set window title and icon
         self.video2x_icon_path = str(resource_path('images/video2x.png'))
         self.setWindowTitle(f'Video2X GUI {GUI_VERSION}')
-        self.setWindowIcon(QtGui.QIcon(self.video2x_icon_path))
+        self.setWindowIcon(QIcon(self.video2x_icon_path))
+
+        # register shortcut keys
+        QShortcut(QKeySequence(Qt.CTRL + Qt.Key_W), self, self.close)
+        QShortcut(QKeySequence(Qt.CTRL + Qt.Key_Q), self, self.close)
+        QShortcut(QKeySequence(Qt.CTRL + Qt.Key_I), self, self.select_input_file)
+        QShortcut(QKeySequence(Qt.CTRL + Qt.Key_O), self, self.select_output_file)
+        QShortcut(QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_I), self, self.select_input_folder)
+        QShortcut(QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_O), self, self.select_output_folder)
 
         # menu bar
         self.action_exit = self.findChild(QAction, 'actionExit')
-        self.action_exit.triggered.connect(sys.exit)
+        self.action_exit.triggered.connect(self.close)
+
+        self.action_shortcuts = self.findChild(QAction, 'actionShortcuts')
+        self.action_shortcuts.triggered.connect(self.show_shortcuts)
 
         self.action_about = self.findChild(QAction, 'actionAbout')
         self.action_about.triggered.connect(self.show_about)
@@ -933,10 +945,23 @@ class Video2XMainWindow(QMainWindow):
             return
         driver_line_edit.setText(str(driver_binary_path.absolute()))
 
-    def show_about(self, message: str):
+    def show_shortcuts(self):
+        message_box = QMessageBox(self)
+        message_box.setWindowTitle('Video2X Shortcuts')
+        message_box.setTextFormat(Qt.MarkdownText)
+        shortcut_information = '''**Ctrl+W**:\tExit application\\
+**Ctrl+Q**:\tExit application\\
+**Ctrl+I**:\tOpen select input file dialog\\
+**Ctrl+O**:\tOpen select output file dialog\\
+**Ctrl+Shift+I**:\tOpen select input folder dialog\\
+**Ctrl+Shift+O**:\tOpen select output folder dialog'''
+        message_box.setText(shortcut_information)
+        message_box.exec_()
+
+    def show_about(self):
         message_box = QMessageBox(self)
         message_box.setWindowTitle('About Video2X')
-        message_box.setIconPixmap(QtGui.QPixmap(self.video2x_icon_path).scaled(64, 64))
+        message_box.setIconPixmap(QPixmap(self.video2x_icon_path).scaled(64, 64))
         message_box.setTextFormat(Qt.MarkdownText)
         message_box.setText(LEGAL_INFO)
         message_box.exec_()
@@ -1024,7 +1049,7 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
 
         # if show frame is checked, show preview image
         if self.frame_preview_show_preview_check_box.isChecked() and last_frame_upscaled.is_file():
-            last_frame_pixmap = QtGui.QPixmap(str(last_frame_upscaled.absolute()))
+            last_frame_pixmap = QPixmap(str(last_frame_upscaled.absolute()))
             # the -2 here behind geometry subtracts frame size from width and height
             self.frame_preview_label.setPixmap(last_frame_pixmap.scaled(self.frame_preview_label.width() - 2,
                                                                         self.frame_preview_label.height() - 2,
@@ -1168,7 +1193,7 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
         except AttributeError:
             return True
 
-    def closeEvent(self, event: QtGui.QCloseEvent):
+    def closeEvent(self, event: QCloseEvent):
         # try cleaning up temp directories
         if self.stop():
             event.accept()

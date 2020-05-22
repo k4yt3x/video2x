@@ -2596,6 +2596,7 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionShortcuts"/>
     <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuFile"/>
@@ -2610,6 +2611,11 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionShortcuts">
+   <property name="text">
+    <string>Shortcuts</string>
    </property>
   </action>
  </widget>
