@@ -50,7 +50,7 @@ language.install()
 _ = language.gettext
 
 # version information
-UPSCALER_VERSION = '4.1.0'
+UPSCALER_VERSION = '4.1.1'
 
 # these names are consistent for
 # - driver selection in command line
@@ -407,8 +407,14 @@ class Upscaler:
         # define processing queue
         self.processing_queue = queue.Queue()
 
+        Avalon.info(_('Loading files into processing queue'))
+
         # if input is a list of files
         if isinstance(self.input, list):
+
+            Avalon.info(_('Loading files from multiple paths'))
+            Avalon.debug_info(_('Input path(s): {}').format(self.input))
+
             # make output directory if it doesn't exist
             self.output.mkdir(parents=True, exist_ok=True)
 
@@ -425,12 +431,15 @@ class Upscaler:
 
         # if input specified is single file
         elif self.input.is_file():
-            Avalon.info(_('Upscaling single file: {}').format(self.input))
+            Avalon.info(_('Loading single file'))
+            Avalon.debug_info(_('Input path(s): {}').format(self.input))
             self.processing_queue.put((self.input.absolute(), self.output.absolute()))
 
         # if input specified is a directory
         elif self.input.is_dir():
 
+            Avalon.info(_('Loading files from directory'))
+            Avalon.debug_info(_('Input path(s): {}').format(self.input))
             # make output directory if it doesn't exist
             self.output.mkdir(parents=True, exist_ok=True)
             for input_path in [f for f in self.input.iterdir() if f.is_file()]:
@@ -442,6 +451,11 @@ class Upscaler:
 
         # record file count for external calls
         self.total_files = self.processing_queue.qsize()
+
+        Avalon.info(_('Loaded files into processing queue'))
+        # print all files in queue for debugging
+        for job in self.processing_queue.queue:
+            Avalon.debug_info(_('Input file: {}').format(job[0].absolute()))
 
         try:
             while not self.processing_queue.empty():
