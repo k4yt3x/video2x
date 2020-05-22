@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-05-22 16:28-0400\n"
-"PO-Revision-Date: 2020-05-22 16:29-0400\n"
+"POT-Creation-Date: 2020-05-22 17:51-0400\n"
+"PO-Revision-Date: 2020-05-22 17:54-0400\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -141,79 +141,103 @@ msgstr "收到停止信号"
 msgid "Subprocess execution ran into an error"
 msgstr "子进程执行遇到错误"
 
-#: upscaler.py:428
-msgid "Upscaling single file: {}"
-msgstr "放大单个文件：{}"
+#: upscaler.py:410
+msgid "Loading files into processing queue"
+msgstr "正在将文件添加到处理队列中"
 
-#: upscaler.py:471
+#: upscaler.py:415
+msgid "Loading files from multiple paths"
+msgstr "正在从多个路径中导入文件"
+
+#: upscaler.py:416 upscaler.py:435 upscaler.py:442
+msgid "Input path(s): {}"
+msgstr "输入路径：{}"
+
+#: upscaler.py:434
+msgid "Loading single file"
+msgstr "正在导入单个文件"
+
+#: upscaler.py:441
+msgid "Loading files from directory"
+msgstr "正在从文件夹中导入文件"
+
+#: upscaler.py:455
+msgid "Loaded files into processing queue"
+msgstr "文件已添加到处理队列"
+
+#: upscaler.py:458
+msgid "Input file: {}"
+msgstr "输入文件：{}"
+
+#: upscaler.py:485
 msgid "Starting to upscale image"
 msgstr "开始放大图像"
 
-#: upscaler.py:474 upscaler.py:536
+#: upscaler.py:488 upscaler.py:550
 msgid "Upscaling completed"
 msgstr "放大完成"
 
-#: upscaler.py:488
+#: upscaler.py:502
 msgid "Reading video information"
 msgstr "读取视频信息"
 
-#: upscaler.py:502
+#: upscaler.py:516
 msgid "Aborting: No video stream found"
 msgstr "程序中止：文件中未找到视频流"
 
-#: upscaler.py:507
+#: upscaler.py:521
 msgid "Framerate: {}"
 msgstr "帧率：{}"
 
-#: upscaler.py:524
+#: upscaler.py:538
 msgid "Unsupported pixel format: {}"
 msgstr "不支持的像素格式：{}"
 
-#: upscaler.py:534
+#: upscaler.py:548
 msgid "Starting to upscale extracted frames"
 msgstr "开始对提取的帧进行放大"
 
-#: upscaler.py:541
+#: upscaler.py:555
 msgid "File {} ({}) neither an image nor a video"
 msgstr "文件 {} （{}） 既不是图片也不是视频"
 
-#: upscaler.py:542
+#: upscaler.py:556
 msgid "Skipping this file"
 msgstr "将跳过此文件"
 
-#: upscaler.py:552
+#: upscaler.py:566
 msgid "Converting extracted frames into GIF image"
 msgstr "正在将提取的帧转换为 GIF"
 
-#: upscaler.py:556 upscaler.py:565
+#: upscaler.py:570 upscaler.py:579
 msgid "Conversion completed"
 msgstr "转换已完成"
 
-#: upscaler.py:561
+#: upscaler.py:575
 msgid "Converting extracted frames into video"
 msgstr "正在将提取的帧转换为视频"
 
-#: upscaler.py:569
+#: upscaler.py:583
 msgid "Migrating audio, subtitles and other streams to upscaled video"
 msgstr "正在将音频、字幕和其他流迁移到放大后的视频"
 
-#: upscaler.py:579
+#: upscaler.py:593
 msgid "Failed to migrate streams"
 msgstr "迁移流失败"
 
-#: upscaler.py:580
+#: upscaler.py:594
 msgid "Trying to output video without additional streams"
 msgstr "正在尝试输出不含其他流的视频"
 
-#: upscaler.py:596
+#: upscaler.py:610
 msgid "Output video file exists"
 msgstr "输出目标文件已存在"
 
-#: upscaler.py:600
+#: upscaler.py:614
 msgid "Created temporary directory to contain file"
 msgstr "为文件创建了临时目录"
 
-#: upscaler.py:603
+#: upscaler.py:617
 msgid "Writing intermediate file to: {}"
 msgstr "正在将中间视频文件写入至：{}"
 
@@ -321,6 +345,3 @@ msgstr "发生了异常"
 
 #~ msgid "You must specify both width and height"
 #~ msgstr "您必须同时指定宽度和高度"
-
-#~ msgid "Upscaling videos in directory: {}"
-#~ msgstr "放大该文件夹中的所有视频：{}"
