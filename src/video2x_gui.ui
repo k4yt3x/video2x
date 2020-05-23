@@ -1707,7 +1707,7 @@
         <item>
          <widget class="QTabWidget" name="ffmpegSettingsTabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="ffmpegGlobalOptionsTab">
            <attribute name="title">
@@ -1929,7 +1929,7 @@
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>yuv444p10le</string>
+                    <string>yuv420p</string>
                    </property>
                   </widget>
                  </item>
@@ -1952,6 +1952,64 @@
                    <property name="value">
                     <number>17</number>
                    </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="ffmpegAssembleVideoOutputOptionsTuneHorizontalLayout">
+                 <item>
+                  <widget class="QLabel" name="ffmpegAssembleVideoOutputOptionsTuneLabel">
+                   <property name="text">
+                    <string>H.264/H.265 Tune (-tune)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="ffmpegAssembleVideoOutputOptionsTuneComboBox">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;- film (x264 only): use for high quality movie content; lowers deblocking&lt;/p&gt;&lt;p&gt;- animation (x264 only): good for cartoons; uses higher deblocking and more reference frames&lt;/p&gt;&lt;p&gt;- grain: preserves the grain structure in old, grainy film material&lt;/p&gt;&lt;p&gt;- stillimage: (x264 only) good for slideshow-like content&lt;/p&gt;&lt;p&gt;- fastdecode: allows faster decoding by disabling certain filters&lt;/p&gt;&lt;p&gt;- zerolatency: good for fast encoding and low-latency streaming&lt;/p&gt;&lt;p&gt;- psnr: ignore this as it is only used for codec development&lt;/p&gt;&lt;p&gt;- ssim: ignore this as it is only used for codec development &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>animation</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>film</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>grain</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>stillimage</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>fastdecode</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>zerolatency</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>psnr</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>ssim</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
                 </layout>

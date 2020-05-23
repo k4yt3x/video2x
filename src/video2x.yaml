@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: May 17, 2020
+# Last Modified: May 23, 2020
 # Values here are the default values. Change the value here to
 #   save the default value permanently.
 # Items commented out are parameters irrelevant to this context
@@ -123,6 +123,7 @@ ffmpeg:
       '-crf': 17 # H.264 Constant Rate Factor
       '-b:v': null # target average bitrate
       '-vf': 'pad=ceil(iw/2)*2:ceil(ih/2)*2' # ensure output is divisible by 2, recommended for libx264
+      '-tune': 'animation' # encoding tuning film/animation/grain/stillimage/fastdecode/zerolatency/psnr/ssim
   # Step 3: Streams Migration
   # migrate audio and subtitle streams from original
   #   video into the upscaled video
