@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 15, 2020
+Last Modified: May 23, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -80,7 +80,7 @@ language.install()
 _ = language.gettext
 
 
-CLI_VERSION = '4.0.0'
+CLI_VERSION = '4.0.1'
 
 LEGAL_INFO = _('''Video2X CLI Version: {}
 Upscaler Version: {}
@@ -107,8 +107,15 @@ def parse_arguments():
     # video options
     video2x_options = parser.add_argument_group(_('Video2X Options'))
     video2x_options.add_argument('-h', '--help', action='help', help=_('show this help message and exit'))
-    video2x_options.add_argument('-i', '--input', type=pathlib.Path, help=_('source video file/directory'))
-    video2x_options.add_argument('-o', '--output', type=pathlib.Path, help=_('output video file/directory'))
+
+    # if help is in arguments list
+    # do not require input and output path to be specified
+    require_input_output = True
+    if '-h' in sys.argv or '--help' in sys.argv:
+        require_input_output = False
+    video2x_options.add_argument('-i', '--input', type=pathlib.Path, help=_('source video file/directory'), required=require_input_output)
+    video2x_options.add_argument('-o', '--output', type=pathlib.Path, help=_('output video file/directory'), required=require_input_output)
+
     video2x_options.add_argument('-c', '--config', type=pathlib.Path, help=_('video2x config file path'), action='store',
                                  default=pathlib.Path(__file__).parent.absolute() / 'video2x.yaml')
     video2x_options.add_argument('-v', '--version', help=_('display version, lawful information and exit'), action='store_true')
