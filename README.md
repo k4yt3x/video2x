@@ -34,6 +34,14 @@ To download the latest nightly build, go to the [GitHub Actions](https://github.
 
 Video2X is a video/GIF/image upscaling software based on Waifu2X, Anime4K and SRMD written in Python 3. It upscales videos, GIFs and images, restoring details from low-resolution inputs. Video2X also accepts GIF input to video output and video input to GIF output.
 
+Currently, Video2X supports the following drivers (implementations of algorithms).
+
+- Waifu2X Caffe
+- Waifu2X Converter CPP
+- Waifu2X NCNN Vulkan
+- SRMD NCNN Vulkan
+- Anime4KCPP
+
 ### Video Upscaling
 
 ![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)\
