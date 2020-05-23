@@ -267,10 +267,11 @@ This project relies on the following software and projects.
 
 ## Special Thanks
 
-Appreciations given to the following code contributors:
+Appreciations given to the following personnel who have contributed significantly to the project (specifically the technical perspective).
 
 - @BrianPetkovsek
 - @SAT3LL
+- @ddouglas87
 
 ## Related Projects
 
