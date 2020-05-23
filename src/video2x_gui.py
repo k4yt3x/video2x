@@ -988,7 +988,7 @@ class Video2XMainWindow(QMainWindow):
         message_box.setTextFormat(Qt.MarkdownText)
 
         error_message = '''Upscaler ran into an error:\\
-**{}**\\
+{}\\
 Check the console output for details.\\
 When reporting an error, please include console output.\\
 You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new?assignees=K4YT3X&labels=bug&template=bug-report.md&title={}) to report this error.'''
