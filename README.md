@@ -36,11 +36,11 @@ Video2X is a video/GIF/image upscaling software based on Waifu2X, Anime4K and SR
 
 Currently, Video2X supports the following drivers (implementations of algorithms).
 
-- Waifu2X Caffe
-- Waifu2X Converter CPP
-- Waifu2X NCNN Vulkan
-- SRMD NCNN Vulkan
-- Anime4KCPP
+- **Waifu2X Caffe**: Caffe implementation of waifu2x
+- **Waifu2X Converter CPP**: CPP implementation of waifu2x based on OpenCL and OpenCV
+- **Waifu2X NCNN Vulkan**: NCNN implementation of waifu2x based on Vulkan API
+- **SRMD NCNN Vulkan**: NCNN implementation of SRMD based on Vulkan API
+- **Anime4KCPP**: CPP implementation of Anime4K
 
 ### Video Upscaling
 
