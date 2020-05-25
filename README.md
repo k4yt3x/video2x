@@ -178,6 +178,14 @@ To see a help page for driver-specific settings, use `-d` to select the driver a
 python video2x.py -d waifu2x_caffe -- --help
 ```
 
+### Running Video2X (Docker)
+
+Video2X can be deployed via Docker.
+
+```shell
+docker pull k4yt3x/video2x
+```
+
 ---
 
 ## Documentations
@@ -280,6 +288,7 @@ Appreciations given to the following personnel who have contributed significantl
 - @BrianPetkovsek
 - @SAT3LL
 - @ddouglas87
+- @lhanjian
 
 ## Related Projects
 
