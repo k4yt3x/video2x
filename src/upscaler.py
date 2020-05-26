@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: May 22, 2020
+Last Modified: May 26, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -50,7 +50,7 @@ language.install()
 _ = language.gettext
 
 # version information
-UPSCALER_VERSION = '4.1.1'
+UPSCALER_VERSION = '4.2.0'
 
 # these names are consistent for
 # - driver selection in command line
@@ -60,6 +60,7 @@ AVAILABLE_DRIVERS = ['waifu2x_caffe',
                      'waifu2x_converter_cpp',
                      'waifu2x_ncnn_vulkan',
                      'srmd_ncnn_vulkan',
+                     'realsr_ncnn_vulkan',
                      'anime4kcpp']
 
 
@@ -281,7 +282,7 @@ class Upscaler:
             process_directory.mkdir(parents=True, exist_ok=True)
 
         # waifu2x-converter-cpp will perform multi-threading within its own process
-        if self.driver in ['waifu2x_converter_cpp', 'waifu2x_ncnn_vulkan', 'srmd_ncnn_vulkan']:
+        if self.driver in ['waifu2x_converter_cpp', 'waifu2x_ncnn_vulkan', 'srmd_ncnn_vulkan', 'realsr_ncnn_vulkan']:
             process_directories = [self.extracted_frames]
 
         else:

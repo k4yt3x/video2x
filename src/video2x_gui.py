@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 23, 2020
+Last Modified: May 26, 2020
 """
 
 # local imports
@@ -32,7 +32,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.4.0'
+GUI_VERSION = '2.5.0'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -46,6 +46,7 @@ AVAILABLE_DRIVERS = {
     'Waifu2X Converter CPP': 'waifu2x_converter_cpp',
     'Waifu2X NCNN Vulkan': 'waifu2x_ncnn_vulkan',
     'SRMD NCNN Vulkan': 'srmd_ncnn_vulkan',
+    'RealSR NCNN Vulkan': 'realsr_ncnn_vulkan',
     'Anime4KCPP': 'anime4kcpp'
 }
 
@@ -346,6 +347,17 @@ class Video2XMainWindow(QMainWindow):
         self.srmd_ncnn_vulkan_jobs_line_edit = self.findChild(QLineEdit, 'srmdNcnnVulkanJobsLineEdit')
         self.srmd_ncnn_vulkan_tta_check_box = self.findChild(QCheckBox, 'srmdNcnnVulkanTtaCheckBox')
 
+        # realsr-ncnn-vulkan
+        self.realsr_ncnn_vulkan_path_line_edit = self.findChild(QLineEdit, 'realsrNcnnVulkanPathLineEdit')
+        self.enable_line_edit_file_drop(self.realsr_ncnn_vulkan_path_line_edit)
+        self.realsr_ncnn_vulkan_path_select_button = self.findChild(QPushButton, 'realsrNcnnVulkanPathSelectButton')
+        self.realsr_ncnn_vulkan_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.realsr_ncnn_vulkan_path_line_edit))
+        self.realsr_ncnn_vulkan_tile_size_spin_box = self.findChild(QSpinBox, 'realsrNcnnVulkanTileSizeSpinBox')
+        self.realsr_ncnn_vulkan_model_combo_box = self.findChild(QComboBox, 'realsrNcnnVulkanModelComboBox')
+        self.realsr_ncnn_vulkan_gpu_id_spin_box = self.findChild(QSpinBox, 'realsrNcnnVulkanGpuIdSpinBox')
+        self.realsr_ncnn_vulkan_jobs_line_edit = self.findChild(QLineEdit, 'realsrNcnnVulkanJobsLineEdit')
+        self.realsr_ncnn_vulkan_tta_check_box = self.findChild(QCheckBox, 'realsrNcnnVulkanTtaCheckBox')
+
         # anime4k
         self.anime4kcpp_path_line_edit = self.findChild(QLineEdit, 'anime4kCppPathLineEdit')
         self.enable_line_edit_file_drop(self.anime4kcpp_path_line_edit)
@@ -497,6 +509,14 @@ class Video2XMainWindow(QMainWindow):
         self.srmd_ncnn_vulkan_jobs_line_edit.setText(settings['j'])
         self.srmd_ncnn_vulkan_tta_check_box.setChecked(settings['x'])
 
+        # realsr-ncnn-vulkan
+        settings = self.config['realsr_ncnn_vulkan']
+        self.realsr_ncnn_vulkan_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
+        self.realsr_ncnn_vulkan_tile_size_spin_box.setValue(settings['t'])
+        self.realsr_ncnn_vulkan_gpu_id_spin_box.setValue(settings['g'])
+        self.realsr_ncnn_vulkan_jobs_line_edit.setText(settings['j'])
+        self.realsr_ncnn_vulkan_tta_check_box.setChecked(settings['x'])
+
         # anime4k
         settings = self.config['anime4kcpp']
         self.anime4kcpp_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
@@ -597,6 +617,14 @@ class Video2XMainWindow(QMainWindow):
         self.config['srmd_ncnn_vulkan']['g'] = self.srmd_ncnn_vulkan_gpu_id_spin_box.value()
         self.config['srmd_ncnn_vulkan']['j'] = self.srmd_ncnn_vulkan_jobs_line_edit.text()
         self.config['srmd_ncnn_vulkan']['x'] = self.srmd_ncnn_vulkan_tta_check_box.isChecked()
+
+        # realsr-ncnn-vulkan
+        self.config['realsr_ncnn_vulkan']['path'] = os.path.expandvars(self.realsr_ncnn_vulkan_path_line_edit.text())
+        self.config['realsr_ncnn_vulkan']['t'] = self.realsr_ncnn_vulkan_tile_size_spin_box.value()
+        self.config['realsr_ncnn_vulkan']['m'] = str((pathlib.Path(self.config['realsr_ncnn_vulkan']['path']).parent / self.realsr_ncnn_vulkan_model_combo_box.currentText()).absolute())
+        self.config['realsr_ncnn_vulkan']['g'] = self.realsr_ncnn_vulkan_gpu_id_spin_box.value()
+        self.config['realsr_ncnn_vulkan']['j'] = self.realsr_ncnn_vulkan_jobs_line_edit.text()
+        self.config['realsr_ncnn_vulkan']['x'] = self.realsr_ncnn_vulkan_tta_check_box.isChecked()
 
         # anime4k
         self.config['anime4kcpp']['path'] = os.path.expandvars(self.anime4kcpp_path_line_edit.text())
@@ -788,6 +816,10 @@ class Video2XMainWindow(QMainWindow):
             self.scale_ratio_double_spin_box.setMinimum(2.0)
             self.scale_ratio_double_spin_box.setMaximum(4.0)
             self.scale_ratio_double_spin_box.setValue(2.0)
+        elif current_driver == 'realsr_ncnn_vulkan':
+            self.scale_ratio_double_spin_box.setMinimum(4.0)
+            self.scale_ratio_double_spin_box.setMaximum(4.0)
+            self.scale_ratio_double_spin_box.setValue(4.0)
 
         # update preferred processes/threads count
         if current_driver == 'anime4kcpp':

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>673</width>
-    <height>802</height>
+    <height>844</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -340,6 +340,11 @@
                  <item>
                   <property name="text">
                    <string>SRMD NCNN Vulkan</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>RealSR NCNN Vulkan</string>
                   </property>
                  </item>
                  <item>
@@ -1378,6 +1383,131 @@
                <size>
                 <width>20</width>
                 <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="realsrNcnnVulkanTab">
+           <attribute name="title">
+            <string>RealSR NCNN Vulkan</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_34">
+            <item>
+             <layout class="QHBoxLayout" name="realsrNcnnVulkanPathHorizontalLayout">
+              <item>
+               <widget class="QLineEdit" name="realsrNcnnVulkanPathLineEdit"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="realsrNcnnVulkanPathSelectButton">
+                <property name="text">
+                 <string>Select Binary Path</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="realsrNcnnVulkanTileSizeHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="realsrNcnnVulkanTileSizeLabel">
+                <property name="text">
+                 <string>Tile Size</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="realsrNcnnVulkanTileSizeSpinBox">
+                <property name="minimum">
+                 <number>0</number>
+                </property>
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+                <property name="value">
+                 <number>0</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="realsrNcnnVulkanModelHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="realsrNcnnVulkanModelLabel">
+                <property name="text">
+                 <string>Model</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="realsrNcnnVulkanModelComboBox">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If the input file contains very little noise, DF2K will produce sharper outputs.&lt;/p&gt;&lt;p&gt;However, if the input is noisy, DF2K might produce artifacts. DF2K_JPEG will then be preferred.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>models-DF2K_JPEG</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>models-DF2K</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="realsrNcnnVulkanGpuIdHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="realsrNcnnVulkanGpuIdLabel">
+                <property name="text">
+                 <string>GPU ID</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="realsrNcnnVulkanGpuIdSpinBox"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="realsrNcnnVulkanJobsHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="realsrNcnnVulkanJobsLabel">
+                <property name="text">
+                 <string>Jobs</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="realsrNcnnVulkanJobsLineEdit">
+                <property name="text">
+                 <string>1:2:2</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="realsrNcnnVulkanTtaCheckBox">
+              <property name="text">
+               <string>TTA</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="realsrNcnnVulkanVerticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>331</height>
                </size>
               </property>
              </spacer>

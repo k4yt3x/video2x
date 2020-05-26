@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: May 23, 2020
+# Last Modified: May 26, 2020
 # Values here are the default values. Change the value here to
 #   save the default value permanently.
 # Items commented out are parameters irrelevant to this context
@@ -73,6 +73,17 @@ srmd_ncnn_vulkan:
   s: 2 # upscale ratio (2/3/4, default=2)
   t: 400 # tile-size: tile size (>=32, default=400)
   m: null # srmd model path (default=models-srmd)
+  g: 0 # gpu device to use (default=0)
+  j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
+  x: false # enable tta mode
+realsr_ncnn_vulkan:
+  path: '%LOCALAPPDATA%\video2x\realsr-ncnn-vulkan\realsr-ncnn-vulkan'
+  v: null # verbose output
+  #i: null # input-path: input image path (jpg/png) or directory
+  #o: null # output-path: output image path (png) or directory
+  s: 4 # upscale ratio (4, default=4)
+  t: 0 # tile size (>=32/0=auto, default=0)
+  m: null # realsr model path (default=models-DF2K)
   g: 0 # gpu device to use (default=0)
   j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
   x: false # enable tta mode
