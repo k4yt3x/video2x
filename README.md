@@ -8,7 +8,7 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square)
 ![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-blue?style=flat-square)
-<img alt="Become a Patron!" src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" href="https://www.patreon.com/bePatron?u=34970782" height=20>
+![Become A Patron!](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fk4yt3x&style=flat-square)
 
 <!--# Video2X Lossless Video Enlarger-->
 
