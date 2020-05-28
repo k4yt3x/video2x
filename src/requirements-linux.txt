@@ -1,0 +1,10 @@
+avalon_framework
+colorama
+patool
+psutil
+pyqt5
+python-magic
+pyunpack
+pyyaml
+requests
+tqdm
