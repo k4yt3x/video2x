@@ -1,8 +1,20 @@
+# Name: Video2X Dockerfile
+# Creator: Danielle Douglas
+# Date Created: Unknown
+# Last Modified: January 14, 2020
+
+# Editor: Lhanjian
+# Last Modified: May 24, 2020
+
+# Editor: K4YT3X
+# Last Modified: May 29, 2020
+
 FROM ubuntu:19.10
 #FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
-MAINTAINER Danielle Douglas <ddouglas87@gmail.com>
-MAINTAINER Lhanjian <lhjay1@foxmail.com>
-MAINTAINER K4YT3X <k4yt3x@k4yt3x.com>
+
+LABEL maintainer="Danielle Douglas <ddouglas87@gmail.com>"
+LABEL maintainer="Lhanjian <lhjay1@foxmail.com>"
+LABEL maintainer="K4YT3X <k4yt3x@k4yt3x.com>"
 
 # Don't ask questions during image setup.
 ENV DEBIAN_FRONTEND noninteractive
@@ -18,10 +30,7 @@ RUN apt-get update && apt-get install -y apt-utils &&\
     add-apt-repository -y ppa:graphics-drivers/ppa &&\
     apt-get install -y --no-install-recommends apt-fast && apt-fast update
 
-
-## Install Video2X ##
-
-# Dependencies
+# Install dependencies
 RUN apt-fast install -y --no-install-recommends git-core python3-pip python3-setuptools python3-wheel python3-psutil ffmpeg gcc g++ \
     libc6-dev python3-dev libmagic-dev libmagic1 python3.8 nvidia-driver-440 nvidia-cuda-toolkit gnupg2 curl ca-certificates pkg-config \
     autoconf libx264-dev libx265-dev libnuma-dev libvpx-dev libfdk-aac-dev libmp3lame-dev libopus-dev libass-dev libfreetype6-dev libgnutls28-dev \
@@ -34,6 +43,7 @@ RUN apt-fast install -y --no-install-recommends git-core python3-pip python3-set
     libvorbis-dev libvpx-dev libwavpack-dev libwebp-dev libx264-dev libx265-dev libxvidcore-dev libxml2-dev libzmq3-dev libzvbi-dev liblilv-dev \
     libopenal-dev opencl-dev libjack-dev libbluray-dev libfdk-aac-dev libmysofa-dev
 
+# Install MASM
 RUN curl -vfsSLO https://www.nasm.us/pub/nasm/releasebuilds/$NASM_VERSION/nasm-$NASM_VERSION.tar.bz2 \
     && tar -xjf nasm-$NASM_VERSION.tar.bz2 \
     && cd nasm-$NASM_VERSION \
@@ -41,6 +51,8 @@ RUN curl -vfsSLO https://www.nasm.us/pub/nasm/releasebuilds/$NASM_VERSION/nasm-$
     && ./configure \
     && make -j$(nproc) \
     && make install
+
+# Compile FFmpeg with CUDA support
 
 RUN git clone --recurse-submodules -b n$NVCODEC_VERSION --depth 1 https://git.videolan.org/git/ffmpeg/nv-codec-headers \
     && cd nv-codec-headers \
@@ -72,19 +84,15 @@ RUN curl -vfsSLO https://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 \
     && make -j$(nproc) \
     && make install
 
-# Install Nvidia Driver
-
-RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add -
-
-RUN echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
-
 # Install Video2X
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1 && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
 RUN  cd / && python3.8 -m pip install --upgrade pip &&\
     git clone --recurse-submodules --progress https://github.com/k4yt3x/video2x.git --depth=1 &&\
-    python3.8 -m pip install avalon_framework colorama python-magic patool psutil pyqt5 pyunpack pyyaml requests tqdm
+    python3.8 -m pip install -U -r video2x/src/requirements-linux.txt
 
-# eg: docker build -t video2x . --build-arg driver=waifu2x_ncnn_vulkan
+# Compile drivers
+
+# example: docker build -t video2x . --build-arg driver=waifu2x_ncnn_vulkan
 ARG driver=all
 
 # Check if driver exists.
@@ -178,9 +186,8 @@ RUN if [ "$driver" = "all" ] || [ "$driver" = "waifu2x_converter" ] ;\
 #ENTRYPOINT ["/entrypoint.sh"]
 
 WORKDIR /host
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["python3", "/video2x/src/video2x.py"]
 
 ENV NVIDIA_DRIVER_CAPABILITIES all
 # Docker image can ask questions now, if needed.
 ENV DEBIAN_FRONTEND teletype
-
