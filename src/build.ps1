@@ -9,7 +9,7 @@ executable (PE) releases automatically using PyInstaller.
 This script is currently only tuned for K4YT3X's environment.
 
 To start a PowerShell session with execution policy bypass
-powershell –ExecutionPolicy Bypass
+powershell -ExecutionPolicy Bypass
 #>
 
 if ($args.count -ne 1){
