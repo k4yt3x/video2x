@@ -286,10 +286,10 @@ This project relies on the following software and projects.
 
 Appreciations given to the following personnel who have contributed significantly to the project (specifically the technical perspective).
 
-- @BrianPetkovsek
-- @SAT3LL
-- @ddouglas87
-- @lhanjian
+- [@BrianPetkovsek](https://github.com/BrianPetkovsek)
+- [@sat3ll](https://github.com/sat3ll)
+- [@ddouglas87](https://github.com/ddouglas87)
+- [@lhanjian](https://github.com/lhanjian)
 
 ## Related Projects
 
