@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: May 26, 2020
+# Last Modified: May 29, 2020
 # Values here are the default values. Change the value here to
 #   save the default value permanently.
 # Items commented out are parameters irrelevant to this context
@@ -167,6 +167,6 @@ gifski:
   nosort: false # Use files exactly in the order given, rather than sorted
   quiet: false # Do not show a progress bar
 video2x:
-  video2x_cache_directory: null # default: %TEMP%\video2x
-  image_format: png
-  preserve_frames: false
+  video2x_cache_directory: null # default: %TEMP%\video2x, directory where cache files are stored, will be deleted if preserve_frames is not set to true
+  image_format: png # png/jpg intermediate file format used for extracted frames during video processing
+  preserve_frames: false # if set to true, the cache directory won't be cleaned upon task completion
