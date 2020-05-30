@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: May 29, 2020
+Last Modified: May 30, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -44,7 +44,7 @@ import zipfile
 # Therefore, they will be installed during the Python dependency
 #   installation step and imported later in the script.
 
-SETUP_VERSION = '2.2.0'
+SETUP_VERSION = '2.2.1'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
@@ -56,7 +56,7 @@ DRIVER_OPTIONS = ['all',
                   'waifu2x_converter_cpp',
                   'waifu2x_ncnn_vulkan',
                   'srmd_ncnn_vulkan',
-                  # 'realsr_ncnn_vulkan',
+                  'realsr_ncnn_vulkan',
                   'anime4kcpp']
 
 
@@ -139,7 +139,7 @@ class Video2xSetup:
         print('\nInstalling Gifski')
         import requests
 
-        # Get latest release of waifu2x-ncnn-vulkan via Github API
+        # Get latest release of Gifski via Github API
         latest_release = requests.get('https://api.github.com/repos/ImageOptim/gifski/releases/latest').json()
 
         for a in latest_release['assets']:
@@ -195,7 +195,7 @@ class Video2xSetup:
         latest_release = requests.get('https://api.github.com/repos/nihui/waifu2x-ncnn-vulkan/releases/latest').json()
 
         for a in latest_release['assets']:
-            if re.search(r'waifu2x-ncnn-vulkan-\d*\.zip', a['browser_download_url']):
+            if re.search(r'waifu2x-ncnn-vulkan-\d*-windows\.zip', a['browser_download_url']):
                 waifu2x_ncnn_vulkan_zip = download(a['browser_download_url'], tempfile.gettempdir())
                 self.trash.append(waifu2x_ncnn_vulkan_zip)
 
@@ -211,6 +211,32 @@ class Video2xSetup:
             # rename the newly extracted directory
             (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(waifu2x_ncnn_vulkan_directory)
 
+    def _install_srmd_ncnn_vulkan(self):
+        """ Install srmd-ncnn-vulkan
+        """
+        print('\nInstalling srmd-ncnn-vulkan')
+        import requests
+
+        # Get latest release of srmd-ncnn-vulkan via Github API
+        latest_release = requests.get('https://api.github.com/repos/nihui/srmd-ncnn-vulkan/releases/latest').json()
+
+        for a in latest_release['assets']:
+            if re.search(r'srmd-ncnn-vulkan-\d*-windows\.zip', a['browser_download_url']):
+                srmd_ncnn_vulkan_zip = download(a['browser_download_url'], tempfile.gettempdir())
+                self.trash.append(srmd_ncnn_vulkan_zip)
+
+        # extract and rename
+        srmd_ncnn_vulkan_directory = LOCALAPPDATA / 'video2x' / 'srmd-ncnn-vulkan'
+        with zipfile.ZipFile(srmd_ncnn_vulkan_zip) as zipf:
+            zipf.extractall(LOCALAPPDATA / 'video2x')
+
+            # if directory already exists, remove it
+            if srmd_ncnn_vulkan_directory.exists():
+                shutil.rmtree(srmd_ncnn_vulkan_directory)
+
+            # rename the newly extracted directory
+            (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(srmd_ncnn_vulkan_directory)
+
     def _install_realsr_ncnn_vulkan(self):
         """ Install realsr-ncnn-vulkan
         """
@@ -221,7 +247,7 @@ class Video2xSetup:
         latest_release = requests.get('https://api.github.com/repos/nihui/realsr-ncnn-vulkan/releases/latest').json()
 
         for a in latest_release['assets']:
-            if re.search(r'realsr-ncnn-vulkan-\d*\.zip', a['browser_download_url']):
+            if re.search(r'realsr-ncnn-vulkan-\d*-windows\.zip', a['browser_download_url']):
                 realsr_ncnn_vulkan_zip = download(a['browser_download_url'], tempfile.gettempdir())
                 self.trash.append(realsr_ncnn_vulkan_zip)
 
@@ -265,32 +291,6 @@ class Video2xSetup:
         if (LOCALAPPDATA / 'video2x' / 'anime4kcpp').exists():
             shutil.rmtree(LOCALAPPDATA / 'video2x' / 'anime4kcpp')
         patoolib.extract_archive(str(anime4kcpp_7z), outdir=str(LOCALAPPDATA / 'video2x' / 'anime4kcpp'))
-
-    def _install_srmd_ncnn_vulkan(self):
-        """ Install srmd-ncnn-vulkan
-        """
-        print('\nInstalling srmd-ncnn-vulkan')
-        import requests
-
-        # Get latest release of srmd-ncnn-vulkan via Github API
-        latest_release = requests.get('https://api.github.com/repos/nihui/srmd-ncnn-vulkan/releases/latest').json()
-
-        for a in latest_release['assets']:
-            if re.search(r'srmd-ncnn-vulkan-\d*\.zip', a['browser_download_url']):
-                srmd_ncnn_vulkan_zip = download(a['browser_download_url'], tempfile.gettempdir())
-                self.trash.append(srmd_ncnn_vulkan_zip)
-
-        # extract and rename
-        srmd_ncnn_vulkan_directory = LOCALAPPDATA / 'video2x' / 'srmd-ncnn-vulkan'
-        with zipfile.ZipFile(srmd_ncnn_vulkan_zip) as zipf:
-            zipf.extractall(LOCALAPPDATA / 'video2x')
-
-            # if directory already exists, remove it
-            if srmd_ncnn_vulkan_directory.exists():
-                shutil.rmtree(srmd_ncnn_vulkan_directory)
-
-            # rename the newly extracted directory
-            (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(srmd_ncnn_vulkan_directory)
 
 
 def download(url, save_path, chunk_size=4096):
