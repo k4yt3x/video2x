@@ -33,7 +33,7 @@ To download the latest nightly build, go to the [GitHub Actions](https://github.
 
 ## Introduction
 
-Video2X is a video/GIF/image upscaling software based on Waifu2X, Anime4K and SRMD written in Python 3. It upscales videos, GIFs and images, restoring details from low-resolution inputs. Video2X also accepts GIF input to video output and video input to GIF output.
+Video2X is a video/GIF/image upscaling software based on Waifu2X, Anime4K, SRMD and RealSR written in Python 3. It upscales videos, GIFs and images, restoring details from low-resolution inputs. Video2X also accepts GIF input to video output and video input to GIF output.
 
 Currently, Video2X supports the following drivers (implementations of algorithms).
 
@@ -41,6 +41,7 @@ Currently, Video2X supports the following drivers (implementations of algorithms
 - **Waifu2X Converter CPP**: CPP implementation of waifu2x based on OpenCL and OpenCV
 - **Waifu2X NCNN Vulkan**: NCNN implementation of waifu2x based on Vulkan API
 - **SRMD NCNN Vulkan**: NCNN implementation of SRMD based on Vulkan API
+- **RealSR NCNN Vulkan**: NCNN implementation of RealSR based on Vulkan API
 - **Anime4KCPP**: CPP implementation of Anime4K
 
 ### Video Upscaling
@@ -247,6 +248,7 @@ Available options are:
 - waifu2x_converter_cpp
 - waifu2x_ncnn_vulkan
 - srmd_ncnn_vulkan
+- realsr_ncnn_vulkan
 - anime4kcpp
 
 ### -r RATIO, --ratio RATIO
@@ -278,6 +280,7 @@ This project relies on the following software and projects.
 - [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
 - [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)
 - [srmd-ncnn-vulkan](https://github.com/nihui/srmd-ncnn-vulkan)
+- [realsr-ncnn-vulkan](https://github.com/nihui/realsr-ncnn-vulkan)
 - [Anime4K](https://github.com/bloc97/Anime4K)
 - [Anime4KCPP](https://github.com/TianZerL/Anime4KCPP)
 - [Gifski](https://github.com/ImageOptim/gifski)
