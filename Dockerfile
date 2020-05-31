@@ -31,19 +31,9 @@ RUN apt-get update && apt-get install -y apt-utils &&\
     apt-get install -y --no-install-recommends apt-fast && apt-fast update
 
 # Install dependencies
-RUN apt-fast install -y --no-install-recommends git-core python3-pip python3-setuptools python3-wheel python3-psutil ffmpeg gcc g++ \
-    libc6-dev python3-dev libmagic-dev libmagic1 python3.8 nvidia-driver-440 nvidia-cuda-toolkit gnupg2 curl ca-certificates pkg-config \
-    autoconf libx264-dev libx265-dev libnuma-dev libvpx-dev libfdk-aac-dev libmp3lame-dev libopus-dev libass-dev libfreetype6-dev libgnutls28-dev \
-    libsdl2-dev libtool libva-dev libvdpau-dev libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev texinfo wget yasm zlib1g-dev \
-    libass-dev libfreetype6-dev libsdl2-dev p11-kit libva-dev libvdpau-dev libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev \
-    pkg-config texinfo wget zlib1g-dev libchromaprint-dev frei0r-plugins-dev gnutls-dev ladspa-sdk libcaca-dev libcdio-paranoia-dev libcodec2-dev \
-    libfontconfig1-dev libfreetype6-dev libfribidi-dev libgme-dev libgsm1-dev libjack-dev libmodplug-dev libmp3lame-dev libopencore-amrnb-dev \
-    libopencore-amrwb-dev libopenjp2-7-dev libopenmpt-dev libopus-dev libpulse-dev librsvg2-dev librubberband-dev librtmp-dev libshine-dev \
-    libsmbclient-dev libsnappy-dev libsoxr-dev libspeex-dev libssh-dev libtesseract-dev libtheora-dev libtwolame-dev libv4l-dev libvo-amrwbenc-dev \
-    libvorbis-dev libvpx-dev libwavpack-dev libwebp-dev libx264-dev libx265-dev libxvidcore-dev libxml2-dev libzmq3-dev libzvbi-dev liblilv-dev \
-    libopenal-dev opencl-dev libjack-dev libbluray-dev libfdk-aac-dev libmysofa-dev
+RUN apt-fast install -y --no-install-recommends autoconf ca-certificates curl ffmpeg frei0r-plugins-dev g++ gcc git-core gnupg2 gnutls-dev ladspa-sdk libass-dev libass-dev libbluray-dev libc6-dev libcaca-dev libcdio-paranoia-dev libchromaprint-dev libcodec2-dev libfdk-aac-dev libfdk-aac-dev libfontconfig1-dev libfreetype6-dev libfreetype6-dev libfreetype6-dev libfribidi-dev libgme-dev libgnutls28-dev libgsm1-dev libjack-dev libjack-dev liblilv-dev libmagic-dev libmagic1 libmodplug-dev libmp3lame-dev libmp3lame-dev libmysofa-dev libnuma-dev libopenal-dev libopencore-amrnb-dev libopencore-amrwb-dev libopenjp2-7-dev libopenmpt-dev libopus-dev libopus-dev libpulse-dev librsvg2-dev librtmp-dev librubberband-dev libsdl2-dev libsdl2-dev libshine-dev libsmbclient-dev libsnappy-dev libsoxr-dev libspeex-dev libssh-dev libtesseract-dev libtheora-dev libtool libtwolame-dev libv4l-dev libva-dev libva-dev libvdpau-dev libvdpau-dev libvo-amrwbenc-dev libvorbis-dev libvorbis-dev libvorbis-dev libvpx-dev libvpx-dev libwavpack-dev libwebp-dev libx264-dev libx264-dev libx265-dev libx265-dev libxcb-shm0-dev libxcb-shm0-dev libxcb-xfixes0-dev libxcb-xfixes0-dev libxcb1-dev libxcb1-dev libxml2-dev libxvidcore-dev libzmq3-dev libzvbi-dev nvidia-cuda-toolkit nvidia-driver-440 opencl-dev p11-kit pkg-config pkg-config python3-dev python3-pip python3-setuptools python3-wheel python3.8 texinfo texinfo wget wget yasm zlib1g-dev zlib1g-dev
 
-# Install MASM
+# Install NASM
 RUN curl -vfsSLO https://www.nasm.us/pub/nasm/releasebuilds/$NASM_VERSION/nasm-$NASM_VERSION.tar.bz2 \
     && tar -xjf nasm-$NASM_VERSION.tar.bz2 \
     && cd nasm-$NASM_VERSION \
