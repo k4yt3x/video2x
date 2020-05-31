@@ -7,7 +7,7 @@
 # Last Modified: May 24, 2020
 
 # Editor: K4YT3X
-# Last Modified: May 29, 2020
+# Last Modified: May 30, 2020
 
 FROM ubuntu:19.10
 #FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
@@ -109,6 +109,9 @@ RUN if [ "$driver" = "all" ] || [ "$driver" = "waifu2x_caffe" ] ; then \
     fi
 
 RUN if [ "$driver" = "all" ] || [ "$driver" = "waifu2x_caffe" ] ; then \
+    # add Nvidia's machine-learning repository for libcudnn7 and libcudnn7-dev
+    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - &&\
+    echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list &&\
     apt-fast install --no-install-recommends -y gcc-8 libcudnn7 libcudnn7-dev &&\
     apt-get remove -y gcc g++ &&\
     ln -s /usr/bin/gcc-8 /usr/bin/gcc && ln -s /usr/bin/g++-8 /usr/bin/g++ &&\
