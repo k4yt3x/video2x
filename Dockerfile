@@ -74,9 +74,13 @@ RUN curl -vfsSLO https://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 \
     && make -j$(nproc) \
     && make install
 
+# Add Nvidia's machine-learning repository for libcudnn7 and libcudnn7-dev
+RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - &&\
+    echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list
+
 # Install Video2X
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1 && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
-RUN  cd / && python3.8 -m pip install --upgrade pip &&\
+RUN cd / && python3.8 -m pip install --upgrade pip &&\
     git clone --recurse-submodules --progress https://github.com/k4yt3x/video2x.git --depth=1 &&\
     python3.8 -m pip install -U -r video2x/src/requirements-linux.txt
 
@@ -109,9 +113,6 @@ RUN if [ "$driver" = "all" ] || [ "$driver" = "waifu2x_caffe" ] ; then \
     fi
 
 RUN if [ "$driver" = "all" ] || [ "$driver" = "waifu2x_caffe" ] ; then \
-    # add Nvidia's machine-learning repository for libcudnn7 and libcudnn7-dev
-    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - &&\
-    echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list &&\
     apt-fast install --no-install-recommends -y gcc-8 libcudnn7 libcudnn7-dev &&\
     apt-get remove -y gcc g++ &&\
     ln -s /usr/bin/gcc-8 /usr/bin/gcc && ln -s /usr/bin/g++-8 /usr/bin/g++ &&\
