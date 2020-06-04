@@ -82,7 +82,7 @@ Copy-Item "dist\video2x.exe" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2
 Copy-Item "dist\video2x_gui.exe" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
 Copy-Item "dist\video2x_setup.exe" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
 Copy-Item "video2x.yaml" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
-Copy-Item "requirements-windows.txt" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
+Copy-Item "requirements.txt" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2X_VERSION)-win32-light\"
 
 # clean up temporary files
 Write-Host -ForegroundColor White "`nDeleting temporary files"

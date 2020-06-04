@@ -1,0 +1,9 @@
+avalon_framework
+colorama
+patool
+pyqt5
+python-magic; platform_system != "Windows"
+python-magic-bin; platform_system == "Windows"
+pyyaml
+requests
+tqdm

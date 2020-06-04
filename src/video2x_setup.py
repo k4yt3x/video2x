@@ -105,7 +105,7 @@ class Video2xSetup:
     def _install_python_requirements(self):
         """ Read requirements.txt and return its content
         """
-        pip_install('requirements-windows.txt')
+        pip_install('requirements.txt')
 
     def _cleanup(self):
         """ Cleanup all the temp files downloaded
