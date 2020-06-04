@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: May 26, 2020
+Last Modified: June 4, 2020
 """
 
 # local imports
@@ -32,7 +32,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.5.0'
+GUI_VERSION = '2.5.1'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -131,9 +131,12 @@ class InputTableModel(QAbstractTableModel):
                 # if path is single file
                 # determine file type
                 elif file_path.is_file():
-                    input_file_mime_type = magic.from_file(str(file_path.absolute()), mime=True)
-                    input_file_type = input_file_mime_type.split('/')[0]
-                    input_file_subtype = input_file_mime_type.split('/')[1]
+                    try:
+                        input_file_mime_type = magic.from_file(str(file_path.absolute()), mime=True)
+                        input_file_type = input_file_mime_type.split('/')[0]
+                        input_file_subtype = input_file_mime_type.split('/')[1]
+                    except magic.magic.MagicException:
+                        input_file_type = input_file_subtype = None
 
                     # in case python-magic fails to detect file type
                     # try guessing file mime type with mimetypes
@@ -890,9 +893,12 @@ class Video2XMainWindow(QMainWindow):
             if input_path.is_file():
 
                 # generate suffix automatically
-                input_file_mime_type = magic.from_file(str(input_path.absolute()), mime=True)
-                input_file_type = input_file_mime_type.split('/')[0]
-                input_file_subtype = input_file_mime_type.split('/')[1]
+                try:
+                    input_file_mime_type = magic.from_file(str(input_path.absolute()), mime=True)
+                    input_file_type = input_file_mime_type.split('/')[0]
+                    input_file_subtype = input_file_mime_type.split('/')[1]
+                except magic.magic.MagicException:
+                    input_file_type = input_file_subtype = None
 
                 # in case python-magic fails to detect file type
                 # try guessing file mime type with mimetypes
