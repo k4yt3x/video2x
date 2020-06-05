@@ -27,6 +27,8 @@ In case you're unable to download the releases directly from GitHub, you can try
 
 ## [Download Nightly Builds](https://github.com/k4yt3x/video2x/actions) (Windows)
 
+**You need to be logged into GitHub to be able to download GitHub Actions artifacts.**
+
 Nightly builds are built automatically every time a new commit is pushed to the master branch. The lates nightly build is always up-to-date with the latest version of the code, but is less stable and may contain bugs. Nightly builds are handled by GitHub's integrated CI/CD tool, GitHub Actions.
 
 To download the latest nightly build, go to the [GitHub Actions](https://github.com/k4yt3x/video2x/actions) tab, enter the last run of workflow "Video2X Nightly Build, and download the artifacts generated from the run.
