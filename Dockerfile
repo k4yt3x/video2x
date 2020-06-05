@@ -82,7 +82,7 @@ RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu18
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1 && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
 RUN cd / && python3.8 -m pip install --upgrade pip &&\
     git clone --recurse-submodules --progress https://github.com/k4yt3x/video2x.git --depth=1 &&\
-    python3.8 -m pip install -U -r video2x/src/requirements-linux.txt
+    python3.8 -m pip install -U -r video2x/src/requirements.txt
 
 # Compile drivers
 

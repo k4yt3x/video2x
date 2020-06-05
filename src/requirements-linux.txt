@@ -1,8 +1,0 @@
-avalon_framework
-colorama
-patool
-pyqt5
-python-magic
-pyyaml
-requests
-tqdm
