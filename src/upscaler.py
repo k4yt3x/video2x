@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: June 4, 2020
+Last Modified: June 5, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -473,7 +473,7 @@ class Upscaler:
                     input_file_mime_type = magic.from_file(str(self.current_input_file.absolute()), mime=True)
                     input_file_type = input_file_mime_type.split('/')[0]
                     input_file_subtype = input_file_mime_type.split('/')[1]
-                except magic.magic.MagicException:
+                except Exception:
                     input_file_type = input_file_subtype = None
 
                 # in case python-magic fails to detect file type

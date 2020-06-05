@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: June 4, 2020
+Last Modified: June 5, 2020
 """
 
 # local imports
@@ -137,7 +137,7 @@ class InputTableModel(QAbstractTableModel):
                         input_file_mime_type = magic.from_file(str(file_path.absolute()), mime=True)
                         input_file_type = input_file_mime_type.split('/')[0]
                         input_file_subtype = input_file_mime_type.split('/')[1]
-                    except magic.magic.MagicException:
+                    except Exception:
                         input_file_type = input_file_subtype = None
 
                     # in case python-magic fails to detect file type
@@ -899,7 +899,7 @@ class Video2XMainWindow(QMainWindow):
                     input_file_mime_type = magic.from_file(str(input_path.absolute()), mime=True)
                     input_file_type = input_file_mime_type.split('/')[0]
                     input_file_subtype = input_file_mime_type.split('/')[1]
-                except magic.magic.MagicException:
+                except Exception:
                     input_file_type = input_file_subtype = None
 
                 # in case python-magic fails to detect file type
