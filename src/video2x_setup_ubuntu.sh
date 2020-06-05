@@ -181,6 +181,28 @@ wget "$download_link" -O "$realsr_ncnn_vulkan_zip"
 unzip "$realsr_ncnn_vulkan_zip" -d $TEMP/realsr-ncnn-vulkan
 mv -v $TEMP/realsr-ncnn-vulkan/realsr-ncnn-vulkan-*-linux $INSTALLATION_PATH/video2x/src/dependencies/realsr-ncnn-vulkan
 
+# rewrite config file values
+python3.8 - << EOF
+import yaml
+
+with open('/video2x/src/video2x.yaml', 'r') as template:
+    template_dict = yaml.load(template, Loader=yaml.FullLoader)
+    template.close()
+
+template_dict['ffmpeg']['ffmpeg_path'] = '/usr/bin'
+template_dict['gifski']['gifski_path'] = '/root/.cargo/bin/gifski'
+template_dict['waifu2x_caffe']['path'] = '/video2x/src/dependencies/waifu2x-caffe/waifu2x-caffe'
+template_dict['waifu2x_converter_cpp']['path'] = '/video2x/src/dependencies/waifu2x-converter-cpp/waifu2x-converter-cpp'
+template_dict['waifu2x_ncnn_vulkan']['path'] = '/video2x/src/dependencies/waifu2x-ncnn-vulkan/waifu2x-ncnn-vulkan'
+template_dict['srmd_ncnn_vulkan']['path'] = '/video2x/src/dependencies/srmd-ncnn-vulkan/srmd-ncnn-vulkan'
+template_dict['realsr_ncnn_vulkan']['path'] = '/video2x/src/dependencies/realsr-ncnn-vulkan/realsr-ncnn-vulkan'
+template_dict['anime4kcpp']['path'] = '/video2x/src/dependencies/anime4kcpp/anime4kcpp'
+
+# write configuration into file
+with open('/video2x/src/video2x.yaml', 'w') as config:
+    yaml.dump(template_dict, config)
+EOF
+
 # clean up temp directory
 # purge default utilities
 apt-get purge -y git-core curl wget ca-certificates gnupg2 python3-dev python3-pip python3-setuptools
