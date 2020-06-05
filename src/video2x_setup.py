@@ -48,7 +48,6 @@ SETUP_VERSION = '2.2.1'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
-VIDEO2X_CONFIG = pathlib.Path(__file__).parent.absolute() / 'video2x.yaml'
 DRIVER_OPTIONS = ['all',
                   'ffmpeg',
                   'gifski',
