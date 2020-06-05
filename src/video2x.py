@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 23, 2020
+Last Modified: June 4, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019

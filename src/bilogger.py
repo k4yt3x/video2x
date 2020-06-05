@@ -20,14 +20,27 @@ class BiLogger(object):
     """
 
     def __init__(self, terminal: _io.TextIOWrapper, logfile: pathlib.Path):
+        """ initialize BiLogger
+
+        Args:
+            terminal (_io.TextIOWrapper): original terminal IO wrapper
+            logfile (pathlib.Path): target log file path object
+        """
         self.terminal = terminal
         self.log = logfile.open(mode='a+')
 
-    def write(self, message):
+    def write(self, message: str):
+        """ write message to original terminal output and log file
+
+        Args:
+            message (str): message to write
+        """
         self.terminal.write(message)
         self.terminal.flush()
         self.log.write(message)
         self.log.flush()
 
     def flush(self):
+        """ flush logger (for compability only)
+        """
         pass
