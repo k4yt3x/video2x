@@ -14,14 +14,14 @@
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
 
-## [Download Stable/Beta Builds](https://github.com/k4yt3x/video2x/releases) (Windows)
+## [Download Stable/Beta Builds](https://github.com/k4yt3x/video2x/releases/latest) (Windows)
 
 - **`Full`**: full package comes pre-configured with **all** dependencies like `FFmpeg` and `waifu2x-caffe`.
 - **`Light`**: ligt package comes with only Video2X binaries and a template configuration file. The user will either have to run the setup script or install and configure dependencies themselves.
 
 Go to the **[Quick Start](#quick-start)** section for usages.
 
-### [Download From Mirror](https://files.k4yt3x.com/Projects/Video2X/)
+### [Download From Mirror](https://files.k4yt3x.com/Projects/Video2X/latest)
 
 In case you're unable to download the releases directly from GitHub, you can try downloading from the mirror site hosted by the author. Only releases will be updated in this directory, not nightly builds.
 
