@@ -842,12 +842,9 @@ class Video2XMainWindow(QMainWindow):
         self.input_table_view.setModel(self.input_table_model)
 
     def input_table_delete_selected(self):
-        items_to_delete = []
-        for index in [i.row() for i in self.input_table_view.selectedIndexes()]:
-            items_to_delete.append(self.input_table_data[index])
-
-        for item in items_to_delete:
-            self.input_table_data.remove(item)
+        indexes_to_delete = [i.row() for i in self.input_table_view.selectedIndexes()]
+        for index in sorted(indexes_to_delete, reverse=True):
+            del self.input_table_data[index]
 
         self.update_output_path()
         self.update_input_table()
