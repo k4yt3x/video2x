@@ -8,12 +8,14 @@ Last Modified: June 4, 2020
 """
 
 # local imports
+from bilogger import BiLogger
 from upscaler import UPSCALER_VERSION
 from upscaler import Upscaler
 from wrappers.ffmpeg import Ffmpeg
 
 # built-in imports
 import contextlib
+import datetime
 import json
 import mimetypes
 import os
@@ -32,7 +34,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.5.1'
+GUI_VERSION = '2.6.0'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -189,6 +191,9 @@ class Video2XMainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         uic.loadUi(str(resource_path('video2x_gui.ui')), self)
+
+        # generate log file name
+        self.logfile = pathlib.Path(__file__).parent.absolute() / f'video2x_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log'
 
         # create thread pool for upscaler workers
         self.threadpool = QThreadPool()
@@ -1032,8 +1037,9 @@ class Video2XMainWindow(QMainWindow):
 {}\\
 Check the console output for details.\\
 When reporting an error, please include console output.\\
-You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new?assignees=K4YT3X&labels=bug&template=bug-report.md&title={}) to report this error.'''
-        message_box.setText(error_message.format(exception, urllib.parse.quote(str(exception))))
+You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new?assignees=K4YT3X&labels=bug&template=bug-report.md&title={}) to report this error.\\
+It\'s also highly recommended for you to attach the [log file]({}) under the programs\'s parent folder named {}.'''
+        message_box.setText(error_message.format(exception, urllib.parse.quote(str(exception)), self.logfile.as_uri(), self.logfile.name))
         message_box.exec_()
 
     def progress_monitor(self, progress_callback: pyqtSignal):
@@ -1136,6 +1142,10 @@ You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new
             if self.output_line_edit.text().strip() == '':
                 self.show_warning('Output path unspecified')
                 return
+
+            print(f'Redirecting console logs to {self.logfile}', file=sys.stderr)
+            sys.stdout = BiLogger(sys.stdout, self.logfile)
+            sys.stderr = BiLogger(sys.stderr, self.logfile)
 
             if len(self.input_table_data) == 1:
                 input_directory = self.input_table_data[0]

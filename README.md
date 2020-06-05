@@ -234,6 +234,12 @@ Are you interested in how the idea of Video2X was born? Do you want to know the 
 ### -c CONFIG, --config CONFIG
     video2x config file path
 
+### --log LOG
+    log file path (default: program_directory\video2x_%Y-%m-%d_%H-%M-%S.log)
+
+### --nolog
+    disable logging (default: False)
+
 ### -v, --version
     display version, lawful information and exit
 

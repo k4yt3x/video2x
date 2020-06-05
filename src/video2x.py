@@ -49,12 +49,14 @@ smooth and edges sharp.
 """
 
 # local imports
+from bilogger import BiLogger
 from upscaler import AVAILABLE_DRIVERS
 from upscaler import UPSCALER_VERSION
 from upscaler import Upscaler
 
 # built-in imports
 import argparse
+import datetime
 import gettext
 import importlib
 import locale
@@ -79,8 +81,7 @@ language = gettext.translation(DOMAIN, LOCALE_DIRECTORY, [default_locale], fallb
 language.install()
 _ = language.gettext
 
-
-CLI_VERSION = '4.0.1'
+CLI_VERSION = '4.1.0'
 
 LEGAL_INFO = _('''Video2X CLI Version: {}
 Upscaler Version: {}
@@ -118,6 +119,9 @@ def parse_arguments():
 
     video2x_options.add_argument('-c', '--config', type=pathlib.Path, help=_('video2x config file path'), action='store',
                                  default=pathlib.Path(__file__).parent.absolute() / 'video2x.yaml')
+    video2x_options.add_argument('--log', type=pathlib.Path, help=_('log file path'),
+                                 default=pathlib.Path(__file__).parent.absolute() / f'video2x_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log')
+    video2x_options.add_argument('--nolog', help=_('disable logging'), action='store_true')
     video2x_options.add_argument('-v', '--version', help=_('display version, lawful information and exit'), action='store_true')
 
     # scaling options
@@ -178,6 +182,13 @@ video2x_args, driver_args = parse_arguments()
 if video2x_args.version:
     print(LEGAL_INFO)
     sys.exit(0)
+
+# redirect output to both terminal and log file
+if video2x_args.nolog is False:
+    LOGFILE = video2x_args.log
+    Avalon.debug_info(_('Redirecting console logs to {}').format(LOGFILE))
+    sys.stdout = BiLogger(sys.stdout, LOGFILE)
+    sys.stderr = BiLogger(sys.stderr, LOGFILE)
 
 # read configurations from configuration file
 config = read_config(video2x_args.config)
