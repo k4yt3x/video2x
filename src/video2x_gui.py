@@ -257,7 +257,12 @@ class Video2XMainWindow(QMainWindow):
         # config file
         self.config_line_edit = self.findChild(QLineEdit, 'configLineEdit')
         self.enable_line_edit_file_drop(self.config_line_edit)
-        self.config_line_edit.setText(str((pathlib.Path(__file__).parent / 'video2x.yaml').absolute()))
+
+        if getattr(sys, 'frozen', False):
+            self.config_line_edit.setText(str((pathlib.Path(sys.executable).parent / 'video2x.yaml').absolute()))
+        elif __file__:
+            self.config_line_edit.setText(str((pathlib.Path(__file__).parent / 'video2x.yaml').absolute()))
+
         self.config_select_file_button = self.findChild(QPushButton, 'configSelectButton')
         self.config_select_file_button.clicked.connect(self.select_config_file)
 
