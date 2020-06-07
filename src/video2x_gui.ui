@@ -1685,6 +1685,13 @@
                  </property>
                 </widget>
                </item>
+               <item>
+                <widget class="QCheckBox" name="anime4kCppCnnModeCheckBox">
+                 <property name="text">
+                  <string>CNN Mode</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
             </item>

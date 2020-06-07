@@ -34,7 +34,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.6.0'
+GUI_VERSION = '2.7.0'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -385,6 +385,7 @@ class Video2XMainWindow(QMainWindow):
         self.anime4kcpp_pre_processing_check_box = self.findChild(QCheckBox, 'anime4kCppPreProcessingCheckBox')
         self.anime4kcpp_post_processing_check_box = self.findChild(QCheckBox, 'anime4kCppPostProcessingCheckBox')
         self.anime4kcpp_gpu_mode_check_box = self.findChild(QCheckBox, 'anime4kCppGpuModeCheckBox')
+        self.anime4kcpp_cnn_mode_check_box = self.findChild(QCheckBox, 'anime4kCppCnnModeCheckBox')
 
         # FFmpeg settings
         # global options
@@ -542,6 +543,7 @@ class Video2XMainWindow(QMainWindow):
         self.anime4kcpp_pre_processing_check_box.setChecked(settings['preprocessing'])
         self.anime4kcpp_post_processing_check_box.setChecked(settings['postprocessing'])
         self.anime4kcpp_gpu_mode_check_box.setChecked(settings['GPUMode'])
+        self.anime4kcpp_cnn_mode_check_box.setChecked(settings['CNNMode'])
 
         # ffmpeg
         # global options
@@ -650,6 +652,7 @@ class Video2XMainWindow(QMainWindow):
         self.config['anime4kcpp']['preprocessing'] = bool(self.anime4kcpp_pre_processing_check_box.isChecked())
         self.config['anime4kcpp']['postprocessing'] = bool(self.anime4kcpp_post_processing_check_box.isChecked())
         self.config['anime4kcpp']['GPUMode'] = bool(self.anime4kcpp_gpu_mode_check_box.isChecked())
+        self.config['anime4kcpp']['CNNMode'] = bool(self.anime4kcpp_cnn_mode_check_box.isChecked())
 
         # ffmpeg
         self.config['ffmpeg']['ffmpeg_path'] = os.path.expandvars(self.ffmpeg_path_line_edit.text())

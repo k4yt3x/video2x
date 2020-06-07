@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: May 29, 2020
+# Last Modified: June 7, 2020
 # Values here are the default values. Change the value here to
 #   save the default value permanently.
 # Items commented out are parameters irrelevant to this context
@@ -100,11 +100,12 @@ anime4kcpp:
   fastMode: false # Faster but maybe low quality
   videoMode: false # Video process
   preview: null # Preview image
-  preprocessing: False # Enable pre processing
-  postprocessing: False # Enable post processing
+  preprocessing: false # Enable pre processing
+  postprocessing: false # Enable post processing
   preFilters: 4 # Enhancement filter, only working when preProcessing is true,there are 5 options by binary:Median blur=0000001, Mean blur=0000010, CAS Sharpening=0000100, Gaussian blur weak=0001000, Gaussian blur=0010000, Bilateral filter=0100000, Bilateral filter faster=1000000, you can freely combine them, eg: Gaussian blur weak + Bilateral filter = 0001000 | 0100000 = 0101000 = 40(D) (unsigned int [=4])
   postFilters: 40 # Enhancement filter, only working when postProcessing is true,there are 5 options by binary:Median blur=0000001, Mean blur=0000010, CAS Sharpening=0000100, Gaussian blur weak=0001000, Gaussian blur=0010000, Bilateral filter=0100000, Bilateral filter faster=1000000, you can freely combine them, eg: Gaussian blur weak + Bilateral filter = 0001000 | 0100000 = 0101000 = 40(D), so you can put 40 to enable Gaussian blur weak and Bilateral filter, which also is what I recommend for image that < 1080P, 48 for image that >= 1080P, and for performance I recommend to use 72 for video that < 1080P, 80 for video that >=1080P (unsigned int [=40])
-  GPUMode: False # Enable GPU acceleration
+  GPUMode: false # Enable GPU acceleration
+  CNNMode: false # Enable ACNet
   listGPUs: null # list GPUs
   platformID: 0 # Specify the platform ID (unsigned int [=0])
   deviceID: 0 # Specify the device ID (unsigned int [=0])
