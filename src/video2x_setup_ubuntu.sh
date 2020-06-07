@@ -2,7 +2,7 @@
 # Name: Video2X Setup Script (Ubuntu)
 # Creator: K4YT3X
 # Date Created: June 5, 2020
-# Last Modified: June 5, 2020
+# Last Modified: June 7, 2020
 
 # help message if input is incorrect of if -h/--help is specified
 if [ "$1" == "-h" ] || [ "$1" == "--help" ] || [ "$#" -gt 2 ]; then
@@ -214,7 +214,7 @@ apt-get purge -y autoconf build-essential cmake gcc-8 libatlas-base-dev libboost
 apt-get purge -y libopencv-dev ocl-icd-opencl-dev
 
 # purge waifu2x/srmd/realsr-ncnn-vulkan build dependencies
-apt-get purge -y libvulkan1 unzip jq
+apt-get purge -y unzip jq
 
 # run autoremove and purge all unused packages
 apt-get autoremove --purge -y
