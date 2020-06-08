@@ -239,7 +239,7 @@ Are you interested in how the idea of Video2X was born? Do you want to know the 
 ### --log LOG
     log file path (default: program_directory\video2x_%Y-%m-%d_%H-%M-%S.log)
 
-### --nolog
+### --disable_logging
     disable logging (default: False)
 
 ### -v, --version
