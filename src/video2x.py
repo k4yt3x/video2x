@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 7, 2020
+Last Modified: June 8, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -81,7 +81,7 @@ language = gettext.translation(DOMAIN, LOCALE_DIRECTORY, [default_locale], fallb
 language.install()
 _ = language.gettext
 
-CLI_VERSION = '4.1.0'
+CLI_VERSION = '4.1.1'
 
 LEGAL_INFO = _('''Video2X CLI Version: {}
 Upscaler Version: {}
@@ -236,21 +236,24 @@ try:
     begin_time = time.time()
 
     # initialize upscaler object
-    upscaler = Upscaler(input_path=video2x_args.input,
-                        output_path=video2x_args.output,
-                        driver_settings=driver_settings,
-                        ffmpeg_settings=ffmpeg_settings,
-                        gifski_settings=gifski_settings)
+    upscaler = Upscaler(
+        # required parameters
+        input_path=video2x_args.input,
+        output_path=video2x_args.output,
+        driver_settings=driver_settings,
+        ffmpeg_settings=ffmpeg_settings,
+        gifski_settings=gifski_settings,
 
-    # set upscaler optional options
-    upscaler.driver = video2x_args.driver
-    upscaler.scale_ratio = video2x_args.ratio
-    upscaler.processes = video2x_args.processes
-    upscaler.video2x_cache_directory = video2x_cache_directory
-    upscaler.extracted_frame_format = extracted_frame_format
-    upscaler.image_output_extension = image_output_extension
-    upscaler.video_output_extension = video_output_extension
-    upscaler.preserve_frames = preserve_frames
+        # optional parameters
+        driver=video2x_args.driver,
+        scale_ratio=video2x_args.ratio,
+        processes=video2x_args.processes,
+        video2x_cache_directory=video2x_cache_directory,
+        extracted_frame_format=extracted_frame_format,
+        image_output_extension=image_output_extension,
+        video_output_extension=video_output_extension,
+        preserve_frames=preserve_frames
+    )
 
     # run upscaler
     upscaler.run()

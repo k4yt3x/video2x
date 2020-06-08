@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: June 7, 2020
+Last Modified: June 8, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -50,7 +50,7 @@ language.install()
 _ = language.gettext
 
 # version information
-UPSCALER_VERSION = '4.2.1'
+UPSCALER_VERSION = '4.2.2'
 
 # these names are consistent for
 # - driver selection in command line
@@ -73,23 +73,39 @@ class Upscaler:
         ArgumentError -- if argument is not valid
     """
 
-    def __init__(self, input_path, output_path, driver_settings, ffmpeg_settings, gifski_settings):
-        # mandatory arguments
+    def __init__(
+        self,
+        input_path: pathlib.Path or list,
+        output_path: pathlib.Path,
+        driver_settings: dict,
+        ffmpeg_settings: dict,
+        gifski_settings: dict,
+        driver: str = 'waifu2x_caffe',
+        scale_ratio: float = None,
+        processes: int = 1,
+        video2x_cache_directory: pathlib.Path = pathlib.Path(tempfile.gettempdir()) / 'video2x',
+        extracted_frame_format: str = 'png',
+        image_output_extension: str = '.png',
+        video_output_extension: str = '.mp4',
+        preserve_frames: bool = False
+    ):
+
+        # required parameters
         self.input = input_path
         self.output = output_path
         self.driver_settings = driver_settings
         self.ffmpeg_settings = ffmpeg_settings
         self.gifski_settings = gifski_settings
 
-        # optional arguments
-        self.driver = 'waifu2x_caffe'
-        self.scale_ratio = None
-        self.processes = 1
-        self.video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / 'video2x'
-        self.extracted_frame_format = 'png'
-        self.image_output_extension = '.png'
-        self.video_output_extension = '.mp4'
-        self.preserve_frames = False
+        # optional parameters
+        self.driver = driver
+        self.scale_ratio = scale_ratio
+        self.processes = processes
+        self.video2x_cache_directory = video2x_cache_directory
+        self.extracted_frame_format = extracted_frame_format
+        self.image_output_extension = image_output_extension
+        self.video_output_extension = video_output_extension
+        self.preserve_frames = preserve_frames
 
         # other internal members and signals
         self.running = False

@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: June 7, 2020
+Last Modified: June 8, 2020
 """
 
 # local imports
@@ -34,7 +34,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.7.0'
+GUI_VERSION = '2.7.1'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -1173,21 +1173,24 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
             # load driver settings for the current driver
             self.driver_settings = self.config[AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]]
 
-            self.upscaler = Upscaler(input_path=input_directory,
-                                     output_path=output_directory,
-                                     driver_settings=self.driver_settings,
-                                     ffmpeg_settings=self.ffmpeg_settings,
-                                     gifski_settings=self.gifski_settings)
+            self.upscaler = Upscaler(
+                # required parameters
+                input_path=input_directory,
+                output_path=output_directory,
+                driver_settings=self.driver_settings,
+                ffmpeg_settings=self.ffmpeg_settings,
+                gifski_settings=self.gifski_settings,
 
-            # set optional options
-            self.upscaler.driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
-            self.upscaler.scale_ratio = self.scale_ratio_double_spin_box.value()
-            self.upscaler.processes = self.processes_spin_box.value()
-            self.upscaler.video2x_cache_directory = pathlib.Path(os.path.expandvars(self.cache_line_edit.text()))
-            self.upscaler.extracted_frame_format = self.config['video2x']['extracted_frame_format'].lower()
-            self.upscaler.image_output_extension = self.image_output_extension_line_edit.text()
-            self.upscaler.video_output_extension = self.video_output_extension_line_edit.text()
-            self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.isChecked())
+                # optional parameters
+                driver=AVAILABLE_DRIVERS[self.driver_combo_box.currentText()],
+                scale_ratio=self.scale_ratio_double_spin_box.value(),
+                processes=self.processes_spin_box.value(),
+                video2x_cache_directory=pathlib.Path(os.path.expandvars(self.cache_line_edit.text())),
+                extracted_frame_format=self.config['video2x']['extracted_frame_format'].lower(),
+                image_output_extension=self.image_output_extension_line_edit.text(),
+                video_output_extension=self.video_output_extension_line_edit.text(),
+                preserve_frames=bool(self.preserve_frames_check_box.isChecked())
+            )
 
             # run upscaler
             worker = UpscalerWorker(self.upscaler.run)
