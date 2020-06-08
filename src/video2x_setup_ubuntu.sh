@@ -2,7 +2,7 @@
 # Name: Video2X Setup Script (Ubuntu)
 # Creator: K4YT3X
 # Date Created: June 5, 2020
-# Last Modified: June 7, 2020
+# Last Modified: June 8, 2020
 
 # help message if input is incorrect of if -h/--help is specified
 if [ "$1" == "-h" ] || [ "$1" == "--help" ] || [ "$#" -gt 2 ]; then
@@ -205,19 +205,19 @@ EOF
 
 # clean up temp directory
 # purge default utilities
-apt-get purge -y git-core curl wget ca-certificates gnupg2 python3-dev python3-pip python3-setuptools
+# apt-get purge -y git-core curl wget ca-certificates gnupg2 python3-dev python3-pip python3-setuptools
 
 # purge waifu2x-caffe build dependencies
-apt-get purge -y autoconf build-essential cmake gcc-8 libatlas-base-dev libboost-atomic-dev libboost-chrono-dev libboost-date-time-dev libboost-filesystem-dev libboost-iostreams-dev libboost-python-dev libboost-system-dev libboost-thread-dev libcudnn7 libcudnn7-dev libgflags-dev libgoogle-glog-dev libhdf5-dev libleveldb-dev liblmdb-dev libopencv-dev libprotobuf-dev libsnappy-dev protobuf-compiler python-numpy texinfo yasm zlib1g-dev
+# apt-get purge -y autoconf build-essential cmake gcc-8 libatlas-base-dev libboost-atomic-dev libboost-chrono-dev libboost-date-time-dev libboost-filesystem-dev libboost-iostreams-dev libboost-python-dev libboost-system-dev libboost-thread-dev libcudnn7 libcudnn7-dev libgflags-dev libgoogle-glog-dev libhdf5-dev libleveldb-dev liblmdb-dev libopencv-dev libprotobuf-dev libsnappy-dev protobuf-compiler python-numpy texinfo yasm zlib1g-dev
 
 # purge waifu2x-converter-cpp build dependencies
-apt-get purge -y libopencv-dev ocl-icd-opencl-dev
+# apt-get purge -y libopencv-dev ocl-icd-opencl-dev
 
 # purge waifu2x/srmd/realsr-ncnn-vulkan build dependencies
-apt-get purge -y unzip jq
+# apt-get purge -y unzip jq
 
 # run autoremove and purge all unused packages
-apt-get autoremove --purge -y
+# apt-get autoremove --purge -y
 
 # remove temp directory
 rm -vrf $TEMP
