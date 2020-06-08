@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>673</width>
-    <height>876</height>
+    <height>910</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -465,6 +465,13 @@
                </property>
                <property name="tristate">
                 <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="disableLoggingCheckBox">
+               <property name="text">
+                <string>Disable Logging</string>
                </property>
               </widget>
              </item>

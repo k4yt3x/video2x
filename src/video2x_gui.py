@@ -17,7 +17,6 @@ from wrappers.ffmpeg import Ffmpeg
 import contextlib
 import datetime
 import json
-import math
 import mimetypes
 import os
 import pathlib
@@ -281,6 +280,7 @@ class Video2XMainWindow(QMainWindow):
         self.image_output_extension_line_edit = self.findChild(QLineEdit, 'imageOutputExtensionLineEdit')
         self.video_output_extension_line_edit = self.findChild(QLineEdit, 'videoOutputExtensionLineEdit')
         self.preserve_frames_check_box = self.findChild(QCheckBox, 'preserveFramesCheckBox')
+        self.disable_logging_check_box = self.findChild(QCheckBox, 'disableLoggingCheckBox')
 
         # frame preview
         self.frame_preview_show_preview_check_box = self.findChild(QCheckBox, 'framePreviewShowPreviewCheckBox')
@@ -1154,9 +1154,10 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
                 self.show_warning('Output path unspecified')
                 return
 
-            print(f'Redirecting console logs to {self.logfile}', file=sys.stderr)
-            sys.stdout = BiLogger(sys.stdout, self.logfile)
-            sys.stderr = BiLogger(sys.stderr, self.logfile)
+            if self.disable_logging_check_box.isChecked() is False:
+                print(f'Redirecting console logs to {self.logfile}', file=sys.stderr)
+                sys.stdout = BiLogger(sys.stdout, self.logfile)
+                sys.stderr = BiLogger(sys.stderr, self.logfile)
 
             if len(self.input_table_data) == 1:
                 input_directory = self.input_table_data[0]

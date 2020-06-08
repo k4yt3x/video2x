@@ -121,7 +121,7 @@ def parse_arguments():
                                  default=pathlib.Path(__file__).parent.absolute() / 'video2x.yaml')
     video2x_options.add_argument('--log', type=pathlib.Path, help=_('log file path'),
                                  default=pathlib.Path(__file__).parent.absolute() / f'video2x_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log')
-    video2x_options.add_argument('--nolog', help=_('disable logging'), action='store_true')
+    video2x_options.add_argument('--disable_logging', help=_('disable logging'), action='store_true')
     video2x_options.add_argument('-v', '--version', help=_('display version, lawful information and exit'), action='store_true')
 
     # scaling options
@@ -184,7 +184,7 @@ if video2x_args.version:
     sys.exit(0)
 
 # redirect output to both terminal and log file
-if video2x_args.nolog is False:
+if video2x_args.disable_logging is False:
     LOGFILE = video2x_args.log
     Avalon.debug_info(_('Redirecting console logs to {}').format(LOGFILE))
     sys.stdout = BiLogger(sys.stdout, LOGFILE)
