@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 Name: Video2X Upscale Progress Monitor
-Author: BrianPetkovsek
+Author: K4YT3X
 Date Created: May 7, 2020
-Last Modified: May 10, 2020
+Last Modified: June 7, 2020
 """
 
 # built-in imports
@@ -37,7 +37,7 @@ class ProgressMonitor(threading.Thread):
         # get number of extracted frames
         self.upscaler.total_frames = 0
         for directory in self.extracted_frames_directories:
-            self.upscaler.total_frames += len([f for f in directory.iterdir() if str(f).lower().endswith(self.upscaler.image_format.lower())])
+            self.upscaler.total_frames += len([f for f in directory.iterdir() if str(f).lower().endswith(self.upscaler.extracted_frame_format.lower())])
 
         with tqdm(total=self.upscaler.total_frames, ascii=True, desc=_('Upscaling Progress')) as progress_bar:
             # tqdm update method adds the value to the progress
@@ -47,7 +47,7 @@ class ProgressMonitor(threading.Thread):
             while self.running:
 
                 with contextlib.suppress(FileNotFoundError):
-                    upscaled_frames = [f for f in self.upscaler.upscaled_frames.iterdir() if str(f).lower().endswith(self.upscaler.image_format.lower())]
+                    upscaled_frames = [f for f in self.upscaler.upscaled_frames.iterdir() if str(f).lower().endswith(self.upscaler.extracted_frame_format.lower())]
                     if len(upscaled_frames) >= 1:
                         self.upscaler.last_frame_upscaled = sorted(upscaled_frames)[-1]
                     self.upscaler.total_frames_upscaled = len(upscaled_frames)

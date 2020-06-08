@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 11, 2020
+Last Modified: June 7, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -63,7 +63,7 @@ class WrapperMain:
     def load_configurations(self, upscaler):
         # use scale width and scale height if specified
         self.driver_settings['scale_ratio'] = upscaler.scale_ratio
-        self.driver_settings['output_extention'] = upscaler.image_format
+        self.driver_settings['output_extention'] = upscaler.extracted_frame_format
 
         # bit_depth will be 12 at this point
         # it will up updated later

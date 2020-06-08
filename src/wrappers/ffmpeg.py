@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: May 14, 2020
+Last Modified: June 7, 2020
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -27,7 +27,7 @@ class Ffmpeg:
     and inserting audio tracks to videos.
     """
 
-    def __init__(self, ffmpeg_settings, image_format='png'):
+    def __init__(self, ffmpeg_settings, extracted_frame_format='png'):
         self.ffmpeg_settings = ffmpeg_settings
 
         self.ffmpeg_path = pathlib.Path(self.ffmpeg_settings['ffmpeg_path'])
@@ -35,7 +35,7 @@ class Ffmpeg:
         self.ffmpeg_probe_binary = self.ffmpeg_path / 'ffprobe'
 
         # video metadata
-        self.image_format = image_format
+        self.extracted_frame_format = extracted_frame_format
         self.intermediate_file_name = pathlib.Path(self.ffmpeg_settings['intermediate_file_name'])
         self.pixel_format = self.ffmpeg_settings['extract_frames']['output_options']['-pix_fmt']
 
@@ -133,7 +133,7 @@ class Ffmpeg:
 
         # specify output file
         execute.extend([
-            extracted_frames / f'extracted_%0d.{self.image_format}'
+            extracted_frames / f'extracted_%0d.{self.extracted_frame_format}'
         ])
 
         return(self._execute(execute))
@@ -174,7 +174,7 @@ class Ffmpeg:
         # append input frames path into command
         execute.extend([
             '-i',
-            upscaled_frames / f'extracted_%d.{self.image_format}'
+            upscaled_frames / f'extracted_%d.{self.extracted_frame_format}'
         ])
 
         # read FFmpeg output options

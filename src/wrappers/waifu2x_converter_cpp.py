@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: May 11, 2020
+Last Modified: June 7, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
@@ -69,7 +69,7 @@ class WrapperMain:
     def load_configurations(self, upscaler):
         self.driver_settings['scale-ratio'] = upscaler.scale_ratio
         self.driver_settings['jobs'] = upscaler.processes
-        self.driver_settings['output-format'] = upscaler.image_format.lower()
+        self.driver_settings['output-format'] = upscaler.extracted_frame_format.lower()
 
     def upscale(self, input_directory, output_directory):
         """ Waifu2x Converter Driver Upscaler
