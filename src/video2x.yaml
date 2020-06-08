@@ -169,5 +169,7 @@ gifski:
   quiet: false # Do not show a progress bar
 video2x:
   video2x_cache_directory: null # default: %TEMP%\video2x, directory where cache files are stored, will be deleted if preserve_frames is not set to true
-  image_format: png # png/jpg intermediate file format used for extracted frames during video processing
+  extracted_frame_format: png # png/jpg intermediate file format used for extracted frames during video processing
+  image_output_extension: .png # image output extension during batch processing
+  video_output_extension: .mp4 # video output extension during batch processing
   preserve_frames: false # if set to true, the cache directory won't be cleaned upon task completion

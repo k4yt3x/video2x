@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 4, 2020
+Last Modified: June 7, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -206,7 +206,9 @@ gifski_settings = config['gifski']
 gifski_settings['gifski_path'] = os.path.expandvars(gifski_settings['gifski_path'])
 
 # load video2x settings
-image_format = config['video2x']['image_format'].lower()
+extracted_frame_format = config['video2x']['extracted_frame_format'].lower()
+image_output_extension = config['video2x']['image_output_extension']
+video_output_extension = config['video2x']['video_output_extension']
 preserve_frames = config['video2x']['preserve_frames']
 
 # if preserve frames specified in command line
@@ -245,7 +247,9 @@ try:
     upscaler.scale_ratio = video2x_args.ratio
     upscaler.processes = video2x_args.processes
     upscaler.video2x_cache_directory = video2x_cache_directory
-    upscaler.image_format = image_format
+    upscaler.extracted_frame_format = extracted_frame_format
+    upscaler.image_output_extension = image_output_extension
+    upscaler.video_output_extension = video_output_extension
     upscaler.preserve_frames = preserve_frames
 
     # run upscaler

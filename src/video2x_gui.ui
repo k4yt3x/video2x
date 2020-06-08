@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>673</width>
-    <height>844</height>
+    <height>876</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -408,6 +408,54 @@
               </layout>
              </item>
              <item>
+              <layout class="QHBoxLayout" name="imageOutputExtensionHorizontalLayout">
+               <item>
+                <widget class="QLabel" name="imageOutputExtensionLabel">
+                 <property name="text">
+                  <string>Image Output Extension</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="imageOutputExtensionLineEdit">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>.png</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="videoOutputExtensionHorizontalLayout">
+               <item>
+                <widget class="QLabel" name="videoOutputExtensionLabel">
+                 <property name="text">
+                  <string>Video Output Extension</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="videoOutputExtensionLineEdit">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>.mp4</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
               <widget class="QCheckBox" name="preserveFramesCheckBox">
                <property name="toolTip">
                 <string>Check this to prevent Video2X from cleaning up its cache folder containing extracted and upscaled frames.</string>
@@ -447,6 +495,9 @@
                   <widget class="QCheckBox" name="framePreviewKeepAspectRatioCheckBox">
                    <property name="text">
                     <string>Keep Aspect Ratio</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>

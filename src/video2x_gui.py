@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: June 5, 2020
+Last Modified: June 7, 2020
 """
 
 # local imports
@@ -17,6 +17,7 @@ from wrappers.ffmpeg import Ffmpeg
 import contextlib
 import datetime
 import json
+import math
 import mimetypes
 import os
 import pathlib
@@ -277,6 +278,8 @@ class Video2XMainWindow(QMainWindow):
         self.driver_combo_box.currentTextChanged.connect(self.update_gui_for_driver)
         self.processes_spin_box = self.findChild(QSpinBox, 'processesSpinBox')
         self.scale_ratio_double_spin_box = self.findChild(QDoubleSpinBox, 'scaleRatioDoubleSpinBox')
+        self.image_output_extension_line_edit = self.findChild(QLineEdit, 'imageOutputExtensionLineEdit')
+        self.video_output_extension_line_edit = self.findChild(QLineEdit, 'videoOutputExtensionLineEdit')
         self.preserve_frames_check_box = self.findChild(QCheckBox, 'preserveFramesCheckBox')
 
         # frame preview
@@ -471,6 +474,9 @@ class Video2XMainWindow(QMainWindow):
         if self.config['video2x']['video2x_cache_directory'] is None:
             self.config['video2x']['video2x_cache_directory'] = str((pathlib.Path(tempfile.gettempdir()) / 'video2x').absolute())
         self.cache_line_edit.setText(self.config['video2x']['video2x_cache_directory'])
+
+        self.image_output_extension_line_edit.setText(self.config['video2x']['image_output_extension'])
+        self.video_output_extension_line_edit.setText(self.config['video2x']['video_output_extension'])
 
         # load preserve frames settings
         self.preserve_frames_check_box.setChecked(self.config['video2x']['preserve_frames'])
@@ -926,11 +932,11 @@ class Video2XMainWindow(QMainWindow):
 
                     # otherwise, use .png by default for all images
                     else:
-                        suffix = '.png'
+                        suffix = self.image_output_extension_line_edit.text()
 
                 # if input is video, use .mp4 as output by default
                 elif input_file_type == 'video':
-                    suffix = '.mp4'
+                    suffix = self.video_output_extension_line_edit.text()
 
                 # if failed to detect file type
                 # use input file's suffix
@@ -942,9 +948,9 @@ class Video2XMainWindow(QMainWindow):
             elif input_path.is_dir():
                 output_path = input_path.parent / f'{input_path.stem}_output'
 
-            # try up to 1000 times
+            # try a new name with a different file ID
             output_path_id = 0
-            while output_path.exists() and output_path_id <= 1000:
+            while output_path.exists():
                 if input_path.is_file():
                     output_path = input_path.parent / pathlib.Path(f'{input_path.stem}_output_{output_path_id}{suffix}')
                 elif input_path.is_dir():
@@ -1067,7 +1073,7 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
 
         # upscale process will stop at 99%
         # so it's set to 100 manually when all is done
-        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path(), pathlib.Path()))
+        # progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path(), pathlib.Path()))
 
     def set_progress(self, progress_information: tuple):
         upscale_begin_time = progress_information[0]
@@ -1177,7 +1183,9 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
             self.upscaler.scale_ratio = self.scale_ratio_double_spin_box.value()
             self.upscaler.processes = self.processes_spin_box.value()
             self.upscaler.video2x_cache_directory = pathlib.Path(os.path.expandvars(self.cache_line_edit.text()))
-            self.upscaler.image_format = self.config['video2x']['image_format'].lower()
+            self.upscaler.extracted_frame_format = self.config['video2x']['extracted_frame_format'].lower()
+            self.upscaler.image_output_extension = self.image_output_extension_line_edit.text()
+            self.upscaler.video_output_extension = self.video_output_extension_line_edit.text()
             self.upscaler.preserve_frames = bool(self.preserve_frames_check_box.isChecked())
 
             # run upscaler
@@ -1200,6 +1208,10 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
             self.upscale_errored(e)
 
     def upscale_errored(self, exception: Exception):
+        # send stop signal in case it's not triggered
+        with contextlib.suppress(AttributeError):
+            self.upscaler.running = False
+
         self.show_error(exception)
         self.threadpool.waitForDone(5)
         self.start_button.setEnabled(True)
