@@ -7,26 +7,20 @@ assignees: K4YT3X
 
 ---
 
-## Environment Information
+## Component Versions
 
-|Module|Version|
-|-|-|
-|`Video2X`||
-|`FFmpeg`||
-|`waifu2x-caffe`||
-|`waifu2x-converter-cpp`||
-|`waifu2x-ncnn-vulkan`||
+Please at least fill in the release version and GUI or CLI version.
+
+- **Video2X release version**:
+- **Upscaler version**:
+- **GUI version**:
+- **CLI version**:
 
 ## Symptom
 
-Briefly describe what's going on.
+In this section, briefly describe what's going on.
 
-## Screenshots or Error Messages
+## Error Log or Screenshots
 
-Please paste screenshots or error messages here.
-Include as much details as you can, as this greatly helps debugging the problem.
-
-Please paste your error message in the code block down below:
-
-```
-```
+Please upload or paste the error log here. You may also include screenshots.
+**It is highly recommended to include your error log.**

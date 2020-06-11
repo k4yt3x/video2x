@@ -9,7 +9,7 @@ assignees: K4YT3X
 
 ## Description
 
-Briefly describe the feature you want to be added into `video2x`.
+Briefly describe the feature that you'd like Video2X to have.
 
 ## Sources
 
