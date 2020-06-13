@@ -38,7 +38,7 @@ apt-get install -y --no-install-recommends apt-fast
 apt-fast update
 
 # install runtime packages
-apt-fast install -y --no-install-recommends ffmpeg libmagic1 nvidia-cuda-toolkit nvidia-driver-440 python3.8
+apt-fast install -y --no-install-recommends ca-certificates ffmpeg libmagic1 nvidia-cuda-toolkit nvidia-driver-440 python3.8
 
 # install compilation packages
 apt-fast install -y --no-install-recommends git-core curl wget ca-certificates gnupg2 python3-dev python3-pip python3-setuptools python3-wheel
