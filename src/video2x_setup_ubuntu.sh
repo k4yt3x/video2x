@@ -2,7 +2,7 @@
 # Name: Video2X Setup Script (Ubuntu)
 # Creator: K4YT3X
 # Date Created: June 5, 2020
-# Last Modified: June 8, 2020
+# Last Modified: June 13, 2020
 
 # help message if input is incorrect of if -h/--help is specified
 if [ "$1" == "-h" ] || [ "$1" == "--help" ] || [ "$#" -gt 2 ]; then
@@ -76,12 +76,13 @@ mv -v /tmp/video2x/waifu2x-caffe-ubuntu/bin $INSTALLATION_PATH/video2x/src/depen
 mv -v /tmp/video2x/waifu2x-caffe-ubuntu/build/waifu2x-caffe $INSTALLATION_PATH/video2x/src/dependencies/waifu2x-caffe/waifu2x-caffe
 
 # install waifu2x-converter-cpp
-apt-fast install -y --no-install-recommends build-essential cmake libopencv-dev ocl-icd-opencl-dev
+apt-fast install -y --no-install-recommends build-essential cmake libopencv-dev beignet-opencl-icd mesa-opencl-icd nvidia-cuda-toolkit ocl-icd-opencl-dev opencl-headers
 git clone --recurse-submodules --depth=1 --progress https://github.com/DeadSix27/waifu2x-converter-cpp $TEMP/waifu2x-converter-cpp
 mkdir -v $TEMP/waifu2x-converter-cpp/build
 cd $TEMP/waifu2x-converter-cpp/build
 cmake ..
 make -j$(nproc)
+ldconfig
 mv -v $TEMP/waifu2x-converter-cpp/build $INSTALLATION_PATH/video2x/src/dependencies/waifu2x-converter-cpp
 mv -v $TEMP/waifu2x-converter-cpp/models_rgb $INSTALLATION_PATH/video2x/src/dependencies/waifu2x-converter-cpp/models_rgb
 
