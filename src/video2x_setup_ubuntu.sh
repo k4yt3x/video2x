@@ -64,9 +64,8 @@ apt-fast install -y --no-install-recommends autoconf build-essential cmake gcc-8
 git clone --recurse-submodules --depth=1 --progress --recurse-submodules https://github.com/nagadomi/waifu2x-caffe-ubuntu.git $TEMP/waifu2x-caffe-ubuntu
 git clone --recurse-submodules --progress --depth=1 https://github.com/nagadomi/caffe.git $TEMP/waifu2x-caffe-ubuntu/caffe
 
-apt-get purge -y gcc g++
-ln -s /usr/bin/gcc-8 /usr/bin/gcc
-ln -s /usr/bin/g++-8 /usr/bin/g++
+export CC=/usr/bin/gcc-8
+export CXX=/usr/bin/g++-8
 mkdir -v -p $TEMP/waifu2x-caffe-ubuntu/build
 cd $TEMP/waifu2x-caffe-ubuntu/build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
