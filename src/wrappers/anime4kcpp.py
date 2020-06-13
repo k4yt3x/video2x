@@ -84,6 +84,10 @@ class WrapperMain:
             height {int} -- output video height
         """
 
+        # change the working directory to the binary's parent directory
+        # so the binary can find shared object files and other files
+        os.chdir(pathlib.Path(self.driver_settings['path']).parent)
+
         # overwrite config file settings
         self.driver_settings['input'] = input_file
         self.driver_settings['output'] = output_file

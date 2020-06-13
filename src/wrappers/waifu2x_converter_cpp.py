@@ -82,8 +82,8 @@ class WrapperMain:
             threads {int} -- number of threads
         """
 
-        # waifu2x-converter-cpp cannot fine libw2xc.so under Linux
-        # if the working directory is not waifu2x-converter-cpp's directory
+        # change the working directory to the binary's parent directory
+        # so the binary can find shared object files and other files
         os.chdir(pathlib.Path(self.driver_settings['path']).parent)
 
         # overwrite config file settings

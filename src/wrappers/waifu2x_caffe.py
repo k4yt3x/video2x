@@ -73,6 +73,10 @@ class WrapperMain:
         """ start upscaling process
         """
 
+        # change the working directory to the binary's parent directory
+        # so the binary can find shared object files and other files
+        os.chdir(pathlib.Path(self.driver_settings['path']).parent)
+
         # overwrite config file settings
         self.driver_settings['input_path'] = input_directory
         self.driver_settings['output_path'] = output_directory
