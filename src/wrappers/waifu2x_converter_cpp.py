@@ -4,7 +4,7 @@
 Name: Waifu2x Converter CPP Driver
 Author: K4YT3X
 Date Created: February 8, 2019
-Last Modified: June 7, 2020
+Last Modified: June 13, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-converter-cpp.
@@ -81,6 +81,10 @@ class WrapperMain:
             scale_ratio {int} -- frames' scale ratio
             threads {int} -- number of threads
         """
+
+        # waifu2x-converter-cpp cannot fine libw2xc.so under Linux
+        # if the working directory is not waifu2x-converter-cpp's directory
+        os.chdir(pathlib.Path(self.driver_settings['path']).parent)
 
         # overwrite config file settings
         self.driver_settings['input'] = input_directory
