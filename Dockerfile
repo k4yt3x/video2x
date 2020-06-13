@@ -7,7 +7,7 @@
 # Last Modified: May 24, 2020
 
 # Editor: K4YT3X
-# Last Modified: June 5, 2020
+# Last Modified: June 13, 2020
 
 # using Ubuntu LTS 19.10
 # Ubuntu 20.x is incompatible with Nvidia libraries
@@ -24,7 +24,7 @@ RUN apt-get update \
     && git clone --recurse-submodules --progress https://github.com/k4yt3x/video2x.git /tmp/video2x/video2x \
     && bash -e /tmp/video2x/video2x/src/video2x_setup_ubuntu.sh /
 
-WORKDIR /video2x/src
+WORKDIR /host
 ENTRYPOINT ["python3.8", "/video2x/src/video2x.py"]
 
 ENV NVIDIA_DRIVER_CAPABILITIES all
