@@ -191,7 +191,7 @@ python video2x.py -d waifu2x_caffe -- --help
 Video2X can be deployed via Docker. The following command upscales the video `sample_input.mp4` two times with Waifu2X NCNN Vulkan and outputs the upscaled video to `sample_output.mp4`. For more details on Video2X Docker image usages, please refer to the [documentations](https://github.com/K4YT3X/video2x/wiki/Docker).
 
 ```shell
-docker run --rm -it --gpus all -v /dev/dri:/dev/dri -v $PWD:/host k4yt3x/video2x -d waifu2x_ncnn_vulkan -r 2 -i sample_input.mp4 -o sample_output.mp4
+docker run --rm -it --gpus all -v /dev/dri:/dev/dri -v $PWD:/host k4yt3x/video2x:4.6.0 -d waifu2x_ncnn_vulkan -r 2 -i sample_input.mp4 -o sample_output.mp4
 ```
 
 ---
