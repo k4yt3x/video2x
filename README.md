@@ -33,6 +33,10 @@ Nightly builds are built automatically every time a new commit is pushed to the 
 
 To download the latest nightly build, go to the [GitHub Actions](https://github.com/k4yt3x/video2x/actions) tab, enter the last run of workflow "Video2X Nightly Build, and download the artifacts generated from the run.
 
+## [Docker Image](https://hub.docker.com/r/k4yt3x/video2x)
+
+Video2X Docker images are available on Docker Hub for easy and rapid Video2X deployment on Linux and macOS. If you already have Docker installed, then only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentations](https://github.com/K4YT3X/video2x/wiki/Docker).
+
 ## Introduction
 
 Video2X is a video/GIF/image upscaling software based on Waifu2X, Anime4K, SRMD and RealSR written in Python 3. It upscales videos, GIFs and images, restoring details from low-resolution inputs. Video2X also accepts GIF input to video output and video input to GIF output.
@@ -184,10 +188,10 @@ python video2x.py -d waifu2x_caffe -- --help
 
 ### Running Video2X (Docker)
 
-Video2X can be deployed via Docker.
+Video2X can be deployed via Docker. The following command upscales the video `sample_input.mp4` two times with Waifu2X NCNN Vulkan and outputs the upscaled video to `sample_output.mp4`. For more details on Video2X Docker image usages, please refer to the [documentations](https://github.com/K4YT3X/video2x/wiki/Docker).
 
 ```shell
-docker pull k4yt3x/video2x
+docker run --rm -it --gpus all -v /dev/dri:/dev/dri -v $PWD:/host k4yt3x/video2x -d waifu2x_ncnn_vulkan -r 2 -i sample_input.mp4 -o sample_output.mp4
 ```
 
 ---
