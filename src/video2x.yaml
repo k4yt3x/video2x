@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: June 7, 2020
+# Last Modified: June 30, 2020
 # Values here are the default values. Change the value here to
 #   save the default value permanently.
 # Items commented out are parameters irrelevant to this context
@@ -170,6 +170,7 @@ gifski:
 video2x:
   video2x_cache_directory: null # default: %TEMP%\video2x, directory where cache files are stored, will be deleted if preserve_frames is not set to true
   extracted_frame_format: png # png/jpg intermediate file format used for extracted frames during video processing
+  output_file_name_format_string: "{original_file_name}_output{extension}" # format string to use for generating output file names
   image_output_extension: .png # image output extension during batch processing
   video_output_extension: .mp4 # video output extension during batch processing
   preserve_frames: false # if set to true, the cache directory won't be cleaned upon task completion

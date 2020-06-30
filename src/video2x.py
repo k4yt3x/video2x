@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 8, 2020
+Last Modified: June 29, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -81,7 +81,7 @@ language = gettext.translation(DOMAIN, LOCALE_DIRECTORY, [default_locale], fallb
 language.install()
 _ = language.gettext
 
-CLI_VERSION = '4.1.1'
+CLI_VERSION = '4.2.0'
 
 LEGAL_INFO = _('''Video2X CLI Version: {}
 Upscaler Version: {}
@@ -207,6 +207,7 @@ gifski_settings['gifski_path'] = os.path.expandvars(gifski_settings['gifski_path
 
 # load video2x settings
 extracted_frame_format = config['video2x']['extracted_frame_format'].lower()
+output_file_name_format_string = config['video2x']['output_file_name_format_string']
 image_output_extension = config['video2x']['image_output_extension']
 video_output_extension = config['video2x']['video_output_extension']
 preserve_frames = config['video2x']['preserve_frames']
@@ -250,6 +251,7 @@ try:
         processes=video2x_args.processes,
         video2x_cache_directory=video2x_cache_directory,
         extracted_frame_format=extracted_frame_format,
+        output_file_name_format_string=output_file_name_format_string,
         image_output_extension=image_output_extension,
         video_output_extension=video_output_extension,
         preserve_frames=preserve_frames

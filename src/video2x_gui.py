@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: June 8, 2020
+Last Modified: June 30, 2020
 """
 
 # local imports
@@ -277,6 +277,7 @@ class Video2XMainWindow(QMainWindow):
         self.driver_combo_box.currentTextChanged.connect(self.update_gui_for_driver)
         self.processes_spin_box = self.findChild(QSpinBox, 'processesSpinBox')
         self.scale_ratio_double_spin_box = self.findChild(QDoubleSpinBox, 'scaleRatioDoubleSpinBox')
+        self.output_file_name_format_string_line_edit = self.findChild(QLineEdit, 'outputFileNameFormatStringLineEdit')
         self.image_output_extension_line_edit = self.findChild(QLineEdit, 'imageOutputExtensionLineEdit')
         self.video_output_extension_line_edit = self.findChild(QLineEdit, 'videoOutputExtensionLineEdit')
         self.preserve_frames_check_box = self.findChild(QCheckBox, 'preserveFramesCheckBox')
@@ -475,6 +476,7 @@ class Video2XMainWindow(QMainWindow):
             self.config['video2x']['video2x_cache_directory'] = str((pathlib.Path(tempfile.gettempdir()) / 'video2x').absolute())
         self.cache_line_edit.setText(self.config['video2x']['video2x_cache_directory'])
 
+        self.output_file_name_format_string_line_edit.setText(self.config['video2x']['output_file_name_format_string'])
         self.image_output_extension_line_edit.setText(self.config['video2x']['image_output_extension'])
         self.video_output_extension_line_edit.setText(self.config['video2x']['video_output_extension'])
 
@@ -943,10 +945,10 @@ class Video2XMainWindow(QMainWindow):
                 else:
                     suffix = input_path.suffix
 
-                output_path = input_path.parent / f'{input_path.stem}_output{suffix}'
+                output_path = input_path.parent / self.output_file_name_format_string_line_edit.text().format(original_file_name=input_path.stem, extension=suffix)
 
             elif input_path.is_dir():
-                output_path = input_path.parent / f'{input_path.stem}_output'
+                output_path = input_path.parent / self.output_file_name_format_string_line_edit.text().format(original_file_name=input_path.stem, extension='')
 
             # try a new name with a different file ID
             output_path_id = 0

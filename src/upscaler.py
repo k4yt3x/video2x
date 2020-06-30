@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: June 8, 2020
+Last Modified: June 29, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -85,6 +85,7 @@ class Upscaler:
         processes: int = 1,
         video2x_cache_directory: pathlib.Path = pathlib.Path(tempfile.gettempdir()) / 'video2x',
         extracted_frame_format: str = 'png',
+        output_file_name_format_string: str = '{original_file_name}_output{extension}',
         image_output_extension: str = '.png',
         video_output_extension: str = '.mp4',
         preserve_frames: bool = False
@@ -103,6 +104,7 @@ class Upscaler:
         self.processes = processes
         self.video2x_cache_directory = video2x_cache_directory
         self.extracted_frame_format = extracted_frame_format
+        self.output_file_name_format_string = output_file_name_format_string
         self.image_output_extension = image_output_extension
         self.video_output_extension = video_output_extension
         self.preserve_frames = preserve_frames
@@ -478,13 +480,13 @@ class Upscaler:
             # set default output file suffixes
             # if image type is GIF, default output suffix is also .gif
             if input_file_mime_type == 'image/gif':
-                output_path = self.output / (input_path.stem + '.gif')
+                output_path = self.output / self.output_file_name_format_string.format(original_file_name=input_path.stem, extension='.gif')
 
             elif input_file_type == 'image':
-                output_path = self.output / (input_path.stem + self.image_output_extension)
+                output_path = self.output / self.output_file_name_format_string.format(original_file_name=input_path.stem, extension=self.image_output_extension)
 
             elif input_file_type == 'video':
-                output_path = self.output / (input_path.stem + self.video_output_extension)
+                output_path = self.output / self.output_file_name_format_string.format(original_file_name=input_path.stem, extension=self.video_output_extension)
 
             # if file is none of: image, image/gif, video
             # skip to the next task

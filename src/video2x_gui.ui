@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>727</width>
-    <height>908</height>
+    <width>724</width>
+    <height>936</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -142,11 +142,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="otherPathsSelectionGroupBox">
+         <widget class="QGroupBox" name="groupBox">
           <property name="title">
-           <string>Other Paths Selection</string>
+           <string>Output Selection</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_9">
+          <layout class="QVBoxLayout" name="verticalLayout_35">
            <item>
             <layout class="QHBoxLayout" name="outputHorizontalLayout">
              <item>
@@ -187,6 +187,45 @@
              </item>
             </layout>
            </item>
+           <item>
+            <layout class="QHBoxLayout" name="outputFileNameFormatStringHorizontalLayout">
+             <item>
+              <widget class="QLabel" name="outputFileNameFormatStringLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>63</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Output File Name Format String</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="outputFileNameFormatStringLineEdit">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Format string used to generate output file name(s).&lt;/p&gt;&lt;p&gt;For example, if the input is &amp;quot;sample.mp4&amp;quot;, and the format string is &amp;quot;{original_file_name}_output{extension}&amp;quot;, then the output file name will be &amp;quot;sample_output.mp4&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>{original_file_name}_output{extension}</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="otherPathsSelectionGroupBox">
+          <property name="title">
+           <string>Other Paths Selection</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_9">
            <item>
             <layout class="QHBoxLayout" name="configHorizontalLayout">
              <item>
@@ -2835,7 +2874,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>727</width>
+     <width>724</width>
      <height>21</height>
     </rect>
    </property>
