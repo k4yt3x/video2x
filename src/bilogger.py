@@ -4,7 +4,7 @@
 Creator: Video2X Bidirectional Logger
 Author: K4YT3X
 Date Created: June 4, 2020
-Last Modified: June 4, 2020
+Last Modified: July 17, 2020
 """
 
 # built-in imports
@@ -27,7 +27,7 @@ class BiLogger(object):
             logfile (pathlib.Path): target log file path object
         """
         self.terminal = terminal
-        self.log = logfile.open(mode='a+')
+        self.log = logfile.open(mode='a+', encoding='utf-8')
 
     def write(self, message: str):
         """ write message to original terminal output and log file
