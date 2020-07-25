@@ -2,7 +2,7 @@
 # Name: Video2X Setup Script (Ubuntu)
 # Creator: K4YT3X
 # Date Created: June 5, 2020
-# Last Modified: June 13, 2020
+# Last Modified: July 25, 2020
 
 # help message if input is incorrect of if -h/--help is specified
 if [ "$1" == "-h" ] || [ "$1" == "--help" ] || [ "$#" -gt 2 ]; then
@@ -12,16 +12,16 @@ fi
 
 # set intallation path if specified
 if [ ! -z "$1" ]; then
-    INSTALLATION_PATH=$1
+    export INSTALLATION_PATH=$1
 else
-    INSTALLATION_PATH="$HOME/.local/share"
+    export INSTALLATION_PATH="$HOME/.local/share"
 fi
 
 # set temp directory location if specified
 if [ ! -z "$2" ]; then
-    TEMP=$2
+    export TEMP=$2
 else
-    TEMP="/tmp/video2x"
+    export TEMP="/tmp/video2x"
 fi
 
 # environment variables
@@ -181,25 +181,39 @@ wget "$download_link" -O "$realsr_ncnn_vulkan_zip"
 unzip "$realsr_ncnn_vulkan_zip" -d $TEMP/realsr-ncnn-vulkan
 mv -v $TEMP/realsr-ncnn-vulkan/realsr-ncnn-vulkan-*-linux $INSTALLATION_PATH/video2x/src/dependencies/realsr-ncnn-vulkan
 
-# rewrite config file values
-python3.8 - << EOF
-import yaml
+# install anime4kcpp
+#apt-fast install -y --no-install-recommends build-essential cmake libopencv-dev beignet-opencl-icd mesa-opencl-icd ocl-icd-opencl-dev opencl-headers
+#git clone --recurse-submodules --depth=1 --progress https://github.com/TianZerL/Anime4KCPP.git $TEMP/anime4kcpp
+#mkdir -v $TEMP/anime4kcpp/build
+#cd $TEMP/anime4kcpp/CLI/build
+#cmake -DBuild_GUI=OFF ..
+#make -j$(nproc)
+#mv -v $TEMP/anime4kcpp/build $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp
+#mv -v $TEMP/anime4kcpp/models_rgb $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/models_rgb
 
-with open('/video2x/src/video2x.yaml', 'r') as template:
+# rewrite config file values
+python3.8 - <<EOF
+import yaml
+import os
+
+
+INSTALLATION_PATH = os.environ['INSTALLATION_PATH']
+
+with open('{}/video2x/src/video2x.yaml'.format(INSTALLATION_PATH), 'r') as template:
     template_dict = yaml.load(template, Loader=yaml.FullLoader)
     template.close()
 
 template_dict['ffmpeg']['ffmpeg_path'] = '/usr/bin'
 template_dict['gifski']['gifski_path'] = '/root/.cargo/bin/gifski'
-template_dict['waifu2x_caffe']['path'] = '/video2x/src/dependencies/waifu2x-caffe/waifu2x-caffe'
-template_dict['waifu2x_converter_cpp']['path'] = '/video2x/src/dependencies/waifu2x-converter-cpp/waifu2x-converter-cpp'
-template_dict['waifu2x_ncnn_vulkan']['path'] = '/video2x/src/dependencies/waifu2x-ncnn-vulkan/waifu2x-ncnn-vulkan'
-template_dict['srmd_ncnn_vulkan']['path'] = '/video2x/src/dependencies/srmd-ncnn-vulkan/srmd-ncnn-vulkan'
-template_dict['realsr_ncnn_vulkan']['path'] = '/video2x/src/dependencies/realsr-ncnn-vulkan/realsr-ncnn-vulkan'
-template_dict['anime4kcpp']['path'] = '/video2x/src/dependencies/anime4kcpp/anime4kcpp'
+template_dict['waifu2x_caffe']['path'] = '{}/video2x/src/dependencies/waifu2x-caffe/waifu2x-caffe'.format(INSTALLATION_PATH)
+template_dict['waifu2x_converter_cpp']['path'] = '{}/video2x/src/dependencies/waifu2x-converter-cpp/waifu2x-converter-cpp'.format(INSTALLATION_PATH)
+template_dict['waifu2x_ncnn_vulkan']['path'] = '{}/video2x/src/dependencies/waifu2x-ncnn-vulkan/waifu2x-ncnn-vulkan'.format(INSTALLATION_PATH)
+template_dict['srmd_ncnn_vulkan']['path'] = '{}/video2x/src/dependencies/srmd-ncnn-vulkan/srmd-ncnn-vulkan'.format(INSTALLATION_PATH)
+template_dict['realsr_ncnn_vulkan']['path'] = '{}/video2x/src/dependencies/realsr-ncnn-vulkan/realsr-ncnn-vulkan'.format(INSTALLATION_PATH)
+template_dict['anime4kcpp']['path'] = '{}/video2x/src/dependencies/anime4kcpp/anime4kcpp'.format(INSTALLATION_PATH)
 
 # write configuration into file
-with open('/video2x/src/video2x.yaml', 'w') as config:
+with open('{}/video2x/src/video2x.yaml'.format(INSTALLATION_PATH), 'w') as config:
     yaml.dump(template_dict, config)
 EOF
 
