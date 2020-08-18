@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: June 30, 2020
+# Last Modified: August 18, 2020
 # Values here are the default values. Change the value here to
 #   save the default value permanently.
 # Items commented out are parameters irrelevant to this context
@@ -120,7 +120,7 @@ ffmpeg:
     '-y': true
     input_options: {} # empty dict, expand if necessary
     output_options:
-      '-pix_fmt': rgba64be # extracted frames pixel format
+      '-pix_fmt': rgb24 # extracted frames pixel format
       '-qscale:v': null # output image quality control for JPEG (1-31, 1 being highest)
   # Step 2: Video Assembly
   # assemble all frames back into a video with only a video track
