@@ -106,10 +106,16 @@ anime4kcpp:
   postFilters: 40 # Enhancement filter, only working when postProcessing is true,there are 5 options by binary:Median blur=0000001, Mean blur=0000010, CAS Sharpening=0000100, Gaussian blur weak=0001000, Gaussian blur=0010000, Bilateral filter=0100000, Bilateral filter faster=1000000, you can freely combine them, eg: Gaussian blur weak + Bilateral filter = 0001000 | 0100000 = 0101000 = 40(D), so you can put 40 to enable Gaussian blur weak and Bilateral filter, which also is what I recommend for image that < 1080P, 48 for image that >= 1080P, and for performance I recommend to use 72 for video that < 1080P, 80 for video that >=1080P (unsigned int [=40])
   GPUMode: false # Enable GPU acceleration
   CNNMode: false # Enable ACNet
+  HDN: false # Enable HDN mode for ACNet
+  HDNLevel: 1 # Set HDN level (int [=1])
   listGPUs: null # list GPUs
   platformID: 0 # Specify the platform ID (unsigned int [=0])
   deviceID: 0 # Specify the device ID (unsigned int [=0])
   codec: mp4v # Specify the codec for encoding from mp4v(recommended in Windows), dxva(for Windows), avc1(H264, recommended in Linux), vp09(very slow), hevc(not support in Windowds), av01(not support in Windowds) (string [=mp4v])
+  forceFps: 0 # Set output video fps to the specifying number, 0 to disable (float [=0])
+  disableProgress: false # disable progress display
+  webVideo: null # process the video from URL
+  alpha: false # preserve the Alpha channel for transparent image
 ffmpeg:
   ffmpeg_path: '%LOCALAPPDATA%\video2x\ffmpeg-latest-win64-static\bin'
   intermediate_file_name: 'intermediate.mkv'
