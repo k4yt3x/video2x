@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: June 30, 2020
+Last Modified: September 1, 2020
 """
 
 # local imports
@@ -34,7 +34,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.7.1'
+GUI_VERSION = '2.7.2'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -395,6 +395,11 @@ class Video2XMainWindow(QMainWindow):
         self.anime4kcpp_post_processing_check_box = self.findChild(QCheckBox, 'anime4kCppPostProcessingCheckBox')
         self.anime4kcpp_gpu_mode_check_box = self.findChild(QCheckBox, 'anime4kCppGpuModeCheckBox')
         self.anime4kcpp_cnn_mode_check_box = self.findChild(QCheckBox, 'anime4kCppCnnModeCheckBox')
+        self.anime4kcpp_hdn_check_box = self.findChild(QCheckBox, 'anime4kCppHdnCheckBox')
+        self.anime4kcpp_hdn_level_spin_box = self.findChild(QSpinBox, 'anime4kCppHdnLevelSpinBox')
+        self.anime4kcpp_force_fps_double_spin_box = self.findChild(QDoubleSpinBox, 'anime4kCppForceFpsDoubleSpinBox')
+        self.anime4kcpp_disable_progress_check_box = self.findChild(QCheckBox, 'anime4kCppDisableProgressCheckBox')
+        self.anime4kcpp_alpha_check_box = self.findChild(QCheckBox, 'anime4kCppAlphaCheckBox')
 
         # FFmpeg settings
         # global options
@@ -557,6 +562,11 @@ class Video2XMainWindow(QMainWindow):
         self.anime4kcpp_post_processing_check_box.setChecked(settings['postprocessing'])
         self.anime4kcpp_gpu_mode_check_box.setChecked(settings['GPUMode'])
         self.anime4kcpp_cnn_mode_check_box.setChecked(settings['CNNMode'])
+        self.anime4kcpp_hdn_check_box.setChecked(settings['HDN'])
+        self.anime4kcpp_hdn_level_spin_box.setValue(settings['HDNLevel'])
+        self.anime4kcpp_force_fps_double_spin_box.setValue(settings['forceFps'])
+        self.anime4kcpp_disable_progress_check_box.setChecked(settings['disableProgress'])
+        self.anime4kcpp_alpha_check_box.setChecked(settings['alpha'])
 
         # ffmpeg
         # global options
@@ -666,6 +676,11 @@ class Video2XMainWindow(QMainWindow):
         self.config['anime4kcpp']['postprocessing'] = bool(self.anime4kcpp_post_processing_check_box.isChecked())
         self.config['anime4kcpp']['GPUMode'] = bool(self.anime4kcpp_gpu_mode_check_box.isChecked())
         self.config['anime4kcpp']['CNNMode'] = bool(self.anime4kcpp_cnn_mode_check_box.isChecked())
+        self.config['anime4kcpp']['HDN'] = bool(self.anime4kcpp_hdn_check_box.isChecked())
+        self.config['anime4kcpp']['HDNLevel'] = self.anime4kcpp_hdn_level_spin_box.value()
+        self.config['anime4kcpp']['forceFps'] = self.anime4kcpp_force_fps_double_spin_box.value()
+        self.config['anime4kcpp']['disableProgress'] = bool(self.anime4kcpp_disable_progress_check_box.isChecked())
+        self.config['anime4kcpp']['alpha'] = bool(self.anime4kcpp_alpha_check_box.isChecked())
 
         # ffmpeg
         self.config['ffmpeg']['ffmpeg_path'] = os.path.expandvars(self.ffmpeg_path_line_edit.text())

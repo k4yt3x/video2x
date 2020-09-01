@@ -4,7 +4,7 @@
 Name: Anime4KCPP Driver
 Author: K4YT3X
 Date Created: May 3, 2020
-Last Modified: August 20, 2020
+Last Modified: September 1, 2020
 
 Description: This class is a high-level wrapper
 for Anime4KCPP.
@@ -66,7 +66,7 @@ class WrapperMain:
         parser.add_argument('-h', '--platformID', type=int, help='Specify the platform ID')
         parser.add_argument('-d', '--deviceID', type=int, help='Specify the device ID')
         parser.add_argument('-C', '--codec', type=str, help='Specify the codec for encoding from mp4v(recommended in Windows), dxva(for Windows), avc1(H264, recommended in Linux), vp09(very slow), hevc(not support in Windowds), av01(not support in Windowds) (string [=mp4v])')
-        parser.add_argument('-F', '--forceFps', action='store_true', help='Set output video fps to the specifying number, 0 to disable')
+        parser.add_argument('-F', '--forceFps', type=float, help='Set output video fps to the specifying number, 0 to disable')
         parser.add_argument('-D', '--disableProgress', action='store_true', help='disable progress display')
         parser.add_argument('-W', '--webVideo', type=str, help='process the video from URL')
         parser.add_argument('-A', '--alpha', action='store_true', help='preserve the Alpha channel for transparent image')

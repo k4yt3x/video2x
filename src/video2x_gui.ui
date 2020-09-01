@@ -1804,6 +1804,27 @@
                      </property>
                     </widget>
                    </item>
+                   <item>
+                    <widget class="QCheckBox" name="anime4kCppHdnCheckBox">
+                     <property name="text">
+                      <string>HDN</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QCheckBox" name="anime4kCppDisableProgressCheckBox">
+                     <property name="text">
+                      <string>Disable Progress</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QCheckBox" name="anime4kCppAlphaCheckBox">
+                     <property name="text">
+                      <string>Preserve Alpha Channel</string>
+                     </property>
+                    </widget>
+                   </item>
                   </layout>
                  </widget>
                 </item>
@@ -1941,6 +1962,38 @@
                    </size>
                   </property>
                  </spacer>
+                </item>
+                <item row="8" column="0">
+                 <layout class="QHBoxLayout" name="anime4kCppHdnLevelHorizontalLayout">
+                  <item>
+                   <widget class="QLabel" name="anime4kCppHdnLevelLabel">
+                    <property name="text">
+                     <string>HDN Level</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSpinBox" name="anime4kCppHdnLevelSpinBox">
+                    <property name="value">
+                     <number>1</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="8" column="1">
+                 <layout class="QHBoxLayout" name="anime4kCppForceFpsHorizontalLayout">
+                  <item>
+                   <widget class="QLabel" name="anime4kCppForceFpsLabel">
+                    <property name="text">
+                     <string>Force FPS</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="anime4kCppForceFpsDoubleSpinBox"/>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </widget>
