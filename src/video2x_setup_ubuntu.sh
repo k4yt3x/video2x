@@ -58,6 +58,7 @@ mkdir -v -p $INSTALLATION_PATH/video2x/src/dependencies
 # cargo from APT might be outdate and will result in gifski components not being built successfully
 # apt-fast install -y --no-install-recommends cargo
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
+source $HOME/.cargo/env
 cargo install gifski
 
 # install waifu2x-caffe
