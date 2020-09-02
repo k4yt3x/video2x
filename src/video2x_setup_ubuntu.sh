@@ -2,7 +2,7 @@
 # Name: Video2X Setup Script (Ubuntu)
 # Creator: K4YT3X
 # Date Created: June 5, 2020
-# Last Modified: July 25, 2020
+# Last Modified: September 2, 2020
 
 # help message if input is incorrect of if -h/--help is specified
 if [ "$1" == "-h" ] || [ "$1" == "--help" ] || [ "$#" -gt 2 ]; then
@@ -55,7 +55,9 @@ python3.8 -m pip install -U -r $INSTALLATION_PATH/video2x/src/requirements.txt
 mkdir -v -p $INSTALLATION_PATH/video2x/src/dependencies
 
 # install gifski
-apt-fast install -y --no-install-recommends cargo
+# cargo from APT might be outdate and will result in gifski components not being built successfully
+# apt-fast install -y --no-install-recommends cargo
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
 cargo install gifski
 
 # install waifu2x-caffe
