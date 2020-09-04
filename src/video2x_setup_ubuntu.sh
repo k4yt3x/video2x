@@ -116,7 +116,7 @@ fi
 
 waifu2x_ncnn_vulkan_zip="$TEMP/waifu2x-ncnn-vulkan-linux.zip"
 echo "Downloading $download_link to $waifu2x_ncnn_vulkan_zip"
-aria2c "$download_link" -o "$waifu2x_ncnn_vulkan_zip"
+aria2c "$download_link" --dir / -o "$waifu2x_ncnn_vulkan_zip"
 unzip "$waifu2x_ncnn_vulkan_zip" -d $TEMP/waifu2x-ncnn-vulkan
 mv -v $TEMP/waifu2x-ncnn-vulkan/waifu2x-ncnn-vulkan-*-linux $INSTALLATION_PATH/video2x/src/dependencies/waifu2x-ncnn-vulkan
 
@@ -148,7 +148,7 @@ fi
 
 srmd_ncnn_vulkan_zip="$TEMP/srmd-ncnn-vulkan-linux.zip"
 echo "Downloading $download_link to $srmd_ncnn_vulkan_zip"
-aria2c "$download_link" -o "$srmd_ncnn_vulkan_zip"
+aria2c "$download_link" --dir / -o "$srmd_ncnn_vulkan_zip"
 unzip "$srmd_ncnn_vulkan_zip" -d $TEMP/srmd-ncnn-vulkan
 mv -v $TEMP/srmd-ncnn-vulkan/srmd-ncnn-vulkan-*-linux $INSTALLATION_PATH/video2x/src/dependencies/srmd-ncnn-vulkan
 
@@ -180,18 +180,18 @@ fi
 
 realsr_ncnn_vulkan_zip="$TEMP/realsr-ncnn-vulkan-linux.zip"
 echo "Downloading $download_link to $realsr_ncnn_vulkan_zip"
-aria2c "$download_link" -o "$realsr_ncnn_vulkan_zip"
+aria2c "$download_link" --dir / -o "$realsr_ncnn_vulkan_zip"
 unzip "$realsr_ncnn_vulkan_zip" -d $TEMP/realsr-ncnn-vulkan
 mv -v $TEMP/realsr-ncnn-vulkan/realsr-ncnn-vulkan-*-linux $INSTALLATION_PATH/video2x/src/dependencies/realsr-ncnn-vulkan
 
 # install Anime4KCPP
 # install the latest cmake for compiling Anime4KCPP
-aria2c https://github.com/Kitware/CMake/releases/download/v3.18.2/cmake-3.18.2-Linux-x86_64.sh -o "$TEMP/cmake.sh"
+aria2c https://github.com/Kitware/CMake/releases/download/v3.18.2/cmake-3.18.2-Linux-x86_64.sh --dir / -o "$TEMP/cmake.sh"
 mkdir /cmake
 bash "$TEMP/cmake.sh" --prefix=/cmake --skip-license
 
 # build and install Anime4KCPP
-apt-fast install -y --no-install-recommends libopencv-dev opencl-dev libqt5svg5-dev qttools5-dev
+apt-fast install -y --no-install-recommends libopencv-dev opencl-dev
 git clone --recurse-submodules --depth=1 --progress https://github.com/TianZerL/Anime4KCPP.git $TEMP/anime4kcpp
 mkdir -v $TEMP/anime4kcpp/build
 cd $TEMP/anime4kcpp/build
