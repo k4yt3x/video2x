@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: September 1, 2020
+Last Modified: September 4, 2020
 """
 
 # local imports
@@ -34,7 +34,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.7.2'
+GUI_VERSION = '2.7.3'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -613,7 +613,7 @@ class Video2XMainWindow(QMainWindow):
         self.config['waifu2x_caffe']['process'] = self.waifu2x_caffe_process_combo_box.currentText()
         self.config['waifu2x_caffe']['model_dir'] = str((pathlib.Path(self.config['waifu2x_caffe']['path']).parent / 'models' / self.waifu2x_caffe_model_combobox.currentText()).absolute())
         self.config['waifu2x_caffe']['crop_size'] = self.waifu2x_caffe_crop_size_spin_box.value()
-        self.config['waifu2x_caffe']['output_quality'] = self.waifu2x_caffe_output_depth_spin_box.value()
+        self.config['waifu2x_caffe']['output_quality'] = self.waifu2x_caffe_output_quality_spin_box.value()
         self.config['waifu2x_caffe']['output_depth'] = self.waifu2x_caffe_output_depth_spin_box.value()
         self.config['waifu2x_caffe']['batch_size'] = self.waifu2x_caffe_batch_size_spin_box.value()
         self.config['waifu2x_caffe']['gpu'] = self.waifu2x_caffe_gpu_spin_box.value()
