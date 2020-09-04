@@ -2,7 +2,7 @@
 # Name: Video2X Setup Script (Ubuntu)
 # Creator: K4YT3X
 # Date Created: June 5, 2020
-# Last Modified: September 2, 2020
+# Last Modified: September 4, 2020
 
 # help message if input is incorrect of if -h/--help is specified
 if [ "$1" == "-h" ] || [ "$1" == "--help" ] || [ "$#" -gt 2 ]; then
@@ -34,7 +34,7 @@ apt-get install -y --no-install-recommends apt-utils software-properties-common
 # add PPAs and sources
 add-apt-repository -y ppa:apt-fast/stable
 add-apt-repository -y ppa:graphics-drivers/ppa
-apt-get install -y --no-install-recommends apt-fast
+apt-get install -y --no-install-recommends apt-fast aria2
 apt-fast update
 
 # install runtime packages
@@ -62,7 +62,7 @@ source $HOME/.cargo/env
 cargo install gifski
 
 # install waifu2x-caffe
-apt-fast install -y --no-install-recommends autoconf build-essential cmake gcc-8 libatlas-base-dev libboost-atomic-dev libboost-chrono-dev libboost-date-time-dev libboost-filesystem-dev libboost-iostreams-dev libboost-python-dev libboost-system-dev libboost-thread-dev libcudnn7 libcudnn7-dev libgflags-dev libgoogle-glog-dev libhdf5-dev libleveldb-dev liblmdb-dev libopencv-dev libprotobuf-dev libsnappy-dev protobuf-compiler python-numpy texinfo yasm zlib1g-dev
+apt-fast install -y --no-install-recommends autoconf build-essential cmake gcc-8 libatlas-base-dev libboost-atomic-dev libboost-chrono-dev libboost-date-time-dev libboost-filesystem-dev libboost-iostreams-dev libboost-python-dev libboost-system-dev libboost-thread-dev libcudnn7 libcudnn7-dev libgflags-dev libgoogle-glog-dev libhdf5-dev libleveldb-dev liblmdb-dev libopencv-dev libprotobuf-dev libsnappy-dev protobuf-compiler python-dev python-numpy texinfo yasm zlib1g-dev
 
 git clone --recurse-submodules --depth=1 --progress --recurse-submodules https://github.com/nagadomi/waifu2x-caffe-ubuntu.git $TEMP/waifu2x-caffe-ubuntu
 git clone --recurse-submodules --progress --depth=1 https://github.com/nagadomi/caffe.git $TEMP/waifu2x-caffe-ubuntu/caffe
@@ -116,7 +116,7 @@ fi
 
 waifu2x_ncnn_vulkan_zip="$TEMP/waifu2x-ncnn-vulkan-linux.zip"
 echo "Downloading $download_link to $waifu2x_ncnn_vulkan_zip"
-wget "$download_link" -O "$waifu2x_ncnn_vulkan_zip"
+aria2c "$download_link" -o "$waifu2x_ncnn_vulkan_zip"
 unzip "$waifu2x_ncnn_vulkan_zip" -d $TEMP/waifu2x-ncnn-vulkan
 mv -v $TEMP/waifu2x-ncnn-vulkan/waifu2x-ncnn-vulkan-*-linux $INSTALLATION_PATH/video2x/src/dependencies/waifu2x-ncnn-vulkan
 
@@ -148,7 +148,7 @@ fi
 
 srmd_ncnn_vulkan_zip="$TEMP/srmd-ncnn-vulkan-linux.zip"
 echo "Downloading $download_link to $srmd_ncnn_vulkan_zip"
-wget "$download_link" -O "$srmd_ncnn_vulkan_zip"
+aria2c "$download_link" -o "$srmd_ncnn_vulkan_zip"
 unzip "$srmd_ncnn_vulkan_zip" -d $TEMP/srmd-ncnn-vulkan
 mv -v $TEMP/srmd-ncnn-vulkan/srmd-ncnn-vulkan-*-linux $INSTALLATION_PATH/video2x/src/dependencies/srmd-ncnn-vulkan
 
@@ -180,19 +180,25 @@ fi
 
 realsr_ncnn_vulkan_zip="$TEMP/realsr-ncnn-vulkan-linux.zip"
 echo "Downloading $download_link to $realsr_ncnn_vulkan_zip"
-wget "$download_link" -O "$realsr_ncnn_vulkan_zip"
+aria2c "$download_link" -o "$realsr_ncnn_vulkan_zip"
 unzip "$realsr_ncnn_vulkan_zip" -d $TEMP/realsr-ncnn-vulkan
 mv -v $TEMP/realsr-ncnn-vulkan/realsr-ncnn-vulkan-*-linux $INSTALLATION_PATH/video2x/src/dependencies/realsr-ncnn-vulkan
 
-# install anime4kcpp
-#apt-fast install -y --no-install-recommends build-essential cmake libopencv-dev beignet-opencl-icd mesa-opencl-icd ocl-icd-opencl-dev opencl-headers
-#git clone --recurse-submodules --depth=1 --progress https://github.com/TianZerL/Anime4KCPP.git $TEMP/anime4kcpp
-#mkdir -v $TEMP/anime4kcpp/build
-#cd $TEMP/anime4kcpp/CLI/build
-#cmake -DBuild_GUI=OFF ..
-#make -j$(nproc)
-#mv -v $TEMP/anime4kcpp/build $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp
-#mv -v $TEMP/anime4kcpp/models_rgb $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/models_rgb
+# install Anime4KCPP
+# install the latest cmake for compiling Anime4KCPP
+aria2c https://github.com/Kitware/CMake/releases/download/v3.18.2/cmake-3.18.2-Linux-x86_64.sh -o "$TEMP/cmake.sh"
+mkdir /cmake
+bash "$TEMP/cmake.sh" --prefix=/cmake --skip-license
+
+# build and install Anime4KCPP
+apt-fast install -y --no-install-recommends libopencv-dev opencl-dev libqt5svg5-dev qttools5-dev
+git clone --recurse-submodules --depth=1 --progress https://github.com/TianZerL/Anime4KCPP.git $TEMP/anime4kcpp
+mkdir -v $TEMP/anime4kcpp/build
+cd $TEMP/anime4kcpp/build
+/cmake/bin/cmake -DBuild_GUI=OFF ..
+make -j$(nproc)
+mv -v $TEMP/anime4kcpp/build $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp
+mv -v $TEMP/anime4kcpp/models_rgb $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/models_rgb
 
 # rewrite config file values
 python3.8 - <<EOF
@@ -237,4 +243,4 @@ EOF
 # apt-get autoremove --purge -y
 
 # remove temp directory
-rm -vrf $TEMP
+rm -rf $TEMP
