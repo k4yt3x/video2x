@@ -197,8 +197,9 @@ mkdir -v $TEMP/anime4kcpp/build
 cd $TEMP/anime4kcpp/build
 /cmake/bin/cmake -DBuild_GUI=OFF ..
 make -j$(nproc)
-mv -v $TEMP/anime4kcpp/build $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp
-mv -v $TEMP/anime4kcpp/models_rgb $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/models_rgb
+mkdir -p $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/CLI/Anime4KCPP_CLI
+mv -v $TEMP/anime4kcpp/build $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/CLI/Anime4KCPP_CLI
+ln -s $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/bin/libAnime4KCPPCore.so /usr/lib
 
 # rewrite config file values
 python3.8 - <<EOF
