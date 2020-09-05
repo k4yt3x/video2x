@@ -197,8 +197,7 @@ mkdir -v $TEMP/anime4kcpp/build
 cd $TEMP/anime4kcpp/build
 /cmake/bin/cmake -DBuild_GUI=OFF ..
 make -j$(nproc)
-mkdir -p $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/CLI/Anime4KCPP_CLI
-mv -v $TEMP/anime4kcpp/build $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/CLI/Anime4KCPP_CLI
+mv -v $TEMP/anime4kcpp/build $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp
 ln -s $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/bin/libAnime4KCPPCore.so /usr/lib
 
 # rewrite config file values
@@ -220,7 +219,7 @@ template_dict['waifu2x_converter_cpp']['path'] = '{}/video2x/src/dependencies/wa
 template_dict['waifu2x_ncnn_vulkan']['path'] = '{}/video2x/src/dependencies/waifu2x-ncnn-vulkan/waifu2x-ncnn-vulkan'.format(INSTALLATION_PATH)
 template_dict['srmd_ncnn_vulkan']['path'] = '{}/video2x/src/dependencies/srmd-ncnn-vulkan/srmd-ncnn-vulkan'.format(INSTALLATION_PATH)
 template_dict['realsr_ncnn_vulkan']['path'] = '{}/video2x/src/dependencies/realsr-ncnn-vulkan/realsr-ncnn-vulkan'.format(INSTALLATION_PATH)
-template_dict['anime4kcpp']['path'] = '{}/video2x/src/dependencies/anime4kcpp/anime4kcpp'.format(INSTALLATION_PATH)
+template_dict['anime4kcpp']['path'] = '{}/video2x/src/dependencies/anime4kcpp/bin/Anime4KCPP_CLI'.format(INSTALLATION_PATH)
 
 # write configuration into file
 with open('{}/video2x/src/video2x.yaml'.format(INSTALLATION_PATH), 'w') as config:
