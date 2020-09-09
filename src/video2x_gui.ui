@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>756</width>
-    <height>954</height>
+    <width>737</width>
+    <height>1020</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -40,8 +40,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>744</width>
-         <height>696</height>
+         <width>725</width>
+         <height>762</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_36">
@@ -378,17 +378,17 @@
                      </property>
                      <item>
                       <property name="text">
+                       <string>Waifu2X NCNN Vulkan</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
                        <string>Waifu2X Caffe</string>
                       </property>
                      </item>
                      <item>
                       <property name="text">
                        <string>Waifu2X Converter CPP</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>Waifu2X NCNN Vulkan</string>
                       </property>
                      </item>
                      <item>
@@ -456,6 +456,42 @@
                      </property>
                      <property name="value">
                       <double>2.000000000000000</double>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="outputWidthHorizontalLayout">
+                   <item>
+                    <widget class="QLabel" name="outputWidthLabel">
+                     <property name="text">
+                      <string>Output Width</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSpinBox" name="outputWidthSpinBox">
+                     <property name="maximum">
+                      <number>99999</number>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="outputHeightHorizontalLayout">
+                   <item>
+                    <widget class="QLabel" name="outputHeightLabel">
+                     <property name="text">
+                      <string>Output Height</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSpinBox" name="outputHeightSpinBox">
+                     <property name="maximum">
+                      <number>99999</number>
                      </property>
                     </widget>
                    </item>
@@ -623,48 +659,6 @@
                    <widget class="QPushButton" name="waifu2xCaffePathSelectButton">
                     <property name="text">
                      <string>Select Binary Path</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="waifu2xCaffeScaleWidthHorizontalLayout">
-                  <item>
-                   <widget class="QLabel" name="waifu2xCaffeScaleWidthLabel">
-                    <property name="text">
-                     <string>Scale Width</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QSpinBox" name="waifu2xCaffeScaleWidthSpinBox">
-                    <property name="toolTip">
-                     <string>custom scale width (specifying this will overwrite scale_ratio)</string>
-                    </property>
-                    <property name="maximum">
-                     <number>999999</number>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="waifu2xCaffeScaleHeightHorizontalLayout">
-                  <item>
-                   <widget class="QLabel" name="waifu2xCaffeScaleHeightLabel">
-                    <property name="text">
-                     <string>Scale Height</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QSpinBox" name="waifu2xCaffeScaleHeightSpinBox">
-                    <property name="toolTip">
-                     <string>custom scale height (specifying this will overwrite scale_ratio)</string>
-                    </property>
-                    <property name="maximum">
-                     <number>999999</number>
                     </property>
                    </widget>
                   </item>
@@ -2946,7 +2940,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>756</width>
+     <width>737</width>
      <height>21</height>
     </rect>
    </property>

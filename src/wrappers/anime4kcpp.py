@@ -4,7 +4,7 @@
 Name: Anime4KCPP Driver
 Author: K4YT3X
 Date Created: May 3, 2020
-Last Modified: September 1, 2020
+Last Modified: September 9, 2020
 
 Description: This class is a high-level wrapper
 for Anime4KCPP.
@@ -73,12 +73,15 @@ class WrapperMain:
         return parser.parse_args(arguments)
 
     def load_configurations(self, upscaler):
-        self.driver_settings['zoomFactor'] = upscaler.scale_ratio
+        # self.driver_settings['zoomFactor'] = upscaler.scale_ratio
         self.driver_settings['threads'] = upscaler.processes
 
         # append FFmpeg path to the end of PATH
         # Anime4KCPP will then use FFmpeg to migrate audio tracks
         os.environ['PATH'] += f';{upscaler.ffmpeg_settings["ffmpeg_path"]}'
+
+    def set_scale_ratio(self, scale_ratio: float):
+        self.driver_settings['zoomFactor'] = scale_ratio
 
     def upscale(self, input_file, output_file):
         """This is the core function for WAIFU2X class

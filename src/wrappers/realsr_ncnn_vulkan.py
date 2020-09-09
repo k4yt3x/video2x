@@ -4,7 +4,7 @@
 Name: RealSR NCNN Vulkan Driver
 Creator: K4YT3X
 Date Created: May 26, 2020
-Last Modified: May 26, 2020
+Last Modified: September 9, 2020
 
 Description: This class is a high-level wrapper
 for realsr_ncnn_vulkan.
@@ -44,7 +44,7 @@ class WrapperMain:
         parser.add_argument('-v', action='store_true', help='verbose output')
         parser.add_argument('-i', type=str, help=argparse.SUPPRESS)  # help='input image path (jpg/png) or directory')
         parser.add_argument('-o', type=str, help=argparse.SUPPRESS)  # help='output image path (png) or directory')
-        parser.add_argument('-s', type=int, choices=[4], help='upscale ratio')
+        parser.add_argument('-s', type=int, help='upscale ratio')
         parser.add_argument('-t', type=int, help='tile size (>=32/0=auto)')
         parser.add_argument('-m', type=str, help='realsr model path')
         parser.add_argument('-g', type=int, help='gpu device to use')
@@ -53,8 +53,11 @@ class WrapperMain:
         return parser.parse_args(arguments)
 
     def load_configurations(self, upscaler):
-        self.driver_settings['s'] = int(upscaler.scale_ratio)
+        # self.driver_settings['s'] = int(upscaler.scale_ratio)
         self.driver_settings['j'] = '{}:{}:{}'.format(upscaler.processes, upscaler.processes, upscaler.processes)
+
+    def set_scale_ratio(self, scale_ratio: int):
+        self.driver_settings['s'] = int(scale_ratio)
 
     def upscale(self, input_directory, output_directory):
         """This is the core function for RealSR NCNN Vulkan class

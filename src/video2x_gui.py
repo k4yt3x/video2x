@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: September 4, 2020
+Last Modified: September 9, 2020
 """
 
 # local imports
@@ -34,7 +34,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.7.3'
+GUI_VERSION = '2.8.0'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -277,6 +277,10 @@ class Video2XMainWindow(QMainWindow):
         self.driver_combo_box.currentTextChanged.connect(self.update_gui_for_driver)
         self.processes_spin_box = self.findChild(QSpinBox, 'processesSpinBox')
         self.scale_ratio_double_spin_box = self.findChild(QDoubleSpinBox, 'scaleRatioDoubleSpinBox')
+        self.output_width_spin_box = self.findChild(QSpinBox, 'outputWidthSpinBox')
+        self.output_width_spin_box.valueChanged.connect(self.mutually_exclude_scale_ratio_resolution)
+        self.output_height_spin_box = self.findChild(QSpinBox, 'outputHeightSpinBox')
+        self.output_height_spin_box.valueChanged.connect(self.mutually_exclude_scale_ratio_resolution)
         self.output_file_name_format_string_line_edit = self.findChild(QLineEdit, 'outputFileNameFormatStringLineEdit')
         self.image_output_extension_line_edit = self.findChild(QLineEdit, 'imageOutputExtensionLineEdit')
         self.video_output_extension_line_edit = self.findChild(QLineEdit, 'videoOutputExtensionLineEdit')
@@ -310,8 +314,6 @@ class Video2XMainWindow(QMainWindow):
         self.enable_line_edit_file_drop(self.waifu2x_caffe_path_line_edit)
         self.waifu2x_caffe_path_select_button = self.findChild(QPushButton, 'waifu2xCaffePathSelectButton')
         self.waifu2x_caffe_path_select_button.clicked.connect(lambda: self.select_driver_binary_path(self.waifu2x_caffe_path_line_edit))
-        self.waifu2x_caffe_scale_width_spin_box = self.findChild(QSpinBox, 'waifu2xCaffeScaleWidthSpinBox')
-        self.waifu2x_caffe_scale_height_spin_box = self.findChild(QSpinBox, 'waifu2xCaffeScaleHeightSpinBox')
         self.waifu2x_caffe_mode_combo_box = self.findChild(QComboBox, 'waifu2xCaffeModeComboBox')
         self.waifu2x_caffe_noise_level_spin_box = self.findChild(QSpinBox, 'waifu2xCaffeNoiseLevelSpinBox')
         self.waifu2x_caffe_process_combo_box = self.findChild(QComboBox, 'waifu2xCaffeProcessComboBox')
@@ -491,8 +493,6 @@ class Video2XMainWindow(QMainWindow):
 
         # waifu2x-caffe
         settings = self.config['waifu2x_caffe']
-        self.waifu2x_caffe_scale_width_spin_box.setValue(settings['scale_width'])
-        self.waifu2x_caffe_scale_height_spin_box.setValue(settings['scale_height'])
         self.waifu2x_caffe_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['path'])).absolute()))
         self.waifu2x_caffe_mode_combo_box.setCurrentText(settings['mode'])
         self.waifu2x_caffe_noise_level_spin_box.setValue(settings['noise_level'])
@@ -605,8 +605,6 @@ class Video2XMainWindow(QMainWindow):
     def resolve_driver_settings(self):
 
         # waifu2x-caffe
-        self.config['waifu2x_caffe']['scale_width'] = self.waifu2x_caffe_scale_width_spin_box.value()
-        self.config['waifu2x_caffe']['scale_height'] = self.waifu2x_caffe_scale_height_spin_box.value()
         self.config['waifu2x_caffe']['path'] = os.path.expandvars(self.waifu2x_caffe_path_line_edit.text())
         self.config['waifu2x_caffe']['mode'] = self.waifu2x_caffe_mode_combo_box.currentText()
         self.config['waifu2x_caffe']['noise_level'] = self.waifu2x_caffe_noise_level_spin_box.value()
@@ -831,6 +829,12 @@ class Video2XMainWindow(QMainWindow):
         with open(config_file, 'r') as config:
             return yaml.load(config, Loader=yaml.FullLoader)
 
+    def mutually_exclude_scale_ratio_resolution(self):
+        if self.output_width_spin_box.value() != 0 or self.output_height_spin_box.value() != 0:
+            self.scale_ratio_double_spin_box.setDisabled(True)
+        elif self.output_width_spin_box.value() == 0 and self.output_height_spin_box.value() == 0:
+            self.scale_ratio_double_spin_box.setDisabled(False)
+
     def mutually_exclude_frame_interpolation_stream_copy(self):
         if self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box.value() > 0:
             self.ffmpeg_migrate_streams_output_options_copy_streams_check_box.setChecked(False)
@@ -841,24 +845,6 @@ class Video2XMainWindow(QMainWindow):
 
     def update_gui_for_driver(self):
         current_driver = AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]
-
-        # update scale ratio constraints
-        if current_driver in ['waifu2x_caffe', 'waifu2x_converter_cpp', 'anime4kcpp']:
-            self.scale_ratio_double_spin_box.setMinimum(0.0)
-            self.scale_ratio_double_spin_box.setMaximum(999.0)
-            self.scale_ratio_double_spin_box.setValue(2.0)
-        elif current_driver == 'waifu2x_ncnn_vulkan':
-            self.scale_ratio_double_spin_box.setMinimum(1.0)
-            self.scale_ratio_double_spin_box.setMaximum(2.0)
-            self.scale_ratio_double_spin_box.setValue(2.0)
-        elif current_driver == 'srmd_ncnn_vulkan':
-            self.scale_ratio_double_spin_box.setMinimum(2.0)
-            self.scale_ratio_double_spin_box.setMaximum(4.0)
-            self.scale_ratio_double_spin_box.setValue(2.0)
-        elif current_driver == 'realsr_ncnn_vulkan':
-            self.scale_ratio_double_spin_box.setMinimum(4.0)
-            self.scale_ratio_double_spin_box.setMaximum(4.0)
-            self.scale_ratio_double_spin_box.setValue(4.0)
 
         # update preferred processes/threads count
         if current_driver == 'anime4kcpp':
@@ -1074,7 +1060,7 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
 
         # initialize progress bar values
         upscale_begin_time = time.time()
-        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path(), pathlib.Path()))
+        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, 0, [], pathlib.Path(), pathlib.Path()))
 
         # keep querying upscaling process and feed information to callback signal
         while self.upscaler.running:
@@ -1084,6 +1070,8 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
                                     self.upscaler.total_frames,
                                     self.upscaler.total_processed,
                                     self.upscaler.total_files,
+                                    self.upscaler.current_pass,
+                                    self.upscaler.scaling_jobs,
                                     self.upscaler.current_input_file,
                                     self.upscaler.last_frame_upscaled))
             time.sleep(1)
@@ -1098,8 +1086,10 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
         total_frames = progress_information[2]
         total_processed = progress_information[3]
         total_files = progress_information[4]
-        current_input_file = progress_information[5]
-        last_frame_upscaled = progress_information[6]
+        current_pass = progress_information[5]
+        scaling_jobs = progress_information[6]
+        current_input_file = progress_information[7]
+        last_frame_upscaled = progress_information[8]
 
         # calculate fields based on frames and time elapsed
         time_elapsed = time.time() - upscale_begin_time
@@ -1120,7 +1110,7 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
         self.overall_progress_label.setText('Overall Progress: {}/{}'.format(total_processed, total_files))
         self.overall_progress_bar.setMaximum(total_files)
         self.overall_progress_bar.setValue(total_processed)
-        self.currently_processing_label.setText('Currently Processing: {}'.format(str(current_input_file.name)))
+        self.currently_processing_label.setText('Currently Processing: {} (pass {}/{})'.format(str(current_input_file.name), current_pass, len(scaling_jobs)))
 
         # if show frame is checked, show preview image
         if self.frame_preview_show_preview_check_box.isChecked() and last_frame_upscaled.is_file():
@@ -1190,6 +1180,16 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
             # load driver settings for the current driver
             self.driver_settings = self.config[AVAILABLE_DRIVERS[self.driver_combo_box.currentText()]]
 
+            # get scale ratio or resolution
+            if self.scale_ratio_double_spin_box.isEnabled():
+                scale_ratio = self.scale_ratio_double_spin_box.value()
+                scale_width = scale_height = None
+
+            else:
+                scale_ratio = None
+                scale_width = self.output_width_spin_box.value()
+                scale_height = self.output_height_spin_box.value()
+
             self.upscaler = Upscaler(
                 # required parameters
                 input_path=input_directory,
@@ -1200,7 +1200,9 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
 
                 # optional parameters
                 driver=AVAILABLE_DRIVERS[self.driver_combo_box.currentText()],
-                scale_ratio=self.scale_ratio_double_spin_box.value(),
+                scale_ratio=scale_ratio,
+                scale_width=scale_width,
+                scale_height=scale_height,
                 processes=self.processes_spin_box.value(),
                 video2x_cache_directory=pathlib.Path(os.path.expandvars(self.cache_line_edit.text())),
                 extracted_frame_format=self.config['video2x']['extracted_frame_format'].lower(),

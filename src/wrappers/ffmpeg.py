@@ -75,6 +75,37 @@ class Ffmpeg:
 
         return pixel_formats
 
+    def get_number_of_frames(self, input_file: str, video_stream_index: int) -> int:
+        """ Count the number of frames in a video
+
+        Args:
+            input_file (str): input file path
+            video_stream_index (int): index number of the video stream
+
+        Returns:
+            int: number of frames in the video
+        """
+
+        execute = [
+            self.ffmpeg_probe_binary,
+            '-v',
+            'quiet',
+            '-count_frames',
+            '-select_streams',
+            f'v:{video_stream_index}',
+            '-show_entries',
+            'stream=nb_read_frames',
+            '-of',
+            'default=nokey=1:noprint_wrappers=1',
+            input_file
+        ]
+
+        # turn elements into str
+        execute = [str(e) for e in execute]
+
+        Avalon.debug_info(f'Executing: {shlex.join(execute)}')
+        return int(subprocess.run(execute, check=True, stdout=subprocess.PIPE).stdout.decode().strip())
+
     def probe_file_info(self, input_video):
         """ Gets input video information
 
@@ -134,6 +165,7 @@ class Ffmpeg:
         # specify output file
         execute.extend([
             extracted_frames / f'extracted_%0d.{self.extracted_frame_format}'
+            # extracted_frames / f'frame_%06d.{self.extracted_frame_format}'
         ])
 
         return(self._execute(execute))
@@ -175,6 +207,7 @@ class Ffmpeg:
         execute.extend([
             '-i',
             upscaled_frames / f'extracted_%d.{self.extracted_frame_format}'
+            # upscaled_frames / f'%06d.{self.extracted_frame_format}'
         ])
 
         # read FFmpeg output options

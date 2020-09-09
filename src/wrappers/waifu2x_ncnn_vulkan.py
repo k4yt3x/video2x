@@ -7,7 +7,7 @@ Date Created: June 26, 2019
 Last Modified: May 11, 2020
 
 Editor: K4YT3X
-Last Modified: February 22, 2020
+Last Modified: September 9, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x_ncnn_vulkan.
@@ -48,7 +48,7 @@ class WrapperMain:
         parser.add_argument('-i', type=str, help=argparse.SUPPRESS)  # help='input image path (jpg/png) or directory')
         parser.add_argument('-o', type=str, help=argparse.SUPPRESS)  # help='output image path (png) or directory')
         parser.add_argument('-n', type=int, choices=range(-1, 4), help='denoise level')
-        parser.add_argument('-s', type=int, choices=range(1, 3), help='upscale ratio')
+        parser.add_argument('-s', type=int, help='upscale ratio')
         parser.add_argument('-t', type=int, help='tile size (>=32)')
         parser.add_argument('-m', type=str, help='waifu2x model path')
         parser.add_argument('-g', type=int, help='gpu device to use')
@@ -57,11 +57,14 @@ class WrapperMain:
         return parser.parse_args(arguments)
 
     def load_configurations(self, upscaler):
-        self.driver_settings['s'] = int(upscaler.scale_ratio)
+        # self.driver_settings['s'] = int(upscaler.scale_ratio)
         self.driver_settings['j'] = '{}:{}:{}'.format(upscaler.processes, upscaler.processes, upscaler.processes)
 
+    def set_scale_ratio(self, scale_ratio: int):
+        self.driver_settings['s'] = int(scale_ratio)
+
     def upscale(self, input_directory, output_directory):
-        """This is the core function for WAIFU2X class
+        """ This is the core function for waifu2x class
 
         Arguments:
             input_directory {string} -- source directory path

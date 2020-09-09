@@ -4,7 +4,7 @@
 Name: Video2X Upscale Progress Monitor
 Author: K4YT3X
 Date Created: May 7, 2020
-Last Modified: June 7, 2020
+Last Modified: September 9, 2020
 """
 
 # built-in imports
@@ -34,12 +34,7 @@ class ProgressMonitor(threading.Thread):
     def run(self):
         self.running = True
 
-        # get number of extracted frames
-        self.upscaler.total_frames = 0
-        for directory in self.extracted_frames_directories:
-            self.upscaler.total_frames += len([f for f in directory.iterdir() if str(f).lower().endswith(self.upscaler.extracted_frame_format.lower())])
-
-        with tqdm(total=self.upscaler.total_frames, ascii=True, desc=_('Upscaling Progress')) as progress_bar:
+        with tqdm(total=self.upscaler.total_frames, ascii=True, desc=_('Processing: {} (pass {}/{})').format(self.upscaler.current_input_file.name, self.upscaler.current_pass, len(self.upscaler.scaling_jobs))) as progress_bar:
             # tqdm update method adds the value to the progress
             # bar instead of setting the value. Therefore, a delta
             # needs to be calculated.

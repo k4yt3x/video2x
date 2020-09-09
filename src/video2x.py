@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 29, 2020
+Last Modified: September 9, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -81,7 +81,7 @@ language = gettext.translation(DOMAIN, LOCALE_DIRECTORY, [default_locale], fallb
 language.install()
 _ = language.gettext
 
-CLI_VERSION = '4.2.0'
+CLI_VERSION = '4.3.0'
 
 LEGAL_INFO = _('''Video2X CLI Version: {}
 Upscaler Version: {}
@@ -107,7 +107,7 @@ def parse_arguments():
 
     # video options
     video2x_options = parser.add_argument_group(_('Video2X Options'))
-    video2x_options.add_argument('-h', '--help', action='help', help=_('show this help message and exit'))
+    video2x_options.add_argument('--help', action='help', help=_('show this help message and exit'))
 
     # if help is in arguments list
     # do not require input and output path to be specified
@@ -126,8 +126,10 @@ def parse_arguments():
 
     # scaling options
     upscaling_options = parser.add_argument_group(_('Upscaling Options'))
-    upscaling_options.add_argument('-d', '--driver', help=_('upscaling driver'), choices=AVAILABLE_DRIVERS, default='waifu2x_caffe')
-    upscaling_options.add_argument('-r', '--ratio', help=_('scaling ratio'), action='store', type=float, default=2.0)
+    upscaling_options.add_argument('-r', '--ratio', help=_('scaling ratio'), action='store', type=float)
+    upscaling_options.add_argument('-w', '--width', help=_('output width'), action='store', type=float)
+    upscaling_options.add_argument('-h', '--height', help=_('output height'), action='store', type=float)
+    upscaling_options.add_argument('-d', '--driver', help=_('upscaling driver'), choices=AVAILABLE_DRIVERS, default='waifu2x_ncnn_vulkan')
     upscaling_options.add_argument('-p', '--processes', help=_('number of processes to use for upscaling'), action='store', type=int, default=1)
     upscaling_options.add_argument('--preserve_frames', help=_('preserve extracted and upscaled frames'), action='store_true')
 
@@ -182,6 +184,15 @@ video2x_args, driver_args = parse_arguments()
 if video2x_args.version:
     print(LEGAL_INFO)
     sys.exit(0)
+
+# additional checks on upscaling arguments
+if video2x_args.ratio is not None and (video2x_args.width is not None or video2x_args.height is not None):
+    Avalon.error(_('Specify either scaling ratio or scaling resolution, not both'))
+    sys.exit(1)
+
+if bool(video2x_args.width) ^ bool(video2x_args.height):
+    Avalon.error(_('Only one of scaling width and scaling height is specified'))
+    sys.exit(1)
 
 # redirect output to both terminal and log file
 if video2x_args.disable_logging is False:
@@ -248,6 +259,8 @@ try:
         # optional parameters
         driver=video2x_args.driver,
         scale_ratio=video2x_args.ratio,
+        scale_width=video2x_args.width,
+        scale_height=video2x_args.height,
         processes=video2x_args.processes,
         video2x_cache_directory=video2x_cache_directory,
         extracted_frame_format=extracted_frame_format,

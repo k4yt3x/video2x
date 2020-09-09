@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: June 29, 2020
+Last Modified: September 9, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -25,6 +25,7 @@ import copy
 import gettext
 import importlib
 import locale
+import math
 import mimetypes
 import pathlib
 import queue
@@ -50,7 +51,7 @@ language.install()
 _ = language.gettext
 
 # version information
-UPSCALER_VERSION = '4.2.2'
+UPSCALER_VERSION = '4.3.0'
 
 # these names are consistent for
 # - driver selection in command line
@@ -62,6 +63,12 @@ AVAILABLE_DRIVERS = ['waifu2x_caffe',
                      'srmd_ncnn_vulkan',
                      'realsr_ncnn_vulkan',
                      'anime4kcpp']
+
+DRIVER_FIXED_SCALING_RATIOS = {
+    'waifu2x_ncnn_vulkan': [1, 2],
+    'srmd_ncnn_vulkan': [2, 3, 4],
+    'realsr_ncnn_vulkan': [4],
+}
 
 
 class Upscaler:
@@ -82,6 +89,8 @@ class Upscaler:
         gifski_settings: dict,
         driver: str = 'waifu2x_caffe',
         scale_ratio: float = None,
+        scale_width: int = None,
+        scale_height: int = None,
         processes: int = 1,
         video2x_cache_directory: pathlib.Path = pathlib.Path(tempfile.gettempdir()) / 'video2x',
         extracted_frame_format: str = 'png',
@@ -101,6 +110,8 @@ class Upscaler:
         # optional parameters
         self.driver = driver
         self.scale_ratio = scale_ratio
+        self.scale_width = scale_width
+        self.scale_height = scale_height
         self.processes = processes
         self.video2x_cache_directory = video2x_cache_directory
         self.extracted_frame_format = extracted_frame_format
@@ -115,6 +126,8 @@ class Upscaler:
         self.total_frames = 0
         self.total_files = 0
         self.total_processed = 0
+        self.scaling_jobs = []
+        self.current_pass = 0
         self.current_input_file = pathlib.Path()
         self.last_frame_upscaled = pathlib.Path()
 
@@ -250,31 +263,19 @@ class Upscaler:
             Avalon.error(_('Failed to parse driver argument: {}').format(e.args[0]))
             raise e
 
-        # waifu2x-caffe scale_ratio, scale_width and scale_height check
-        if self.driver == 'waifu2x_caffe':
-            if (driver_settings['scale_width'] != 0 and driver_settings['scale_height'] == 0 or
-                    driver_settings['scale_width'] == 0 and driver_settings['scale_height'] != 0):
-                Avalon.error(_('Only one of scale_width and scale_height is specified for waifu2x-caffe'))
-                raise AttributeError('only one of scale_width and scale_height is specified for waifu2x-caffe')
-
-            # if scale_width and scale_height are specified, ensure scale_ratio is None
-            elif self.driver_settings['scale_width'] != 0 and self.driver_settings['scale_height'] != 0:
-                self.driver_settings['scale_ratio'] = None
-
-            # if scale_width and scale_height not specified
-            # ensure they are None, not 0
-            else:
-                self.driver_settings['scale_width'] = None
-                self.driver_settings['scale_height'] = None
-
-    def _upscale_frames(self):
+    def _upscale_frames(self, input_directory: pathlib.Path, output_directory: pathlib.Path):
         """ Upscale video frames with waifu2x-caffe
 
         This function upscales all the frames extracted
         by ffmpeg using the waifu2x-caffe binary.
 
-        Arguments:
-            w2 {Waifu2x Object} -- initialized waifu2x object
+        Args:
+            input_directory (pathlib.Path): directory containing frames to upscale
+            output_directory (pathlib.Path): directory which upscaled frames should be exported to
+
+        Raises:
+            UnrecognizedDriverError: raised when the given driver is not recognized
+            e: re-raised exception after an exception has been captured and finished processing in this scope
         """
 
         # initialize waifu2x driver
@@ -282,7 +283,7 @@ class Upscaler:
             raise UnrecognizedDriverError(_('Unrecognized driver: {}').format(self.driver))
 
         # list all images in the extracted frames
-        frames = [(self.extracted_frames / f) for f in self.extracted_frames.iterdir() if f.is_file]
+        frames = [(input_directory / f) for f in input_directory.iterdir() if f.is_file]
 
         # if we have less images than processes,
         # create only the processes necessary
@@ -293,7 +294,7 @@ class Upscaler:
         # name into a list
         process_directories = []
         for process_id in range(self.processes):
-            process_directory = self.extracted_frames / str(process_id)
+            process_directory = input_directory / str(process_id)
             process_directories.append(process_directory)
 
             # delete old directories and create new directories
@@ -303,7 +304,7 @@ class Upscaler:
 
         # waifu2x-converter-cpp will perform multi-threading within its own process
         if self.driver in ['waifu2x_converter_cpp', 'waifu2x_ncnn_vulkan', 'srmd_ncnn_vulkan', 'realsr_ncnn_vulkan', 'anime4kcpp']:
-            process_directories = [self.extracted_frames]
+            process_directories = [input_directory]
 
         else:
             # evenly distribute images into each directory
@@ -316,7 +317,7 @@ class Upscaler:
 
         # create driver processes and start them
         for process_directory in process_directories:
-            self.process_pool.append(self.driver_object.upscale(process_directory, self.upscaled_frames))
+            self.process_pool.append(self.driver_object.upscale(process_directory, output_directory))
 
         # start progress bar in a different thread
         Avalon.debug_info(_('Starting progress monitor'))
@@ -325,7 +326,7 @@ class Upscaler:
 
         # create the clearer and start it
         Avalon.debug_info(_('Starting upscaled image cleaner'))
-        self.image_cleaner = ImageCleaner(self.extracted_frames, self.upscaled_frames, len(self.process_pool))
+        self.image_cleaner = ImageCleaner(input_directory, output_directory, len(self.process_pool))
         self.image_cleaner.start()
 
         # wait for all process to exit
@@ -343,11 +344,11 @@ class Upscaler:
         # if the driver is waifu2x-converter-cpp
         # images need to be renamed to be recognizable for FFmpeg
         if self.driver == 'waifu2x_converter_cpp':
-            for image in [f for f in self.upscaled_frames.iterdir() if f.is_file()]:
+            for image in [f for f in output_directory.iterdir() if f.is_file()]:
                 renamed = re.sub(f'_\\[.*\\]\\[x(\\d+(\\.\\d+)?)\\]\\.{self.extracted_frame_format}',
                                  f'.{self.extracted_frame_format}',
                                  str(image.name))
-                (self.upscaled_frames / image).rename(self.upscaled_frames / renamed)
+                (output_directory / image).rename(output_directory / renamed)
 
         # upscaling done, kill helper threads
         Avalon.debug_info(_('Killing progress monitor'))
@@ -550,8 +551,6 @@ class Upscaler:
                     # get video information JSON using FFprobe
                     Avalon.info(_('Reading video information'))
                     video_info = self.ffmpeg_object.probe_file_info(self.current_input_file)
-                    # analyze original video with FFprobe and retrieve framerate
-                    # width, height = info['streams'][0]['width'], info['streams'][0]['height']
 
                     # find index of video stream
                     video_stream_index = None
@@ -567,8 +566,88 @@ class Upscaler:
 
                     # get average frame rate of video stream
                     framerate = float(Fraction(video_info['streams'][video_stream_index]['r_frame_rate']))
+                    width = int(video_info['streams'][video_stream_index]['width'])
+                    height = int(video_info['streams'][video_stream_index]['height'])
                     Avalon.info(_('Framerate: {}').format(framerate))
                     # self.ffmpeg_object.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
+
+                    # get total number of frames
+                    Avalon.info(_('Getting total number of frames in the file'))
+
+                    # if container stores total number of frames in nb_frames, fetch it directly
+                    if 'nb_frames' in video_info['streams'][video_stream_index]:
+                        self.total_frames = int(video_info['streams'][video_stream_index]['nb_frames'])
+
+                    # otherwise call FFprobe to count the total number of frames
+                    else:
+                        self.total_frames = self.ffmpeg_object.get_number_of_frames(self.current_input_file, video_stream_index)
+
+                    # if driver is one of the drivers that doesn't support arbitrary scaling ratio
+                    # TODO: more documentations on this block
+                    if self.driver in DRIVER_FIXED_SCALING_RATIOS:
+
+                        # if user specified output resolution
+                        # calculate number of passes needed
+                        if self.scale_width is not None and self.scale_height is not None:
+                            self.scale_ratio = 2
+
+                            # when scaled output resolution is smaller than target output resolution
+                            # increase scaling ratio
+                            while (self.scale_ratio * width) < self.scale_width:
+                                self.scale_ratio += 1
+
+                            while (self.scale_ratio * height) < self.scale_height:
+                                self.scale_ratio += 1
+
+                        # select the optimal driver scaling ratio to use
+                        supported_scaling_ratios = sorted(DRIVER_FIXED_SCALING_RATIOS[self.driver])
+
+                        remaining_scaling_ratio = math.ceil(self.scale_ratio)
+                        self.scaling_jobs = []
+
+                        while remaining_scaling_ratio > 1:
+                            for ratio in supported_scaling_ratios:
+                                if ratio >= remaining_scaling_ratio:
+                                    self.scaling_jobs.append(ratio)
+                                    remaining_scaling_ratio /= ratio
+                                    break
+
+                            else:
+
+                                found = False
+                                for i in supported_scaling_ratios:
+                                    for j in supported_scaling_ratios:
+                                        if i * j >= remaining_scaling_ratio:
+                                            self.scaling_jobs.extend([i, j])
+                                            remaining_scaling_ratio /= i * j
+                                            found = True
+                                            break
+                                    if found is True:
+                                        break
+
+                                if found is False:
+                                    self.scaling_jobs.append(supported_scaling_ratios[-1])
+                                    remaining_scaling_ratio /= supported_scaling_ratios[-1]
+
+                        # calculate and set output bicubic downscaling filter
+                        # always ensure that the output resolution is divisible by 2
+                        if self.scale_width is not None and self.scale_height is not None:
+                            output_width = math.ceil(self.scale_width / 2.0) * 2
+                            output_height = math.ceil(self.scale_height / 2.0) * 2
+                        else:
+                            output_width = math.ceil(width * self.scale_ratio / 2.0) * 2
+                            output_height = math.ceil(height * self.scale_ratio / 2.0) * 2
+
+                        # append scaling filter to video assembly command
+                        if self.ffmpeg_settings['assemble_video']['output_options'].get('-vf') is None:
+                            self.ffmpeg_settings['assemble_video']['output_options']['-vf'] = f'scale={output_width}:{output_height}'
+                        else:
+                            self.ffmpeg_settings['assemble_video']['output_options']['-vf'] += f',scale={output_width}:{output_height}'
+
+                    else:
+                        self.scaling_jobs = [self.scale_ratio]
+
+                    Avalon.debug_info(_('Upscaling jobs queue: {}').format(self.scaling_jobs))
 
                     # extract frames from video
                     self.process_pool.append((self.ffmpeg_object.extract_frames(self.current_input_file, self.extracted_frames)))
@@ -595,7 +674,18 @@ class Upscaler:
 
                     # upscale images one by one using waifu2x
                     Avalon.info(_('Starting to upscale extracted frames'))
-                    self._upscale_frames()
+
+                    self.current_pass = 1
+                    self.driver_object.set_scale_ratio(self.scaling_jobs[0])
+                    self._upscale_frames(self.extracted_frames, self.upscaled_frames)
+                    for job in self.scaling_jobs[1:]:
+                        self.current_pass += 1
+                        self.driver_object.set_scale_ratio(job)
+                        shutil.rmtree(self.extracted_frames)
+                        shutil.move(self.upscaled_frames, self.extracted_frames)
+                        self.upscaled_frames.mkdir(parents=True, exist_ok=True)
+                        self._upscale_frames(self.extracted_frames, self.upscaled_frames)
+
                     Avalon.info(_('Upscaling completed'))
 
                 # start handling output
