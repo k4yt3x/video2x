@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: September 9, 2020
+Last Modified: September 10, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -188,10 +188,6 @@ if video2x_args.version:
 # additional checks on upscaling arguments
 if video2x_args.ratio is not None and (video2x_args.width is not None or video2x_args.height is not None):
     Avalon.error(_('Specify either scaling ratio or scaling resolution, not both'))
-    sys.exit(1)
-
-if bool(video2x_args.width) ^ bool(video2x_args.height):
-    Avalon.error(_('Only one of scaling width and scaling height is specified'))
     sys.exit(1)
 
 # redirect output to both terminal and log file

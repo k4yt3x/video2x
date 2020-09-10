@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: September 9, 2020
+Last Modified: September 10, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -588,7 +588,15 @@ class Upscaler:
 
                         # if user specified output resolution
                         # calculate number of passes needed
-                        if self.scale_width is not None and self.scale_height is not None:
+                        if self.scale_width is not None or self.scale_height is not None:
+
+                            # scale keeping aspect ratio is only one of width/height is given
+                            if self.scale_width is None:
+                                self.scale_width = self.scale_height / height * width
+
+                            elif self.scale_height is None:
+                                self.scale_height = self.scale_width / width * height
+
                             self.scale_ratio = 2
 
                             # when scaled output resolution is smaller than target output resolution
