@@ -740,7 +740,8 @@ class Video2XMainWindow(QMainWindow):
 
         self.config['ffmpeg']['migrate_streams']['output_options']['-pix_fmt'] = self.ffmpeg_migrate_streams_output_options_pixel_format_line_edit.text()
 
-        if (fps := self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box.value()) > 0:
+        fps = self.ffmpeg_migrate_streams_output_options_frame_interpolation_spin_box.value()
+        if fps > 0:
             if ('-vf' in self.config['ffmpeg']['migrate_streams']['output_options'] and
                     len(self.config['ffmpeg']['migrate_streams']['output_options']['-vf']) > 0 and
                     'minterpolate=' not in self.config['ffmpeg']['migrate_streams']['output_options']['-vf']):
@@ -964,44 +965,49 @@ class Video2XMainWindow(QMainWindow):
                 self.output_line_edit.setText(str(output_path.absolute()))
 
     def select_input_file(self):
-        if ((input_file := self.select_file('Select Input File')) is None or
-                self.input_table_path_exists(input_file)):
+        input_file = self.select_file('Select Input File')
+        if (input_file is None or self.input_table_path_exists(input_file)):
             return
         self.input_table_data.append(input_file)
         self.update_output_path()
         self.update_input_table()
 
     def select_input_folder(self):
-        if ((input_folder := self.select_folder('Select Input Folder')) is None or
-                self.input_table_path_exists(input_folder)):
+        input_folder = self.select_folder('Select Input Folder')
+        if (input_folder is None or self.input_table_path_exists(input_folder)):
             return
         self.input_table_data.append(input_folder)
         self.update_output_path()
         self.update_input_table()
 
     def select_output_file(self):
-        if (output_file := self.select_file('Select Output File')) is None:
+        output_file = self.select_file('Select Output File')
+        if output_file is None:
             return
         self.output_line_edit.setText(str(output_file.absolute()))
 
     def select_output_folder(self):
-        if (output_folder := self.select_folder('Select Output Folder')) is None:
+        output_folder = self.select_folder('Select Output Folder')
+        if output_folder is None:
             return
         self.output_line_edit.setText(str(output_folder.absolute()))
 
     def select_cache_folder(self):
-        if (cache_folder := self.select_folder('Select Cache Folder')) is None:
+        cache_folder = self.select_folder('Select Cache Folder')
+        if cache_folder is None:
             return
         self.cache_line_edit.setText(str(cache_folder.absolute()))
 
     def select_config_file(self):
-        if (config_file := self.select_file('Select Config File', filter='(YAML files (*.yaml))')) is None:
+        config_file = self.select_file('Select Config File', filter='(YAML files (*.yaml))')
+        if config_file is None:
             return
         self.config_line_edit.setText(str(config_file.absolute()))
         self.load_configurations()
 
     def select_driver_binary_path(self, driver_line_edit: QLineEdit):
-        if (driver_binary_path := self.select_file('Select Driver Binary File')) is None:
+        driver_binary_path = self.select_file('Select Driver Binary File')
+        if driver_binary_path is None:
             return
         driver_line_edit.setText(str(driver_binary_path.absolute()))
 
