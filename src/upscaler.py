@@ -591,10 +591,10 @@ class Upscaler:
                         if self.scale_width is not None or self.scale_height is not None:
 
                             # scale keeping aspect ratio is only one of width/height is given
-                            if self.scale_width is None:
+                            if self.scale_width == 0 or self.scale_width is None:
                                 self.scale_width = self.scale_height / height * width
 
-                            elif self.scale_height is None:
+                            elif self.scale_height == 0 or self.scale_height is None:
                                 self.scale_height = self.scale_width / width * height
 
                             self.scale_ratio = 2
