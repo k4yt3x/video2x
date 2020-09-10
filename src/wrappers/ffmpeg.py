@@ -12,7 +12,6 @@ Description: This class handles all FFmpeg related operations.
 # built-in imports
 import json
 import pathlib
-import shlex
 import subprocess
 
 # third-party imports
@@ -58,7 +57,7 @@ class Ffmpeg:
         # turn elements into str
         execute = [str(e) for e in execute]
 
-        Avalon.debug_info(f'Executing: {shlex.join(execute)}')
+        Avalon.debug_info(f'Executing: {" ".join(execute)}')
 
         # initialize dictionary to store pixel formats
         pixel_formats = {}
@@ -66,7 +65,7 @@ class Ffmpeg:
         # record all pixel formats into dictionary
         for line in subprocess.run(execute, check=True, stdout=subprocess.PIPE).stdout.decode().split('\n'):
             try:
-                pixel_formats[' '.join(line.split()).split()[1]] = int(' '.join(line.split()).split()[3])
+                pixel_formats[" ".join(line.split()).split()[1]] = int(" ".join(line.split()).split()[3])
             except (IndexError, ValueError):
                 pass
 
@@ -103,7 +102,7 @@ class Ffmpeg:
         # turn elements into str
         execute = [str(e) for e in execute]
 
-        Avalon.debug_info(f'Executing: {shlex.join(execute)}')
+        Avalon.debug_info(f'Executing: {" ".join(execute)}')
         return int(subprocess.run(execute, check=True, stdout=subprocess.PIPE).stdout.decode().strip())
 
     def probe_file_info(self, input_video):
@@ -136,7 +135,7 @@ class Ffmpeg:
         # turn elements into str
         execute = [str(e) for e in execute]
 
-        Avalon.debug_info(f'Executing: {shlex.join(execute)}')
+        Avalon.debug_info(f'Executing: {" ".join(execute)}')
         json_str = subprocess.run(execute, check=True, stdout=subprocess.PIPE).stdout
         return json.loads(json_str.decode('utf-8'))
 
@@ -316,5 +315,5 @@ class Ffmpeg:
     def _execute(self, execute):
         # turn all list elements into string to avoid errors
         execute = [str(e) for e in execute]
-        Avalon.debug_info(f'Executing: {shlex.join(execute)}')
+        Avalon.debug_info(f'Executing: {" ".join(execute)}')
         return subprocess.Popen(execute)

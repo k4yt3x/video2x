@@ -15,7 +15,6 @@ import argparse
 import os
 import pathlib
 import platform
-import shlex
 import subprocess
 import threading
 
@@ -104,6 +103,6 @@ class WrapperMain:
 
         # return the Popen object of the new process created
         self.print_lock.acquire()
-        Avalon.debug_info(f'[upscaler] Subprocess {os.getpid()} executing: {shlex.join(execute)}')
+        Avalon.debug_info(f'[upscaler] Subprocess {os.getpid()} executing: {" ".join(execute)}')
         self.print_lock.release()
         return subprocess.Popen(execute)
