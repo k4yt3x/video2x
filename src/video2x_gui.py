@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: September 9, 2020
+Last Modified: September 12, 2020
 """
 
 # local imports
@@ -1065,13 +1065,12 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
     def progress_monitor(self, progress_callback: pyqtSignal):
 
         # initialize progress bar values
-        upscale_begin_time = time.time()
-        progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, 0, [], pathlib.Path(), pathlib.Path()))
+        progress_callback.emit((self.begin_time, 0, 0, 0, 0, 0, [], pathlib.Path(), pathlib.Path()))
 
         # keep querying upscaling process and feed information to callback signal
         while self.upscaler.running:
 
-            progress_callback.emit((upscale_begin_time,
+            progress_callback.emit((self.begin_time,
                                     self.upscaler.total_frames_upscaled,
                                     self.upscaler.total_frames,
                                     self.upscaler.total_processed,
@@ -1084,10 +1083,10 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
 
         # upscale process will stop at 99%
         # so it's set to 100 manually when all is done
-        # progress_callback.emit((upscale_begin_time, 0, 0, 0, 0, pathlib.Path(), pathlib.Path()))
+        # progress_callback.emit((self.begin_time, 0, 0, 0, 0, pathlib.Path(), pathlib.Path()))
 
     def set_progress(self, progress_information: tuple):
-        upscale_begin_time = progress_information[0]
+        self.begin_time = progress_information[0]
         total_frames_upscaled = progress_information[1]
         total_frames = progress_information[2]
         total_processed = progress_information[3]
@@ -1098,9 +1097,9 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
         last_frame_upscaled = progress_information[8]
 
         # calculate fields based on frames and time elapsed
-        time_elapsed = time.time() - upscale_begin_time
+        time_elapsed = time.time() - self.begin_time
         try:
-            rate = total_frames_upscaled / (time.time() - upscale_begin_time)
+            rate = total_frames_upscaled / (time.time() - self.begin_time)
             time_remaining = (total_frames - total_frames_upscaled) / rate
         except Exception:
             rate = 0.0
