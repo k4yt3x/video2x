@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: September 10, 2020
+Last Modified: September 12, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -51,7 +51,7 @@ language.install()
 _ = language.gettext
 
 # version information
-UPSCALER_VERSION = '4.3.0'
+UPSCALER_VERSION = '4.3.1'
 
 # these names are consistent for
 # - driver selection in command line
@@ -64,6 +64,8 @@ AVAILABLE_DRIVERS = ['waifu2x_caffe',
                      'realsr_ncnn_vulkan',
                      'anime4kcpp']
 
+# fixed scaling ratios supported by the drivers
+# that only support certain fixed scale ratios
 DRIVER_FIXED_SCALING_RATIOS = {
     'waifu2x_ncnn_vulkan': [1, 2],
     'srmd_ncnn_vulkan': [2, 3, 4],
@@ -533,6 +535,12 @@ class Upscaler:
                 # if input file is a static image
                 if input_file_type == 'image' and input_file_subtype != 'gif':
                     Avalon.info(_('Starting to upscale image'))
+
+                    if self.driver == 'waifu2x_caffe' and self.scale_ratio is None:
+                        self.driver_object.set_scale_resolution(self.scale_width, self.scale_height)
+                    else:
+                        self.driver_object.set_scale_ratio(self.scale_ratio)
+
                     self.process_pool.append(self.driver_object.upscale(self.current_input_file, output_path))
                     self._wait()
                     Avalon.info(_('Upscaling completed'))
@@ -549,7 +557,7 @@ class Upscaler:
                     self.create_temp_directories()
 
                     # get video information JSON using FFprobe
-                    Avalon.info(_('Reading video information'))
+                    Avalon.info(_('Reading file information'))
                     video_info = self.ffmpeg_object.probe_file_info(self.current_input_file)
 
                     # find index of video stream
@@ -568,8 +576,6 @@ class Upscaler:
                     framerate = float(Fraction(video_info['streams'][video_stream_index]['r_frame_rate']))
                     width = int(video_info['streams'][video_stream_index]['width'])
                     height = int(video_info['streams'][video_stream_index]['height'])
-                    Avalon.info(_('Framerate: {}').format(framerate))
-                    # self.ffmpeg_object.pixel_format = video_info['streams'][video_stream_index]['pix_fmt']
 
                     # get total number of frames
                     Avalon.info(_('Getting total number of frames in the file'))
@@ -582,30 +588,31 @@ class Upscaler:
                     else:
                         self.total_frames = self.ffmpeg_object.get_number_of_frames(self.current_input_file, video_stream_index)
 
+                    # calculate scale width/height/ratio and scaling jobs if required
+                    Avalon.info(_('Calculating scaling parameters'))
+
+                    # calculate output width and height if scale ratio is specified
+                    if self.scale_ratio is not None:
+                        output_width = int(math.ceil(width * self.scale_ratio / 2.0) * 2)
+                        output_height = int(math.ceil(height * self.scale_ratio / 2.0) * 2)
+
+                    else:
+                        # scale keeping aspect ratio is only one of width/height is given
+                        if self.scale_width == 0 or self.scale_width is None:
+                            self.scale_width = self.scale_height / height * width
+
+                        elif self.scale_height == 0 or self.scale_height is None:
+                            self.scale_height = self.scale_width / width * height
+
+                        output_width = int(math.ceil(self.scale_width / 2.0) * 2)
+                        output_height = int(math.ceil(self.scale_height / 2.0) * 2)
+
+                        # calculate required minimum scale ratio
+                        self.scale_ratio = max(output_width / width, output_height / height)
+
                     # if driver is one of the drivers that doesn't support arbitrary scaling ratio
                     # TODO: more documentations on this block
                     if self.driver in DRIVER_FIXED_SCALING_RATIOS:
-
-                        # if user specified output resolution
-                        # calculate number of passes needed
-                        if self.scale_width is not None or self.scale_height is not None:
-
-                            # scale keeping aspect ratio is only one of width/height is given
-                            if self.scale_width == 0 or self.scale_width is None:
-                                self.scale_width = self.scale_height / height * width
-
-                            elif self.scale_height == 0 or self.scale_height is None:
-                                self.scale_height = self.scale_width / width * height
-
-                            self.scale_ratio = 2
-
-                            # when scaled output resolution is smaller than target output resolution
-                            # increase scaling ratio
-                            while (self.scale_ratio * width) < self.scale_width:
-                                self.scale_ratio += 1
-
-                            while (self.scale_ratio * height) < self.scale_height:
-                                self.scale_ratio += 1
 
                         # select the optimal driver scaling ratio to use
                         supported_scaling_ratios = sorted(DRIVER_FIXED_SCALING_RATIOS[self.driver])
@@ -637,15 +644,6 @@ class Upscaler:
                                     self.scaling_jobs.append(supported_scaling_ratios[-1])
                                     remaining_scaling_ratio /= supported_scaling_ratios[-1]
 
-                        # calculate and set output bicubic downscaling filter
-                        # always ensure that the output resolution is divisible by 2
-                        if self.scale_width is not None and self.scale_height is not None:
-                            output_width = math.ceil(self.scale_width / 2.0) * 2
-                            output_height = math.ceil(self.scale_height / 2.0) * 2
-                        else:
-                            output_width = math.ceil(width * self.scale_ratio / 2.0) * 2
-                            output_height = math.ceil(height * self.scale_ratio / 2.0) * 2
-
                         # append scaling filter to video assembly command
                         if self.ffmpeg_settings['assemble_video']['output_options'].get('-vf') is None:
                             self.ffmpeg_settings['assemble_video']['output_options']['-vf'] = f'scale={output_width}:{output_height}'
@@ -655,6 +653,14 @@ class Upscaler:
                     else:
                         self.scaling_jobs = [self.scale_ratio]
 
+                    # print file information
+                    Avalon.debug_info(_('Framerate: {}').format(framerate))
+                    Avalon.debug_info(_('Width: {}').format(width))
+                    Avalon.debug_info(_('Height: {}').format(height))
+                    Avalon.debug_info(_('Total number of frames: {}').format(self.total_frames))
+                    Avalon.debug_info(_('Output width: {}').format(output_width))
+                    Avalon.debug_info(_('Output height: {}').format(output_height))
+                    Avalon.debug_info(_('Required scale ratio: {}').format(self.scale_ratio))
                     Avalon.debug_info(_('Upscaling jobs queue: {}').format(self.scaling_jobs))
 
                     # extract frames from video
@@ -682,9 +688,13 @@ class Upscaler:
 
                     # upscale images one by one using waifu2x
                     Avalon.info(_('Starting to upscale extracted frames'))
+                    upscale_begin_time = time.time()
 
                     self.current_pass = 1
-                    self.driver_object.set_scale_ratio(self.scaling_jobs[0])
+                    if self.driver == 'waifu2x_caffe':
+                        self.driver_object.set_scale_resolution(output_width, output_height)
+                    else:
+                        self.driver_object.set_scale_ratio(self.scaling_jobs[0])
                     self._upscale_frames(self.extracted_frames, self.upscaled_frames)
                     for job in self.scaling_jobs[1:]:
                         self.current_pass += 1
@@ -695,6 +705,7 @@ class Upscaler:
                         self._upscale_frames(self.extracted_frames, self.upscaled_frames)
 
                     Avalon.info(_('Upscaling completed'))
+                    Avalon.info(_('Average processing speed: {} seconds per frame').format(self.total_frames / (time.time() - upscale_begin_time)))
 
                 # start handling output
                 # output can be either GIF or video

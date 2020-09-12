@@ -4,7 +4,7 @@
 Name: Waifu2x Caffe Driver
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: September 9, 2020
+Last Modified: September 12, 2020
 
 Description: This class is a high-level wrapper
 for waifu2x-caffe.
@@ -69,7 +69,14 @@ class WrapperMain:
         # it will up updated later
         self.driver_settings['output_depth'] = 12
 
+    def set_scale_resolution(self, width: int, height: int):
+        self.driver_settings['scale_width'] = width
+        self.driver_settings['scale_height'] = height
+        self.driver_settings['scale_ratio'] = None
+
     def set_scale_ratio(self, scale_ratio: float):
+        self.driver_settings['scale_width'] = None
+        self.driver_settings['scale_height'] = None
         self.driver_settings['scale_ratio'] = scale_ratio
 
     def upscale(self, input_directory, output_directory):
