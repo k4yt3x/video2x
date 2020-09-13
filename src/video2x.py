@@ -56,7 +56,6 @@ from upscaler import Upscaler
 
 # built-in imports
 import argparse
-import datetime
 import gettext
 import importlib
 import locale
@@ -81,7 +80,7 @@ language = gettext.translation(DOMAIN, LOCALE_DIRECTORY, [default_locale], fallb
 language.install()
 _ = language.gettext
 
-CLI_VERSION = '4.3.0'
+CLI_VERSION = '4.3.1'
 
 LEGAL_INFO = _('''Video2X CLI Version: {}
 Upscaler Version: {}
@@ -119,9 +118,7 @@ def parse_arguments():
 
     video2x_options.add_argument('-c', '--config', type=pathlib.Path, help=_('video2x config file path'), action='store',
                                  default=pathlib.Path(__file__).parent.absolute() / 'video2x.yaml')
-    video2x_options.add_argument('--log', type=pathlib.Path, help=_('log file path'),
-                                 default=pathlib.Path(__file__).parent.absolute() / f'video2x_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log')
-    video2x_options.add_argument('--disable_logging', help=_('disable logging'), action='store_true')
+    video2x_options.add_argument('--log', type=pathlib.Path, help=_('log file path'))
     video2x_options.add_argument('-v', '--version', help=_('display version, lawful information and exit'), action='store_true')
 
     # scaling options
@@ -191,11 +188,15 @@ if video2x_args.ratio is not None and (video2x_args.width is not None or video2x
     sys.exit(1)
 
 # redirect output to both terminal and log file
-if video2x_args.disable_logging is False:
-    LOGFILE = video2x_args.log
-    Avalon.debug_info(_('Redirecting console logs to {}').format(LOGFILE))
-    sys.stdout = BiLogger(sys.stdout, LOGFILE)
-    sys.stderr = BiLogger(sys.stderr, LOGFILE)
+if video2x_args.log is not None:
+    log_file = video2x_args.log.open(mode='a+', encoding='utf-8')
+else:
+    log_file = tempfile.TemporaryFile(mode='a+', suffix='.log', prefix='video2x_', encoding='utf-8')
+
+original_stdout = sys.stdout
+original_stderr = sys.stderr
+sys.stdout = BiLogger(sys.stdout, log_file)
+sys.stderr = BiLogger(sys.stderr, log_file)
 
 # read configurations from configuration file
 config = read_config(video2x_args.config)
@@ -272,5 +273,21 @@ try:
     Avalon.info(_('Program completed, taking {} seconds').format(round((time.time() - begin_time), 5)))
 
 except Exception:
+
     Avalon.error(_('An exception has occurred'))
     traceback.print_exc()
+
+    if video2x_args.log is not None:
+        log_file_path = video2x_args.log.absolute()
+    else:
+        log_file_path = tempfile.mkstemp(suffix='.log', prefix='video2x_')[1]
+        with open(log_file_path, 'w', encoding='utf-8') as permanent_log_file:
+            log_file.seek(0)
+            permanent_log_file.write(log_file.read())
+
+    Avalon.error(_('The error log file can be found at: {}').format(log_file_path))
+
+finally:
+    sys.stdout = original_stdout
+    sys.stderr = original_stderr
+    log_file.close()

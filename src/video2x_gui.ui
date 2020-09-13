@@ -558,13 +558,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item>
-                  <widget class="QCheckBox" name="disableLoggingCheckBox">
-                   <property name="text">
-                    <string>Disable Logging</string>
-                   </property>
-                  </widget>
-                 </item>
                 </layout>
                </widget>
               </item>

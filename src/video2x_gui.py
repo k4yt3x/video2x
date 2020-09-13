@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: September 12, 2020
+Last Modified: September 13, 2020
 """
 
 # local imports
@@ -15,7 +15,6 @@ from wrappers.ffmpeg import Ffmpeg
 
 # built-in imports
 import contextlib
-import datetime
 import json
 import mimetypes
 import os
@@ -195,8 +194,10 @@ class Video2XMainWindow(QMainWindow):
         super().__init__(*args, **kwargs)
         uic.loadUi(str(resource_path('video2x_gui.ui')), self)
 
-        # generate log file name
-        self.logfile = pathlib.Path(__file__).parent.absolute() / f'video2x_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log'
+        # redirect output to both terminal and log file
+        self.log_file = tempfile.TemporaryFile(mode='a+', suffix='.log', prefix='video2x_', encoding='utf-8')
+        sys.stdout = BiLogger(sys.stdout, self.log_file)
+        sys.stderr = BiLogger(sys.stderr, self.log_file)
 
         # create thread pool for upscaler workers
         self.threadpool = QThreadPool()
@@ -288,7 +289,6 @@ class Video2XMainWindow(QMainWindow):
         self.image_output_extension_line_edit = self.findChild(QLineEdit, 'imageOutputExtensionLineEdit')
         self.video_output_extension_line_edit = self.findChild(QLineEdit, 'videoOutputExtensionLineEdit')
         self.preserve_frames_check_box = self.findChild(QCheckBox, 'preserveFramesCheckBox')
-        self.disable_logging_check_box = self.findChild(QCheckBox, 'disableLoggingCheckBox')
 
         # frame preview
         self.frame_preview_show_preview_check_box = self.findChild(QCheckBox, 'framePreviewShowPreviewCheckBox')
@@ -894,6 +894,12 @@ class Video2XMainWindow(QMainWindow):
             return None
         return pathlib.Path(folder_selected)
 
+    def select_save_file(self, *args, **kwargs) -> pathlib.Path:
+        save_file_selected = QFileDialog.getSaveFileName(self, *args, **kwargs)
+        if not isinstance(save_file_selected, tuple) or save_file_selected[0] == '':
+            return None
+        return pathlib.Path(save_file_selected[0])
+
     def update_output_path(self):
         # if input list is empty
         # clear output path
@@ -1050,6 +1056,16 @@ class Video2XMainWindow(QMainWindow):
         message_box.exec_()
 
     def show_error(self, exception: Exception):
+
+        def _process_button_press(button_pressed):
+            # if the user pressed the save button, save log file to destination
+            if button_pressed.text() == 'Save':
+                log_file_saving_path = self.select_save_file('Select Log File Saving Destination', 'video2x_error.log')
+                if log_file_saving_path is not None:
+                    with open(log_file_saving_path, 'w', encoding='utf-8') as log_file:
+                        self.log_file.seek(0)
+                        log_file.write(self.log_file.read())
+
         # QErrorMessage(self).showMessage(message.replace('\n', '<br>'))
         message_box = QMessageBox(self)
         message_box.setWindowTitle('Error')
@@ -1058,11 +1074,15 @@ class Video2XMainWindow(QMainWindow):
 
         error_message = '''Upscaler ran into an error:\\
 {}\\
-Check the console output for details.\\
-When reporting an error, please include console output.\\
+Check the console output or the log file for details.\\
 You can [submit an issue on GitHub](https://github.com/k4yt3x/video2x/issues/new?assignees=K4YT3X&labels=bug&template=bug-report.md&title={}) to report this error.\\
-It\'s also highly recommended for you to attach the [log file]({}) under the programs\'s parent folder named {}.'''
-        message_box.setText(error_message.format(exception, urllib.parse.quote(str(exception)), self.logfile.as_uri(), self.logfile.name))
+It\'s highly recommended to attach the log file.\\
+You can click \"Save\" to save the log file.'''
+        message_box.setText(error_message.format(exception, urllib.parse.quote(str(exception))))
+
+        message_box.setStandardButtons(QMessageBox.Save | QMessageBox.Close)
+        message_box.setDefaultButton(QMessageBox.Save)
+        message_box.buttonClicked.connect(_process_button_press)
         message_box.exec_()
 
     def progress_monitor(self, progress_callback: pyqtSignal):
@@ -1176,11 +1196,6 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
             if self.output_line_edit.text().strip() == '':
                 self.show_warning('Output path unspecified')
                 return
-
-            if self.disable_logging_check_box.isChecked() is False:
-                print(f'Redirecting console logs to {self.logfile}', file=sys.stderr)
-                sys.stdout = BiLogger(sys.stdout, self.logfile)
-                sys.stderr = BiLogger(sys.stderr, self.logfile)
 
             if len(self.input_table_data) == 1:
                 input_directory = self.input_table_data[0]
