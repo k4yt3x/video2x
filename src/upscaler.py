@@ -591,24 +591,29 @@ class Upscaler:
                 # calculate scale width/height/ratio and scaling jobs if required
                 Avalon.info(_('Calculating scaling parameters'))
 
+                # create a local copy of the global output settings
+                output_scale = self.scale_ratio
+                output_width = self.scale_width
+                output_height = self.scale_height
+
                 # calculate output width and height if scale ratio is specified
-                if self.scale_ratio is not None:
-                    output_width = int(math.ceil(width * self.scale_ratio / 2.0) * 2)
-                    output_height = int(math.ceil(height * self.scale_ratio / 2.0) * 2)
+                if output_scale is not None:
+                    output_width = int(math.ceil(width * output_scale / 2.0) * 2)
+                    output_height = int(math.ceil(height * output_scale / 2.0) * 2)
 
                 else:
                     # scale keeping aspect ratio is only one of width/height is given
-                    if self.scale_width == 0 or self.scale_width is None:
-                        self.scale_width = self.scale_height / height * width
+                    if output_width == 0 or output_width is None:
+                        output_width = output_height / height * width
 
-                    elif self.scale_height == 0 or self.scale_height is None:
-                        self.scale_height = self.scale_width / width * height
+                    elif output_height == 0 or output_height is None:
+                        output_height = output_width / width * height
 
-                    output_width = int(math.ceil(self.scale_width / 2.0) * 2)
-                    output_height = int(math.ceil(self.scale_height / 2.0) * 2)
+                    output_width = int(math.ceil(output_width / 2.0) * 2)
+                    output_height = int(math.ceil(output_height / 2.0) * 2)
 
                     # calculate required minimum scale ratio
-                    self.scale_ratio = max(output_width / width, output_height / height)
+                    output_scale = max(output_width / width, output_height / height)
 
                 # if driver is one of the drivers that doesn't support arbitrary scaling ratio
                 # TODO: more documentations on this block
@@ -617,7 +622,7 @@ class Upscaler:
                     # select the optimal driver scaling ratio to use
                     supported_scaling_ratios = sorted(DRIVER_FIXED_SCALING_RATIOS[self.driver])
 
-                    remaining_scaling_ratio = math.ceil(self.scale_ratio)
+                    remaining_scaling_ratio = math.ceil(output_scale)
                     self.scaling_jobs = []
 
                     while remaining_scaling_ratio > 1:
@@ -645,7 +650,7 @@ class Upscaler:
                                 remaining_scaling_ratio /= supported_scaling_ratios[-1]
 
                 else:
-                    self.scaling_jobs = [self.scale_ratio]
+                    self.scaling_jobs = [output_scale]
 
                 # print file information
                 Avalon.debug_info(_('Framerate: {}').format(framerate))
@@ -654,7 +659,7 @@ class Upscaler:
                 Avalon.debug_info(_('Total number of frames: {}').format(self.total_frames))
                 Avalon.debug_info(_('Output width: {}').format(output_width))
                 Avalon.debug_info(_('Output height: {}').format(output_height))
-                Avalon.debug_info(_('Required scale ratio: {}').format(self.scale_ratio))
+                Avalon.debug_info(_('Required scale ratio: {}').format(output_scale))
                 Avalon.debug_info(_('Upscaling jobs queue: {}').format(self.scaling_jobs))
 
                 # extract frames from video
@@ -733,7 +738,7 @@ class Upscaler:
                     if output_path.suffix.lower() == '.gif':
                         Avalon.info(_('Converting extracted frames into GIF image'))
                         gifski_object = Gifski(self.gifski_settings)
-                        self.process_pool.append(gifski_object.make_gif(self.upscaled_frames, output_path, framerate, self.extracted_frame_format))
+                        self.process_pool.append(gifski_object.make_gif(self.upscaled_frames, output_path, framerate, self.extracted_frame_format, output_width, output_height))
                         self._wait()
                         Avalon.info(_('Conversion completed'))
 

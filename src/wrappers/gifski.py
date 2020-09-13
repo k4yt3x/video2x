@@ -4,7 +4,7 @@
 Name: Gifski Wrapper
 Creator: K4YT3X
 Date Created: May 11, 2020
-Last Modified: June 7, 2020
+Last Modified: September 13, 2020
 
 Description: High-level wrapper for Gifski.
 """
@@ -22,13 +22,17 @@ class Gifski:
     def __init__(self, gifski_settings):
         self.gifski_settings = gifski_settings
 
-    def make_gif(self, upscaled_frames: pathlib.Path, output_path: pathlib.Path, framerate: float, extracted_frame_format: str) -> subprocess.Popen:
+    def make_gif(self, upscaled_frames: pathlib.Path, output_path: pathlib.Path, framerate: float, extracted_frame_format: str, output_width: int, output_height: int) -> subprocess.Popen:
         execute = [
             self.gifski_settings['gifski_path'],
             '-o',
             output_path,
             '--fps',
-            int(round(framerate, 0))
+            int(round(framerate, 0)),
+            '--width',
+            output_width,
+            '--height',
+            output_height
         ]
 
         # load configurations from config file
