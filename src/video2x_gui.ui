@@ -579,6 +579,22 @@
                    <item>
                     <layout class="QVBoxLayout" name="framePreviewOptionsVerticalLayout">
                      <item>
+                      <widget class="QLabel" name="framePreviewLabel">
+                       <property name="frameShape">
+                        <enum>QFrame::StyledPanel</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>false</bool>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
                       <widget class="QCheckBox" name="framePreviewShowPreviewCheckBox">
                        <property name="text">
                         <string>Show Preview</string>
@@ -598,33 +614,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item>
-                      <spacer name="framePreviewOptionsVerticalSpacer">
-                       <property name="orientation">
-                        <enum>Qt::Vertical</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>20</width>
-                         <height>40</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
                     </layout>
-                   </item>
-                   <item>
-                    <widget class="QLabel" name="framePreviewLabel">
-                     <property name="frameShape">
-                      <enum>QFrame::StyledPanel</enum>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                     <property name="scaledContents">
-                      <bool>false</bool>
-                     </property>
-                    </widget>
                    </item>
                   </layout>
                  </item>
