@@ -52,6 +52,9 @@ AVAILABLE_DRIVERS = {
     'Anime4KCPP': 'anime4kcpp'
 }
 
+# get current working directory before it is changed by drivers
+CWD = pathlib.Path.cwd()
+
 
 def resource_path(relative_path: str) -> pathlib.Path:
     try:
@@ -248,7 +251,7 @@ class Video2XMainWindow(QMainWindow):
         # select output file/folder
         self.output_line_edit = self.findChild(QLineEdit, 'outputLineEdit')
         self.enable_line_edit_file_drop(self.output_line_edit)
-        self.output_line_edit.setText(str((pathlib.Path().cwd() / 'output').absolute()))
+        self.output_line_edit.setText(str((CWD / 'output').absolute()))
         self.output_select_file_button = self.findChild(QPushButton, 'outputSelectFileButton')
         self.output_select_file_button.clicked.connect(self.select_output_file)
         self.output_select_folder_button = self.findChild(QPushButton, 'outputSelectFolderButton')
@@ -900,7 +903,7 @@ class Video2XMainWindow(QMainWindow):
         # if there are multiple output files
         # use cwd/output directory for output
         elif len(self.input_table_data) > 1:
-            self.output_line_edit.setText(str((pathlib.Path.cwd() / 'output').absolute()))
+            self.output_line_edit.setText(str((CWD / 'output').absolute()))
 
         # if there's only one input file
         # generate output file/directory name automatically
@@ -1065,12 +1068,12 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
     def progress_monitor(self, progress_callback: pyqtSignal):
 
         # initialize progress bar values
-        progress_callback.emit((self.begin_time, 0, 0, 0, 0, 0, [], pathlib.Path(), pathlib.Path()))
+        progress_callback.emit((time.time(), 0, 0, 0, 0, 0, [], pathlib.Path(), pathlib.Path()))
 
         # keep querying upscaling process and feed information to callback signal
         while self.upscaler.running:
 
-            progress_callback.emit((self.begin_time,
+            progress_callback.emit((self.upscaler.current_processing_starting_time,
                                     self.upscaler.total_frames_upscaled,
                                     self.upscaler.total_frames,
                                     self.upscaler.total_processed,
@@ -1083,10 +1086,18 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
 
         # upscale process will stop at 99%
         # so it's set to 100 manually when all is done
-        # progress_callback.emit((self.begin_time, 0, 0, 0, 0, pathlib.Path(), pathlib.Path()))
+        progress_callback.emit((time.time(),
+                                self.upscaler.total_frames,
+                                self.upscaler.total_frames,
+                                self.upscaler.total_files,
+                                self.upscaler.total_files,
+                                len(self.upscaler.scaling_jobs),
+                                self.upscaler.scaling_jobs,
+                                pathlib.Path(),
+                                pathlib.Path()))
 
     def set_progress(self, progress_information: tuple):
-        self.begin_time = progress_information[0]
+        current_processing_starting_time = progress_information[0]
         total_frames_upscaled = progress_information[1]
         total_frames = progress_information[2]
         total_processed = progress_information[3]
@@ -1097,9 +1108,9 @@ It\'s also highly recommended for you to attach the [log file]({}) under the pro
         last_frame_upscaled = progress_information[8]
 
         # calculate fields based on frames and time elapsed
-        time_elapsed = time.time() - self.begin_time
+        time_elapsed = time.time() - current_processing_starting_time
         try:
-            rate = total_frames_upscaled / (time.time() - self.begin_time)
+            rate = total_frames_upscaled / time_elapsed
             time_remaining = (total_frames - total_frames_upscaled) / rate
         except Exception:
             rate = 0.0
