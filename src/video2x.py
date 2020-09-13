@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: September 10, 2020
+Last Modified: September 13, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -279,6 +279,10 @@ except Exception:
 
     if video2x_args.log is not None:
         log_file_path = video2x_args.log.absolute()
+
+    # if log file path is not specified, create temporary file as permanent log file
+    # tempfile.TempFile does not have a name attribute and is not guaranteed to have
+    # a visible name on the file system
     else:
         log_file_path = tempfile.mkstemp(suffix='.log', prefix='video2x_')[1]
         with open(log_file_path, 'w', encoding='utf-8') as permanent_log_file:
