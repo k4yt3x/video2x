@@ -259,26 +259,6 @@ class Ffmpeg:
 
         return(self._execute(execute))
 
-    def resize_image(self, input_path: pathlib.Path, output_path: pathlib.Path, output_width: int, output_height: int):
-        """ resize the given image and output the resized image to output_path
-
-        Args:
-            input_path (pathlib.Path): input image path
-            output_path (pathlib.Path): output image path
-            output_width (int): output image target width
-            output_height (int): output image target height
-        """
-        execute = [
-            self.ffmpeg_binary,
-            '-i',
-            input_path,
-            '-vf',
-            f'scale={output_width}:{output_height}',
-            output_path
-        ]
-
-        return(self._execute(execute))
-
     def _read_configuration(self, phase, section=None):
         """ read configuration from JSON
 
