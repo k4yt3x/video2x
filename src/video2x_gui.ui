@@ -2622,42 +2622,6 @@
              </layout>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="gifskiWidthHorizontalLayout">
-              <item>
-               <widget class="QLabel" name="gifskiWidthLabel">
-                <property name="text">
-                 <string>Width</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="gifskiWidthSpinBox">
-                <property name="maximum">
-                 <number>99999</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="gifskiHeightHorizontalLayout">
-              <item>
-               <widget class="QLabel" name="gifskiHeightLabel">
-                <property name="text">
-                 <string>Height</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="gifskiHeightSpinBox">
-                <property name="maximum">
-                 <number>99999</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
              <widget class="QGroupBox" name="gifskiSwitchesGroupBox">
               <property name="title">
                <string>Switches</string>

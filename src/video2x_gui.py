@@ -447,8 +447,6 @@ class Video2XMainWindow(QMainWindow):
         self.gifski_path_line_edit = self.findChild(QLineEdit, 'gifskiPathLineEdit')
         self.enable_line_edit_file_drop(self.gifski_path_line_edit)
         self.gifski_quality_spin_box = self.findChild(QSpinBox, 'gifskiQualitySpinBox')
-        self.gifski_width_spin_box = self.findChild(QSpinBox, 'gifskiWidthSpinBox')
-        self.gifski_height_spin_box = self.findChild(QSpinBox, 'gifskiHeightSpinBox')
         self.gifski_fast_check_box = self.findChild(QCheckBox, 'gifskiFastCheckBox')
         self.gifski_once_check_box = self.findChild(QCheckBox, 'gifskiOnceCheckBox')
         self.gifski_quiet_check_box = self.findChild(QCheckBox, 'gifskiQuietCheckBox')
@@ -598,9 +596,6 @@ class Video2XMainWindow(QMainWindow):
         settings = self.config['gifski']
         self.gifski_path_line_edit.setText(str(pathlib.Path(os.path.expandvars(settings['gifski_path'])).absolute()))
         self.gifski_quality_spin_box.setValue(settings['quality'])
-        if isinstance(settings['width'], int) and isinstance(settings['height'], int):
-            self.gifski_width_spin_box.setValue(settings['width'])
-            self.gifski_height_spin_box.setValue(settings['height'])
         self.gifski_fast_check_box.setChecked(settings['fast'])
         self.gifski_once_check_box.setChecked(settings['once'])
         self.gifski_quiet_check_box.setChecked(settings['quiet'])
@@ -781,12 +776,6 @@ class Video2XMainWindow(QMainWindow):
         # Gifski
         self.config['gifski']['gifski_path'] = os.path.expandvars(self.gifski_path_line_edit.text())
         self.config['gifski']['quality'] = self.gifski_quality_spin_box.value()
-        if self.gifski_width_spin_box.value() > 0 and self.gifski_height_spin_box.value() > 0:
-            self.config['gifski']['width'] = self.gifski_width_spin_box.value()
-            self.config['gifski']['height'] = self.gifski_height_spin_box.value()
-        else:
-            self.config['gifski']['width'] = None
-            self.config['gifski']['height'] = None
         self.config['gifski']['fast'] = self.gifski_fast_check_box.isChecked()
         self.config['gifski']['once'] = self.gifski_once_check_box.isChecked()
         self.config['gifski']['quiet'] = self.gifski_quiet_check_box.isChecked()
