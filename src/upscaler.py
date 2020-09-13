@@ -37,7 +37,9 @@ import time
 import traceback
 
 # third-party imports
+from PIL import Image
 from avalon_framework import Avalon
+from tqdm import tqdm
 import magic
 
 # internationalization constants
@@ -51,7 +53,7 @@ language.install()
 _ = language.gettext
 
 # version information
-UPSCALER_VERSION = '4.3.1'
+UPSCALER_VERSION = '4.4.0'
 
 # these names are consistent for
 # - driver selection in command line
@@ -124,6 +126,7 @@ class Upscaler:
 
         # other internal members and signals
         self.running = False
+        self.current_processing_starting_time = time.time()
         self.total_frames_upscaled = 0
         self.total_frames = 0
         self.total_files = 0
@@ -531,6 +534,9 @@ class Upscaler:
                 # get new job from queue
                 self.current_input_file, output_path, input_file_mime_type, input_file_type, input_file_subtype = self.processing_queue.get()
 
+                # get current job starting time for GUI calculations
+                self.current_processing_starting_time = time.time()
+
                 # get video information JSON using FFprobe
                 Avalon.info(_('Reading file information'))
                 file_info = self.ffmpeg_object.probe_file_info(self.current_input_file)
@@ -638,12 +644,6 @@ class Upscaler:
                                 self.scaling_jobs.append(supported_scaling_ratios[-1])
                                 remaining_scaling_ratio /= supported_scaling_ratios[-1]
 
-                    # append scaling filter to video assembly command
-                    if self.ffmpeg_settings['assemble_video']['output_options'].get('-vf') is None:
-                        self.ffmpeg_settings['assemble_video']['output_options']['-vf'] = f'scale={output_width}:{output_height}'
-                    else:
-                        self.ffmpeg_settings['assemble_video']['output_options']['-vf'] += f',scale={output_width}:{output_height}'
-
                 else:
                     self.scaling_jobs = [self.scale_ratio]
 
@@ -696,15 +696,35 @@ class Upscaler:
                 Avalon.info(_('Upscaling completed'))
                 Avalon.info(_('Average processing speed: {} seconds per frame').format(self.total_frames / (time.time() - upscale_begin_time)))
 
+                # downscale frames with Lanczos
+                Avalon.info(_('Lanczos downsampling frames'))
+                shutil.rmtree(self.extracted_frames)
+                shutil.move(self.upscaled_frames, self.extracted_frames)
+                self.upscaled_frames.mkdir(parents=True, exist_ok=True)
+
+                for image in tqdm([i for i in self.extracted_frames.iterdir() if i.is_file() and i.name.endswith(self.extracted_frame_format)], ascii=True, desc=_('Downsamping')):
+                    image_object = Image.open(image)
+
+                    # if the image dimensions are not equal to the output size
+                    # resize the image using Lanczos
+                    if (image_object.width, image_object.height) != (output_width, output_height):
+                        image_object.resize((output_width, output_height), Image.LANCZOS).save(self.upscaled_frames / image.name)
+                        image_object.close()
+
+                    # if the image's dimensions are already equal to the output size
+                    # move image to the finished directory
+                    else:
+                        image_object.close()
+                        shutil.move(image, self.upscaled_frames / image.name)
+
                 # start handling output
                 # output can be either GIF or video
                 if input_file_type == 'image' and input_file_subtype != 'gif':
 
                     Avalon.info(_('Exporting image'))
 
-                    # resize and output image to output_path
-                    self.process_pool.append(self.ffmpeg_object.resize_image([f for f in self.upscaled_frames.iterdir() if f.is_file()][0], output_path, output_width, output_height))
-                    self._wait()
+                    # there should be only one image in the directory
+                    shutil.move([f for f in self.upscaled_frames.iterdir() if f.is_file()][0], output_path)
 
                 # elif input_file_mime_type == 'image/gif' or input_file_type == 'video':
                 else:
@@ -765,10 +785,10 @@ class Upscaler:
                                 Avalon.info(_('Writing intermediate file to: {}').format(output_video_path.absolute()))
                                 shutil.move(self.upscaled_frames / self.ffmpeg_object.intermediate_file_name, output_video_path)
 
-            # increment total number of files processed
-            self.cleanup_temp_directories()
-            self.processing_queue.task_done()
-            self.total_processed += 1
+                # increment total number of files processed
+                self.cleanup_temp_directories()
+                self.processing_queue.task_done()
+                self.total_processed += 1
 
         except (Exception, KeyboardInterrupt, SystemExit) as e:
             with contextlib.suppress(ValueError, AttributeError):
