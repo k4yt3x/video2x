@@ -2744,9 +2744,9 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="currentVideoProcessingProgressGroupBox">
+     <widget class="QGroupBox" name="currentProcessingProgressGroupBox">
       <property name="title">
-       <string>Current Video Processing Progress</string>
+       <string>Current Processing Progress</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_11">
        <item>
@@ -2838,9 +2838,9 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="overallVideoProcessingProgressGroupBox">
+     <widget class="QGroupBox" name="overallProcessingProgressGroupBox">
       <property name="title">
-       <string>Overall Video Processing Progress</string>
+       <string>Overall Processing Progress</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_13">
        <item>
