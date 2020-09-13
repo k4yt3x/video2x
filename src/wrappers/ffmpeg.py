@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: June 7, 2020
+Last Modified: September 13, 2020
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -256,6 +256,26 @@ class Ffmpeg:
         execute.extend([
             output_video
         ])
+
+        return(self._execute(execute))
+
+    def resize_image(self, input_path: pathlib.Path, output_path: pathlib.Path, output_width: int, output_height: int):
+        """ resize the given image and output the resized image to output_path
+
+        Args:
+            input_path (pathlib.Path): input image path
+            output_path (pathlib.Path): output image path
+            output_width (int): output image target width
+            output_height (int): output image target height
+        """
+        execute = [
+            self.ffmpeg_binary,
+            '-i',
+            input_path,
+            '-vf',
+            f'scale={output_width}:{output_height}',
+            output_path
+        ]
 
         return(self._execute(execute))
 
