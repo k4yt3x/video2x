@@ -1,9 +1,10 @@
 avalon_framework
 colorama
 patool
+pillow
 pyqt5
-python-magic; platform_system != "Windows"
 python-magic-bin; platform_system == "Windows"
+python-magic; platform_system != "Windows"
 pyyaml
 requests
 tqdm
