@@ -478,6 +478,8 @@ class Upscaler:
                 input_file_type = input_file_mime_type.split('/')[0]
                 input_file_subtype = input_file_mime_type.split('/')[1]
 
+            Avalon.debug_info(_('File MIME type: {}').format(input_file_mime_type))
+
             # set default output file suffixes
             # if image type is GIF, default output suffix is also .gif
             if input_file_mime_type == 'image/gif':
@@ -694,71 +696,74 @@ class Upscaler:
                 Avalon.info(_('Upscaling completed'))
                 Avalon.info(_('Average processing speed: {} seconds per frame').format(self.total_frames / (time.time() - upscale_begin_time)))
 
-            # start handling output
-            # output can be either GIF or video
-            if input_file_type == 'image' and input_file_subtype != 'gif':
+                # start handling output
+                # output can be either GIF or video
+                if input_file_type == 'image' and input_file_subtype != 'gif':
 
-                # resize and output image to output_path
-                self.process_pool.append(self.ffmpeg_object.resize_image([f for f in self.upscaled_frames.iterdir() if f.is_file()][0], output_path, output_width, output_height))
-                self._wait()
+                    Avalon.info(_('Exporting image'))
 
-            elif input_file_mime_type == 'image/gif' or input_file_type == 'video':
-
-                # if the desired output is gif file
-                if output_path.suffix.lower() == '.gif':
-                    Avalon.info(_('Converting extracted frames into GIF image'))
-                    gifski_object = Gifski(self.gifski_settings)
-                    self.process_pool.append(gifski_object.make_gif(self.upscaled_frames, output_path, framerate, self.extracted_frame_format))
+                    # resize and output image to output_path
+                    self.process_pool.append(self.ffmpeg_object.resize_image([f for f in self.upscaled_frames.iterdir() if f.is_file()][0], output_path, output_width, output_height))
                     self._wait()
-                    Avalon.info(_('Conversion completed'))
 
-                # if the desired output is video
+                # elif input_file_mime_type == 'image/gif' or input_file_type == 'video':
                 else:
-                    # frames to video
-                    Avalon.info(_('Converting extracted frames into video'))
-                    self.process_pool.append(self.ffmpeg_object.assemble_video(framerate, self.upscaled_frames))
-                    # f'{scale_width}x{scale_height}'
-                    self._wait()
-                    Avalon.info(_('Conversion completed'))
 
-                    try:
-                        # migrate audio tracks and subtitles
-                        Avalon.info(_('Migrating audio, subtitles and other streams to upscaled video'))
-                        self.process_pool.append(self.ffmpeg_object.migrate_streams(self.current_input_file,
-                                                                                    output_path,
-                                                                                    self.upscaled_frames))
+                    # if the desired output is gif file
+                    if output_path.suffix.lower() == '.gif':
+                        Avalon.info(_('Converting extracted frames into GIF image'))
+                        gifski_object = Gifski(self.gifski_settings)
+                        self.process_pool.append(gifski_object.make_gif(self.upscaled_frames, output_path, framerate, self.extracted_frame_format))
                         self._wait()
+                        Avalon.info(_('Conversion completed'))
 
-                    # if failed to copy streams
-                    # use file with only video stream
-                    except subprocess.CalledProcessError:
-                        traceback.print_exc()
-                        Avalon.error(_('Failed to migrate streams'))
-                        Avalon.warning(_('Trying to output video without additional streams'))
+                    # if the desired output is video
+                    else:
+                        # frames to video
+                        Avalon.info(_('Converting extracted frames into video'))
+                        self.process_pool.append(self.ffmpeg_object.assemble_video(framerate, self.upscaled_frames))
+                        # f'{scale_width}x{scale_height}'
+                        self._wait()
+                        Avalon.info(_('Conversion completed'))
 
-                        if input_file_mime_type == 'image/gif':
-                            # copy will overwrite destination content if exists
-                            shutil.copy(self.upscaled_frames / self.ffmpeg_object.intermediate_file_name, output_path)
+                        try:
+                            # migrate audio tracks and subtitles
+                            Avalon.info(_('Migrating audio, subtitles and other streams to upscaled video'))
+                            self.process_pool.append(self.ffmpeg_object.migrate_streams(self.current_input_file,
+                                                                                        output_path,
+                                                                                        self.upscaled_frames))
+                            self._wait()
 
-                        else:
-                            # construct output file path
-                            output_file_name = f'{output_path.stem}{self.ffmpeg_object.intermediate_file_name.suffix}'
-                            output_video_path = output_path.parent / output_file_name
+                        # if failed to copy streams
+                        # use file with only video stream
+                        except subprocess.CalledProcessError:
+                            traceback.print_exc()
+                            Avalon.error(_('Failed to migrate streams'))
+                            Avalon.warning(_('Trying to output video without additional streams'))
 
-                            # if output file already exists
-                            # create temporary directory in output folder
-                            # temporary directories generated by tempfile are guaranteed to be unique
-                            # and won't conflict with other files
-                            if output_video_path.exists():
-                                Avalon.error(_('Output video file exists'))
+                            if input_file_mime_type == 'image/gif':
+                                # copy will overwrite destination content if exists
+                                shutil.copy(self.upscaled_frames / self.ffmpeg_object.intermediate_file_name, output_path)
 
-                                temporary_directory = pathlib.Path(tempfile.mkdtemp(dir=output_path.parent))
-                                output_video_path = temporary_directory / output_file_name
-                                Avalon.info(_('Created temporary directory to contain file'))
+                            else:
+                                # construct output file path
+                                output_file_name = f'{output_path.stem}{self.ffmpeg_object.intermediate_file_name.suffix}'
+                                output_video_path = output_path.parent / output_file_name
 
-                            # move file to new destination
-                            Avalon.info(_('Writing intermediate file to: {}').format(output_video_path.absolute()))
-                            shutil.move(self.upscaled_frames / self.ffmpeg_object.intermediate_file_name, output_video_path)
+                                # if output file already exists
+                                # create temporary directory in output folder
+                                # temporary directories generated by tempfile are guaranteed to be unique
+                                # and won't conflict with other files
+                                if output_video_path.exists():
+                                    Avalon.error(_('Output video file exists'))
+
+                                    temporary_directory = pathlib.Path(tempfile.mkdtemp(dir=output_path.parent))
+                                    output_video_path = temporary_directory / output_file_name
+                                    Avalon.info(_('Created temporary directory to contain file'))
+
+                                # move file to new destination
+                                Avalon.info(_('Writing intermediate file to: {}').format(output_video_path.absolute()))
+                                shutil.move(self.upscaled_frames / self.ffmpeg_object.intermediate_file_name, output_video_path)
 
             # increment total number of files processed
             self.cleanup_temp_directories()
