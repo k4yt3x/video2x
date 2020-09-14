@@ -116,7 +116,7 @@ def parse_arguments():
     video2x_options.add_argument('-i', '--input', type=pathlib.Path, help=_('source video file/directory'), required=require_input_output)
     video2x_options.add_argument('-o', '--output', type=pathlib.Path, help=_('output video file/directory'), required=require_input_output)
 
-    video2x_options.add_argument('-c', '--config', type=pathlib.Path, help=_('video2x config file path'), action='store',
+    video2x_options.add_argument('-c', '--config', type=pathlib.Path, help=_('Video2X config file path'), action='store',
                                  default=pathlib.Path(__file__).parent.absolute() / 'video2x.yaml')
     video2x_options.add_argument('--log', type=pathlib.Path, help=_('log file path'))
     video2x_options.add_argument('-v', '--version', help=_('display version, lawful information and exit'), action='store_true')

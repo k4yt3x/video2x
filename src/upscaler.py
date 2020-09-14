@@ -702,12 +702,12 @@ class Upscaler:
                 Avalon.info(_('Average processing speed: {} seconds per frame').format(self.total_frames / (time.time() - upscale_begin_time)))
 
                 # downscale frames with Lanczos
-                Avalon.info(_('Lanczos downsampling frames'))
+                Avalon.info(_('Lanczos downscaling frames'))
                 shutil.rmtree(self.extracted_frames)
                 shutil.move(self.upscaled_frames, self.extracted_frames)
                 self.upscaled_frames.mkdir(parents=True, exist_ok=True)
 
-                for image in tqdm([i for i in self.extracted_frames.iterdir() if i.is_file() and i.name.endswith(self.extracted_frame_format)], ascii=True, desc=_('Downsamping')):
+                for image in tqdm([i for i in self.extracted_frames.iterdir() if i.is_file() and i.name.endswith(self.extracted_frame_format)], ascii=True, desc=_('Downscaling')):
                     image_object = Image.open(image)
 
                     # if the image dimensions are not equal to the output size
