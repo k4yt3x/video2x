@@ -44,8 +44,8 @@ class WrapperMain:
         parser.error = lambda message: (_ for _ in ()).throw(AttributeError(message))
         parser.add_argument('--help', action='help', help='show this help message and exit')
         parser.add_argument('-v', action='store_true', help='verbose output')
-        parser.add_argument('-i', type=str, help=argparse.SUPPRESS)  # help='input image path (jpg/png) or directory')
-        parser.add_argument('-o', type=str, help=argparse.SUPPRESS)  # help='output image path (png) or directory')
+        parser.add_argument('-i', type=str, help=argparse.SUPPRESS)  # help='input image path (jpg/png/webp) or directory')
+        parser.add_argument('-o', type=str, help=argparse.SUPPRESS)  # help='output image path (jpg/png/webp) or directory')
         parser.add_argument('-n', type=int, choices=range(-1, 4), help='denoise level')
         parser.add_argument('-s', type=int, help='upscale ratio')
         parser.add_argument('-t', type=int, help='tile size (>=32)')
@@ -53,6 +53,7 @@ class WrapperMain:
         parser.add_argument('-g', type=int, help='gpu device to use')
         parser.add_argument('-j', type=str, help='thread count for load/proc/save')
         parser.add_argument('-x', action='store_true', help='enable tta mode')
+        parser.add_argument('-f', type=str, help='output image format (jpg/png/webp, default=ext/png)')
         return parser.parse_args(arguments)
 
     def load_configurations(self, upscaler):
