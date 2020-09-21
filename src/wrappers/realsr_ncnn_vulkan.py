@@ -4,7 +4,7 @@
 Name: RealSR NCNN Vulkan Driver
 Creator: K4YT3X
 Date Created: May 26, 2020
-Last Modified: September 9, 2020
+Last Modified: September 21, 2020
 
 Description: This class is a high-level wrapper
 for realsr_ncnn_vulkan.
@@ -49,11 +49,13 @@ class WrapperMain:
         parser.add_argument('-g', type=int, help='gpu device to use')
         parser.add_argument('-j', type=str, help='thread count for load/proc/save')
         parser.add_argument('-x', action='store_true', help='enable tta mode')
+        parser.add_argument('-f', type=str, help=argparse.SUPPRESS)  # help='output image format (jpg/png/webp, default=ext/png)')
         return parser.parse_args(arguments)
 
     def load_configurations(self, upscaler):
         # self.driver_settings['s'] = int(upscaler.scale_ratio)
         self.driver_settings['j'] = '{}:{}:{}'.format(upscaler.processes, upscaler.processes, upscaler.processes)
+        self.driver_settings['f'] = upscaler.extracted_frame_format.lower()
 
     def set_scale_ratio(self, scale_ratio: int):
         self.driver_settings['s'] = int(scale_ratio)
