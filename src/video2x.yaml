@@ -55,15 +55,16 @@ waifu2x_converter_cpp:
 waifu2x_ncnn_vulkan:
   path: '%LOCALAPPDATA%\video2x\waifu2x-ncnn-vulkan\waifu2x-ncnn-vulkan'
   v: null # verbose output
-  #i: null # input-path: input image path (jpg/png) or directory
-  #o: null # output-path: output image path (png) or directory
+  #i: null # input-path: input image path (jpg/png/webp) or directory
+  #o: null # output-path: output image path (jpg/png/webp) or directory
   'n': 2 # noise-level: denoise level (-1/0/1/2/3, default=0)
   s: 2 # scale: upscale ratio (1/2, default=2)
   t: 400 # tile-size: tile size (>=32, default=400)
   m: null # model-path: waifu2x model path (default=models-cunet)
   g: 0 # gpu-id: gpu device to use (default=0)
-  j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
+  j: '1:2:2' # thread count for load/proc/save (default=1:2:2) can be 1:2,2,2:2 for multi-gpu
   x: false # enable tta mode
+  f: png # output image format (jpg/png/webp, default=ext/png)
 srmd_ncnn_vulkan:
   path: '%LOCALAPPDATA%\video2x\srmd-ncnn-vulkan\srmd-ncnn-vulkan'
   v: null # verbose output
