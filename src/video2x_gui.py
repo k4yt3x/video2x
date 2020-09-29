@@ -684,9 +684,7 @@ class Video2XMainWindow(QMainWindow):
 
         # extract frames
         self.config['ffmpeg']['extract_frames']['output_options']['-pix_fmt'] = self.ffmpeg_extract_frames_output_options_pixel_format_line_edit.text()
-        if self.ffmpeg_extract_frames_hardware_acceleration_check_box.isChecked():
-            self.config['ffmpeg']['extract_frames']['-hwaccel'] = 'auto'
-        else:
+        if not self.ffmpeg_extract_frames_hardware_acceleration_check_box.isChecked():
             self.config['ffmpeg']['extract_frames'].pop('-hwaccel', None)
 
         # assemble video
@@ -712,9 +710,7 @@ class Video2XMainWindow(QMainWindow):
         else:
             self.config['ffmpeg']['assemble_video']['output_options'].pop('-vf', None)
 
-        if self.ffmpeg_assemble_video_hardware_acceleration_check_box.isChecked():
-            self.config['ffmpeg']['assemble_video']['-hwaccel'] = 'auto'
-        else:
+        if not self.ffmpeg_assemble_video_hardware_acceleration_check_box.isChecked():
             self.config['ffmpeg']['assemble_video'].pop('-hwaccel', None)
 
         # migrate streams
@@ -768,9 +764,7 @@ class Video2XMainWindow(QMainWindow):
             self.config['ffmpeg']['migrate_streams']['output_options'].pop('-movflags', None)
 
         # hardware acceleration
-        if self.ffmpeg_migrate_streams_hardware_acceleration_check_box.isChecked():
-            self.config['ffmpeg']['migrate_streams']['-hwaccel'] = 'auto'
-        else:
+        if not self.ffmpeg_migrate_streams_hardware_acceleration_check_box.isChecked():
             self.config['ffmpeg']['migrate_streams'].pop('-hwaccel', None)
 
         # Gifski
