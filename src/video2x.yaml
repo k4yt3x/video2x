@@ -1,7 +1,7 @@
 # Name: Video2X Configuration File
 # Creator: K4YT3X
 # Date Created: October 23, 2018
-# Last Modified: September 21, 2020
+# Last Modified: September 28, 2020
 # Values here are the default values. Change the value here to
 #   save the default value permanently.
 # Items commented out are parameters irrelevant to this context
@@ -120,7 +120,7 @@ anime4kcpp:
   webVideo: null # process the video from URL
   alpha: false # preserve the Alpha channel for transparent image
 ffmpeg:
-  ffmpeg_path: '%LOCALAPPDATA%\video2x\ffmpeg-latest-win64-static\bin'
+  ffmpeg_path: '%LOCALAPPDATA%\video2x\ffmpeg\bin'
   intermediate_file_name: 'intermediate.mkv'
   # Step 1: Frame Extraction
   # extract all frames from original input into temporary directory
