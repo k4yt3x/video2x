@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: May 30, 2020
+Last Modified: September 28, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -44,7 +44,7 @@ import zipfile
 # Therefore, they will be installed during the Python dependency
 #   installation step and imported later in the script.
 
-SETUP_VERSION = '2.2.1'
+SETUP_VERSION = '2.3.0'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
@@ -126,13 +126,21 @@ class Video2xSetup:
         """
         print('\nInstalling FFmpeg')
 
-        latest_release = 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-latest-win64-static.zip'
+        latest_release = 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.zip'
 
         ffmpeg_zip = download(latest_release, tempfile.gettempdir())
         self.trash.append(ffmpeg_zip)
 
+        ffmpeg_directory = LOCALAPPDATA / 'video2x' / 'ffmpeg'
         with zipfile.ZipFile(ffmpeg_zip) as zipf:
             zipf.extractall(LOCALAPPDATA / 'video2x')
+
+            # if directory already exists, remove it
+            if ffmpeg_directory.exists():
+                shutil.rmtree(ffmpeg_directory)
+
+            # rename the newly extracted directory
+            (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(ffmpeg_directory)
 
     def _install_gifski(self):
         print('\nInstalling Gifski')
