@@ -40,6 +40,7 @@ Video2X Docker images are available on Docker Hub for easy and rapid Video2X dep
 ## [Google Colab](https://colab.research.google.com/drive/1xqeZvoJXaBBPP6UyVwErnhwrnth0br0u)
 
 You can use Video2X on the [Google Colab plattform](https://colab.research.google.com/) for free. Colab allows you too use a GPU on Google's Servers (Tesla K80, T4, P4, P100) for performing the upscaling. Please bare in mind that Colab can only be provided for free if all users know that they shouldn't abuse it. While a session there lasts up to 12hours, don't abuse it by running upscaling 24/7.
+
 For an example Notebook please have a look at this: [Video2X_on_Colab.ipynb](https://colab.research.google.com/drive/1xqeZvoJXaBBPP6UyVwErnhwrnth0br0u)
 
 ## Introduction
