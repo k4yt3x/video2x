@@ -708,12 +708,11 @@ class Upscaler:
                 Avalon.info(_('Lanczos downscaling frames'))
                 try:
                     shutil.rmtree(self.extracted_frames)
-                except:
+                except Exception:
                     if platform.system() == 'Windows':
-                        Avalon.info(_("Change file's attribute."))
-                        for root, dirs, files in os.walk(self.extracted_frames):
-                            for f in files:
-                                os.chmod(os.path.join(root, f), stat.S_IWRITE)
+                        for file in self.extracted_frames.iterdir():
+                            Avalon.info(_("Remove file:[%s] readOnly attribute." % file))
+                            os.chmod(file, stat.S_IWRITE)
 
                         shutil.rmtree(self.extracted_frames)
 
