@@ -35,6 +35,9 @@ import subprocess
 import tempfile
 import time
 import traceback
+import os
+import platform
+import stat
 
 # third-party imports
 from PIL import Image
@@ -703,7 +706,17 @@ class Upscaler:
 
                 # downscale frames with Lanczos
                 Avalon.info(_('Lanczos downscaling frames'))
-                shutil.rmtree(self.extracted_frames)
+                try:
+                    shutil.rmtree(self.extracted_frames)
+                except:
+                    if platform.system() == 'Windows':
+                        Avalon.info(_("Change file's attribute."))
+                        for root, dirs, files in os.walk(self.extracted_frames):
+                            for f in files:
+                                os.chmod(os.path.join(root, f), stat.S_IWRITE)
+
+                        shutil.rmtree(self.extracted_frames)
+
                 shutil.move(self.upscaled_frames, self.extracted_frames)
                 self.upscaled_frames.mkdir(parents=True, exist_ok=True)
 
