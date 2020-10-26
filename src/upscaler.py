@@ -624,30 +624,34 @@ class Upscaler:
 
                     remaining_scaling_ratio = math.ceil(output_scale)
                     self.scaling_jobs = []
-
-                    while remaining_scaling_ratio > 1:
-                        for ratio in supported_scaling_ratios:
-                            if ratio >= remaining_scaling_ratio:
-                                self.scaling_jobs.append(ratio)
-                                remaining_scaling_ratio /= ratio
-                                break
-
-                        else:
-
-                            found = False
-                            for i in supported_scaling_ratios:
-                                for j in supported_scaling_ratios:
-                                    if i * j >= remaining_scaling_ratio:
-                                        self.scaling_jobs.extend([i, j])
-                                        remaining_scaling_ratio /= i * j
-                                        found = True
-                                        break
-                                if found is True:
+                    
+                    # if the scaling ratio is 1.0
+                    # apply the smallest scaling ratio available
+                    if remaining_scaling_ratio == 1:
+                        self.scaling_jobs.append(supported_scaling_ratios[0])
+                    else:
+                        while remaining_scaling_ratio > 1:
+                            for ratio in supported_scaling_ratios:
+                                if ratio >= remaining_scaling_ratio:
+                                    self.scaling_jobs.append(ratio)
+                                    remaining_scaling_ratio /= ratio
                                     break
 
-                            if found is False:
-                                self.scaling_jobs.append(supported_scaling_ratios[-1])
-                                remaining_scaling_ratio /= supported_scaling_ratios[-1]
+                            else:
+                                found = False
+                                for i in supported_scaling_ratios:
+                                    for j in supported_scaling_ratios:
+                                        if i * j >= remaining_scaling_ratio:
+                                            self.scaling_jobs.extend([i, j])
+                                            remaining_scaling_ratio /= i * j
+                                            found = True
+                                            break
+                                    if found is True:
+                                        break
+
+                                if found is False:
+                                    self.scaling_jobs.append(supported_scaling_ratios[-1])
+                                    remaining_scaling_ratio /= supported_scaling_ratios[-1]
 
                 else:
                     self.scaling_jobs = [output_scale]
