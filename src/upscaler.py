@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: September 13, 2020
+Last Modified: October 26, 2020
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -53,7 +53,7 @@ language.install()
 _ = language.gettext
 
 # version information
-UPSCALER_VERSION = '4.4.0'
+UPSCALER_VERSION = '4.4.1'
 
 # these names are consistent for
 # - driver selection in command line
@@ -474,7 +474,11 @@ class Upscaler:
                 input_file_type = input_file_mime_type.split('/')[0]
                 input_file_subtype = input_file_mime_type.split('/')[1]
             except Exception:
+                input_file_mime_type = input_file_type = input_file_subtype = ''
 
+            # if python-magic doesn't determine the file to be an image/video file
+            # fall back to mimetypes to guess the file type based on the extension
+            if input_file_type not in ['image', 'video']:
                 # in case python-magic fails to detect file type
                 # try guessing file mime type with mimetypes
                 input_file_mime_type = mimetypes.guess_type(input_path.name)[0]
@@ -624,7 +628,7 @@ class Upscaler:
 
                     remaining_scaling_ratio = math.ceil(output_scale)
                     self.scaling_jobs = []
-                    
+
                     # if the scaling ratio is 1.0
                     # apply the smallest scaling ratio available
                     if remaining_scaling_ratio == 1:
