@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: September 28, 2020
+Last Modified: October 26, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -44,7 +44,7 @@ import zipfile
 # Therefore, they will be installed during the Python dependency
 #   installation step and imported later in the script.
 
-SETUP_VERSION = '2.3.0'
+SETUP_VERSION = '2.4.0'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
@@ -126,21 +126,26 @@ class Video2xSetup:
         """
         print('\nInstalling FFmpeg')
 
-        latest_release = 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.zip'
+        import patoolib
 
-        ffmpeg_zip = download(latest_release, tempfile.gettempdir())
-        self.trash.append(ffmpeg_zip)
+        latest_release = 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z'
+
+        ffmpeg_7z = download(latest_release, tempfile.gettempdir())
+        self.trash.append(ffmpeg_7z)
+
+        # if running in PyInstaller, add sys._MEIPASS\7z to path
+        # this directory contains 7za.exe and its DLL files
+        with contextlib.suppress(AttributeError):
+            os.environ['PATH'] += f';{sys._MEIPASS}\\7z'
 
         ffmpeg_directory = LOCALAPPDATA / 'video2x' / 'ffmpeg'
-        with zipfile.ZipFile(ffmpeg_zip) as zipf:
-            zipf.extractall(LOCALAPPDATA / 'video2x')
 
-            # if directory already exists, remove it
-            if ffmpeg_directory.exists():
-                shutil.rmtree(ffmpeg_directory)
-
-            # rename the newly extracted directory
-            (LOCALAPPDATA / 'video2x' / zipf.namelist()[0]).rename(ffmpeg_directory)
+        # (ffmpeg_directory).mkdir(parents=True, exist_ok=True)
+        # pyunpack.Archive(ffmpeg_7z).extractall(ffmpeg_directory)
+        if (ffmpeg_directory).exists():
+            shutil.rmtree(ffmpeg_directory)
+        patoolib.extract_archive(str(ffmpeg_7z), outdir=str(LOCALAPPDATA / 'video2x'))
+        (LOCALAPPDATA / 'video2x' / ffmpeg_7z.stem).rename(ffmpeg_directory)
 
     def _install_gifski(self):
         print('\nInstalling Gifski')
