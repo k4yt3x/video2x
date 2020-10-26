@@ -625,9 +625,10 @@ class Upscaler:
                     remaining_scaling_ratio = math.ceil(output_scale)
                     self.scaling_jobs = []
                     
-                    # special case for 1.0 upscale ratio 
+                    # if the scaling ratio is 1.0
+                    # apply the smallest scaling ratio available
                     if remaining_scaling_ratio == 1:
-                        self.scaling_jobs.append(1)
+                        self.scaling_jobs.append(supported_scaling_ratios[0])
                     else:
                         while remaining_scaling_ratio > 1:
                             for ratio in supported_scaling_ratios:
@@ -637,7 +638,6 @@ class Upscaler:
                                     break
 
                             else:
-
                                 found = False
                                 for i in supported_scaling_ratios:
                                     for j in supported_scaling_ratios:
