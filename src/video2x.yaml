@@ -22,7 +22,7 @@ waifu2x_caffe:
   #scale_width: 0 # custom scale width (specifying this will overwrite scale_ratio)
   #scale_ratio: null # custom scale ratio
   noise_level: 3 # <0|1|2|3> noise reduction level
-  mode: noise_scale # <noise|scale|noise_scale|auto_scale> image processing mode
+  mode: auto_scale # <noise|scale|noise_scale|auto_scale> image processing mode
   output_extention: null # extension to output image file when output_path is (auto) or input_path is folder
   input_extention_list: null # extension to input image file when input_path is folder
   #output_path: null # path to output image file (when input_path is folder, output_path must be folder)
