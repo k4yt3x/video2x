@@ -143,7 +143,7 @@ ffmpeg:
       '-pix_fmt': 'yuv420p' # overwrite default pixel format
       '-crf': 17 # H.264 Constant Rate Factor
       '-b:v': null # target average bitrate
-      '-vf': 'pad=ceil(iw/2)*2:ceil(ih/2)*2' # ensure output is divisible by 2, recommended for libx264
+      '-vf': 'scale=out_color_matrix=bt709,pad=ceil(iw/2)*2:ceil(ih/2)*2' # RGB -> YUV use bt709; ensure output is divisible by 2, recommended for libx264
       '-tune': 'animation' # encoding tuning film/animation/grain/stillimage/fastdecode/zerolatency/psnr/ssim
   # Step 3: Streams Migration
   # migrate audio and subtitle streams from original
