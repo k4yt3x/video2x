@@ -4,10 +4,11 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: October 26, 2020
+Last Modified: November 18, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
+Editor: konqiDAM
 
 Description: This script helps installing all dependencies of video2x
 and generates a configuration for it.
@@ -155,8 +156,8 @@ class Video2xSetup:
         latest_release = requests.get('https://api.github.com/repos/ImageOptim/gifski/releases/latest').json()
 
         for a in latest_release['assets']:
-            if re.search(r'gifski-.*\.tar\.xz', a['browser_download_url']):
-                gifski_tar_gz = download(a['browser_download_url'], tempfile.gettempdir())
+            if re.search(r'gifski-.*\.tar\.xz\.7z', a['browser_download_url']):
+                gifski_tar_gz = download(a['zipball_url'], tempfile.gettempdir())
                 self.trash.append(gifski_tar_gz)
 
         # extract and rename
