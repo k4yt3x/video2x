@@ -155,8 +155,8 @@ class Video2xSetup:
         latest_release = requests.get('https://api.github.com/repos/ImageOptim/gifski/releases/latest').json()
 
         for a in latest_release['assets']:
-            if re.search(r'gifski-.*\.tar\.xz', a['browser_download_url']):
-                gifski_tar_gz = download(a['browser_download_url'], tempfile.gettempdir())
+            if re.search(r'gifski-.*\.tar\.xz\.7z', a['browser_download_url']):
+                gifski_tar_gz = download(a['zipball_url'], tempfile.gettempdir())
                 self.trash.append(gifski_tar_gz)
 
         # extract and rename
