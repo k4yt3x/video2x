@@ -4,10 +4,11 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: October 26, 2020
+Last Modified: November 18, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
+Editor: konqiDAM
 
 Description: This script helps installing all dependencies of video2x
 and generates a configuration for it.
