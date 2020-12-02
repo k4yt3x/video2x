@@ -259,7 +259,7 @@ class Video2XMainWindow(QMainWindow):
         self.output_select_folder_button.clicked.connect(self.select_output_folder)
 
         # config file
-        self.config_line_edit = self.findChild(QLineEdit, 'configLineEdit')
+        self.config_line_edit = self.findChild(QLineEdit, 'video2xConfigLineEdit')
         self.enable_line_edit_file_drop(self.config_line_edit)
 
         if getattr(sys, 'frozen', False):
@@ -267,13 +267,13 @@ class Video2XMainWindow(QMainWindow):
         elif __file__:
             self.config_line_edit.setText(str((pathlib.Path(__file__).parent / 'video2x.yaml').absolute()))
 
-        self.config_select_file_button = self.findChild(QPushButton, 'configSelectButton')
+        self.config_select_file_button = self.findChild(QPushButton, 'video2xConfigSelectButton')
         self.config_select_file_button.clicked.connect(self.select_config_file)
 
         # cache directory
-        self.cache_line_edit = self.findChild(QLineEdit, 'cacheLineEdit')
+        self.cache_line_edit = self.findChild(QLineEdit, 'video2xCacheLineEdit')
         self.enable_line_edit_file_drop(self.cache_line_edit)
-        self.cache_select_folder_button = self.findChild(QPushButton, 'cacheSelectFolderButton')
+        self.cache_select_folder_button = self.findChild(QPushButton, 'video2xCacheSelectFolderButton')
         self.cache_select_folder_button.clicked.connect(self.select_cache_folder)
 
         # express settings
@@ -451,6 +451,9 @@ class Video2XMainWindow(QMainWindow):
         self.gifski_once_check_box = self.findChild(QCheckBox, 'gifskiOnceCheckBox')
         self.gifski_quiet_check_box = self.findChild(QCheckBox, 'gifskiQuietCheckBox')
 
+        #Video2x Settings
+        self.video2x_downscaling_threads_spin_box = self.findChild(QSpinBox, 'video2xDownscalingSpinBox')
+
         # Tools
         self.ffprobe_plain_text_edit = self.findChild(QPlainTextEdit, 'ffprobePlainTextEdit')
         self.ffprobe_plain_text_edit.dropEvent = self.show_ffprobe_output
@@ -591,6 +594,10 @@ class Video2XMainWindow(QMainWindow):
         # migrate streams
         settings = self.config['ffmpeg']['migrate_streams']
         self.ffmpeg_migrate_streams_output_options_pixel_format_line_edit.setText(settings['output_options']['-pix_fmt'])
+
+        # Video2x
+        settings = self.config['video2x']
+        self.video2x_downscaling_threads_spin_box.setValue(settings['downscaler_threads'])
 
         # Gifski
         settings = self.config['gifski']
@@ -1222,7 +1229,8 @@ You can click \"Save\" to save the log file.'''
                 extracted_frame_format=self.config['video2x']['extracted_frame_format'].lower(),
                 image_output_extension=self.image_output_extension_line_edit.text(),
                 video_output_extension=self.video_output_extension_line_edit.text(),
-                preserve_frames=bool(self.preserve_frames_check_box.isChecked())
+                preserve_frames=bool(self.preserve_frames_check_box.isChecked()),
+                downscaler_threads=self.video2x_downscaling_threads_spin_box.value()
             )
 
             # run upscaler

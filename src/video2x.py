@@ -219,6 +219,7 @@ output_file_name_format_string = config['video2x']['output_file_name_format_stri
 image_output_extension = config['video2x']['image_output_extension']
 video_output_extension = config['video2x']['video_output_extension']
 preserve_frames = config['video2x']['preserve_frames']
+downscaler_threads = config['video2x']['downscaler_threads']
 
 # if preserve frames specified in command line
 # overwrite config file options
@@ -264,7 +265,8 @@ try:
         output_file_name_format_string=output_file_name_format_string,
         image_output_extension=image_output_extension,
         video_output_extension=video_output_extension,
-        preserve_frames=preserve_frames
+        preserve_frames=preserve_frames,
+        downscaler_threads=downscaler_threads
     )
 
     # run upscaler

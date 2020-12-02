@@ -183,3 +183,4 @@ video2x:
   image_output_extension: .png # image output extension during batch processing
   video_output_extension: .mp4 # video output extension during batch processing
   preserve_frames: false # if set to true, the cache directory won't be cleaned upon task completion
+  downscaler_threads: 4 #if set to 0 it would generate as many threads as logic core available
