@@ -12,6 +12,7 @@ a folder.
 """
 
 # local imports
+from companion import Companion
 from exceptions import *
 from image_cleaner import ImageCleaner
 from progress_monitor import ProgressMonitor
@@ -21,7 +22,9 @@ from wrappers.gifski import Gifski
 # built-in imports
 from fractions import Fraction
 from multiprocessing import cpu_count
+from os import path
 from threading import Thread
+
 import contextlib
 import copy
 import gettext
@@ -37,6 +40,7 @@ import subprocess
 import tempfile
 import time
 import traceback
+import yaml
 
 # third-party imports
 from PIL import Image
@@ -104,8 +108,10 @@ class Upscaler:
         image_output_extension: str = '.png',
         video_output_extension: str = '.mp4',
         preserve_frames: bool = False,
-        downscaler_threads: int = 4
+        downscaler_threads: int = 4,
+        companion_keep_changes: bool = True
     ):
+
         # required parameters
         self.input = input_path
         self.output = output_path
@@ -125,10 +131,11 @@ class Upscaler:
         self.image_output_extension = image_output_extension
         self.video_output_extension = video_output_extension
         self.preserve_frames = preserve_frames
-        if downscaler_threads==0:
-            self.downscaler_threads=cpu_count()
+        if downscaler_threads == 0:
+            self.downscaler_threads = cpu_count()
         else:
-            self.downscaler_threads=int(downscaler_threads)
+            self.downscaler_threads = int(downscaler_threads)
+        self.companion_keep_changes = companion_keep_changes
 
         # other internal members and signals
         self.running = False
@@ -571,6 +578,25 @@ class Upscaler:
                 # create temporary directories for storing frames
                 self.create_temp_directories()
 
+                # checks if file has a companion.
+                companion_path = str(self.current_input_file.absolute()).split('.')
+                companion_path = '.'.join(companion_path[:-1]) + '.yaml'
+                companion_path = pathlib.Path(companion_path)
+                if companion_path.is_file():
+                    Avalon.info(_('Companion file found. Reading file...'))
+                    companion_object = Companion(companion_path,self)
+                    companion_object.keep_changes = self.companion_keep_changes
+                    # updates upscaler settings
+                    companion_object.update_upscaler_settings()
+                    if companion_object.driverChange:
+                        #if driver has changed, it loads new driver_settings and driver_object
+                        Avalon.info(_(f'Loading new driver: {self.driver}'))
+                        video2x_path = path.dirname(path.realpath(__file__)) + '/video2x.yaml'
+                        companion_object.load_new_driver(video2x_path)
+                    new_output_path = companion_object.get_output_path()
+                    if new_output_path != None:
+                        output_path = pathlib.Path(new_output_path)
+
                 # start handling input
                 # if input file is a static image
                 if input_file_type == 'image' and input_file_subtype != 'gif':
@@ -738,17 +764,18 @@ class Upscaler:
                 shutil.move(self.upscaled_frames, self.extracted_frames)
                 self.upscaled_frames.mkdir(parents=True, exist_ok=True)
 
-                frame_list=[]
+                frame_list = []
                 for frame in self.extracted_frames.iterdir():
                     if frame.is_file() and frame.name.endswith(self.extracted_frame_format):
                         frame_list.append(frame)
 
-                frames_per_thread=len(frame_list)/self.downscaler_threads
-                threads_list=[]
+                frames_per_thread = len(frame_list)/self.downscaler_threads
+                threads_list = []
                 for thread_counter in range(self.downscaler_threads):
                     threads_list.append(Thread(
-                        target=self._downscaler_thread,
-                        args=(output_width, output_height, frame_list[int(frames_per_thread*thread_counter):int(frames_per_thread*(thread_counter+1))],)))
+                        target = self._downscaler_thread,
+                        args = (output_width, output_height, frame_list[int(frames_per_thread*thread_counter):int(frames_per_thread*(thread_counter+1))],))
+                        )
                 
                 for downscaler_thread in threads_list:
                     downscaler_thread.start()
@@ -824,6 +851,14 @@ class Upscaler:
                                 Avalon.info(_('Writing intermediate file to: {}').format(output_video_path.absolute()))
                                 shutil.move(self.upscaled_frames / self.ffmpeg_object.intermediate_file_name, output_video_path)
 
+                if companion_path.is_file():
+                    companion_object.rewind()
+                    if companion_object.get_video_type() == 'Last Low Storage Video':
+                        output_name,file_path = companion_object.last_low_storage()
+                        output_path = pathlib.Path(file_path).parents[1]
+                        self.ffmpeg_object.concat_video(file_path, f'{output_path}/{output_name}')
+                        shutil.rmtree(pathlib.Path(file_path).parents[0])
+                    
                 # increment total number of files processed
                 self.cleanup_temp_directories()
                 self.processing_queue.task_done()
@@ -832,6 +867,8 @@ class Upscaler:
         except (Exception, KeyboardInterrupt, SystemExit) as e:
             with contextlib.suppress(ValueError, AttributeError):
                 self.cleanup_temp_directories()
+                if companion_path.is_file() and companion_object.get_video_type() == 'Last Low Storage Video':
+                    shutil.rmtree(pathlib.Path(file_path).parents[0])
                 self.running = False
             raise e
 

@@ -259,6 +259,73 @@ class Ffmpeg:
 
         return(self._execute(execute))
 
+    def split_video(self,input_video,video_extension,output_folder,time):
+        """Splits Video in n part all of the same lenght
+
+        Arguments:
+            input_video {string} -- input video file path
+            output_folder {string} -- output folder path
+            time {list of int} -- lenght expressed in minutes[0] and second[1]
+        """
+
+        execute = [
+            self.ffmpeg_binary,
+            '-i',
+            input_video,
+            #-i path/to/video
+            '-segment_time',
+            f'00:{time[0]}:{time[1]}',
+            #-segmet_time 00:15:00
+            '-reset_timestamps',
+            '1',
+            '-f',
+            'segment',
+            #-f segmemnt -reset_timestamps 1
+            '-c',
+            'copy'
+        ]
+
+        execute.extend([f'{output_folder}/clip_%d{video_extension}'])
+
+        execute = [str(e) for e in execute]
+
+        Avalon.debug_info(f'Executing: {" ".join(execute)}')
+        
+        subprocess.run(execute, check=True)
+
+    def concat_video(self,input_file_path,output_file_path):
+        """Concat videos specified in the input_file
+
+        Arguments:
+            input_file_path {string} -- list file path
+            output_file_path {string} -- output folder path
+        """
+
+        execute = [
+            self.ffmpeg_binary,
+            '-safe',
+            '0',
+            #-safe 0
+            '-f',
+            'concat',
+            #-f concat
+            '-i',
+            input_file_path,
+            #-i path/to/file
+            '-c',
+            'copy',
+            #-c copy
+            '-y'
+        ]
+
+        execute.extend([output_file_path])
+
+        execute = [str(e) for e in execute]
+
+        Avalon.debug_info(f'Executing: {" ".join(execute)}')
+        
+        subprocess.run(execute, check=True)
+
     def _read_configuration(self, phase, section=None):
         """ read configuration from JSON
 

@@ -9,6 +9,7 @@ Last Modified: September 13, 2020
 
 # local imports
 from bilogger import BiLogger
+from companion import generate_companion
 from upscaler import UPSCALER_VERSION
 from upscaler import Upscaler
 from wrappers.ffmpeg import Ffmpeg
@@ -132,9 +133,17 @@ class InputTableModel(QAbstractTableModel):
                 if file_path.is_dir():
                     return 'Folder'
 
-                # if path is single file
-                # determine file type
+                # if path is a file
                 elif file_path.is_file():
+                # check if it has yaml companion
+                    companion_path = str(file_path.absolute()).split('.')
+                    companion_path = '.'.join(companion_path[:-1]) + '.yaml'
+                    companion_path = pathlib.Path(companion_path)
+                    if companion_path.is_file():
+                        companion_extension = ' + Comp'
+                    else:
+                        companion_extension = ''
+                # determine file type
                     try:
                         input_file_mime_type = magic.from_file(str(file_path.absolute()), mime=True)
                         input_file_type = input_file_mime_type.split('/')[0]
@@ -151,17 +160,17 @@ class InputTableModel(QAbstractTableModel):
 
                     if input_file_type == 'image':
                         if input_file_subtype == 'gif':
-                            return 'GIF'
-                        return 'Image'
+                            return 'GIF' + companion_extension
+                        return 'Image' + companion_extension
 
                     elif input_file_type == 'video':
-                        return 'Video'
+                        return 'Video' + companion_extension
 
                     else:
-                        return 'Unknown'
+                        return 'Unknown' + companion_extension
 
                 else:
-                    return 'Unknown'
+                    return 'Deleted?'
 
     def rowCount(self, index):
         return len(self._data)
@@ -216,6 +225,9 @@ class Video2XMainWindow(QMainWindow):
         QShortcut(QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_O), self, self.select_output_folder)
 
         # menu bar
+        self.action_lowstorage_video = self.findChild(QAction, 'actionLowStorageVideo')
+        self.action_lowstorage_video.triggered.connect(self.low_storage_video)
+
         self.action_exit = self.findChild(QAction, 'actionExit')
         self.action_exit.triggered.connect(self.close)
 
@@ -453,6 +465,12 @@ class Video2XMainWindow(QMainWindow):
 
         #Video2x Settings
         self.video2x_downscaling_threads_spin_box = self.findChild(QSpinBox, 'video2xDownscalingSpinBox')
+        self.video2x_lowstoragemode_clip_min_spin_box = self.findChild(QSpinBox, 'video2xLSMinutesSpinBox')
+        self.video2x_lowstoragemode_clip_sec_spin_box = self.findChild(QSpinBox, 'video2xLSSecondsSpinBox')
+        self.video2x_lowstoragemode_clip_folder_format_string_line_edit = self.findChild(QLineEdit, 'video2xLSFolderLineEdit')
+        self.video2x_lowstoragemode_clip_folder_select_folder_button = self.findChild(QPushButton, 'video2xLSFolderSelectFolderButton')
+        self.video2x_lowstoragemode_clip_folder_select_folder_button.clicked.connect(lambda: self.select_folder_path(self.video2x_lowstoragemode_clip_folder_format_string_line_edit))
+        self.video2x_companion_keep_changes_check_box = self.findChild(QCheckBox, 'video2xCompanionKeepChangesCheckBox')
 
         # Tools
         self.ffprobe_plain_text_edit = self.findChild(QPlainTextEdit, 'ffprobePlainTextEdit')
@@ -598,6 +616,10 @@ class Video2XMainWindow(QMainWindow):
         # Video2x
         settings = self.config['video2x']
         self.video2x_downscaling_threads_spin_box.setValue(settings['downscaler_threads'])
+        self.video2x_lowstoragemode_clip_min_spin_box.setValue(settings['lowstorage_clip_lenght']//60)
+        self.video2x_lowstoragemode_clip_sec_spin_box.setValue(settings['lowstorage_clip_lenght']%60)
+        self.video2x_lowstoragemode_clip_folder_format_string_line_edit.setText(settings['lowstorage_clip_folder_format_string'])
+        self.video2x_companion_keep_changes_check_box.setChecked(settings['companion_keep_changes'])
 
         # Gifski
         settings = self.config['gifski']
@@ -985,6 +1007,12 @@ class Video2XMainWindow(QMainWindow):
             return
         self.output_line_edit.setText(str(output_file.absolute()))
 
+    def select_folder_path(self, folder_path_line_edit: QLineEdit):
+        folder_path = self.select_folder('Select Folder')
+        if folder_path is None:
+            return
+        folder_path_line_edit.setText(str(folder_path.absolute()))
+
     def select_output_folder(self):
         output_folder = self.select_folder('Select Output Folder')
         if output_folder is None:
@@ -1022,6 +1050,58 @@ class Video2XMainWindow(QMainWindow):
 **Ctrl+Shift+O**:\tOpen select output folder dialog'''
         message_box.setText(shortcut_information)
         message_box.exec_()
+
+    def low_storage_video(self):
+        input_file = self.select_file('Low Storage Mode - Select Input File')
+        if (input_file is None or self.input_table_path_exists(input_file)):
+            return
+        file_path = input_file.parents[0]
+        file_name = [input_file.stem,input_file.suffix]
+        output_path = self.video2x_lowstoragemode_clip_folder_format_string_line_edit.text()
+        output_path = output_path.replace('{original_file_location}', str(file_path.absolute())).replace("{original_file_name}", file_name[0])
+        output_folder = pathlib.Path(output_path)    
+        #Genereting Folder
+        try:
+            output_folder.mkdir(exist_ok=False)
+        except FileExistsError:
+            self.show_warning(f'The folder {output_folder.absolute()} already exist.')
+            return
+        #Splitting video in clips using ffmpeg
+        ffmpeg_object = Ffmpeg(self.ffmpeg_settings)
+        ffmpeg_object.split_video(str(input_file.absolute()),
+            file_name[1],
+            output_path,
+            [self.video2x_lowstoragemode_clip_min_spin_box.value(),
+            self.video2x_lowstoragemode_clip_sec_spin_box.value()]
+            )
+        #Genereting File list
+        #saving Files Already Existing files to exclude them from the concat process
+        videos = []
+        with open(f'{output_path}/AEFiles.txt','a') as f:
+            for file in os.listdir(output_path):
+                if file.endswith(file_name[1]):
+                    f.write(f"{file}\n")
+                    videos.append(file)
+        #Genereting Companionion files
+        #every clip has his output path changed to the folder
+        #last clip has video_type flag to signal that he is the last clip
+        for index in range(len(videos)):
+            video = videos[index]
+            video_name = video.split('.')
+            video_name = '.'.join(video_name[:-1])
+            settings = {'options_output_path' : f'{output_path}/{video_name}_output{file_name[1]}'}
+            if index == len(videos)-1:
+                settings['video_name'] = f'{file_name[0]}_output{file_name[1]}'
+                settings['video_type'] = 'Last Low Storage Video'
+            generate_companion(f'{output_path}/{video_name}.yaml',settings)
+        #Importing clips to the queue
+        for file in videos:
+            input_file = pathlib.Path(f"{output_path}/{file}")
+            if (input_file is None or self.input_table_path_exists(input_file)):
+                continue
+            self.input_table_data.append(input_file)
+        self.update_output_path()
+        self.update_input_table()
 
     def show_about(self):
         message_box = QMessageBox(self)
@@ -1230,7 +1310,8 @@ You can click \"Save\" to save the log file.'''
                 image_output_extension=self.image_output_extension_line_edit.text(),
                 video_output_extension=self.video_output_extension_line_edit.text(),
                 preserve_frames=bool(self.preserve_frames_check_box.isChecked()),
-                downscaler_threads=self.video2x_downscaling_threads_spin_box.value()
+                downscaler_threads=self.video2x_downscaling_threads_spin_box.value(),
+                companion_keep_changes=bool(self.video2x_companion_keep_changes_check_box.isChecked())
             )
 
             # run upscaler
@@ -1314,8 +1395,18 @@ You can click \"Save\" to save the log file.'''
             event.ignore()
 
 
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
+    input('Press enter to close')
+    quit()
+
 # this file shouldn't be imported
 if __name__ == '__main__':
+    pyqtv=PYQT_VERSION_STR.split('.')
+    if  int(pyqtv[0])>=5 and int(pyqtv[1])>=5:
+        #after pyqt 5.5, unhandle python exception will call qFatal() and this will not trigger Exception
+        #https://www.riverbankcomputing.com/static/Docs/PyQt5/incompatibilities.html#unhandled-python-exceptions
+        sys.excepthook = except_hook
     try:
         app = QApplication(sys.argv)
         window = Video2XMainWindow()

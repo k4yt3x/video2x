@@ -220,6 +220,7 @@ image_output_extension = config['video2x']['image_output_extension']
 video_output_extension = config['video2x']['video_output_extension']
 preserve_frames = config['video2x']['preserve_frames']
 downscaler_threads = config['video2x']['downscaler_threads']
+keep_changes = config['video2x']['companion_keep_changes']
 
 # if preserve frames specified in command line
 # overwrite config file options
@@ -266,7 +267,8 @@ try:
         image_output_extension=image_output_extension,
         video_output_extension=video_output_extension,
         preserve_frames=preserve_frames,
-        downscaler_threads=downscaler_threads
+        downscaler_threads=downscaler_threads,
+        keep_changes=keep_changes
     )
 
     # run upscaler

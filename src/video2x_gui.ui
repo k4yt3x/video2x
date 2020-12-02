@@ -2672,33 +2672,169 @@
              </widget>
             </item>
             <item>
-            <widget class="QGroupBox" name="video2xDownscalingGroupBox">
-             <property name="title">
-              <string>Downscaling</string>
-             </property>
-             <layout class="QHBoxLayout" name="video2xDownscalingHorizontalLayout">
-              <item>
-               <widget class="QLabel" name="video2xDownscalingLabel">
-                <property name="text">
-                 <string>Number of Threads</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="video2xDownscalingSpinBox">
-                <property name="minimum">
-                 <number>0</number>
-                </property>
-                <property name="maximum">
-                 <number>100</number>
-                </property>
-                <property name="value">
-                 <number>4</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
+             <widget class="QGroupBox" name="video2xDownscalingGroupBox">
+              <property name="title">
+               <string>Downscaling</string>
+              </property>
+              <layout class="QHBoxLayout" name="video2xDownscalingHorizontalLayout">
+               <item>
+                <widget class="QLabel" name="video2xDownscalingLabel">
+                 <property name="text">
+                  <string>Number of Threads</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="video2xDownscalingSpinBox">
+                 <property name="minimum">
+                  <number>0</number>
+                 </property>
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>4</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="video2xLowStorageGroupBox">
+              <property name="title">
+               <string>Low Storage Mode</string>
+              </property>
+              <layout class="QVBoxLayout" name="video2xLowStorageVericalLayout">
+               <item>
+                <widget class="QLabel" name="video2xLowStorageLabel">
+                 <property name="text">
+                  <string>This process cut the file in smaller clip.</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="video2xLowStorageSubLabel">
+                 <property name="text">
+                  <string>Then upscale each clips and it recombine them in a single file.</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="video2xLSFolderLayout">
+                 <item>
+                  <widget class="QLabel" name="video2xLSFolderLabel">
+                   <property name="minimumSize">
+                    <size>
+                     <width>63</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Low Storage Clip Folder</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="video2xLSFolderLineEdit"/>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="video2xLSFolderSelectFolderButton">
+                   <property name="text">
+                    <string>Select Folder</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="video2xLSSettingsGroupBox">
+                 <property name="title">
+                  <string>Max Clip Lenght</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="video2xLSSettingsVericalLayout">
+                  <item>
+                   <layout class="QHBoxLayout" name="video2xLSMinutesHorizontaLayout">
+                    <item>
+                     <widget class="QLabel" name="video2xLSMinutesLabel">
+                      <property name="text">
+                       <string>Minutes:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="video2xLSMinutesSpinBox">
+                      <property name="minimum">
+                       <number>0</number>
+                      </property>
+                      <property name="maximum">
+                       <number>59</number>
+                      </property>
+                      <property name="value">
+                       <number>15</number>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="video2xLSSecondsHorizontaLayout">
+                    <item>
+                     <widget class="QLabel" name="video2xLSSecondsLabel">
+                      <property name="text">
+                       <string>Seconds:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="video2xLSSecondsSpinBox">
+                      <property name="minimum">
+                       <number>0</number>
+                      </property>
+                      <property name="maximum">
+                       <number>59</number>
+                      </property>
+                      <property name="value">
+                       <number>0</number>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="video2xCompanionGroupBox">
+              <property name="title">
+               <string>Companion File</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_9">
+               <item>
+                <widget class="QLabel" name="video2xCompanionKeepChangesLabel">
+                 <property name="text">
+                  <string>Enabling "Keep Changes" allows companion files changes to persist after their linked file finished upscaling.</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="video2xCompanionKeepChangesCheckBox">
+                 <property name="toolTip">
+                  <string>Check this to enable "Keep Changes".</string>
+                 </property>
+                 <property name="text">
+                  <string>Enable Keep Changes</string>
+                 </property>
+                 <property name="tristate">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
             </item>
             <item>
              <spacer name="video2xVerticalSpacer">
@@ -2708,7 +2844,7 @@
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>40</height>
+                <height>10</height>
                </size>
               </property>
              </spacer>
@@ -2944,6 +3080,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionLowStorageVideo"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
@@ -2960,6 +3097,11 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionLowStorageVideo">
+   <property name="text">
+    <string>Low Storage Video</string>
    </property>
   </action>
   <action name="actionAbout">

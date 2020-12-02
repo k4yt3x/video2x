@@ -1,0 +1,43 @@
+#To use a companion file it has to have the same name of the file linked to it
+#Ex: Clip.mp4 - Clip.yaml
+
+video:
+  name: #1.0.0 Example:'output.mp4'
+    #Used in Low Storage Mode and it's the name of the product (the sum of the clips)
+  type: #1.0.0 Example:'Last Low Storage Video'
+    #Flag used to signal that the clip is the last one to be upscaled and start concat functions
+
+options:
+  output_path: #1.0.0 path/to/file 
+    #Global path to where the upscaled file is going to be
+  keep_changes: #1.0.0 true/false
+    #Flag to specify if this companions setting are applied to all the following files.
+
+  express:
+    driver: #1.0.0 Example: anime4kcpp
+      #Available: waifu2x_caffe, waifu2x_converter_cpp, waifu2x_ncnn_vulkan, srmd_ncnn_vulkan, realsr_ncnn_vulkan, anime4kcpp
+    processes: #1.0.0 Example: 16
+      #If driver is not anime4kcpp it will always be set to 1
+    scale_ratio: #1.0.0 Example: 2
+    output_width: #1.0.0 Example: 1920
+    output_height: #1.0.0 Example: 1080
+      #Scale_ratio is going to be ignored if output_width and output_height are not 0 or empty
+    preserve_frames: #1.0.0 true/false
+      #If true video2x will not delete the folder containing the upscaled frames
+    downscaler_threads: #1.0.0 Example: 0
+      #Number of Threads used to downscaled frames. 0 = As many logic core available
+    
+  waifu2x_caffe: #Not implemented Yet
+    ...
+  waifu2x_converter_cpp: #Not implemented Yet
+    ...
+  waifu2x_ncnn_vulkan: #Not implemented Yet
+    ...
+  srmd_ncnn_vulkan: #Not implemented Yet
+    ...
+  realsr_ncnn_vulkan: #Not implemented Yet
+    ...
+  anime4kcpp: #Not implemented Yet
+    ...
+  new:
+    path: #Not implemented Yet #path/to/video2x.yaml 

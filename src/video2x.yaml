@@ -184,3 +184,6 @@ video2x:
   video_output_extension: .mp4 # video output extension during batch processing
   preserve_frames: false # if set to true, the cache directory won't be cleaned upon task completion
   downscaler_threads: 4 #if set to 0 it would generate as many threads as logic core available
+  lowstorage_clip_lenght: 900 #expressed in seconds
+  lowstorage_clip_folder_format_string: "{original_file_location}/video2x_{original_file_name}" # format string to use for generating low storage folder
+  companion_keep_changes: true #if set to true, it will allow companion to make changes that persist to all the files in queue
