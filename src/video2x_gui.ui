@@ -2289,6 +2289,11 @@
                          <string>ssim</string>
                         </property>
                        </item>
+                       <item>
+                        <property name="text">
+                         <string>none</string>
+                        </property>
+                       </item>
                       </widget>
                      </item>
                     </layout>

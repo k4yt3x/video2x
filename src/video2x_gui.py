@@ -4,7 +4,7 @@
 Creator: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
-Last Modified: September 13, 2020
+Last Modified: December 13, 2020
 """
 
 # local imports
@@ -33,7 +33,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import magic
 
-GUI_VERSION = '2.8.0'
+GUI_VERSION = '2.8.1'
 
 LEGAL_INFO = f'''Video2X GUI Version: {GUI_VERSION}\\
 Upscaler Version: {UPSCALER_VERSION}\\
@@ -692,7 +692,10 @@ class Video2XMainWindow(QMainWindow):
         self.config['ffmpeg']['assemble_video']['output_options']['-vcodec'] = self.ffmpeg_assemble_video_output_options_video_codec_line_edit.text()
         self.config['ffmpeg']['assemble_video']['output_options']['-pix_fmt'] = self.ffmpeg_assemble_video_output_options_pixel_format_line_edit.text()
         self.config['ffmpeg']['assemble_video']['output_options']['-crf'] = self.ffmpeg_assemble_video_output_options_crf_spin_box.value()
-        self.config['ffmpeg']['assemble_video']['output_options']['-tune'] = self.ffmpeg_assemble_video_output_options_tune_combo_box.currentText()
+        if self.ffmpeg_assemble_video_output_options_tune_combo_box.currentText() == 'none':
+            self.config['ffmpeg']['assemble_video']['output_options']['-tune'] = None
+        else:
+            self.config['ffmpeg']['assemble_video']['output_options']['-tune'] = self.ffmpeg_assemble_video_output_options_tune_combo_box.currentText()
         if self.ffmpeg_assemble_video_output_options_bitrate_line_edit.text() != '':
             self.config['ffmpeg']['assemble_video']['output_options']['-b:v'] = self.ffmpeg_assemble_video_output_options_bitrate_line_edit.text()
         else:
