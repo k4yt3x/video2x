@@ -13,6 +13,7 @@ Description: This class handles all FFmpeg related operations.
 import json
 import pathlib
 import subprocess
+import sys
 
 # third-party imports
 from avalon_framework import Avalon
@@ -316,4 +317,4 @@ class Ffmpeg:
         # turn all list elements into string to avoid errors
         execute = [str(e) for e in execute]
         Avalon.debug_info(f'Executing: {" ".join(execute)}')
-        return subprocess.Popen(execute)
+        return subprocess.Popen(execute, stdout=sys.stdout, stderr=sys.stderr)

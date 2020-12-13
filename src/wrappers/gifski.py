@@ -12,6 +12,7 @@ Description: High-level wrapper for Gifski.
 # built-in imports
 import pathlib
 import subprocess
+import sys
 
 # third-party imports
 from avalon_framework import Avalon
@@ -71,4 +72,4 @@ class Gifski:
 
         Avalon.debug_info(f'Executing: {execute}')
 
-        return subprocess.Popen(execute)
+        return subprocess.Popen(execute, stdout=sys.stdout, stderr=sys.stderr)

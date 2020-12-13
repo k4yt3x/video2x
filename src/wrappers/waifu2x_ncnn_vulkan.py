@@ -19,6 +19,7 @@ import os
 import pathlib
 import platform
 import subprocess
+import sys
 import threading
 
 # third-party imports
@@ -111,4 +112,4 @@ class WrapperMain:
         self.print_lock.acquire()
         Avalon.debug_info(f'[upscaler] Subprocess {os.getpid()} executing: {" ".join(execute)}')
         self.print_lock.release()
-        return subprocess.Popen(execute)
+        return subprocess.Popen(execute, stdout=sys.stdout, stderr=sys.stderr)
