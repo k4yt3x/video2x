@@ -14,6 +14,8 @@
 
 ### Official Discussion Group (Telegram): https://t.me/video2x
 
+A [Discord server](https://discord.gg/Pwf6Ht) is also available. Please note that most developers are only on Telegram. If you join the Discord server, the developers might not be able to see your questions and help you. It is mostly for user-user interactions and those who do not want to use Telegram.
+
 ## [Download Stable/Beta Builds](https://github.com/k4yt3x/video2x/releases/latest) (Windows)
 
 - **`Full`**: full package comes pre-configured with **all** dependencies like `FFmpeg` and `waifu2x-caffe`.
