@@ -4,7 +4,7 @@
 Name: Video2X Setup Script
 Creator: K4YT3X
 Date Created: November 28, 2018
-Last Modified: November 18, 2020
+Last Modified: December 13, 2020
 
 Editor: BrianPetkovsek
 Editor: SAT3LL
@@ -45,7 +45,7 @@ import zipfile
 # Therefore, they will be installed during the Python dependency
 #   installation step and imported later in the script.
 
-SETUP_VERSION = '2.4.0'
+SETUP_VERSION = '2.4.1'
 
 # global static variables
 LOCALAPPDATA = pathlib.Path(os.getenv('localappdata'))
@@ -99,8 +99,7 @@ class Video2xSetup:
         else:
             getattr(self, f'_install_{self.driver}')()
 
-        print('\nCleaning up temporary files')
-        self._cleanup()
+        # self._cleanup()
 
     def _install_python_requirements(self):
         """ Read requirements.txt and return its content
@@ -110,6 +109,8 @@ class Video2xSetup:
     def _cleanup(self):
         """ Cleanup all the temp files downloaded
         """
+        print('\nCleaning up temporary files')
+
         for file in self.trash:
             try:
                 if file.is_dir():
@@ -153,16 +154,18 @@ class Video2xSetup:
         import requests
 
         # Get latest release of Gifski via Github API
-        latest_release = requests.get('https://api.github.com/repos/ImageOptim/gifski/releases/latest').json()
+        releases = requests.get('https://api.github.com/repos/ImageOptim/gifski/releases').json()
+        for release in releases:
+            for asset in release['assets']:
+                if re.search(r'gifski-.*\.tar\.xz', asset['browser_download_url']):
+                    gifski_tar_xz = download(asset['browser_download_url'], tempfile.gettempdir())
+                    self.trash.append(gifski_tar_xz)
 
-        for a in latest_release['assets']:
-            if re.search(r'gifski-.*\.tar\.xz\.7z', a['browser_download_url']):
-                gifski_tar_gz = download(a['zipball_url'], tempfile.gettempdir())
-                self.trash.append(gifski_tar_gz)
+                    # extract and rename
+                    with tarfile.open(gifski_tar_xz) as archive:
+                        archive.extractall(LOCALAPPDATA / 'video2x' / 'gifski')
 
-        # extract and rename
-        with tarfile.open(gifski_tar_gz) as archive:
-            archive.extractall(LOCALAPPDATA / 'video2x' / 'gifski')
+                    return
 
     def _install_waifu2x_caffe(self):
         """ Install waifu2x_caffe
@@ -434,18 +437,18 @@ except Exception:
     print('An error has occurred')
     print('Video2X Automatic Setup has failed')
 
-    # in case of a failure, try cleaning up temp files
+    EXIT_CODE = 1
+
+# regardless if script finishes successfully or not
+# print script execution summary
+finally:
+    # always try cleaning up trash
     try:
         setup._cleanup()
     except Exception:
         traceback.print_exc()
         print('An error occurred while trying to cleanup files')
 
-    EXIT_CODE = 1
-
-# regardless if script finishes successfully or not
-# print script execution summary
-finally:
     print('Script finished')
     print(f'Time taken: {timedelta(seconds=round(time.time() - start_time))}')
 
