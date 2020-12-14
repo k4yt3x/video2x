@@ -11,6 +11,7 @@ for Anime4KCPP.
 """
 
 # built-in imports
+import sys
 import argparse
 import os
 import pathlib
