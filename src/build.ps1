@@ -12,7 +12,7 @@ To start a PowerShell session with execution policy bypass
 powershell -ExecutionPolicy Bypass
 #>
 
-if ($args.count -ne 1){
+if ($args.count -ne 1) {
     Write-Host -ForegroundColor White "Usage:`n .\build.ps1 VIDEO2X_VERSION"
     Exit
 }
@@ -88,7 +88,7 @@ Copy-Item "requirements.txt" -Destination "$($VIDEO2X_VERSION)\video2x-$($VIDEO2
 Write-Host -ForegroundColor White "`nDeleting temporary files"
 $pathsToRemove = "__pycache__", "build", "dist", "*.spec"
 
-foreach ($path in $pathsToRemove){
+foreach ($path in $pathsToRemove) {
     Write-Host "Removing path: $($path)"
     Remove-Item -path $path -recurse
 }
