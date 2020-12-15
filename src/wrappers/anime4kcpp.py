@@ -4,19 +4,22 @@
 Name: Anime4KCPP Driver
 Author: K4YT3X
 Date Created: May 3, 2020
-Last Modified: September 9, 2020
+Last Modified: December 15, 2020
+
+Editor: fire0shadow
+Last Modified: December 15, 2020
 
 Description: This class is a high-level wrapper
 for Anime4KCPP.
 """
 
 # built-in imports
-import sys
 import argparse
 import os
 import pathlib
 import platform
 import subprocess
+import sys
 import threading
 
 # third-party imports
