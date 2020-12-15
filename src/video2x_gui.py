@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Creator: Video2X GUI
+Name: Video2X GUI
 Author: K4YT3X
 Date Created: May 5, 2020
 Last Modified: December 13, 2020
