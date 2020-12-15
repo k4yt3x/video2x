@@ -187,15 +187,15 @@ mv -v $TEMP/realsr-ncnn-vulkan/realsr-ncnn-vulkan-*-linux $INSTALLATION_PATH/vid
 # install Anime4KCPP
 # install the latest cmake for compiling Anime4KCPP
 aria2c https://github.com/Kitware/CMake/releases/download/v3.18.2/cmake-3.18.2-Linux-x86_64.sh --dir / -o "$TEMP/cmake.sh"
-mkdir /cmake
-bash "$TEMP/cmake.sh" --prefix=/cmake --skip-license
+mkdir $TEMP/cmake
+bash "$TEMP/cmake.sh" --prefix=$TEMP/cmake --skip-license
 
 # build and install Anime4KCPP
 apt-fast install -y --no-install-recommends libopencv-dev opencl-dev
 git clone --recurse-submodules --depth=1 --progress https://github.com/TianZerL/Anime4KCPP.git $TEMP/anime4kcpp
 mkdir -v $TEMP/anime4kcpp/build
 cd $TEMP/anime4kcpp/build
-/cmake/bin/cmake -DBuild_GUI=OFF ..
+$TEMP/cmake/bin/cmake -DBuild_GUI=OFF ..
 make -j$(nproc)
 mv -v $TEMP/anime4kcpp/build $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp
 ln -s $INSTALLATION_PATH/video2x/src/dependencies/anime4kcpp/bin/libAnime4KCPPCore.so /usr/lib
