@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 
 class ProgressMonitor(threading.Thread):
-    """ progress monitor
+    """progress monitor
 
     This class provides progress monitoring functionalities
     by keeping track of the amount of frames in the input
@@ -34,7 +34,15 @@ class ProgressMonitor(threading.Thread):
     def run(self):
         self.running = True
 
-        with tqdm(total=self.upscaler.total_frames, ascii=True, desc=_('Processing: {} (pass {}/{})').format(self.upscaler.current_input_file.name, self.upscaler.current_pass, len(self.upscaler.scaling_jobs))) as progress_bar:
+        with tqdm(
+            total=self.upscaler.total_frames,
+            ascii=True,
+            desc=_("Processing: {} (pass {}/{})").format(
+                self.upscaler.current_input_file.name,
+                self.upscaler.current_pass,
+                len(self.upscaler.scaling_jobs),
+            ),
+        ) as progress_bar:
             # tqdm update method adds the value to the progress
             # bar instead of setting the value. Therefore, a delta
             # needs to be calculated.
@@ -42,7 +50,13 @@ class ProgressMonitor(threading.Thread):
             while self.running:
 
                 with contextlib.suppress(FileNotFoundError):
-                    upscaled_frames = [f for f in self.upscaler.upscaled_frames.iterdir() if str(f).lower().endswith(self.upscaler.extracted_frame_format.lower())]
+                    upscaled_frames = [
+                        f
+                        for f in self.upscaler.upscaled_frames.iterdir()
+                        if str(f)
+                        .lower()
+                        .endswith(self.upscaler.extracted_frame_format.lower())
+                    ]
                     if len(upscaled_frames) >= 1:
                         self.upscaler.last_frame_upscaled = sorted(upscaled_frames)[-1]
                     self.upscaler.total_frames_upscaled = len(upscaled_frames)
