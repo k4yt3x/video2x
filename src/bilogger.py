@@ -12,14 +12,14 @@ import io
 
 
 class BiLogger(io.TextIOWrapper):
-    """ A bidirectional logger that both prints the output
+    """A bidirectional logger that both prints the output
     and log all output to file.
 
     Original code from: https://stackoverflow.com/a/14906787
     """
 
     def __init__(self, terminal: io.TextIOWrapper, log_file: io.BufferedRandom):
-        """ initialize BiLogger
+        """initialize BiLogger
 
         Args:
             terminal (_io.TextIOWrapper): original terminal IO wrapper
@@ -30,7 +30,7 @@ class BiLogger(io.TextIOWrapper):
         self.fileno = self.log_file.fileno
 
     def write(self, message: str):
-        """ write message to original terminal output and log file
+        """write message to original terminal output and log file
 
         Args:
             message (str): message to write
@@ -41,6 +41,5 @@ class BiLogger(io.TextIOWrapper):
         self.log_file.flush()
 
     def flush(self):
-        """ flush logger (for compability only)
-        """
+        """flush logger (for compability only)"""
         pass

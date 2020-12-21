@@ -22,7 +22,7 @@ import time
 
 
 class ImageCleaner(threading.Thread):
-    """ Video2X Image Cleaner
+    """Video2X Image Cleaner
 
     This class creates an object that keeps track of extracted
     frames that has already been upscaled and are not needed
@@ -40,8 +40,7 @@ class ImageCleaner(threading.Thread):
         self.running = False
 
     def run(self):
-        """ Run image cleaner
-        """
+        """Run image cleaner"""
         self.running = True
 
         while self.running:
@@ -49,13 +48,12 @@ class ImageCleaner(threading.Thread):
             time.sleep(1)
 
     def stop(self):
-        """ Stop the image cleaner
-        """
+        """Stop the image cleaner"""
         self.running = False
         self.join()
 
     def remove_upscaled_frames(self):
-        """ remove frames that have already been upscaled
+        """remove frames that have already been upscaled
 
         This method compares the files in the extracted frames
         directory with the upscaled frames directory, and removes
