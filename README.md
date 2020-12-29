@@ -1,5 +1,5 @@
 <p align="center">
-   <img src="https://user-images.githubusercontent.com/21986859/81626588-ae5ab800-93eb-11ea-918f-ebe98c2de40a.png"/>
+   <img src="https://user-images.githubusercontent.com/21986859/102733190-872a7880-4334-11eb-8e9e-0ca747f130b1.png"/>
 </p>
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square)
@@ -8,7 +8,7 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square)
 ![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-blue?style=flat-square)
-![Become A Patron!](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fk4yt3x&style=flat-square)
+![Become A Patron!](https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square)
 
 <!--# Video2X Lossless Video Enlarger-->
 
@@ -229,56 +229,6 @@ If you have any questions, first try visiting our [Q&A](https://github.com/k4yt3
 ### [History](https://github.com/k4yt3x/video2x/wiki/History)
 
 Are you interested in how the idea of Video2X was born? Do you want to know the stories and histories behind Video2X's development? Come into this page.
-
----
-
-# Full Usage
-
-## Video2X Options
-
-### -h, --help
-    show this help message and exit
-
-### -i INPUT, --input INPUT
-    source video file/directory
-
-### -o OUTPUT, --output OUTPUT
-    output video file/directory
-
-### -c CONFIG, --config CONFIG
-    video2x config file path
-
-### --log LOG
-    log file path (default: program_directory\video2x_%Y-%m-%d_%H-%M-%S.log)
-
-### --disable_logging
-    disable logging (default: False)
-
-### -v, --version
-    display version, lawful information and exit
-
-## Upscaling Options
-
-### -d DRIVER, --driver DRIVER
-    upscaling driver (default: waifu2x_caffe)
-
-Available options are:
-
-- waifu2x_caffe
-- waifu2x_converter_cpp
-- waifu2x_ncnn_vulkan
-- srmd_ncnn_vulkan
-- realsr_ncnn_vulkan
-- anime4kcpp
-
-### -r RATIO, --ratio RATIO
-    scaling ratio
-
-### -p PROCESSES, --processes PROCESSES
-    number of processes to use for upscaling (default: 1)
-
-### --preserve_frames
-    preserve extracted and upscaled frames (default: False)
 
 ---
 
