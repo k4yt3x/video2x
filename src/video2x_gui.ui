@@ -378,7 +378,7 @@
                      </property>
                      <item>
                       <property name="text">
-                       <string>Waifu2X NCNN Vulkan</string>
+                       <string>Waifu2X ncnn Vulkan</string>
                       </property>
                      </item>
                      <item>
@@ -393,17 +393,32 @@
                      </item>
                      <item>
                       <property name="text">
-                       <string>SRMD NCNN Vulkan</string>
+                       <string>SRMD ncnn Vulkan</string>
                       </property>
                      </item>
                      <item>
                       <property name="text">
-                       <string>RealSR NCNN Vulkan</string>
+                       <string>RealSR ncnn Vulkan</string>
                       </property>
                      </item>
                      <item>
                       <property name="text">
                        <string>Anime4KCPP</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>DAIN ncnn Vulkan</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>CAIN ncnn Vulkan</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>RIFE ncnn Vulkan</string>
                       </property>
                      </item>
                     </widget>

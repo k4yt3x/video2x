@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Name: SRMD NCNN Vulkan Driver
+Name: SRMD ncnn Vulkan Driver
 Creator: K4YT3X
 Date Created: April 26, 2020
 Last Modified: September 21, 2020
@@ -24,7 +24,7 @@ from avalon_framework import Avalon
 
 
 class WrapperMain:
-    """This class communicates with SRMD NCNN Vulkan engine
+    """This class communicates with SRMD ncnn Vulkan engine
 
     An object will be created for this class, containing information
     about the binary address and the processing method. When being called

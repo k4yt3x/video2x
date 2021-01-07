@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Name: Waifu2x NCNN Vulkan Driver
+Name: Waifu2x ncnn Vulkan Driver
 Creator: SAT3LL
 Date Created: June 26, 2019
 Last Modified: May 11, 2020

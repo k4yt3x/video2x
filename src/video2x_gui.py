@@ -45,10 +45,12 @@ Contact: [k4yt3x@k4yt3x.com](mailto:k4yt3x@k4yt3x.com)"""
 AVAILABLE_DRIVERS = {
     "Waifu2X Caffe": "waifu2x_caffe",
     "Waifu2X Converter CPP": "waifu2x_converter_cpp",
-    "Waifu2X NCNN Vulkan": "waifu2x_ncnn_vulkan",
-    "SRMD NCNN Vulkan": "srmd_ncnn_vulkan",
-    "RealSR NCNN Vulkan": "realsr_ncnn_vulkan",
+    "Waifu2X ncnn Vulkan": "waifu2x_ncnn_vulkan",
+    "SRMD ncnn Vulkan": "srmd_ncnn_vulkan",
+    "RealSR ncnn Vulkan": "realsr_ncnn_vulkan",
     "Anime4KCPP": "anime4kcpp",
+    "DAIN ncnn Vulkan": "dain_ncnn_vulkan",
+    "RIFE ncnn Vulkan": "rife_ncnn_vulkan",
 }
 
 # get current working directory before it is changed by drivers
