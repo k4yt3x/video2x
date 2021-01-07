@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X Controller
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: September 13, 2020
+Last Modified: December 30, 2020
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -76,13 +76,15 @@ LOCALE_DIRECTORY = pathlib.Path(__file__).parent.absolute() / "locale"
 
 # getting default locale settings
 default_locale, encoding = locale.getdefaultlocale()
+if default_locale is None:
+    default_locale = "en_US"
 language = gettext.translation(
     DOMAIN, LOCALE_DIRECTORY, [default_locale], fallback=True
 )
 language.install()
 _ = language.gettext
 
-CLI_VERSION = "4.3.1"
+CLI_VERSION = "4.3.2"
 
 LEGAL_INFO = _(
     """Video2X CLI Version: {}
