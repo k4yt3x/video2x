@@ -239,7 +239,7 @@ https://www.gnu.org/licenses/gpl-3.0.txt
 
 ![GPLv3 Icon](https://www.gnu.org/graphics/gplv3-127x51.png)
 
-(C) 2018-2020 K4YT3X
+(C) 2018-2021 K4YT3X
 
 ## Credits
 
