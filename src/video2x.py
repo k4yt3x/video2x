@@ -84,7 +84,7 @@ language = gettext.translation(
 language.install()
 _ = language.gettext
 
-CLI_VERSION = "4.3.2"
+CLI_VERSION = "4.3.3"
 
 LEGAL_INFO = _(
     """Video2X CLI Version: {}
@@ -257,6 +257,12 @@ if video2x_args.ratio is not None and (
     video2x_args.width is not None or video2x_args.height is not None
 ):
     Avalon.error(_("Specify either scaling ratio or scaling resolution, not both"))
+    sys.exit(1)
+
+elif video2x_args.ratio is None and (
+    video2x_args.width is None or video2x_args.height is None
+):
+    Avalon.error(_("Either scaling ratio or scaling resolution needs to be specified"))
     sys.exit(1)
 
 # redirect output to both terminal and log file
