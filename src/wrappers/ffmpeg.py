@@ -113,6 +113,8 @@ class Ffmpeg:
             subprocess.run(execute, check=True, stdout=subprocess.PIPE)
             .stdout.decode()
             .strip()
+            .split("\n")[0]
+            .split("\r")[0]
         )
 
     def probe_file_info(self, input_video):
