@@ -4,7 +4,7 @@
 Name: Video2X Upscaler
 Author: K4YT3X
 Date Created: December 10, 2018
-Last Modified: December 30, 2020
+Last Modified: January 23, 2021
 
 Description: This file contains the Upscaler class. Each
 instance of the Upscaler class is an upscaler on an image or
@@ -716,7 +716,7 @@ class Upscaler:
                     # otherwise call FFprobe to count the total number of frames
                     else:
                         self.total_frames = self.ffmpeg_object.get_number_of_frames(
-                            self.current_input_file, video_stream_index
+                            self.current_input_file
                         )
 
                 # calculate scale width/height/ratio and scaling jobs if required

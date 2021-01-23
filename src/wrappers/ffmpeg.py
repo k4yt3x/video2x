@@ -4,7 +4,7 @@
 Name: Video2X FFmpeg Controller
 Author: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: September 13, 2020
+Last Modified: January 23, 2021
 
 Description: This class handles all FFmpeg related operations.
 """
@@ -80,7 +80,7 @@ class Ffmpeg:
 
         return pixel_formats
 
-    def get_number_of_frames(self, input_file: str, video_stream_index: int) -> int:
+    def get_number_of_frames(self, input_file: str) -> int:
         """Count the number of frames in a video
 
         Args:
@@ -97,7 +97,7 @@ class Ffmpeg:
             "quiet",
             "-count_frames",
             "-select_streams",
-            f"v:{video_stream_index}",
+            "v",
             "-show_entries",
             "stream=nb_read_frames",
             "-of",
