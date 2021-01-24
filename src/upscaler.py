@@ -20,6 +20,8 @@ from wrappers.gifski import Gifski
 
 # built-in imports
 from fractions import Fraction
+from multiprocessing import cpu_count
+from threading import Thread
 import contextlib
 import copy
 import gettext
@@ -109,6 +111,7 @@ class Upscaler:
         image_output_extension: str = ".png",
         video_output_extension: str = ".mp4",
         preserve_frames: bool = False,
+        downscaler_threads: int = 4
     ):
 
         # required parameters
@@ -130,6 +133,10 @@ class Upscaler:
         self.image_output_extension = image_output_extension
         self.video_output_extension = video_output_extension
         self.preserve_frames = preserve_frames
+        if int(downscaler_threads) == 0:
+            self.downscaler_threads = cpu_count()
+        else:
+            self.downscaler_threads = int(downscaler_threads)
 
         # other internal members and signals
         self.running = False
@@ -489,6 +496,23 @@ class Upscaler:
             Avalon.error(_("Subprocess execution ran into an error"))
             self._terminate_subprocesses()
             raise e
+
+    def _downscaler_thread(self, output_width, output_height, frame_list):
+        """function used in threads during the downscaling process
+        """
+        for image in frame_list:
+            image_object = Image.open(image)
+            # if the image dimensions are not equal to the output size
+            # resize the image using Lanczos
+            if (image_object.width, image_object.height) != (output_width, output_height):
+                image_object.resize((output_width, output_height), Image.LANCZOS).save(self.upscaled_frames / image.name)
+                image_object.close()
+
+            # if the image's dimensions are already equal to the output size
+            # move image to the finished directory
+            else:
+                image_object.close()
+                shutil.move(image, self.upscaled_frames / image.name)
 
     def run(self):
         """Main controller for Video2X
@@ -870,33 +894,24 @@ class Upscaler:
                 shutil.move(self.upscaled_frames, self.extracted_frames)
                 self.upscaled_frames.mkdir(parents=True, exist_ok=True)
 
-                for image in tqdm(
-                    [
-                        i
-                        for i in self.extracted_frames.iterdir()
-                        if i.is_file() and i.name.endswith(self.extracted_frame_format)
-                    ],
-                    ascii=True,
-                    desc=_("Downscaling"),
-                ):
-                    image_object = Image.open(image)
+                frame_list = []
+                for frame in self.extracted_frames.iterdir():
+                    if frame.is_file() and frame.name.endswith(self.extracted_frame_format):
+                        frame_list.append(frame)
 
-                    # if the image dimensions are not equal to the output size
-                    # resize the image using Lanczos
-                    if (image_object.width, image_object.height) != (
-                        output_width,
-                        output_height,
-                    ):
-                        image_object.resize(
-                            (output_width, output_height), Image.LANCZOS
-                        ).save(self.upscaled_frames / image.name)
-                        image_object.close()
-
-                    # if the image's dimensions are already equal to the output size
-                    # move image to the finished directory
-                    else:
-                        image_object.close()
-                        shutil.move(image, self.upscaled_frames / image.name)
+                frames_per_thread = len(frame_list)/self.downscaler_threads
+                threads_list = []
+                for thread_counter in range(self.downscaler_threads):
+                    threads_list.append(Thread(
+                        target = self._downscaler_thread,
+                        args = (output_width, output_height, frame_list[int(frames_per_thread*thread_counter):int(frames_per_thread*(thread_counter+1))],))
+                        )
+                
+                for downscaler_thread in threads_list:
+                    downscaler_thread.start()
+                Avalon.info(_('Threads in use: {}').format(len(threads_list)))
+                for downscaler_thread in threads_list:
+                    downscaler_thread.join()
 
                 # start handling output
                 # output can be either GIF or video
