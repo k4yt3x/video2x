@@ -43,7 +43,7 @@ Video2X Docker images are available on Docker Hub for easy and rapid Video2X dep
 
 You can use Video2X on [Google Colab](https://colab.research.google.com/) for free. Colab allows you too use a GPU on Google's Servers (Tesla K80, T4, P4, P100). Please bare in mind that Colab can only be provided for free if all users know that they shouldn't abuse it. A single free-tier tier session can last up to 12 hours. Please do not abuse the platform by creating sessions back-to-back and running upscaling 24/7. This might result in you getting banned.
 
-Here is an exmaple Notebook written by [@Felixkruemel](https://github.com/Felixkruemel): [Video2X_on_Colab.ipynb](https://colab.research.google.com/drive/1xqeZvoJXaBBPP6UyVwErnhwrnth0br0u). This file can be used in combination of the following modified configuration file: [@Felixkruemel's Video2X configuration for Google Colab](https://gist.githubusercontent.com/Felixkruemel/71e62de4bb38965ead2e0f4bae7ef4ee/raw/video2x.yaml).
+Here is an example Notebook written by [@Felixkruemel](https://github.com/Felixkruemel): [Video2X_on_Colab.ipynb](https://colab.research.google.com/drive/1xqeZvoJXaBBPP6UyVwErnhwrnth0br0u). This file can be used in combination of the following modified configuration file: [@Felixkruemel's Video2X configuration for Google Colab](https://gist.githubusercontent.com/Felixkruemel/71e62de4bb38965ead2e0f4bae7ef4ee/raw/video2x.yaml).
 
 ## Introduction
 
