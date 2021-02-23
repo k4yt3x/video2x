@@ -18,6 +18,9 @@ LABEL maintainer="Danielle Douglas <ddouglas87@gmail.com>"
 LABEL maintainer="Lhanjian <lhjay1@foxmail.com>"
 LABEL maintainer="K4YT3X <k4yt3x@k4yt3x.com>"
 
+RUN sed -i 's/archive.ubuntu.com/old-releases.ubuntu.com/g' sources.list
+RUN sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/g' sources.list
+
 # run installation
 RUN apt-get update \
     && apt-get install -y git-core \
