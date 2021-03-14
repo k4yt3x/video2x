@@ -92,8 +92,8 @@ Below is a list of all the demo videos available.
 The list is sorted from new to old.
 
 - **Bad Apple!!**
-  - YouTube: https://youtu.be/xi70vDwUsu8
-  - Bilibili: https://www.bilibili.com/video/BV1s5411s7xV/
+  - YouTube: https://youtu.be/A81rW_FI3cw
+  - Bilibili: https://www.bilibili.com/video/BV16K411K7ue
 - **The Pet Girl of Sakurasou 240P to 1080P 60FPS**
   - Original name: さくら荘のペットな彼女
   - YouTube: https://youtu.be/M0vDI1HH2_Y
