@@ -74,7 +74,7 @@ class Upscaler(multiprocessing.Process):
                     time.sleep(0.1)
                     continue
 
-                difference_ratio = -1
+                difference_ratio = 0
                 if image0 is not None:
                     difference = ImageChops.difference(image0, image1)
                     difference_stat = ImageStat.Stat(difference)
@@ -85,9 +85,22 @@ class Upscaler(multiprocessing.Process):
                     )
 
                 # if the difference is lower than threshold
-                # process the interpolation
+                # skip this frame
                 if difference_ratio < difference_threshold:
 
+                    # make sure the previous frame has been processed
+                    if frame_index > 0:
+                        while self.processed_frames[frame_index - 1] is None:
+                            time.sleep(0.1)
+
+                    # make the current image the same as the previous result
+                    self.processed_frames[frame_index] = self.processed_frames[
+                        frame_index - 1
+                    ]
+
+                # if the difference is greater than threshold
+                # process this frame
+                else:
                     width, height = image1.size
 
                     # calculate required minimum scale ratio
@@ -148,20 +161,6 @@ class Upscaler(multiprocessing.Process):
                     # downscale the image to the desired output size and save the image to disk
                     image1 = image1.resize((output_width, output_height), Image.LANCZOS)
                     self.processed_frames[frame_index] = image1
-
-                # if the difference is greater than threshold
-                # there's a change in camera angle, ignore
-                else:
-
-                    # make sure the previous frame has been processed
-                    if frame_index > 0:
-                        while self.processed_frames[frame_index - 1] is None:
-                            time.sleep(0.1)
-
-                    # make the current image the same as the previous result
-                    self.processed_frames[frame_index] = self.processed_frames[
-                        frame_index - 1
-                    ]
 
             # send exceptions into the client connection pipe
             except (SystemExit, KeyboardInterrupt):
