@@ -56,6 +56,11 @@ class Interpolator(multiprocessing.Process):
                     time.sleep(0.1)
                     continue
 
+                # if image0 is None, image1 is the first frame
+                # skip this round
+                if image0 is None:
+                    continue
+
                 difference = ImageChops.difference(image0, image1)
                 difference_stat = ImageStat.Stat(difference)
                 difference_ratio = (

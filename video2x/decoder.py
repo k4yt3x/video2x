@@ -104,16 +104,13 @@ class VideoDecoder(threading.Thread):
                     "RGB", (self.input_width, self.input_height), buffer
                 )
 
-                # if this is the first frame
-                # there wouldn't be a "previous image"
-                if previous_image is not None:
-                    self.processing_queue.put(
-                        (
-                            frame_index,
-                            (previous_image, image),
-                            self.processing_settings,
-                        )
+                self.processing_queue.put(
+                    (
+                        frame_index,
+                        (previous_image, image),
+                        self.processing_settings,
                     )
+                )
                 previous_image = image
 
                 frame_index += 1

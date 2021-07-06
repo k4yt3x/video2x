@@ -378,8 +378,8 @@ def parse_arguments() -> argparse.Namespace:
         "-t",
         "--threshold",
         type=float,
-        help="if the % difference between two adjacent frames exceeds this value, two images are deemed the same",
-        default=0.1,
+        help="if the % difference between two adjacent frames exceeds this value, two images are deemed the same; 0 is off",
+        default=0,
     )
 
     # interpolator arguments
@@ -400,7 +400,7 @@ def parse_arguments() -> argparse.Namespace:
         "-t",
         "--threshold",
         type=float,
-        help="if the % difference between two adjacent frames exceeds this value, no interpolation will be performed",
+        help="if the % difference between two adjacent frames exceeds this value, no interpolation will be performed; 0 is off",
         default=10,
     )
 

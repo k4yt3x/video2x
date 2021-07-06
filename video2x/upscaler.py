@@ -74,11 +74,15 @@ class Upscaler(multiprocessing.Process):
                     time.sleep(0.1)
                     continue
 
-                difference = ImageChops.difference(image0, image1)
-                difference_stat = ImageStat.Stat(difference)
-                difference_ratio = (
-                    sum(difference_stat.mean) / (len(difference_stat.mean) * 255) * 100
-                )
+                difference_ratio = -1
+                if image0 is not None:
+                    difference = ImageChops.difference(image0, image1)
+                    difference_stat = ImageStat.Stat(difference)
+                    difference_ratio = (
+                        sum(difference_stat.mean)
+                        / (len(difference_stat.mean) * 255)
+                        * 100
+                    )
 
                 # if the difference is lower than threshold
                 # process the interpolation
@@ -150,8 +154,9 @@ class Upscaler(multiprocessing.Process):
                 else:
 
                     # make sure the previous frame has been processed
-                    while self.processed_frames[frame_index - 1] is None:
-                        time.sleep(0.1)
+                    if frame_index > 0:
+                        while self.processed_frames[frame_index - 1] is None:
+                            time.sleep(0.1)
 
                     # make the current image the same as the previous result
                     self.processed_frames[frame_index] = self.processed_frames[
