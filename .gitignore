@@ -1,3 +1,12 @@
+# compiled wrappers for testing purposes
+video2x/wrappers
+
+# test videos
+*.mp4
+
+# vim
+Session.vim
+
 # QtCreator
 video2x_gui.pyproject.user
 

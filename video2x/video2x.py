@@ -10,10 +10,10 @@ __      __  _       _                  ___   __   __
     \/     |_|  \__,_|  \___|  \___/  |____| /_/ \_\
 
 
-Name: Video2X Controller
+Name: Video2X
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: January 23, 2021
+Last Modified: July 3, 2021
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -49,332 +49,412 @@ smooth and edges sharp.
 """
 
 # local imports
-from bilogger import BiLogger
-from upscaler import AVAILABLE_DRIVERS
-from upscaler import UPSCALER_VERSION
-from upscaler import Upscaler
+from .decoder import VideoDecoder
+from .encoder import VideoEncoder
+from .interpolator import Interpolator
+from .upscaler import Upscaler
 
 # built-in imports
 import argparse
-import gettext
-import importlib
-import locale
+import math
+import multiprocessing
 import os
 import pathlib
 import sys
-import tempfile
 import time
-import traceback
-import yaml
 
 # third-party imports
-from avalon_framework import Avalon
+from loguru import logger
+from rich import print
+from tqdm import tqdm
+import cv2
+import ffmpeg
+import numpy as np
 
-# internationalization constants
-DOMAIN = "video2x"
-LOCALE_DIRECTORY = pathlib.Path(__file__).parent.absolute() / "locale"
 
-# getting default locale settings
-default_locale, encoding = locale.getdefaultlocale()
-if default_locale is None:
-    default_locale = "en_US"
-language = gettext.translation(
-    DOMAIN, LOCALE_DIRECTORY, [default_locale], fallback=True
-)
-language.install()
-_ = language.gettext
+VERSION = "5.0.0"
 
-CLI_VERSION = "4.3.3"
-
-LEGAL_INFO = _(
-    """Video2X CLI Version: {}
-Upscaler Version: {}
+LEGAL_INFO = """Video2X {}
 Author: K4YT3X
 License: GNU GPL v3
 Github Page: https://github.com/k4yt3x/video2x
-Contact: k4yt3x@k4yt3x.com"""
-).format(CLI_VERSION, UPSCALER_VERSION)
+Contact: k4yt3x@k4yt3x.com""".format(
+    VERSION
+)
 
-LOGO = r"""
-    __      __  _       _                  ___   __   __
-    \ \    / / (_)     | |                |__ \  \ \ / /
-     \ \  / /   _    __| |   ___    ___      ) |  \ V /
-      \ \/ /   | |  / _` |  / _ \  / _ \    / /    > <
-       \  /    | | | (_| | |  __/ | (_) |  / /_   / . \
-        \/     |_|  \__,_|  \___|  \___/  |____| /_/ \_\
-"""
+UPSCALING_DRIVERS = [
+    "waifu2x",
+    "srmd",
+    "realsr",
+]
+
+INTERPOLATION_DRIVERS = ["rife"]
+
+# fixed scaling ratios supported by the drivers
+# that only support certain fixed scale ratios
+DRIVER_FIXED_SCALING_RATIOS = {
+    "waifu2x": [1, 2],
+    "srmd": [2, 3, 4],
+    "realsr": [4],
+}
 
 
-def parse_arguments():
-    """parse CLI arguments"""
+class Video2X:
+    """
+    Video2X class
+
+    provides two vital functions:
+        - upscale: perform upscaling on a file
+        - interpolate: perform motion interpolation on a file
+    """
+
+    def __init__(self):
+        self.version = "5.0.0"
+
+    def _get_video_info(self, path: pathlib.Path):
+        """
+        get video file information with FFmpeg
+
+        :param path pathlib.Path: video file path
+        :raises RuntimeError: raised when video stream isn't found
+        """
+        # probe video file info
+        logger.info("Reading input video information")
+        for stream in ffmpeg.probe(path)["streams"]:
+            if stream["codec_type"] == "video":
+                video_info = stream
+                break
+        else:
+            raise RuntimeError("unable to find video stream")
+
+        # get total number of frames to be processed
+        total_frames = int(cv2.VideoCapture(str(path)).get(cv2.CAP_PROP_FRAME_COUNT))
+        frame_rate = cv2.VideoCapture(str(path)).get(cv2.CAP_PROP_FPS)
+
+        return video_info["width"], video_info["height"], total_frames, frame_rate
+
+    def _run(
+        self,
+        input_path: pathlib.Path,
+        width: int,
+        height: int,
+        total_frames: int,
+        frame_rate: float,
+        output_path: pathlib.Path,
+        output_width: int,
+        output_height: int,
+        Processor: object,
+        mode: str,
+        processes: int,
+        processing_settings: tuple,
+    ):
+        # initialize values
+        self.processor_processes = []
+        self.processing_queue = multiprocessing.Queue()
+        processed_frames = multiprocessing.Manager().list([None] * total_frames)
+        self.processed = multiprocessing.Value("I", 0)
+
+        # set up and start decoder thread
+        logger.info("Starting video decoder")
+        self.decoder = VideoDecoder(
+            input_path,
+            width,
+            height,
+            frame_rate,
+            self.processing_queue,
+            processing_settings,
+        )
+        self.decoder.start()
+
+        # in interpolate mode, the frame rate is doubled
+        if mode == "upscale":
+            progress = tqdm(total=total_frames, desc=f"UPSC {input_path.name}")
+        # elif mode == "interpolate":
+        else:
+            frame_rate *= 2
+            progress = tqdm(total=total_frames, desc=f"INTERP {input_path.name}")
+
+        # set up and start encoder thread
+        logger.info("Starting video encoder")
+        self.encoder = VideoEncoder(
+            input_path,
+            frame_rate,
+            output_path,
+            output_width,
+            output_height,
+            total_frames,
+            processed_frames,
+            self.processed,
+        )
+        self.encoder.start()
+
+        # create upscaler processes
+        for process_name in range(processes):
+            process = Processor(self.processing_queue, processed_frames)
+            process.name = str(process_name)
+            process.daemon = True
+            process.start()
+            self.processor_processes.append(process)
+
+        # create progress bar
+
+        try:
+            # wait for jobs in queue to deplete
+            while self.encoder.is_alive() is True:
+                for process in self.processor_processes:
+                    if not process.is_alive():
+                        raise Exception("process died unexpectedly")
+                progress.n = self.processed.value
+                progress.refresh()
+                time.sleep(0.1)
+
+            logger.info("Encoding has completed")
+            progress.n = self.processed.value
+            progress.refresh()
+
+        # if SIGTERM is received or ^C is pressed
+        # TODO: pause and continue here
+        except (SystemExit, KeyboardInterrupt):
+            logger.warning("Exit signal received, terminating")
+
+        finally:
+            # mark processing queue as closed
+            self.processing_queue.close()
+
+            # stop upscaler processes
+            logger.info("Stopping upscaler processes")
+            for process in self.processor_processes:
+                process.terminate()
+
+            # wait for processes to finish
+            for process in self.processor_processes:
+                process.join()
+
+            # ensure both the decoder and the encoder have exited
+            self.decoder.stop()
+            self.encoder.stop()
+            self.decoder.join()
+            self.encoder.join()
+
+    def upscale(
+        self,
+        input_path: pathlib.Path,
+        output_path: pathlib.Path,
+        output_width: int,
+        output_height: int,
+        noise: int,
+        processes: int,
+        threshold: float,
+        driver: str,
+    ) -> None:
+
+        # get basic video information
+        width, height, total_frames, frame_rate = self._get_video_info(input_path)
+
+        # automatically calculate output width and height if only one is given
+        if output_width == 0 or output_width is None:
+            output_width = output_height / height * width
+
+        elif output_height == 0 or output_height is None:
+            output_height = output_width / width * height
+
+        # sanitize output width and height to be divisible by 2
+        output_width = int(math.ceil(output_width / 2.0) * 2)
+        output_height = int(math.ceil(output_height / 2.0) * 2)
+
+        # start processing
+        self._run(
+            input_path,
+            width,
+            height,
+            total_frames,
+            frame_rate,
+            output_path,
+            output_width,
+            output_height,
+            Upscaler,
+            "upscale",
+            processes,
+            (
+                output_width,
+                output_height,
+                noise,
+                threshold,
+                driver,
+            ),
+        )
+
+    def interpolate(
+        self,
+        input_path: pathlib.Path,
+        output_path: pathlib.Path,
+        processes: int,
+        threshold: float,
+        driver: str,
+    ) -> None:
+
+        # get video basic information
+        width, height, original_frames, frame_rate = self._get_video_info(input_path)
+
+        # calculate the number of total output frames
+        total_frames = original_frames * 2 - 1
+
+        # start processing
+        self._run(
+            input_path,
+            width,
+            height,
+            total_frames,
+            frame_rate,
+            output_path,
+            width,
+            height,
+            Interpolator,
+            "interpolate",
+            processes,
+            (threshold, driver),
+        )
+
+
+def parse_arguments() -> argparse.Namespace:
+    """
+    parse command line arguments
+
+    :rtype argparse.Namespace: command parsing results
+    """
     parser = argparse.ArgumentParser(
         prog="video2x",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         add_help=False,
     )
-
-    # video options
-    video2x_options = parser.add_argument_group(_("Video2X Options"))
-
-    video2x_options.add_argument(
-        "--help", action="help", help=_("show this help message and exit")
+    parser.add_argument("--help", action="help", help="show this help message and exit")
+    parser.add_argument(
+        "-v", "--version", help="show version information and exit", action="store_true"
     )
-
-    # if help is in arguments list
-    # do not require input and output path to be specified
-    require_input_output = True
-    if "-h" in sys.argv or "--help" in sys.argv:
-        require_input_output = False
-
-    video2x_options.add_argument(
+    parser.add_argument(
         "-i",
         "--input",
         type=pathlib.Path,
-        help=_("source video file/directory"),
-        required=require_input_output,
+        help="input file/directory path",
+        required=True,
     )
-
-    video2x_options.add_argument(
+    parser.add_argument(
         "-o",
         "--output",
         type=pathlib.Path,
-        help=_("output video file/directory"),
-        required=require_input_output,
+        help="output file/directory path",
+        required=True,
+    )
+    parser.add_argument(
+        "-p", "--processes", type=int, help="number of processes to launch", default=1
+    )
+    parser.add_argument(
+        "-l",
+        "--loglevel",
+        choices=["trace", "debug", "info", "success", "warning", "error", "critical"],
+        default="info",
     )
 
-    video2x_options.add_argument(
-        "-c",
-        "--config",
-        type=pathlib.Path,
-        help=_("Video2X config file path"),
-        action="store",
-        default=pathlib.Path(__file__).parent.absolute() / "video2x.yaml",
+    # upscaler arguments
+    action = parser.add_subparsers(
+        help="action to perform", dest="action", required=True
     )
 
-    video2x_options.add_argument("--log", type=pathlib.Path, help=_("log file path"))
-
-    video2x_options.add_argument(
-        "-v",
-        "--version",
-        help=_("display version, lawful information and exit"),
-        action="store_true",
+    upscale = action.add_parser("upscale", help="upscale a file", add_help=False)
+    upscale.add_argument(
+        "--help", action="help", help="show this help message and exit"
     )
-
-    # scaling options
-    upscaling_options = parser.add_argument_group(_("Upscaling Options"))
-
-    upscaling_options.add_argument(
-        "-r", "--ratio", help=_("scaling ratio"), action="store", type=float
-    )
-
-    upscaling_options.add_argument(
-        "-w", "--width", help=_("output width"), action="store", type=float
-    )
-
-    upscaling_options.add_argument(
-        "-h", "--height", help=_("output height"), action="store", type=float
-    )
-
-    upscaling_options.add_argument(
+    upscale.add_argument("-w", "--width", type=int, help="output width")
+    upscale.add_argument("-h", "--height", type=int, help="output height")
+    upscale.add_argument("-n", "--noise", type=int, help="denoise level", default=3)
+    upscale.add_argument(
         "-d",
         "--driver",
-        help=_("upscaling driver"),
-        choices=AVAILABLE_DRIVERS,
-        default="waifu2x_ncnn_vulkan",
+        choices=UPSCALING_DRIVERS,
+        help="driver to use for upscaling",
+        default=UPSCALING_DRIVERS[0],
+    )
+    upscale.add_argument(
+        "-t",
+        "--threshold",
+        type=float,
+        help="if the % difference between two adjacent frames exceeds this value, two images are deemed the same",
+        default=0.1,
     )
 
-    upscaling_options.add_argument(
-        "-p",
-        "--processes",
-        help=_("number of processes to use for upscaling"),
-        action="store",
-        type=int,
-        default=1,
+    # interpolator arguments
+    interpolate = action.add_parser(
+        "interpolate", help="interpolate frames for file", add_help=False
+    )
+    interpolate.add_argument(
+        "--help", action="help", help="show this help message and exit"
+    )
+    interpolate.add_argument(
+        "-d",
+        "--driver",
+        choices=UPSCALING_DRIVERS,
+        help="driver to use for upscaling",
+        default=INTERPOLATION_DRIVERS[0],
+    )
+    interpolate.add_argument(
+        "-t",
+        "--threshold",
+        type=float,
+        help="if the % difference between two adjacent frames exceeds this value, no interpolation will be performed",
+        default=10,
     )
 
-    upscaling_options.add_argument(
-        "--preserve_frames",
-        help=_("preserve extracted and upscaled frames"),
-        action="store_true",
-    )
-
-    # if no driver arguments are specified
-    if "--" not in sys.argv:
-        video2x_args = parser.parse_args()
-        return video2x_args, None
-
-    # if driver arguments are specified
-    else:
-        video2x_args = parser.parse_args(sys.argv[1 : sys.argv.index("--")])
-        wrapper = getattr(
-            importlib.import_module(f"wrappers.{video2x_args.driver}"), "WrapperMain"
-        )
-        driver_args = wrapper.parse_arguments(sys.argv[sys.argv.index("--") + 1 :])
-        return video2x_args, driver_args
+    return parser.parse_args()
 
 
-def print_logo():
-    """print video2x logo"""
-    print(LOGO)
-    print(f'\n{"Video2X Video Enlarger".rjust(40, " ")}')
-    print(f'\n{Avalon.FM.BD}{f"Version {CLI_VERSION}".rjust(36, " ")}{Avalon.FM.RST}\n')
-
-
-def read_config(config_file: pathlib.Path) -> dict:
-    """read video2x configurations from config file
-
-    Arguments:
-        config_file {pathlib.Path} -- video2x configuration file pathlib.Path
-
-    Returns:
-        dict -- dictionary of video2x configuration
+def main():
+    """
+    command line direct invocation
+    program entry point
     """
 
-    with open(config_file, "r") as config:
-        return yaml.load(config, Loader=yaml.FullLoader)
+    try:
 
+        # parse command line arguments
+        args = parse_arguments()
 
-# /////////////////// Execution /////////////////// #
+        # set logger level
+        if os.environ.get("LOGURU_LEVEL") is None:
+            os.environ["LOGURU_LEVEL"] = args.loglevel.upper()
 
-# this is not a library
-if __name__ != "__main__":
-    Avalon.error(_("This file cannot be imported"))
-    raise ImportError(f"{__file__} cannot be imported")
+        # set logger format
+        if os.environ.get("LOGURU_FORMAT") is None:
+            os.environ[
+                "LOGURU_FORMAT"
+            ] = "<fg 240>{time:HH:mm:ss!UTC}</fg 240> | <level>{level: <8}</level> | <level>{message}</level>"
 
-# print video2x logo
-print_logo()
+        # display version and lawful informaition
+        if args.version:
+            print(LEGAL_INFO)
+            sys.exit(0)
 
-# parse command line arguments
-video2x_args, driver_args = parse_arguments()
+        # initialize upscaler object
+        video2x = Video2X()
 
-# display version and lawful informaition
-if video2x_args.version:
-    print(LEGAL_INFO)
-    sys.exit(0)
+        if args.action == "upscale":
+            video2x.upscale(
+                args.input,
+                args.output,
+                args.width,
+                args.height,
+                args.noise,
+                args.processes,
+                args.threshold,
+                args.driver,
+            )
 
-# additional checks on upscaling arguments
-if video2x_args.ratio is not None and (
-    video2x_args.width is not None or video2x_args.height is not None
-):
-    Avalon.error(_("Specify either scaling ratio or scaling resolution, not both"))
-    sys.exit(1)
-
-elif video2x_args.ratio is None and (
-    video2x_args.width is None or video2x_args.height is None
-):
-    Avalon.error(_("Either scaling ratio or scaling resolution needs to be specified"))
-    sys.exit(1)
-
-# redirect output to both terminal and log file
-if video2x_args.log is not None:
-    log_file = video2x_args.log.open(mode="a+", encoding="utf-8")
-else:
-    log_file = tempfile.TemporaryFile(
-        mode="a+", suffix=".log", prefix="video2x_", encoding="utf-8"
-    )
-
-original_stdout = sys.stdout
-original_stderr = sys.stderr
-sys.stdout = BiLogger(sys.stdout, log_file)
-sys.stderr = BiLogger(sys.stderr, log_file)
-
-# read configurations from configuration file
-config = read_config(video2x_args.config)
-
-# load waifu2x configuration
-driver_settings = config[video2x_args.driver]
-driver_settings["path"] = os.path.expandvars(driver_settings["path"])
-
-# read FFmpeg configuration
-ffmpeg_settings = config["ffmpeg"]
-ffmpeg_settings["ffmpeg_path"] = os.path.expandvars(ffmpeg_settings["ffmpeg_path"])
-
-# read Gifski configuration
-gifski_settings = config["gifski"]
-gifski_settings["gifski_path"] = os.path.expandvars(gifski_settings["gifski_path"])
-
-# load video2x settings
-extracted_frame_format = config["video2x"]["extracted_frame_format"].lower()
-output_file_name_format_string = config["video2x"]["output_file_name_format_string"]
-image_output_extension = config["video2x"]["image_output_extension"]
-video_output_extension = config["video2x"]["video_output_extension"]
-preserve_frames = config["video2x"]["preserve_frames"]
-
-# if preserve frames specified in command line
-# overwrite config file options
-if video2x_args.preserve_frames is True:
-    preserve_frames = True
-
-# if cache directory not specified
-# use default path: %TEMP%\video2x
-if config["video2x"]["video2x_cache_directory"] is None:
-    video2x_cache_directory = pathlib.Path(tempfile.gettempdir()) / "video2x"
-else:
-    video2x_cache_directory = pathlib.Path(config["video2x"]["video2x_cache_directory"])
-
-# overwrite driver_settings with driver_args
-if driver_args is not None:
-    driver_args_dict = vars(driver_args)
-    for key in driver_args_dict:
-        if driver_args_dict[key] is not None:
-            driver_settings[key] = driver_args_dict[key]
-
-# start execution
-try:
-    # start timer
-    begin_time = time.time()
-
-    # initialize upscaler object
-    upscaler = Upscaler(
-        # required parameters
-        input_path=video2x_args.input,
-        output_path=video2x_args.output,
-        driver_settings=driver_settings,
-        ffmpeg_settings=ffmpeg_settings,
-        gifski_settings=gifski_settings,
-        # optional parameters
-        driver=video2x_args.driver,
-        scale_ratio=video2x_args.ratio,
-        scale_width=video2x_args.width,
-        scale_height=video2x_args.height,
-        processes=video2x_args.processes,
-        video2x_cache_directory=video2x_cache_directory,
-        extracted_frame_format=extracted_frame_format,
-        output_file_name_format_string=output_file_name_format_string,
-        image_output_extension=image_output_extension,
-        video_output_extension=video_output_extension,
-        preserve_frames=preserve_frames,
-    )
-
-    # run upscaler
-    upscaler.run()
-
-    Avalon.info(
-        _("Program completed, taking {} seconds").format(
-            round((time.time() - begin_time), 5)
-        )
-    )
-
-except Exception:
-
-    Avalon.error(_("An exception has occurred"))
-    traceback.print_exc()
-
-    if video2x_args.log is not None:
-        log_file_path = video2x_args.log.absolute()
-
-    # if log file path is not specified, create temporary file as permanent log file
-    # tempfile.TempFile does not have a name attribute and is not guaranteed to have
-    # a visible name on the file system
-    else:
-        log_file_path = tempfile.mkstemp(suffix=".log", prefix="video2x_")[1]
-        with open(log_file_path, "w", encoding="utf-8") as permanent_log_file:
-            log_file.seek(0)
-            permanent_log_file.write(log_file.read())
-
-    Avalon.error(_("The error log file can be found at: {}").format(log_file_path))
-
-finally:
-    sys.stdout = original_stdout
-    sys.stderr = original_stderr
-    log_file.close()
+        elif args.action == "interpolate":
+            video2x.interpolate(
+                args.input,
+                args.output,
+                args.processes,
+                args.threshold,
+                args.driver,
+            )
+    except Exception as e:
+        logger.exception(e)

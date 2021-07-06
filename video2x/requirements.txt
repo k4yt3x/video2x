@@ -1,10 +1,6 @@
-avalon_framework
-colorama
-patool
+ffmpeg-python
+loguru
+opencv-python
 pillow
-pyqt5
-python-magic-bin; platform_system == "Windows"
-python-magic; platform_system != "Windows"
-pyyaml
-requests
+rich
 tqdm
