@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: July 3, 2021
+Last Modified: August 17, 2021
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -69,8 +69,6 @@ from rich import print
 from tqdm import tqdm
 import cv2
 import ffmpeg
-import numpy as np
-
 
 VERSION = "5.0.0"
 
@@ -325,9 +323,7 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="video2x",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=False,
     )
-    parser.add_argument("--help", action="help", help="show this help message and exit")
     parser.add_argument(
         "-v", "--version", help="show version information and exit", action="store_true"
     )
