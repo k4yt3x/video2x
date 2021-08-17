@@ -4,13 +4,13 @@
 Name: Upscaler
 Author: K4YT3X
 Date Created: May 27, 2021
-Last Modified: June 28, 2021
+Last Modified: August 17, 2021
 """
 
 # local imports
-from .wrappers.realsr_ncnn_vulkan_python.realsr_ncnn_vulkan import RealSR
-from .wrappers.srmd_ncnn_vulkan_python.srmd_ncnn_vulkan import SRMD
-from .wrappers.waifu2x_ncnn_vulkan_python.waifu2x_ncnn_vulkan import Waifu2x
+from realsr_ncnn_vulkan_python.realsr_ncnn_vulkan import Realsr
+from srmd_ncnn_vulkan_python.srmd_ncnn_vulkan import Srmd
+from waifu2x_ncnn_vulkan_python.waifu2x_ncnn_vulkan import Waifu2x
 
 # built-in imports
 import math
@@ -33,7 +33,7 @@ DRIVER_FIXED_SCALING_RATIOS = {
     "realsr": [4],
 }
 
-DRIVER_CLASSES = {"waifu2x": Waifu2x, "srmd": SRMD, "realsr": RealSR}
+DRIVER_CLASSES = {"waifu2x": Waifu2x, "srmd": Srmd, "realsr": Realsr}
 
 
 class Upscaler(multiprocessing.Process):
@@ -174,5 +174,5 @@ class Upscaler(multiprocessing.Process):
         self.running = False
         return super().run()
 
-    def _stop(self, signal_number, frame):
+    def _stop(self, _signal_number, _frame):
         self.running = False
