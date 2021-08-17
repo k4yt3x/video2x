@@ -4,11 +4,11 @@
 Name: Interpolator
 Author: K4YT3X
 Date Created: May 27, 2021
-Last Modified: July 3, 2021
+Last Modified: August 17, 2021
 """
 
 # local imports
-from .wrappers.rife_ncnn_vulkan_python.rife_ncnn_vulkan import RIFE
+from .wrappers.rife_ncnn_vulkan_python.rife_ncnn_vulkan import Rife
 
 # built-in imports
 import multiprocessing
@@ -23,7 +23,7 @@ from PIL import ImageChops, ImageStat
 from loguru import logger
 
 
-DRIVER_CLASSES = {"rife": RIFE}
+DRIVER_CLASSES = {"rife": Rife}
 
 
 class Interpolator(multiprocessing.Process):
@@ -101,5 +101,5 @@ class Interpolator(multiprocessing.Process):
         self.running = False
         return super().run()
 
-    def _stop(self, signal_number, frame):
+    def _stop(self, _signal_number, _frame):
         self.running = False
