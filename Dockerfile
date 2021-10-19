@@ -25,7 +25,6 @@ RUN sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.li
 RUN apt-get update \
     && apt-get install -y git-core \
     && git clone --recurse-submodules --progress https://github.com/k4yt3x/video2x.git /tmp/video2x/video2x \
-    && cd /tmp/video2x/video2x && git checkout -b patch-191021 origin/patch-191021 \
     && bash -e /tmp/video2x/video2x/src/video2x_setup_ubuntu.sh /
 
 # https://forums.developer.nvidia.com/t/issues-running-deepstream-on-wsl2-docker-container-usr-lib-x86-64-linux-gnu-libcuda-so-1-file-exists-n-unknown/139700/4
