@@ -173,7 +173,7 @@ done
 
 # check if download_link variable is set
 if [ -z "$download_link" ]; then
-    echo "$realsr_ncnn_vulkan_latest_release"
+    echo "$assets"
     echo "Error: unable to find realsr-ncnn-vulkan download link or GitHub API rate limit exceeded"
     exit 1
 fi
