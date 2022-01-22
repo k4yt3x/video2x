@@ -214,7 +214,7 @@ class Video2xSetup:
 
         for a in latest_release["assets"]:
             if re.search(
-                r"waifu2x-DeadSix27-win64_v[0-9]*\.zip", a["browser_download_url"]
+                r"waifu2x-converter-cpp-win64_v[0-9]*\.zip", a["browser_download_url"]
             ):
                 waifu2x_converter_cpp_zip = download(
                     a["browser_download_url"], tempfile.gettempdir()
