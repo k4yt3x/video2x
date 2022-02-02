@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: August 17, 2021
+Last Modified: February 2, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -126,8 +126,14 @@ class Video2X:
             raise RuntimeError("unable to find video stream")
 
         # get total number of frames to be processed
-        total_frames = int(cv2.VideoCapture(str(path)).get(cv2.CAP_PROP_FRAME_COUNT))
-        frame_rate = cv2.VideoCapture(str(path)).get(cv2.CAP_PROP_FPS)
+        capture = cv2.VideoCapture(str(path))
+
+        # check if file is opened successfully
+        if not capture.isOpened():
+            raise RuntimeError("OpenCV has failed to open the input file")
+
+        total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        frame_rate = capture.get(cv2.CAP_PROP_FPS)
 
         return video_info["width"], video_info["height"], total_frames, frame_rate
 
@@ -195,7 +201,6 @@ class Video2X:
             self.processor_processes.append(process)
 
         # create progress bar
-
         try:
             # wait for jobs in queue to deplete
             while self.encoder.is_alive() is True:
