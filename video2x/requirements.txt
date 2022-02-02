@@ -1,8 +1,8 @@
 # *-ncnn-vulkan driver backends
-git+git://github.com/media2x/waifu2x-ncnn-vulkan-python@master
-git+git://github.com/media2x/realsr-ncnn-vulkan-python@master
-git+git://github.com/media2x/srmd-ncnn-vulkan-python@master
-git+git://github.com/media2x/rife-ncnn-vulkan-python@master
+realsr-ncnn-vulkan-python
+rife-ncnn-vulkan-python
+srmd-ncnn-vulkan-python
+waifu2x-ncnn-vulkan-python
 
 # regular Python packages from PyPI
 ffmpeg-python
