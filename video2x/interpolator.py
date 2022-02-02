@@ -4,11 +4,11 @@
 Name: Interpolator
 Author: K4YT3X
 Date Created: May 27, 2021
-Last Modified: August 17, 2021
+Last Modified: February 2, 2022
 """
 
 # local imports
-from .wrappers.rife_ncnn_vulkan_python.rife_ncnn_vulkan import Rife
+from rife_ncnn_vulkan_python.rife_ncnn_vulkan import Rife
 
 # built-in imports
 import multiprocessing
