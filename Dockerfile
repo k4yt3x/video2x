@@ -7,28 +7,36 @@
 # Last Modified: May 24, 2020
 
 # Editor: K4YT3X
-# Last Modified: June 13, 2020
+# Last Modified: February 1, 2022
 
-# using Ubuntu LTS 19.10
-# Ubuntu 20.x is incompatible with Nvidia libraries
-FROM ubuntu:19.10
+# stage: build python components into heels
+FROM python:3.10.2-alpine3.15 AS builder
+COPY . /video2x
+WORKDIR /video2x
+RUN apk add --no-cache \
+        cmake g++ gcc git ninja swig \
+        ffmpeg-dev glslang-dev jpeg-dev vulkan-loader-dev zlib-dev \
+        linux-headers \
+    && pip install -U pip \
+    && CMAKE_ARGS="-DWITH_FFMPEG=YES" pip wheel -w /wheels opencv-python \
+    && pip wheel -w /wheels wheel setuptools setuptools_scm \
+        rife-ncnn-vulkan-python@git+https://github.com/media2x/rife-ncnn-vulkan-python.git .
 
-# file mainainter labels
-LABEL maintainer="Danielle Douglas <ddouglas87@gmail.com>"
-LABEL maintainer="Lhanjian <lhjay1@foxmail.com>"
-LABEL maintainer="K4YT3X <k4yt3x@k4yt3x.com>"
+# stage 2: install wheels into final image
+FROM python:3.10.2-alpine3.15
+LABEL maintainer="Danielle Douglas <ddouglas87@gmail.com>" \
+      maintainer="Lhanjian <lhjay1@foxmail.com>" \
+      maintainer="K4YT3X <i@k4yt3x.com>"
 
-RUN sed -i 's/archive.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
-RUN sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
-
-# run installation
-RUN apt-get update \
-    && apt-get install -y git-core \
-    && git clone --recurse-submodules --progress https://github.com/k4yt3x/video2x.git /tmp/video2x/video2x \
-    && bash -e /tmp/video2x/video2x/src/video2x_setup_ubuntu.sh /
+COPY --from=builder /wheels /wheels
+COPY . /video2x
+WORKDIR /video2x
+RUN apk add --no-cache --virtual .run-deps \
+        ffmpeg libgomp libjpeg-turbo libstdc++ \
+        vulkan-loader mesa-vulkan-ati \
+    && pip install --no-cache-dir -U pip \
+    && pip install --no-cache-dir --no-index -f /wheels . \
+    && rm -rf /wheels /video2x
 
 WORKDIR /host
-ENTRYPOINT ["python3.8", "/video2x/src/video2x.py"]
-
-ENV NVIDIA_DRIVER_CAPABILITIES all
-ENV DEBIAN_FRONTEND teletype
+ENTRYPOINT ["/usr/local/bin/python", "-m", "video2x"]
