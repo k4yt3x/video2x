@@ -1,13 +1,7 @@
-# Name: Video2X Dockerfile
-# Creator: Danielle Douglas
-# Date Created: Unknown
-# Last Modified: January 14, 2020
-
-# Editor: Lhanjian
-# Last Modified: May 24, 2020
-
-# Editor: K4YT3X
-# Last Modified: February 1, 2022
+# Name: Video2X Dockerfile (Slim Alpine)
+# Creator: K4YT3X
+# Date Created: February 1, 2022
+# Last Modified: February 4, 2022
 
 # stage: build python components into heels
 FROM python:3.10.2-alpine3.15 AS builder
@@ -24,9 +18,9 @@ RUN apk add --no-cache \
 
 # stage 2: install wheels into final image
 FROM python:3.10.2-alpine3.15
-LABEL maintainer="Danielle Douglas <ddouglas87@gmail.com>" \
-      maintainer="Lhanjian <lhjay1@foxmail.com>" \
-      maintainer="K4YT3X <i@k4yt3x.com>"
+LABEL maintainer="K4YT3X <i@k4yt3x.com>"
+      org.opencontainers.image.source="https://github.com/k4yt3x/video2x" \
+      org.opencontainers.image.description="A lossless video/GIF/image upscaler"
 
 COPY --from=builder /wheels /wheels
 COPY . /video2x
