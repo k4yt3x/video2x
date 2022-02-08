@@ -3,7 +3,6 @@
    </br>
    <img src="https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square"/>
    <img src="https://img.shields.io/github/workflow/status/k4yt3x/video2x/CI?label=CI&style=flat-square"/>
-   <img src="https://img.shields.io/docker/cloud/build/k4yt3x/video2x?style=flat-square"/>
    <img src="https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square"/>
    <img src="https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square"/>
    <img src="https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square"/>
