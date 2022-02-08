@@ -13,7 +13,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 2, 2022
+Last Modified: February 8, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -24,10 +24,10 @@ Last Modified: June 25, 2019
 Editor: 28598519a
 Last Modified: March 23, 2020
 
-Licensed under the GNU General Public License Version 3 (GNU GPL v3),
-    available at: https://www.gnu.org/licenses/gpl-3.0.txt
+Licensed under the GNU Affero General Public License Version 3 (GNU GPL v3),
+    available at: https://www.gnu.org/licenses/agpl-3.0.txt
 
-(C) 2018-2021 K4YT3X
+Copyright (C) 2018-2022 K4YT3X and contributors.
 
 Video2X is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

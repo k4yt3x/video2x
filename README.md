@@ -1,18 +1,15 @@
 <p align="center">
    <img src="https://user-images.githubusercontent.com/21986859/102733190-872a7880-4334-11eb-8e9e-0ca747f130b1.png"/>
+   </br>
+   <img src="https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square"/>
+   <img src="https://img.shields.io/github/workflow/status/k4yt3x/video2x/CI?label=CI&style=flat-square"/>
+   <img src="https://img.shields.io/docker/cloud/build/k4yt3x/video2x?style=flat-square"/>
+   <img src="https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square"/>
+   <img src="https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square"/>
+   <img src="https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square"/>
 </p>
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/k4yt3x/video2x/Video2X%20Nightly%20Build?label=Nightly&style=flat-square)
-![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/k4yt3x/video2x?style=flat-square)
-![GitHub All Releases](https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square)
-![GitHub](https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square)
-![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux%20%7C%20macOS-blue?style=flat-square)
-![Become A Patron!](https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square)
-
-<!--# Video2X Lossless Video Enlarger-->
-
-### Official Discussion Group (Telegram): https://t.me/video2x
+### Official Telegram Discussion Group: https://t.me/video2x
 
 A [Discord server](https://discord.gg/Pwf6Ht) is also available. Please note that most developers are only on Telegram. If you join the Discord server, the developers might not be able to see your questions and help you. It is mostly for user-user interactions and those who do not want to use Telegram.
 
@@ -31,13 +28,13 @@ In case you're unable to download the releases directly from GitHub, you can try
 
 **You need to be logged into GitHub to be able to download GitHub Actions artifacts.**
 
-Nightly builds are built automatically every time a new commit is pushed to the master branch. The lates nightly build is always up-to-date with the latest version of the code, but is less stable and may contain bugs. Nightly builds are handled by GitHub's integrated CI/CD tool, GitHub Actions.
+Nightly builds are built automatically every time a new commit is pushed to the master branch. The latest nightly build is always up-to-date with the latest version of the code, but is less stable and may contain bugs. Nightly builds are handled by GitHub's integrated CI/CD tool, GitHub Actions.
 
-To download the latest nightly build, go to the [GitHub Actions](https://github.com/k4yt3x/video2x/actions) tab, enter the last run of workflow "Video2X Nightly Build, and download the artifacts generated from the run.
+To download the latest nightly build, go to the [GitHub Actions](https://github.com/k4yt3x/video2x/actions) tab, enter the last run of workflow "CI," and download the artifacts generated from the run.
 
-## [Docker Image](https://hub.docker.com/r/k4yt3x/video2x)
+## [Docker Image](https://github.com/k4yt3x/video2x/pkgs/container/video2x)
 
-Video2X Docker images are available on Docker Hub for easy and rapid Video2X deployment on Linux and macOS. If you already have Docker installed, then only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentations](https://github.com/K4YT3X/video2x/wiki/Docker).
+Video2X Docker images are available on Docker Hub for easy and rapid Video2X deployment on Linux and macOS. If you already have Docker installed, then only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentations (outdated)](https://github.com/K4YT3X/video2x/wiki/Docker).
 
 ## [Google Colab](https://colab.research.google.com/drive/1xqeZvoJXaBBPP6UyVwErnhwrnth0br0u)
 
@@ -61,7 +58,7 @@ Currently, Video2X supports the following drivers (implementations of algorithms
 ### Video Upscaling
 
 ![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)\
-*Upscale Comparison Demonstration*
+_Upscale Comparison Demonstration_
 
 **You can watch the whole demo video on YouTube: https://youtu.be/mGEfasQl2Zo**
 
@@ -72,17 +69,17 @@ Clip is from trailer of animated movie "千と千尋の神隠し". Copyright bel
 This original input GIF is 160x120 in size. This image is downsized and accelerated to 20 FPS from its [original image](https://gfycat.com/craftyeasygoingankole-capoo-bug-cat).
 
 ![catfru](https://user-images.githubusercontent.com/21986859/81631069-96d4fc80-93f6-11ea-92fb-33d6545055e7.gif)\
-*Catfru original 160x120 GIF image*
+_Catfru original 160x120 GIF image_
 
 Below is what it looks like after getting upscaled to 640x480 (4x) using Video2X.
 
 ![catfru4x](https://user-images.githubusercontent.com/21986859/81631070-976d9300-93f6-11ea-9137-072a3b386110.gif)\
-*Catfru 4x upscaled GIF*
+_Catfru 4x upscaled GIF_
 
 ### Image Upscaling
 
 ![jill_comparison](https://user-images.githubusercontent.com/21986859/81631903-79a12d80-93f8-11ea-9c3c-f340240cf08c.png)\
-*Image upscaling example*
+_Image upscaling example_
 
 [Original image](https://72915.tumblr.com/post/173793265673) from [nananicu@twitter](https://twitter.com/nananicu/status/994546266968281088), edited by K4YT3X.
 
@@ -110,12 +107,12 @@ The list is sorted from new to old.
 ### Video2X GUI
 
 ![GUI Preview](https://user-images.githubusercontent.com/21986859/82119295-bc526500-976c-11ea-9ea8-53264689023e.png)\
-*Video2X GUI Screenshot*
+_Video2X GUI Screenshot_
 
 ### Video2X CLI
 
 ![Video2X CLI Screenshot](https://user-images.githubusercontent.com/21986859/81662415-0c5bbf80-942d-11ea-8aa6-aacf813f9368.png)\
-*Video2X CLI Screenshot*
+_Video2X CLI Screenshot_
 
 ---
 
@@ -124,7 +121,7 @@ The list is sorted from new to old.
 If you can't find a video clip to begin with, or if you want to see a before-after comparison, we have prepared some sample clips for you. The quick start guide down below will also be based on the name of the sample clips.
 
 ![sample_video](https://user-images.githubusercontent.com/21986859/52905766-d5512b00-3236-11e9-9aea-077636539679.png)\
-*Sample Upscale Videos*
+_Sample Upscale Videos_
 
 - [Sample Video (240P) 4.54MB](https://files.k4yt3x.com/Resources/Videos/sample_input.mp4)
 - [Sample Video Upscaled (1080P) 4.54MB](https://files.k4yt3x.com/Resources/Videos/sample_output.mp4)
@@ -151,22 +148,22 @@ Before running Video2X, you'll need to ensure you have installed the drivers' ex
 The easiest way to run Video2X is to use the full build. Extract the full release zip file and you'll get these files.
 
 ![Video2X Release Files](https://user-images.githubusercontent.com/21986859/81489846-28633380-926a-11ea-9e81-fb92f492e14c.png)\
-*Video2X release files*
+_Video2X release files_
 
 Simply double click on video2x_gui.exe to launch the GUI.
 
 ![Video2X GUI Main Tab](https://user-images.githubusercontent.com/21986859/81489858-4c267980-926a-11ea-9ab2-38ec738f2fb6.png)\
-*Video2X GUI main tab*
+_Video2X GUI main tab_
 
 Then, drag the videos you wish to upscale into the window and select the appropriate output path.
 
 ![drag-drop](https://user-images.githubusercontent.com/21986859/81489880-7bd58180-926a-11ea-85ae-b72d2f4f5e72.png)\
-*Drag and drop file into Video2X GUI*
+_Drag and drop file into Video2X GUI_
 
 Tweak the settings if you want to, then hit the start button at the bottom and the upscale will start. Now you'll just have to wait for it to complete.
 
 ![upscale-started](https://user-images.githubusercontent.com/21986859/81489924-ce16a280-926a-11ea-831c-6c66b950f957.png)\
-*Video2X started processing input files*
+_Video2X started processing input files_
 
 ### Running Video2X (CLI)
 
@@ -196,10 +193,32 @@ python video2x.py -d waifu2x_caffe -- --help
 
 ### Running Video2X (Docker)
 
-Video2X can be deployed via Docker. The following command upscales the video `sample_input.mp4` two times with Waifu2X NCNN Vulkan and outputs the upscaled video to `sample_output.mp4`. For more details on Video2X Docker image usages, please refer to the [documentations](https://github.com/K4YT3X/video2x/wiki/Docker).
+Video2X can be deployed via Docker. The following command upscales the video `sample_input.mp4` with Waifu2X ncnn Vulkan and outputs the upscaled video to `output.mp4`. For more details on Video2X Docker image usages, please refer to the [documentations (outdated)](https://github.com/K4YT3X/video2x/wiki/Docker).
 
 ```shell
-docker run --rm -it --gpus all -v /dev/dri:/dev/dri -v $PWD:/host k4yt3x/video2x:4.6.0 -d waifu2x_ncnn_vulkan -r 2 -i sample_input.mp4 -o sample_output.mp4
+docker run -it --rm \                           # temporary container, delete after run
+    --gpus all -v /dev/dri:/dev/dri \           # mount GPUs
+    -v $PWD:/host \                             # bind mount the current directory as the container's /host
+    ghcr.io/k4yt3x/video2x:5.0.0-beta1-cuda \   # the URL of the docker image
+    -i sample_input.mp4 \                       # path of the input file
+    -o output.mp4 \                             # the path to write the output
+    -p5 \                                       # launch 5 processes
+    upscale \                                   # set action to upscale
+    -h 720 \                                    # set output hight to 720 pixels
+    -d waifu2x \                                # use driver waifu2x
+    -n3                                         # noise level 3
+```
+
+To interpolate a video, set the action to `interpolate`. Right now, only 2x framerate is supported.
+
+```shell
+docker run -it --rm \
+    --gpus all -v /dev/dri:/dev/dri \
+    -v $PWD:/host \
+    ghcr.io/k4yt3x/video2x:5.0.0-beta1-cuda \
+    -i sample_input.mp4 \
+    -o output.mp4 \
+    interpolate                                 # set action to interpolate
 ```
 
 ---
@@ -209,14 +228,6 @@ docker run --rm -it --gpus all -v /dev/dri:/dev/dri -v $PWD:/host k4yt3x/video2x
 ### [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki)
 
 You can find all detailed user-facing and developer-facing documentations in the [Video2X Wiki](https://github.com/k4yt3x/video2x/wiki). It covers everything from step-by-step instructions for beginners, to the code structure of this program for advanced users and developers. If this README page doesn't answer all your questions, the wiki page is where you should head to.
-
-### [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial)
-
-For those who want a detailed walk-through of how to use Video2X, you can head to the [Step-By-Step Tutorial](https://github.com/k4yt3x/video2x/wiki/Step-By-Step-Tutorial) wiki page. It includes almost every step you need to perform in order to enlarge your first video.
-
-### [Run From Source Code](https://github.com/k4yt3x/video2x/wiki/Run-From-Source-Code)
-
-This wiki page contains all instructions for how you can run Video2X directly from Python source code.
 
 ### [Drivers](https://github.com/k4yt3x/video2x/wiki/Drivers)
 
@@ -234,37 +245,50 @@ Are you interested in how the idea of Video2X was born? Do you want to know the 
 
 ## License
 
-Licensed under the GNU General Public License Version 3 (GNU GPL v3)
-https://www.gnu.org/licenses/gpl-3.0.txt
+This project is licensed under the [GNU Affero General Public License Version 3 (GNU AGPL v3)](https://www.gnu.org/licenses/agpl-3.0.txt)\
+Copyright (c) 2018-2022 K4YT3X and contributors.
 
-![GPLv3 Icon](https://www.gnu.org/graphics/gplv3-127x51.png)
+![AGPLv3](https://www.gnu.org/graphics/agplv3-155x51.png)
 
-(C) 2018-2021 K4YT3X
+This project includes or depends on these following projects:
 
-## Credits
+| Project                                                             | License              |
+| ------------------------------------------------------------------- | -------------------- |
+| [FFmpeg](https://www.ffmpeg.org/)                                   | LGPLv2.1, GPLv2      |
+| [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan) | MIT License          |
+| [srmd-ncnn-vulkan](https://github.com/nihui/srmd-ncnn-vulkan)       | MIT License          |
+| [realsr-ncnn-vulkan](https://github.com/nihui/realsr-ncnn-vulkan)   | MIT License          |
+| [rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)       | MIT License          |
+| [ffmpeg-python](https://github.com/kkroening/ffmpeg-python)         | Apache-2.0           |
+| [Loguru](https://github.com/Delgan/loguru)                          | MIT License          |
+| [opencv-python](https://github.com/opencv/opencv-python)            | MIT License          |
+| [Pillow](https://github.com/python-pillow/Pillow)                   | HPND License         |
+| [Rich](https://github.com/Textualize/rich)                          | MIT License          |
+| [tqdm](https://github.com/tqdm/tqdm)                                | MPLv2.0, MIT License |
 
-This project relies on the following software and projects.
+Legacy versions of this project includes or depends on these following projects:
 
-- [FFmpeg](https://www.ffmpeg.org/)
-- [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)
-- [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp)
-- [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)
-- [srmd-ncnn-vulkan](https://github.com/nihui/srmd-ncnn-vulkan)
-- [realsr-ncnn-vulkan](https://github.com/nihui/realsr-ncnn-vulkan)
-- [Anime4K](https://github.com/bloc97/Anime4K)
-- [Anime4KCPP](https://github.com/TianZerL/Anime4KCPP)
-- [Gifski](https://github.com/ImageOptim/gifski)
+| Project                                                                     | License     |
+| --------------------------------------------------------------------------- | ----------- |
+| [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)                  | MIT License |
+| [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp) | MIT License |
+| [Anime4K](https://github.com/bloc97/Anime4K)                                | MIT License |
+| [Anime4KCPP](https://github.com/TianZerL/Anime4KCPP)                        | MIT License |
+| [Gifski](https://github.com/ImageOptim/gifski)                              | AGPLv3      |
+
+More licensing information can be found in the [NOTICES](NOTICES) file.
 
 ## Special Thanks
 
-Appreciations given to the following personnel who have contributed significantly to the project (specifically the technical perspective).
+Appreciations given to the following personnel who have contributed significantly to the project.
 
 - [@BrianPetkovsek](https://github.com/BrianPetkovsek)
 - [@sat3ll](https://github.com/sat3ll)
 - [@ddouglas87](https://github.com/ddouglas87)
 - [@lhanjian](https://github.com/lhanjian)
+- [@ArchieMeng](https://github.com/archiemeng)
 
-## Related Projects
+## Similar Projects
 
 - [Dandere2x](https://github.com/CardinalPanda/dandere2x): A lossy video upscaler also built around `waifu2x`, but with video compression techniques to shorten the time needed to process a video.
 - [Waifu2x-Extension-GUI](https://github.com/AaronFeng753/Waifu2x-Extension-GUI): A similar project that focuses more and only on building a better graphical user interface. It is built using C++ and Qt5, and currently only supports the Windows platform.
