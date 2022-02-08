@@ -27,13 +27,15 @@ jobs:
             python3-opencv python3-pil python3-tqdm python3-dev \
             libvulkan-dev glslang-dev glslang-tools swig
           pip install wheel
-          pip wheel -w /wheels \
+      - name: Build wheels
+        run: |
+          pip wheel -w /tmp/wheels \
             rife-ncnn-vulkan-python@git+https://github.com/media2x/rife-ncnn-vulkan-python.git .
       - name: Package artifacts
         run: |
-          tar cJvf /video2x-nightly-wheels.txz /wheels/*
+          tar cJvf /tmp/video2x-nightly-wheels.txz /tmp/wheels/*
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: video2x-nightly-wheels
-          path: /video2x-nightly-wheels.txz
+          path: /tmp/video2x-nightly-wheels.txz
