@@ -4,7 +4,7 @@
 # Last Modified: February 4, 2022
 
 # stage 1: build the python components into wheels
-FROM nvidia/cuda:11.6.0-runtime-ubuntu20.04 AS builder
+FROM docker.io/nvidia/cuda:11.6.0-runtime-ubuntu20.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 
 COPY . /video2x
@@ -21,7 +21,7 @@ RUN apt-get update \
         rife-ncnn-vulkan-python@git+https://github.com/media2x/rife-ncnn-vulkan-python.git .
 
 # stage 2: install wheels into the final image
-FROM nvidia/cuda:11.6.0-runtime-ubuntu20.04
+FROM docker.io/nvidia/cuda:11.6.0-runtime-ubuntu20.04
 LABEL maintainer="K4YT3X <i@k4yt3x.com>" \
       org.opencontainers.image.source="https://github.com/k4yt3x/video2x" \
       org.opencontainers.image.description="A lossless video/GIF/image upscaler"
