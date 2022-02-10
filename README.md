@@ -10,7 +10,7 @@
 
 ### Official [Telegram Discussion Group](https://t.me/video2x)
 
-Join the Telegram discussion group to
+Join our Telegram discussion group to ask any questions you have about Video2X, chat directly with the developers, or discuss about upscaling technologies and the future of Video2X in general.
 
 ## [Download Windows Releases](https://github.com/k4yt3x/video2x/releases/tag/4.8.1)
 
