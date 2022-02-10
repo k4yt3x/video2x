@@ -8,38 +8,25 @@
    <img src="https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square"/>
 </p>
 
-### Official Telegram Discussion Group: https://t.me/video2x
+### Official [Telegram Discussion Group](https://t.me/video2x)
 
-A [Discord server](https://discord.gg/Pwf6Ht) is also available. Please note that most developers are only on Telegram. If you join the Discord server, the developers might not be able to see your questions and help you. It is mostly for user-user interactions and those who do not want to use Telegram.
+Join the Telegram discussion group to
 
-## [Download Stable/Beta Builds](https://github.com/k4yt3x/video2x/releases/latest) (Windows)
+## [Download Windows Releases](https://github.com/k4yt3x/video2x/releases/tag/4.8.1)
 
-- **`Full`**: full package comes pre-configured with **all** dependencies like `FFmpeg` and `waifu2x-caffe`.
-- **`Light`**: ligt package comes with only Video2X binaries and a template configuration file. The user will either have to run the setup script or install and configure dependencies themselves.
+The latest Windows update is built based on version 4.8.1. GUI is not available for 5.0.0 yet, but is already under development. Go to the **[Quick Start](#quick-start)** section for usages. Try the [mirror](https://files.k4yt3x.com/Projects/Video2X/lates) if you can't download releases directly from GitHub.
 
-Go to the **[Quick Start](#quick-start)** section for usages.
+## [Google Colab](https://colab.research.google.com/drive/1gWEwcA9y57EsxwOjmLNmNMXPsafw0kGo)
 
-### [Download From Mirror](https://files.k4yt3x.com/Projects/Video2X/latest)
+You can use Video2X on [Google Colab](https://colab.research.google.com/) **for free** if you don't have a powerful GPU of your own. You can borrow a powerful GPU (Tesla K80, T4, P4, or P100) on Google's server for free for a maximum of 12 hours per session. **Please use the free resource fairly** and do not create sessions back-to-back and run upscaling 24/7. This might result in you getting banned. You can get [Colab Pro/Pro+](https://colab.research.google.com/signup/pricing) if you'd like to use better GPUs and get longer runtimes. Usage instructions are embedded in the [Colab Notebook](https://github.com/k4yt3x/video2x/actions/workflows/ci.yml).
 
-In case you're unable to download the releases directly from GitHub, you can try downloading from the mirror site hosted by the author. Only releases will be updated in this directory, not nightly builds.
+## [Download Nightly Releases](https://github.com/k4yt3x/video2x/actions/workflows/ci.yml)
 
-## [Download Nightly Builds](https://github.com/k4yt3x/video2x/actions) (Windows)
+Nightly releases are automatically created by the GitHub Actions CI/CD pipelines. They usually contain more experimental features and bug fixes. However, they are much less stable to the stable releases. **You must log in to GitHub to download CI build artifacts.**
 
-**You need to be logged into GitHub to be able to download GitHub Actions artifacts.**
+## [Container Image](https://github.com/k4yt3x/video2x/pkgs/container/video2x)
 
-Nightly builds are built automatically every time a new commit is pushed to the master branch. The latest nightly build is always up-to-date with the latest version of the code, but is less stable and may contain bugs. Nightly builds are handled by GitHub's integrated CI/CD tool, GitHub Actions.
-
-To download the latest nightly build, go to the [GitHub Actions](https://github.com/k4yt3x/video2x/actions) tab, enter the last run of workflow "CI," and download the artifacts generated from the run.
-
-## [Docker Image](https://github.com/k4yt3x/video2x/pkgs/container/video2x)
-
-Video2X Docker images are available on Docker Hub for easy and rapid Video2X deployment on Linux and macOS. If you already have Docker installed, then only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentations (outdated)](https://github.com/K4YT3X/video2x/wiki/Docker).
-
-## [Google Colab](https://colab.research.google.com/drive/1xqeZvoJXaBBPP6UyVwErnhwrnth0br0u)
-
-You can use Video2X on [Google Colab](https://colab.research.google.com/) for free. Colab allows you too use a GPU on Google's Servers (Tesla K80, T4, P4, P100). Please bare in mind that Colab can only be provided for free if all users know that they shouldn't abuse it. A single free-tier tier session can last up to 12 hours. Please do not abuse the platform by creating sessions back-to-back and running upscaling 24/7. This might result in you getting banned.
-
-Here is an example Notebook written by [@Felixkruemel](https://github.com/Felixkruemel): [Video2X_on_Colab.ipynb](https://colab.research.google.com/drive/1xqeZvoJXaBBPP6UyVwErnhwrnth0br0u). This file can be used in combination of the following modified configuration file: [@Felixkruemel's Video2X configuration for Google Colab](https://gist.githubusercontent.com/Felixkruemel/71e62de4bb38965ead2e0f4bae7ef4ee/raw/video2x.yaml).
+Video2X container images are available on the GitHub Container Registry for easy deployment on Linux and macOS. If you already have Docker/Podman installed, only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentations (outdated)](https://github.com/K4YT3X/video2x/wiki/Docker).
 
 ## Introduction
 
