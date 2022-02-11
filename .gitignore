@@ -1,17 +1,13 @@
-# compiled wrappers for testing purposes
-video2x/wrappers
-
 # test videos
 *.mp4
+*.mkv
+*.mov
+*.avi
+*.flv
+*.webm
 
-# vim
+# vim session file
 Session.vim
-
-# QtCreator
-video2x_gui.pyproject.user
-
-# PyCharm
-.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
