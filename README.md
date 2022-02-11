@@ -14,7 +14,7 @@ Join our Telegram discussion group to ask any questions you have about Video2X, 
 
 ## [🪟 Download Windows Releases](https://github.com/k4yt3x/video2x/releases/tag/4.8.1)
 
-The latest Windows update is built based on version 4.8.1. GUI is not available for 5.0.0 yet, but is already under development. Go to the [GUI](https://github.com/k4yt3x/video2x/wiki/GUI) page to see the basic usages of the GUI. Try the [mirror](https://files.k4yt3x.com/Projects/Video2X/lates) if you can't download releases directly from GitHub.
+The latest Windows update is built based on version 4.8.1. GUI is not available for 5.0.0 yet, but is already under development. Go to the [GUI](https://github.com/k4yt3x/video2x/wiki/GUI) page to see the basic usages of the GUI. Try the [mirror](https://files.k4yt3x.com/Projects/Video2X/latest) if you can't download releases directly from GitHub.
 
 ## [📔 Google Colab](https://colab.research.google.com/drive/1gWEwcA9y57EsxwOjmLNmNMXPsafw0kGo)
 
