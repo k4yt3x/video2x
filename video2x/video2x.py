@@ -1,6 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 r"""
+Copyright (C) 2018-2022 K4YT3X and contributors.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 __      __  _       _                  ___   __   __
 \ \    / / (_)     | |                |__ \  \ \ / /
@@ -23,29 +37,6 @@ Last Modified: June 25, 2019
 
 Editor: 28598519a
 Last Modified: March 23, 2020
-
-Licensed under the GNU Affero General Public License Version 3 (GNU GPL v3),
-    available at: https://www.gnu.org/licenses/agpl-3.0.txt
-
-Copyright (C) 2018-2022 K4YT3X and contributors.
-
-Video2X is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Video2X is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-Description: Video2X is an automation software based on waifu2x image
-enlarging engine. It extracts frames from a video, enlarge it by a
-number of times without losing any details or quality, keeping lines
-smooth and edges sharp.
 """
 
 # local imports

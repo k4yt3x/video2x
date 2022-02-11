@@ -36,10 +36,10 @@ Video2X's documentations are hosted on this repository's [Wiki page](https://git
 
 Video2X is a video/GIF/image upscaling and frame interpolation software written in Python. It can use these following state-of-the-art algorithms to increase the resolution and frame rate of your video/GIF/image. More information about the algorithms that it supports can be found in [the documentations](https://github.com/k4yt3x/video2x/wiki/Algorithms).
 
+### Video Upscaling
+
 ![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)\
 _Upscale demo: Spirited Away's movie trailer_
-
-Below are some demo videos you can watch to get a taste of the program:
 
 - **Spirited Away**: [YouTube](https://youtu.be/mGEfasQl2Zo) | [Bilibili](https://www.bilibili.com/video/BV1V5411471i/)
   - 360P to 4K
