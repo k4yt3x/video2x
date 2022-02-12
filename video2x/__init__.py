@@ -22,6 +22,11 @@ Date Created: July 3, 2021
 Last Modified: February 11, 2022
 """
 
+# version assignment has to precede imports to
+# prevent setup.cfg from producing import errors
+__version__ = "5.0.0-beta2"
+
+# local imports
 from .video2x import Video2X
 from .upscaler import Upscaler
 from .interpolator import Interpolator
