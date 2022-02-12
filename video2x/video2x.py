@@ -58,6 +58,8 @@ import time
 # third-party imports
 from loguru import logger
 from rich import print
+from rich.console import Console
+from rich.file_proxy import FileProxy
 from rich.progress import (
     BarColumn,
     Progress,
@@ -97,6 +99,13 @@ DRIVER_FIXED_SCALING_RATIOS = {
 
 # progress bar labels for different modes
 MODE_LABELS = {"upscale": "Upscaling", "interpolate": "Interpolating"}
+
+# format string for Loguru loggers
+LOGURU_FORMAT = (
+    "<green>{time:HH:mm:ss.SSSSSS!UTC}</green> | "
+    "<level>{level: <8}</level> | "
+    "<level>{message}</level>"
+)
 
 
 class ProcessingSpeedColumn(ProgressColumn):
@@ -165,6 +174,22 @@ class Video2X:
         processes: int,
         processing_settings: tuple,
     ):
+
+        # record original STDOUT and STDERR for restoration
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
+
+        # create console for rich's Live display
+        console = Console()
+
+        # redirect STDOUT and STDERR to console
+        sys.stdout = FileProxy(console, sys.stdout)
+        sys.stderr = FileProxy(console, sys.stderr)
+
+        # re-add Loguru to point to the new STDERR
+        logger.remove()
+        logger.add(sys.stderr, colorize=True, format=LOGURU_FORMAT)
+
         # initialize values
         self.processor_processes = []
         self.processing_queue = multiprocessing.Queue(maxsize=processes * 10)
@@ -197,7 +222,7 @@ class Video2X:
         )
         self.encoder.start()
 
-        # create upscaler processes
+        # create processor processes
         for process_name in range(processes):
             process = Processor(self.processing_queue, processed_frames)
             process.name = str(process_name)
@@ -212,13 +237,14 @@ class Video2X:
             # create progress bar
             with Progress(
                 "[progress.description]{task.description}",
-                BarColumn(),
+                BarColumn(finished_style="green"),
                 "[progress.percentage]{task.percentage:>3.0f}%",
                 "[color(240)]({task.completed}/{task.total})",
                 ProcessingSpeedColumn(),
                 TimeElapsedColumn(),
                 "<",
                 TimeRemainingColumn(),
+                console=console,
                 disable=True,
             ) as progress:
                 task = progress.add_task(
@@ -226,7 +252,8 @@ class Video2X:
                 )
 
                 # wait for jobs in queue to deplete
-                while self.encoder.is_alive() is True:
+                while self.processed.value < total_frames - 1:
+                    time.sleep(0.5)
                     for process in self.processor_processes:
                         if not process.is_alive():
                             raise Exception("process died unexpectedly")
@@ -238,10 +265,9 @@ class Video2X:
 
                     # update progress
                     progress.update(task, completed=self.processed.value)
-                    time.sleep(0.5)
 
-                logger.info("Encoding has completed")
-                progress.update(task, completed=self.processed.value)
+                progress.update(task, completed=total_frames)
+            logger.info("Processing has completed")
 
         # if SIGTERM is received or ^C is pressed
         # TODO: pause and continue here
@@ -275,6 +301,14 @@ class Video2X:
             # raise the error if there is any
             if len(exception) > 0:
                 raise exception[0]
+
+            # restore original STDOUT and STDERR
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
+
+            # re-add Loguru to point to the restored STDERR
+            logger.remove()
+            logger.add(sys.stderr, colorize=True, format=LOGURU_FORMAT)
 
     def upscale(
         self,
@@ -461,18 +495,10 @@ def main():
             os.environ["LOGURU_LEVEL"] = args.loglevel.upper()
 
         # remove default handler
-        logger.remove(0)
+        logger.remove()
 
         # add new sink with custom handler
-        logger.add(
-            sys.stderr,
-            colorize=True,
-            format=(
-                "<green>{time:HH:mm:ss.SSSSSS!UTC}</green> | "
-                "<level>{level: <8}</level> | "
-                "<level>{message}</level>"
-            ),
-        )
+        logger.add(sys.stderr, colorize=True, format=LOGURU_FORMAT)
 
         # display version and lawful informaition
         if args.version:
@@ -508,6 +534,8 @@ def main():
                 args.threshold,
                 args.driver,
             )
+
+        logger.success("Processing completed successfully")
 
     # don't print the traceback for manual terminations
     except (SystemExit, KeyboardInterrupt) as e:
