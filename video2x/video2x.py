@@ -40,6 +40,7 @@ Last Modified: March 23, 2020
 """
 
 # local imports
+from . import __version__
 from .decoder import VideoDecoder
 from .encoder import VideoEncoder
 from .interpolator import Interpolator
@@ -61,14 +62,13 @@ from tqdm import tqdm
 import cv2
 import ffmpeg
 
-VERSION = "5.0.0"
 
 LEGAL_INFO = """Video2X {}
 Author: K4YT3X
 License: GNU GPL v3
 Github Page: https://github.com/k4yt3x/video2x
 Contact: k4yt3x@k4yt3x.com""".format(
-    VERSION
+    __version__
 )
 
 UPSCALING_DRIVERS = [
@@ -161,14 +161,6 @@ class Video2X:
         )
         self.decoder.start()
 
-        # in interpolate mode, the frame rate is doubled
-        if mode == "upscale":
-            progress = tqdm(total=total_frames, desc=f"UPSC {input_path.name}")
-        # elif mode == "interpolate":
-        else:
-            frame_rate *= 2
-            progress = tqdm(total=total_frames, desc=f"INTERP {input_path.name}")
-
         # set up and start encoder thread
         logger.info("Starting video encoder")
         self.encoder = VideoEncoder(
@@ -191,7 +183,21 @@ class Video2X:
             process.start()
             self.processor_processes.append(process)
 
+        # set progress bar values based on mode
+        if mode == "upscale":
+            label = "UPSC"
+
+        # in interpolate mode, the frame rate is doubled
+        elif mode == "interpolate":
+            frame_rate *= 2
+            label = "INTERP"
+
+        else:
+            raise ValueError(f"unknown mode {mode}")
+
         # create progress bar
+        progress = tqdm(total=total_frames, desc=f"{label} {input_path.name}")
+
         try:
             # wait for jobs in queue to deplete
             while self.encoder.is_alive() is True:
@@ -414,16 +420,30 @@ def main():
         if os.environ.get("LOGURU_LEVEL") is None:
             os.environ["LOGURU_LEVEL"] = args.loglevel.upper()
 
-        # set logger format
-        if os.environ.get("LOGURU_FORMAT") is None:
-            os.environ[
-                "LOGURU_FORMAT"
-            ] = "<fg 240>{time:HH:mm:ss!UTC}</fg 240> | <level>{level: <8}</level> | <level>{message}</level>"
+        # remove default handler
+        logger.remove(0)
+
+        # add new sink with custom handler
+        logger.add(
+            sys.stderr,
+            colorize=True,
+            format=(
+                "<green>{time:HH:mm:ss.SSSSSS!UTC}</green> | "
+                "<level>{level: <8}</level> | "
+                "<level>{message}</level>"
+            ),
+        )
 
         # display version and lawful informaition
         if args.version:
             print(LEGAL_INFO)
             sys.exit(0)
+
+        # print package version and copyright notice
+        logger.opt(colors=True).info(f"<magenta>Video2X {__version__}</magenta>")
+        logger.opt(colors=True).info(
+            "<magenta>Copyright (C) 2018-2022 K4YT3X and contributors.</magenta>"
+        )
 
         # initialize upscaler object
         video2x = Video2X()
