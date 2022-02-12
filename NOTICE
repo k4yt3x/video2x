@@ -41,8 +41,3 @@ https://github.com/python-pillow/Pillow.
 This product depends on Rich, which is available under
 the MIT License. The source code can be found at
 https://github.com/Textualize/rich.
-
-This product depends on tqdm, which is available under
-the Mozilla Public License Version 2.0 and the MIT License.
-The source code can be found at
-https://github.com/tqdm/tqdm.

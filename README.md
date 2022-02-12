@@ -82,29 +82,29 @@ Copyright (c) 2018-2022 K4YT3X and contributors.
 
 This project includes or depends on these following projects:
 
-| Project                                                             | License              |
-| ------------------------------------------------------------------- | -------------------- |
-| [FFmpeg](https://www.ffmpeg.org/)                                   | LGPLv2.1, GPLv2      |
-| [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan) | MIT License          |
-| [srmd-ncnn-vulkan](https://github.com/nihui/srmd-ncnn-vulkan)       | MIT License          |
-| [realsr-ncnn-vulkan](https://github.com/nihui/realsr-ncnn-vulkan)   | MIT License          |
-| [rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)       | MIT License          |
-| [ffmpeg-python](https://github.com/kkroening/ffmpeg-python)         | Apache-2.0           |
-| [Loguru](https://github.com/Delgan/loguru)                          | MIT License          |
-| [opencv-python](https://github.com/opencv/opencv-python)            | MIT License          |
-| [Pillow](https://github.com/python-pillow/Pillow)                   | HPND License         |
-| [Rich](https://github.com/Textualize/rich)                          | MIT License          |
-| [tqdm](https://github.com/tqdm/tqdm)                                | MPLv2.0, MIT License |
+| Project                                                             | License         |
+| ------------------------------------------------------------------- | --------------- |
+| [FFmpeg](https://www.ffmpeg.org/)                                   | LGPLv2.1, GPLv2 |
+| [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan) | MIT License     |
+| [srmd-ncnn-vulkan](https://github.com/nihui/srmd-ncnn-vulkan)       | MIT License     |
+| [realsr-ncnn-vulkan](https://github.com/nihui/realsr-ncnn-vulkan)   | MIT License     |
+| [rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)       | MIT License     |
+| [ffmpeg-python](https://github.com/kkroening/ffmpeg-python)         | Apache-2.0      |
+| [Loguru](https://github.com/Delgan/loguru)                          | MIT License     |
+| [opencv-python](https://github.com/opencv/opencv-python)            | MIT License     |
+| [Pillow](https://github.com/python-pillow/Pillow)                   | HPND License    |
+| [Rich](https://github.com/Textualize/rich)                          | MIT License     |
 
 Legacy versions of this project includes or depends on these following projects:
 
-| Project                                                                     | License     |
-| --------------------------------------------------------------------------- | ----------- |
-| [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)                  | MIT License |
-| [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp) | MIT License |
-| [Anime4K](https://github.com/bloc97/Anime4K)                                | MIT License |
-| [Anime4KCPP](https://github.com/TianZerL/Anime4KCPP)                        | MIT License |
-| [Gifski](https://github.com/ImageOptim/gifski)                              | AGPLv3      |
+| Project                                                                     | License              |
+| --------------------------------------------------------------------------- | -------------------- |
+| [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)                  | MIT License          |
+| [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp) | MIT License          |
+| [Anime4K](https://github.com/bloc97/Anime4K)                                | MIT License          |
+| [Anime4KCPP](https://github.com/TianZerL/Anime4KCPP)                        | MIT License          |
+| [Gifski](https://github.com/ImageOptim/gifski)                              | AGPLv3               |
+| [tqdm](https://github.com/tqdm/tqdm)                                        | MPLv2.0, MIT License |
 
 More licensing information can be found in the [NOTICES](NOTICES) file.
 
