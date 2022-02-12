@@ -156,7 +156,7 @@ class VideoEncoder(threading.Thread):
 
         # wait for process to terminate
         self.encoder.wait()
-        logger.debug("Encoder thread exiting")
+        logger.info("Encoder thread exiting")
 
         self.running = False
         return super().run()

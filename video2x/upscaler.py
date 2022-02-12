@@ -66,7 +66,9 @@ class Upscaler(multiprocessing.Process):
 
     def run(self):
         self.running = True
-        logger.info(f"Upscaler process {self.name} initiating")
+        logger.opt(colors=True).info(
+            f"Upscaler process <blue>{self.name}</blue> initiating"
+        )
         driver_objects = {}
         while self.running:
             try:
@@ -185,7 +187,9 @@ class Upscaler(multiprocessing.Process):
                 logger.exception(e)
                 break
 
-        logger.info(f"Upscaler process {self.name} terminating")
+        logger.opt(colors=True).info(
+            f"Upscaler process <blue>{self.name}</blue> terminating"
+        )
         self.running = False
         return super().run()
 

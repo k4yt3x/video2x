@@ -19,13 +19,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Decoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: June 17, 2021
+Last Modified: February 12, 2022
 """
 
 # built-in imports
+import contextlib
 import os
 import pathlib
 import queue
+import signal
 import subprocess
 import threading
 
@@ -119,20 +121,29 @@ class VideoDecoder(threading.Thread):
                     "RGB", (self.input_width, self.input_height), buffer
                 )
 
-                self.processing_queue.put(
-                    (
-                        frame_index,
-                        (previous_image, image),
-                        self.processing_settings,
-                    )
-                )
-                previous_image = image
+                # keep checking if the running flag is set to False
+                # while waiting to put the next image into the queue
+                while self.running:
+                    with contextlib.suppress(queue.Full):
+                        self.processing_queue.put(
+                            (
+                                frame_index,
+                                (previous_image, image),
+                                self.processing_settings,
+                            ),
+                            timeout=0.1,
+                        )
+                        break
 
+                previous_image = image
                 frame_index += 1
 
             # most likely "not enough image data"
             except ValueError as e:
-                logger.exception(e)
+
+                # ignore queue closed
+                if not "is closed" in str(e):
+                    logger.exception(e)
                 break
 
             # send exceptions into the client connection pipe
@@ -141,9 +152,14 @@ class VideoDecoder(threading.Thread):
                 logger.exception(e)
                 break
 
+        # send SIGINT (2) to FFmpeg
+        # this instructs it to finalize and exit
+        if self.decoder.poll() is None:
+            self.decoder.send_signal(signal.SIGTERM)
+
         # ensure the decoder has exited
         self.decoder.wait()
-        logger.debug("Decoder thread exiting")
+        logger.info("Decoder thread exiting")
 
         self.running = False
         return super().run()

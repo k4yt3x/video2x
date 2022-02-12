@@ -58,7 +58,15 @@ import time
 # third-party imports
 from loguru import logger
 from rich import print
-from tqdm import tqdm
+from rich.progress import (
+    BarColumn,
+    Progress,
+    ProgressColumn,
+    Task,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
+from rich.text import Text
 import cv2
 import ffmpeg
 
@@ -86,6 +94,20 @@ DRIVER_FIXED_SCALING_RATIOS = {
     "srmd": [2, 3, 4],
     "realsr": [4],
 }
+
+# progress bar labels for different modes
+MODE_LABELS = {"upscale": "Upscaling", "interpolate": "Interpolating"}
+
+
+class ProcessingSpeedColumn(ProgressColumn):
+    """Custom progress bar column that displays the processing speed"""
+
+    def render(self, task: Task) -> Text:
+        speed = task.finished_speed or task.speed
+        return Text(
+            f"{round(speed, 2) if isinstance(speed, float) else '?'} FPS",
+            style="progress.data.speed",
+        )
 
 
 class Video2X:
@@ -165,7 +187,7 @@ class Video2X:
         logger.info("Starting video encoder")
         self.encoder = VideoEncoder(
             input_path,
-            frame_rate,
+            frame_rate * 2 if mode == "interpolate" else frame_rate,
             output_path,
             output_width,
             output_height,
@@ -183,39 +205,53 @@ class Video2X:
             process.start()
             self.processor_processes.append(process)
 
-        # set progress bar values based on mode
-        if mode == "upscale":
-            label = "UPSC"
-
-        # in interpolate mode, the frame rate is doubled
-        elif mode == "interpolate":
-            frame_rate *= 2
-            label = "INTERP"
-
-        else:
-            raise ValueError(f"unknown mode {mode}")
-
-        # create progress bar
-        progress = tqdm(total=total_frames, desc=f"{label} {input_path.name}")
+        # a temporary variable that stores the exception
+        exception = []
 
         try:
-            # wait for jobs in queue to deplete
-            while self.encoder.is_alive() is True:
-                for process in self.processor_processes:
-                    if not process.is_alive():
-                        raise Exception("process died unexpectedly")
-                progress.n = self.processed.value
-                progress.refresh()
-                time.sleep(0.1)
+            # create progress bar
+            with Progress(
+                "[progress.description]{task.description}",
+                BarColumn(),
+                "[progress.percentage]{task.percentage:>3.0f}%",
+                "[color(240)]({task.completed}/{task.total})",
+                ProcessingSpeedColumn(),
+                TimeElapsedColumn(),
+                "<",
+                TimeRemainingColumn(),
+                disable=True,
+            ) as progress:
+                task = progress.add_task(
+                    f"[cyan]{MODE_LABELS.get(mode, 'Unknown')}", total=total_frames
+                )
 
-            logger.info("Encoding has completed")
-            progress.n = self.processed.value
-            progress.refresh()
+                # wait for jobs in queue to deplete
+                while self.encoder.is_alive() is True:
+                    for process in self.processor_processes:
+                        if not process.is_alive():
+                            raise Exception("process died unexpectedly")
+
+                    # show progress bar when upscale starts
+                    if progress.disable is True and self.processed.value > 0:
+                        progress.disable = False
+                        progress.start()
+
+                    # update progress
+                    progress.update(task, completed=self.processed.value)
+                    time.sleep(0.5)
+
+                logger.info("Encoding has completed")
+                progress.update(task, completed=self.processed.value)
 
         # if SIGTERM is received or ^C is pressed
         # TODO: pause and continue here
-        except (SystemExit, KeyboardInterrupt):
+        except (SystemExit, KeyboardInterrupt) as e:
             logger.warning("Exit signal received, terminating")
+            exception.append(e)
+
+        except Exception as e:
+            logger.exception(e)
+            exception.append(e)
 
         finally:
             # mark processing queue as closed
@@ -235,6 +271,10 @@ class Video2X:
             self.encoder.stop()
             self.decoder.join()
             self.encoder.join()
+
+            # raise the error if there is any
+            if len(exception) > 0:
+                raise exception[0]
 
     def upscale(
         self,
@@ -468,5 +508,11 @@ def main():
                 args.threshold,
                 args.driver,
             )
+
+    # don't print the traceback for manual terminations
+    except (SystemExit, KeyboardInterrupt) as e:
+        raise SystemExit(e)
+
     except Exception as e:
         logger.exception(e)
+        raise SystemExit(e)
