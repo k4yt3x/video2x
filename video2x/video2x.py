@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 8, 2022
+Last Modified: February 12, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -145,7 +145,7 @@ class Video2X:
     ):
         # initialize values
         self.processor_processes = []
-        self.processing_queue = multiprocessing.Queue()
+        self.processing_queue = multiprocessing.Queue(maxsize=processes * 10)
         processed_frames = multiprocessing.Manager().list([None] * total_frames)
         self.processed = multiprocessing.Value("I", 0)
 
