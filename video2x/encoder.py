@@ -133,7 +133,11 @@ class VideoEncoder(threading.Thread):
                     time.sleep(0.1)
                     continue
 
+                # send the image to FFmpeg for encoding
                 self.encoder.stdin.write(image.tobytes())
+
+                # remove the image from memory
+                self.processed_frames[frame_index] = None
 
                 with self.processed.get_lock():
                     self.processed.value += 1
