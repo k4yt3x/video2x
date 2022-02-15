@@ -24,7 +24,7 @@ Last Modified: February 11, 2022
 
 # version assignment has to precede imports to
 # prevent setup.cfg from producing import errors
-__version__ = "5.0.0-beta2"
+__version__ = "5.0.0-beta3"
 
 # local imports
 from .video2x import Video2X

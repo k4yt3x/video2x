@@ -11,7 +11,7 @@ sudo podman run -it --rm \
     --cpus 0.9 \
     -v $HOME/projects/media2x/video2x:/video2x \
     -e PYTHONPATH="/video2x" \
-    ghcr.io/k4yt3x/video2x:5.0.0-beta2-cuda \
+    ghcr.io/k4yt3x/video2x:5.0.0-beta3-cuda \
     -i data/input.mp4 -o data/output.mp4 \
     -p5 \
     upscale \
