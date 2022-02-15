@@ -30,7 +30,7 @@ Video2X container images are available on the GitHub Container Registry for easy
 
 ## [📖 Documentations](https://github.com/k4yt3x/video2x/wiki)
 
-Video2X's documentations are hosted on this repository's [Wiki page](https://github.com/k4yt3x/video2x/wiki). It includes comprehensive explanations for how to use the [GUI](https://github.com/k4yt3x/video2x/wiki/GUI), the [CLI](https://github.com/k4yt3x/video2x/wiki/CLI), the [container image](https://github.com/K4YT3X/video2x/wiki/Container), the library, and more. The Wiki is open to edits by the community, so you, yes you, can also correct errors or add new contents to the documentations.
+Video2X's documentations are hosted on this repository's [Wiki page](https://github.com/k4yt3x/video2x/wiki). It includes comprehensive explanations for how to use the [GUI](https://github.com/k4yt3x/video2x/wiki/GUI), the [CLI](https://github.com/k4yt3x/video2x/wiki/CLI), the [container image](https://github.com/K4YT3X/video2x/wiki/Container), the [library](https://github.com/k4yt3x/video2x/wiki/Library), and more. The Wiki is open to edits by the community, so you, yes you, can also correct errors or add new contents to the documentations.
 
 ## Introduction
 
