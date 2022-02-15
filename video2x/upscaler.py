@@ -40,15 +40,15 @@ import time
 from PIL import Image, ImageChops, ImageStat
 from loguru import logger
 
-# fixed scaling ratios supported by the drivers
+# fixed scaling ratios supported by the algorithms
 # that only support certain fixed scale ratios
-DRIVER_FIXED_SCALING_RATIOS = {
+ALGORITHM_FIXED_SCALING_RATIOS = {
     "waifu2x": [1, 2],
     "srmd": [2, 3, 4],
     "realsr": [4],
 }
 
-DRIVER_CLASSES = {"waifu2x": Waifu2x, "srmd": Srmd, "realsr": Realsr}
+ALGORITHM_CLASSES = {"waifu2x": Waifu2x, "srmd": Srmd, "realsr": Realsr}
 
 
 class Upscaler(multiprocessing.Process):
@@ -69,7 +69,7 @@ class Upscaler(multiprocessing.Process):
         logger.opt(colors=True).info(
             f"Upscaler process <blue>{self.name}</blue> initiating"
         )
-        driver_objects = {}
+        processor_objects = {}
         while self.running:
             try:
                 try:
@@ -82,7 +82,7 @@ class Upscaler(multiprocessing.Process):
                             output_height,
                             noise,
                             difference_threshold,
-                            driver,
+                            algorithm,
                         ),
                     ) = self.processing_queue.get(False)
 
@@ -123,9 +123,9 @@ class Upscaler(multiprocessing.Process):
                     # calculate required minimum scale ratio
                     output_scale = max(output_width / width, output_height / height)
 
-                    # select the optimal driver scaling ratio to use
+                    # select the optimal algorithm scaling ratio to use
                     supported_scaling_ratios = sorted(
-                        DRIVER_FIXED_SCALING_RATIOS[driver]
+                        ALGORITHM_FIXED_SCALING_RATIOS[algorithm]
                     )
 
                     remaining_scaling_ratio = math.ceil(output_scale)
@@ -163,17 +163,17 @@ class Upscaler(multiprocessing.Process):
 
                     for job in scaling_jobs:
 
-                        # select a driver object with the required settings
+                        # select a processor object with the required settings
                         # create a new object if none are available
-                        driver_object = driver_objects.get((driver, job))
-                        if driver_object is None:
-                            driver_object = DRIVER_CLASSES[driver](
+                        processor_object = processor_objects.get((algorithm, job))
+                        if processor_object is None:
+                            processor_object = ALGORITHM_CLASSES[algorithm](
                                 scale=job, noise=noise
                             )
-                            driver_objects[(driver, job)] = driver_object
+                            processor_objects[(algorithm, job)] = processor_object
 
-                        # process the image with the selected driver
-                        image1 = driver_object.process(image1)
+                        # process the image with the selected algorithm
+                        image1 = processor_object.process(image1)
 
                     # downscale the image to the desired output size and save the image to disk
                     image1 = image1.resize((output_width, output_height), Image.LANCZOS)

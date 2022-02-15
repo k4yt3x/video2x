@@ -81,21 +81,15 @@ Contact: k4yt3x@k4yt3x.com""".format(
     __version__
 )
 
-UPSCALING_DRIVERS = [
+# algorithms available for upscaling tasks
+UPSCALING_ALGORITHMS = [
     "waifu2x",
     "srmd",
     "realsr",
 ]
 
-INTERPOLATION_DRIVERS = ["rife"]
-
-# fixed scaling ratios supported by the drivers
-# that only support certain fixed scale ratios
-DRIVER_FIXED_SCALING_RATIOS = {
-    "waifu2x": [1, 2],
-    "srmd": [2, 3, 4],
-    "realsr": [4],
-}
+# algorithms available for frame interpolation tasks
+INTERPOLATION_ALGORITHMS = ["rife"]
 
 # progress bar labels for different modes
 MODE_LABELS = {"upscale": "Upscaling", "interpolate": "Interpolating"}
@@ -279,6 +273,10 @@ class Video2X:
             logger.exception(e)
             exception.append(e)
 
+        # if no exceptions were produced
+        else:
+            logger.success("Processing completed successfully")
+
         finally:
             # mark processing queue as closed
             self.processing_queue.close()
@@ -319,7 +317,7 @@ class Video2X:
         noise: int,
         processes: int,
         threshold: float,
-        driver: str,
+        algorithm: str,
     ) -> None:
 
         # get basic video information
@@ -354,7 +352,7 @@ class Video2X:
                 output_height,
                 noise,
                 threshold,
-                driver,
+                algorithm,
             ),
         )
 
@@ -364,7 +362,7 @@ class Video2X:
         output_path: pathlib.Path,
         processes: int,
         threshold: float,
-        driver: str,
+        algorithm: str,
     ) -> None:
 
         # get video basic information
@@ -386,7 +384,7 @@ class Video2X:
             Interpolator,
             "interpolate",
             processes,
-            (threshold, driver),
+            (threshold, algorithm),
         )
 
 
@@ -440,11 +438,11 @@ def parse_arguments() -> argparse.Namespace:
     upscale.add_argument("-h", "--height", type=int, help="output height")
     upscale.add_argument("-n", "--noise", type=int, help="denoise level", default=3)
     upscale.add_argument(
-        "-d",
-        "--driver",
-        choices=UPSCALING_DRIVERS,
-        help="driver to use for upscaling",
-        default=UPSCALING_DRIVERS[0],
+        "-a",
+        "--algorithm",
+        choices=UPSCALING_ALGORITHMS,
+        help="algorithm to use for upscaling",
+        default=UPSCALING_ALGORITHMS[0],
     )
     upscale.add_argument(
         "-t",
@@ -462,11 +460,11 @@ def parse_arguments() -> argparse.Namespace:
         "--help", action="help", help="show this help message and exit"
     )
     interpolate.add_argument(
-        "-d",
-        "--driver",
-        choices=UPSCALING_DRIVERS,
-        help="driver to use for upscaling",
-        default=INTERPOLATION_DRIVERS[0],
+        "-a",
+        "--algorithm",
+        choices=UPSCALING_ALGORITHMS,
+        help="algorithm to use for upscaling",
+        default=INTERPOLATION_ALGORITHMS[0],
     )
     interpolate.add_argument(
         "-t",
@@ -523,7 +521,7 @@ def main():
                 args.noise,
                 args.processes,
                 args.threshold,
-                args.driver,
+                args.algorithm,
             )
 
         elif args.action == "interpolate":
@@ -532,10 +530,8 @@ def main():
                 args.output,
                 args.processes,
                 args.threshold,
-                args.driver,
+                args.algorithm,
             )
-
-        logger.success("Processing completed successfully")
 
     # don't print the traceback for manual terminations
     except (SystemExit, KeyboardInterrupt) as e:

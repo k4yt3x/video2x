@@ -38,7 +38,7 @@ from PIL import ImageChops, ImageStat
 from loguru import logger
 
 
-DRIVER_CLASSES = {"rife": Rife}
+ALGORITHM_CLASSES = {"rife": Rife}
 
 
 class Interpolator(multiprocessing.Process):
@@ -57,7 +57,7 @@ class Interpolator(multiprocessing.Process):
     def run(self):
         self.running = True
         logger.info(f"Interpolator process {self.name} initiating")
-        driver_objects = {}
+        processor_objects = {}
         while self.running:
             try:
                 try:
@@ -65,7 +65,7 @@ class Interpolator(multiprocessing.Process):
                     (
                         frame_index,
                         (image0, image1),
-                        (difference_threshold, driver),
+                        (difference_threshold, algorithm),
                     ) = self.processing_queue.get(False)
                 except queue.Empty:
                     time.sleep(0.1)
@@ -86,13 +86,13 @@ class Interpolator(multiprocessing.Process):
                 # process the interpolation
                 if difference_ratio < difference_threshold:
 
-                    # select a driver object with the required settings
+                    # select a processor object with the required settings
                     # create a new object if none are available
-                    driver_object = driver_objects.get(driver)
-                    if driver_object is None:
-                        driver_object = DRIVER_CLASSES[driver](0)
-                        driver_objects[driver] = driver_object
-                    interpolated_image = driver_object.process(image0, image1)
+                    processor_object = processor_objects.get(algorithm)
+                    if processor_object is None:
+                        processor_object = ALGORITHM_CLASSES[algorithm](0)
+                        processor_objects[algorithm] = processor_object
+                    interpolated_image = processor_object.process(image0, image1)
 
                 # if the difference is greater than threshold
                 # there's a change in camera angle, ignore
