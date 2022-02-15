@@ -12,7 +12,7 @@ sudo podman run -it --rm \
     -v $HOME/projects/media2x/video2x:/video2x \
     -e PYTHONPATH="/video2x" \
     ghcr.io/k4yt3x/video2x:5.0.0-beta2-cuda \
-    -i input-large.mp4 -o output-large.mp4 \
+    -i data/input.mp4 -o data/output.mp4 \
     -p5 \
     upscale \
-    -h 1440 -d waifu2x -n3
+    -h 1440 -a waifu2x -n3
