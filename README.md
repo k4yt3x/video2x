@@ -26,7 +26,7 @@ Nightly releases are automatically created by the GitHub Actions CI/CD pipelines
 
 ## [📦 Container Image](https://github.com/k4yt3x/video2x/pkgs/container/video2x)
 
-Video2X container images are available on the GitHub Container Registry for easy deployment on Linux and macOS. If you already have Docker/Podman installed, only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentations (outdated)](https://github.com/K4YT3X/video2x/wiki/Docker).
+Video2X container images are available on the GitHub Container Registry for easy deployment on Linux and macOS. If you already have Docker/Podman installed, only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentations](https://github.com/K4YT3X/video2x/wiki/Container).
 
 ## [📖 Documentations](https://github.com/k4yt3x/video2x/wiki)
 
