@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: Feb 24, 2018
-Last Modified: February 12, 2022
+Last Modified: February 15, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -123,7 +123,7 @@ class Video2X:
     """
 
     def __init__(self):
-        self.version = "5.0.0"
+        self.version = __version__
 
     def _get_video_info(self, path: pathlib.Path):
         """
@@ -430,7 +430,12 @@ def parse_arguments() -> argparse.Namespace:
         help="action to perform", dest="action", required=True
     )
 
-    upscale = action.add_parser("upscale", help="upscale a file", add_help=False)
+    upscale = action.add_parser(
+        "upscale",
+        help="upscale a file",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=False,
+    )
     upscale.add_argument(
         "--help", action="help", help="show this help message and exit"
     )
@@ -448,13 +453,16 @@ def parse_arguments() -> argparse.Namespace:
         "-t",
         "--threshold",
         type=float,
-        help="skip if the % difference between two adjacent frames is below this value; set to 0 to process all frames",
+        help="skip if the percent difference between two adjacent frames is below this value; set to 0 to process all frames",
         default=0,
     )
 
     # interpolator arguments
     interpolate = action.add_parser(
-        "interpolate", help="interpolate frames for file", add_help=False
+        "interpolate",
+        help="interpolate frames for file",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=False,
     )
     interpolate.add_argument(
         "--help", action="help", help="show this help message and exit"
@@ -470,7 +478,7 @@ def parse_arguments() -> argparse.Namespace:
         "-t",
         "--threshold",
         type=float,
-        help="skip if the % difference between two adjacent frames exceeds this value; set to 100 to interpolate all frames",
+        help="skip if the percent difference between two adjacent frames exceeds this value; set to 100 to interpolate all frames",
         default=10,
     )
 
@@ -534,7 +542,7 @@ def main():
             )
 
     # don't print the traceback for manual terminations
-    except (SystemExit, KeyboardInterrupt) as e:
+    except KeyboardInterrupt as e:
         raise SystemExit(e)
 
     except Exception as e:
