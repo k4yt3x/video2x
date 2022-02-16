@@ -73,11 +73,11 @@ import cv2
 import ffmpeg
 
 
-LEGAL_INFO = """Video2X {}
-Author: K4YT3X
-License: GNU GPL v3
-Github Page: https://github.com/k4yt3x/video2x
-Contact: k4yt3x@k4yt3x.com""".format(
+LEGAL_INFO = """Video2X\t\t{}
+Author:\t\tK4YT3X
+License:\tGNU AGPL v3
+Github Page:\thttps://github.com/k4yt3x/video2x
+Contact:\ti@k4yt3x.com""".format(
     __version__
 )
 
@@ -399,7 +399,7 @@ def parse_arguments() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "-v", "--version", help="show version information and exit", action="store_true"
+        "--version", help="show version information and exit", action="store_true"
     )
     parser.add_argument(
         "-i",
@@ -492,6 +492,10 @@ def main():
     """
 
     try:
+        # display version and lawful informaition
+        if "--version" in sys.argv:
+            print(LEGAL_INFO)
+            sys.exit(0)
 
         # parse command line arguments
         args = parse_arguments()
@@ -505,11 +509,6 @@ def main():
 
         # add new sink with custom handler
         logger.add(sys.stderr, colorize=True, format=LOGURU_FORMAT)
-
-        # display version and lawful informaition
-        if args.version:
-            print(LEGAL_INFO)
-            sys.exit(0)
 
         # print package version and copyright notice
         logger.opt(colors=True).info(f"<magenta>Video2X {__version__}</magenta>")
