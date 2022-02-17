@@ -1,0 +1,55 @@
+name: Release
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.get_tag.outputs.tag }}
+    steps:
+      - name: Get tag
+        id: get_tag
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
+  create-release:
+    name: Create release
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.setup.outputs.tag }}
+          release_name: Video2X ${{ needs.setup.outputs.tag }}
+          draft: true
+          prerelease: false
+
+  container:
+    name: Build and upload container
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: Build & push Docker image
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USER }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: Dockerfile
+          image: k4yt3x/video2x
+          tags: latest, ${{ needs.setup.outputs.tag }}
