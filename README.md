@@ -8,7 +8,7 @@
    <img src="https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square"/>
 </p>
 
-### Official [Telegram Discussion Group](https://t.me/video2x)
+## [💬 Telegram Discussion Group](https://t.me/video2x)
 
 Join our Telegram discussion group to ask any questions you have about Video2X, chat directly with the developers, or discuss about upscaling technologies and the future of Video2X in general.
 
