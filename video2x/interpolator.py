@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Interpolator
 Author: K4YT3X
 Date Created: May 27, 2021
-Last Modified: February 2, 2022
+Last Modified: February 16, 2022
 """
 
 # local imports
@@ -46,7 +46,7 @@ class Interpolator(multiprocessing.Process):
         self,
         processing_queue: multiprocessing.Queue,
         processed_frames: multiprocessing.managers.ListProxy,
-    ):
+    ) -> None:
         multiprocessing.Process.__init__(self)
         self.running = False
         self.processing_queue = processing_queue
@@ -54,7 +54,7 @@ class Interpolator(multiprocessing.Process):
 
         signal.signal(signal.SIGTERM, self._stop)
 
-    def run(self):
+    def run(self) -> None:
         self.running = True
         logger.info(f"Interpolator process {self.name} initiating")
         processor_objects = {}
@@ -116,5 +116,5 @@ class Interpolator(multiprocessing.Process):
         self.running = False
         return super().run()
 
-    def _stop(self, _signal_number, _frame):
+    def _stop(self, _signal_number, _frame) -> None:
         self.running = False

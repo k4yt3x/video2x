@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Upscaler
 Author: K4YT3X
 Date Created: May 27, 2021
-Last Modified: August 17, 2021
+Last Modified: February 16, 2022
 """
 
 # local imports
@@ -56,7 +56,7 @@ class Upscaler(multiprocessing.Process):
         self,
         processing_queue: multiprocessing.Queue,
         processed_frames: multiprocessing.managers.ListProxy,
-    ):
+    ) -> None:
         multiprocessing.Process.__init__(self)
         self.running = False
         self.processing_queue = processing_queue
@@ -64,7 +64,7 @@ class Upscaler(multiprocessing.Process):
 
         signal.signal(signal.SIGTERM, self._stop)
 
-    def run(self):
+    def run(self) -> None:
         self.running = True
         logger.opt(colors=True).info(
             f"Upscaler process <blue>{self.name}</blue> initiating"
@@ -193,5 +193,5 @@ class Upscaler(multiprocessing.Process):
         self.running = False
         return super().run()
 
-    def _stop(self, _signal_number, _frame):
+    def _stop(self, _signal_number, _frame) -> None:
         self.running = False

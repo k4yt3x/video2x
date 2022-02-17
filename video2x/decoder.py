@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Decoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: February 12, 2022
+Last Modified: February 16, 2022
 """
 
 # built-in imports
@@ -59,7 +59,7 @@ class VideoDecoder(threading.Thread):
         processing_queue: queue.Queue,
         processing_settings: tuple,
         ignore_max_image_pixels=True,
-    ):
+    ) -> None:
         threading.Thread.__init__(self)
         self.running = False
         self.input_path = input_path
@@ -91,7 +91,7 @@ class VideoDecoder(threading.Thread):
             # stderr=subprocess.DEVNULL,
         )
 
-    def run(self):
+    def run(self) -> None:
         self.running = True
 
         # the index of the frame
@@ -164,5 +164,5 @@ class VideoDecoder(threading.Thread):
         self.running = False
         return super().run()
 
-    def stop(self):
+    def stop(self) -> None:
         self.running = False

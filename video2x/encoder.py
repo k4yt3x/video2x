@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Encoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: June 30, 2021
+Last Modified: February 16, 2022
 """
 
 # built-in imports
@@ -61,7 +61,11 @@ class VideoEncoder(threading.Thread):
         total_frames: int,
         processed_frames: multiprocessing.managers.ListProxy,
         processed: multiprocessing.sharedctypes.Synchronized,
-    ):
+        copy_audio: bool = True,
+        copy_subtitle: bool = True,
+        copy_data: bool = False,
+        copy_attachments: bool = False,
+    ) -> None:
         threading.Thread.__init__(self)
         self.running = False
         self.input_path = input_path
@@ -82,31 +86,31 @@ class VideoEncoder(threading.Thread):
             r=frame_rate,
         )
 
-        # map additional streams from original file
-        """
+        # copy additional streams from original file
+        # https://ffmpeg.org/ffmpeg.html#Stream-specifiers-1
         additional_streams = [
-            # self.original["v?"],
-            self.original["a?"],
-            self.original["s?"],
-            self.original["d?"],
-            self.original["t?"],
+            # self.original["1:v?"],
+            self.original["a?"] if copy_audio is True else None,
+            self.original["s?"] if copy_subtitle is True else None,
+            self.original["d?"] if copy_data is True else None,
+            self.original["t?"] if copy_attachments is True else None,
         ]
-        """
 
         # run FFmpeg and produce final output
         self.encoder = subprocess.Popen(
             ffmpeg.compile(
                 ffmpeg.output(
                     frames,
+                    *[s for s in additional_streams if s is not None],
                     str(self.output_path),
                     pix_fmt="yuv420p",
                     vcodec="libx264",
-                    acodec="copy",
+                    # acodec="copy",
                     r=frame_rate,
                     crf=17,
                     vsync="1",
-                    # map_metadata=1,
-                    # metadata="comment=Upscaled with Video2X",
+                    map_metadata=1,
+                    metadata="comment=Processed with Video2X",
                 )
                 .global_args("-hide_banner")
                 .global_args("-nostats")
@@ -123,7 +127,7 @@ class VideoEncoder(threading.Thread):
             # stderr=subprocess.DEVNULL,
         )
 
-    def run(self):
+    def run(self) -> None:
         self.running = True
         frame_index = 0
         while self.running and frame_index < self.total_frames:
@@ -165,5 +169,5 @@ class VideoEncoder(threading.Thread):
         self.running = False
         return super().run()
 
-    def stop(self):
+    def stop(self) -> None:
         self.running = False

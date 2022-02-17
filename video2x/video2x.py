@@ -26,8 +26,8 @@ __      __  _       _                  ___   __   __
 
 Name: Video2X
 Creator: K4YT3X
-Date Created: Feb 24, 2018
-Last Modified: February 15, 2022
+Date Created: February 24, 2018
+Last Modified: February 16, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -122,10 +122,10 @@ class Video2X:
         - interpolate: perform motion interpolation on a file
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.version = __version__
 
-    def _get_video_info(self, path: pathlib.Path):
+    def _get_video_info(self, path: pathlib.Path) -> tuple:
         """
         get video file information with FFmpeg
 
@@ -167,7 +167,7 @@ class Video2X:
         mode: str,
         processes: int,
         processing_settings: tuple,
-    ):
+    ) -> None:
 
         # record original STDOUT and STDERR for restoration
         original_stdout = sys.stdout
@@ -453,7 +453,10 @@ def parse_arguments() -> argparse.Namespace:
         "-t",
         "--threshold",
         type=float,
-        help="skip if the percent difference between two adjacent frames is below this value; set to 0 to process all frames",
+        help=(
+            "skip if the percent difference between two adjacent frames is below this"
+            " value; set to 0 to process all frames"
+        ),
         default=0,
     )
 
@@ -478,14 +481,17 @@ def parse_arguments() -> argparse.Namespace:
         "-t",
         "--threshold",
         type=float,
-        help="skip if the percent difference between two adjacent frames exceeds this value; set to 100 to interpolate all frames",
+        help=(
+            "skip if the percent difference between two adjacent frames exceeds this"
+            " value; set to 100 to interpolate all frames"
+        ),
         default=10,
     )
 
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     """
     command line direct invocation
     program entry point
