@@ -10,9 +10,10 @@ sudo podman run -it --rm \
     -m 15g \
     --cpus 0.9 \
     -v $HOME/projects/media2x/video2x:/video2x \
-    -e PYTHONPATH="/video2x" \
-    ghcr.io/k4yt3x/video2x:5.0.0-beta3-cuda \
+    -e PYTHONPATH=/video2x \
+    -e PYTHONDONTWRITEBYTECODE=1 \
+    ghcr.io/k4yt3x/video2x:5.0.0-beta4-cuda \
     -i data/input.mp4 -o data/output.mp4 \
-    -p5 \
+    -p3 \
     upscale \
     -h 1440 -a waifu2x -n3
