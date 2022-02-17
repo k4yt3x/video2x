@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Get tag
         id: get_tag
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        run: echo ::set-output name=tag::${GITHUB_REF/refs\/tags\//}
 
   create-release:
     name: Create release
