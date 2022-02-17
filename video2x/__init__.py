@@ -19,12 +19,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Package Init
 Author: K4YT3X
 Date Created: July 3, 2021
-Last Modified: February 11, 2022
+Last Modified: February 16, 2022
 """
 
 # version assignment has to precede imports to
 # prevent setup.cfg from producing import errors
-__version__ = "5.0.0-beta3"
+__version__ = "5.0.0-beta4"
 
 # local imports
 from .video2x import Video2X
