@@ -18,7 +18,7 @@ RUN apk add --no-cache \
 
 # stage 2: install wheels into final image
 FROM docker.io/library/python:3.10.2-alpine3.15
-LABEL maintainer="K4YT3X <i@k4yt3x.com>"
+LABEL maintainer="K4YT3X <i@k4yt3x.com>" \
       org.opencontainers.image.source="https://github.com/k4yt3x/video2x" \
       org.opencontainers.image.description="A lossless video/GIF/image upscaler"
 
