@@ -1,13 +1,12 @@
 name: Release
 on:
   push:
-    branches:
-      - master
     tags:
       - "*"
 
 jobs:
   setup:
+    if: github.event.base_ref == "refs/heads/master"
     name: Setup
     runs-on: ubuntu-latest
     outputs:
