@@ -1,3 +1,7 @@
+# PDM
+.pdm.toml
+__pypackages__/
+
 # test videos
 *.mp4
 *.mkv
