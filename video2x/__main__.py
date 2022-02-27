@@ -19,12 +19,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Package Main
 Author: K4YT3X
 Date Created: July 3, 2021
-Last Modified: February 11, 2022
+Last Modified: February 26, 2022
 """
 
 # local imports
 from .video2x import main
 
+# built-in imports
+import sys
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

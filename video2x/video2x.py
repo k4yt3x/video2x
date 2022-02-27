@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: February 24, 2018
-Last Modified: February 16, 2022
+Last Modified: February 27, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -491,20 +491,29 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
+def main() -> int:
     """
-    command line direct invocation
-    program entry point
+    command line entrypoint for direct CLI invocation
+
+    :rtype int: 0 if completed successfully, else other int
     """
 
     try:
         # display version and lawful informaition
         if "--version" in sys.argv:
             print(LEGAL_INFO)
-            sys.exit(0)
+            return 0
 
         # parse command line arguments
         args = parse_arguments()
+
+        # check input/output file paths
+        if not args.input.exists():
+            logger.critical(f"Cannot find input file: {args.input}")
+            return 1
+        elif not args.input.is_file():
+            logger.critical(f"Input path is not a file")
+            return 1
 
         # set logger level
         if os.environ.get("LOGURU_LEVEL") is None:
@@ -546,10 +555,12 @@ def main() -> None:
                 args.algorithm,
             )
 
+        return 0
+
     # don't print the traceback for manual terminations
     except KeyboardInterrupt as e:
-        raise SystemExit(e)
+        return 2
 
     except Exception as e:
         logger.exception(e)
-        raise SystemExit(e)
+        return 1
