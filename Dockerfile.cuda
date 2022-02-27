@@ -1,7 +1,7 @@
 # Name: Video2X Dockerfile (CUDA)
 # Creator: K4YT3X
 # Date Created: February 3, 2022
-# Last Modified: February 12, 2022
+# Last Modified: February 26, 2022
 
 # stage 1: build the python components into wheels
 FROM docker.io/nvidia/cuda:11.6.0-runtime-ubuntu20.04 AS builder
@@ -13,12 +13,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         python3-pip python3-opencv python3-pil \
         python3-dev libvulkan-dev glslang-dev glslang-tools \
-        build-essential swig git \
-    && git config --global http.postBuffer 1048576000 \
-    && git config --global https.postBuffer 1048576000 \
-    && pip wheel -w /wheels \
-        wheel setuptools setuptools_scm \
-        rife-ncnn-vulkan-python@git+https://github.com/media2x/rife-ncnn-vulkan-python.git .
+        build-essential swig \
+    && pip wheel -w /wheels wheel pdm-pep517 .
 
 # stage 2: install wheels into the final image
 FROM docker.io/nvidia/cuda:11.6.0-runtime-ubuntu20.04
