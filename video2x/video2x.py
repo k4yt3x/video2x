@@ -248,9 +248,25 @@ class Video2X:
                 # wait for jobs in queue to deplete
                 while self.processed.value < total_frames - 1:
                     time.sleep(0.5)
+
+                    # check processor health
                     for process in self.processor_processes:
                         if not process.is_alive():
                             raise Exception("process died unexpectedly")
+
+                    # check decoder health
+                    if (
+                        not self.decoder.is_alive()
+                        and self.decoder.exception is not None
+                    ):
+                        raise Exception("decoder died unexpectedly")
+
+                    # check encoder health
+                    if (
+                        not self.encoder.is_alive()
+                        and self.encoder.exception is not None
+                    ):
+                        raise Exception("encoder died unexpectedly")
 
                     # show progress bar when upscale starts
                     if progress.disable is True and self.processed.value > 0:
@@ -266,7 +282,8 @@ class Video2X:
         # if SIGTERM is received or ^C is pressed
         # TODO: pause and continue here
         except (SystemExit, KeyboardInterrupt) as e:
-            logger.warning("Exit signal received, terminating")
+            logger.warning("Exit signal received, exiting gracefully")
+            logger.warning("Press ^C again to force terminate")
             exception.append(e)
 
         except Exception as e:
@@ -281,8 +298,8 @@ class Video2X:
             # mark processing queue as closed
             self.processing_queue.close()
 
-            # stop upscaler processes
-            logger.info("Stopping upscaler processes")
+            # stop processor processes
+            logger.info("Stopping processor processes")
             for process in self.processor_processes:
                 process.terminate()
 
@@ -291,6 +308,7 @@ class Video2X:
                 process.join()
 
             # ensure both the decoder and the encoder have exited
+            logger.info("Stopping decoder and encoder threads")
             self.decoder.stop()
             self.encoder.stop()
             self.decoder.join()

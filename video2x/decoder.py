@@ -19,8 +19,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Decoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: February 16, 2022
+Last Modified: February 27, 2022
 """
+
+# local imports
+from .pipe_printer import PipePrinter
 
 # built-in imports
 import contextlib
@@ -87,9 +90,14 @@ class VideoDecoder(threading.Thread):
                 ),
                 overwrite_output=True,
             ),
+            env={"AV_LOG_FORCE_COLOR": "TRUE"},
             stdout=subprocess.PIPE,
-            # stderr=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
         )
+
+        # start the PIPE printer to start printing FFmpeg logs
+        self.pipe_printer = PipePrinter(self.decoder.stderr)
+        self.pipe_printer.start()
 
     def run(self) -> None:
         self.running = True
@@ -113,8 +121,8 @@ class VideoDecoder(threading.Thread):
                 # after the last frame has been decoded
                 # read will return nothing
                 if len(buffer) == 0:
-                    logger.debug("Decoding queue depleted")
-                    break
+                    self.stop()
+                    continue
 
                 # convert raw bytes into image object
                 image = Image.frombytes(
@@ -140,6 +148,7 @@ class VideoDecoder(threading.Thread):
 
             # most likely "not enough image data"
             except ValueError as e:
+                self.exception = e
 
                 # ignore queue closed
                 if not "is closed" in str(e):
@@ -151,13 +160,26 @@ class VideoDecoder(threading.Thread):
                 self.exception = e
                 logger.exception(e)
                 break
+        else:
+            logger.debug("Decoding queue depleted")
+
+        # flush the remaining data in STDOUT and close PIPE
+        self.decoder.stdout.flush()
+        self.decoder.stdout.close()
+
+        # flush the remaining data in STDERR and wait for it to be read
+        self.decoder.stderr.flush()
 
         # send SIGINT (2) to FFmpeg
         # this instructs it to finalize and exit
-        if self.decoder.poll() is None:
-            self.decoder.send_signal(signal.SIGTERM)
+        self.decoder.send_signal(signal.SIGINT)
 
-        # ensure the decoder has exited
+        # wait for process to terminate
+        self.pipe_printer.stop()
+        self.decoder.stderr.close()
+
+        # wait for processes and threads to stop
+        self.pipe_printer.join()
         self.decoder.wait()
         logger.info("Decoder thread exiting")
 

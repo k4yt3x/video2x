@@ -19,8 +19,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Encoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: February 16, 2022
+Last Modified: February 27, 2022
 """
+
+# local imports
+from .pipe_printer import PipePrinter
 
 # built-in imports
 import multiprocessing
@@ -74,6 +77,10 @@ class VideoEncoder(threading.Thread):
         self.processed_frames = processed_frames
         self.processed = processed
 
+        # stores exceptions if the thread exits with errors
+        self.exception = None
+
+        # create FFmpeg input for the original input video
         self.original = ffmpeg.input(input_path)
 
         # define frames as input
@@ -122,10 +129,14 @@ class VideoEncoder(threading.Thread):
                 ),
                 overwrite_output=True,
             ),
+            env={"AV_LOG_FORCE_COLOR": "TRUE"},
             stdin=subprocess.PIPE,
-            # stdout=subprocess.DEVNULL,
-            # stderr=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
         )
+
+        # start the PIPE printer to start printing FFmpeg logs
+        self.pipe_printer = PipePrinter(self.encoder.stderr)
+        self.pipe_printer.start()
 
     def run(self) -> None:
         self.running = True
@@ -150,19 +161,29 @@ class VideoEncoder(threading.Thread):
 
             # send exceptions into the client connection pipe
             except Exception as e:
+                self.exception = e
                 logger.exception(e)
                 break
+        else:
+            logger.debug("Encoding queue depleted")
 
         # flush the remaining data in STDIN and close PIPE
-        logger.debug("Encoding queue depleted")
         self.encoder.stdin.flush()
         self.encoder.stdin.close()
+
+        # flush the remaining data in STDERR and wait for it to be read
+        self.encoder.stderr.flush()
 
         # send SIGINT (2) to FFmpeg
         # this instructs it to finalize and exit
         self.encoder.send_signal(signal.SIGINT)
 
         # wait for process to terminate
+        self.pipe_printer.stop()
+        self.encoder.stderr.close()
+
+        # wait for processes and threads to stop
+        self.pipe_printer.join()
         self.encoder.wait()
         logger.info("Encoder thread exiting")
 
