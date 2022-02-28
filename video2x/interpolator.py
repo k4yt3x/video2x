@@ -56,7 +56,9 @@ class Interpolator(multiprocessing.Process):
 
     def run(self) -> None:
         self.running = True
-        logger.info(f"Interpolator process {self.name} initiating")
+        logger.opt(colors=True).info(
+            f"Interpolator process <blue>{self.name}</blue> initiating"
+        )
         processor_objects = {}
         while self.running:
             try:
@@ -112,7 +114,9 @@ class Interpolator(multiprocessing.Process):
                 logger.exception(e)
                 break
 
-        logger.info(f"Interpolator process {self.name} terminating")
+        logger.opt(colors=True).info(
+            f"Interpolator process <blue>{self.name}</blue> terminating"
+        )
         return super().run()
 
     def _stop(self, _signal_number, _frame) -> None:
