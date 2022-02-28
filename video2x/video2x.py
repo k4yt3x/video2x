@@ -231,7 +231,7 @@ class Video2X:
             # create progress bar
             with Progress(
                 "[progress.description]{task.description}",
-                BarColumn(finished_style="green"),
+                BarColumn(complete_style="blue", finished_style="green"),
                 "[progress.percentage]{task.percentage:>3.0f}%",
                 "[color(240)]({task.completed}/{task.total})",
                 ProcessingSpeedColumn(),
