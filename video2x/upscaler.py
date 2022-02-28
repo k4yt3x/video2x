@@ -190,7 +190,6 @@ class Upscaler(multiprocessing.Process):
         logger.opt(colors=True).info(
             f"Upscaler process <blue>{self.name}</blue> terminating"
         )
-        self.running = False
         return super().run()
 
     def _stop(self, _signal_number, _frame) -> None:

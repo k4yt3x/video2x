@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: February 24, 2018
-Last Modified: February 27, 2022
+Last Modified: February 28, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -290,14 +290,7 @@ class Video2X:
             logger.exception(e)
             exception.append(e)
 
-        # if no exceptions were produced
-        else:
-            logger.success("Processing completed successfully")
-
         finally:
-            # mark processing queue as closed
-            self.processing_queue.close()
-
             # stop processor processes
             logger.info("Stopping processor processes")
             for process in self.processor_processes:
@@ -307,12 +300,15 @@ class Video2X:
             for process in self.processor_processes:
                 process.join()
 
-            # ensure both the decoder and the encoder have exited
+            # stop encoder and decoder
             logger.info("Stopping decoder and encoder threads")
             self.decoder.stop()
             self.encoder.stop()
             self.decoder.join()
             self.encoder.join()
+
+            # mark processing queue as closed
+            self.processing_queue.close()
 
             # raise the error if there is any
             if len(exception) > 0:
@@ -549,7 +545,7 @@ def main() -> int:
             "<magenta>Copyright (C) 2018-2022 K4YT3X and contributors.</magenta>"
         )
 
-        # initialize upscaler object
+        # initialize video2x object
         video2x = Video2X()
 
         if args.action == "upscale":
@@ -573,8 +569,6 @@ def main() -> int:
                 args.algorithm,
             )
 
-        return 0
-
     # don't print the traceback for manual terminations
     except KeyboardInterrupt as e:
         return 2
@@ -582,3 +576,8 @@ def main() -> int:
     except Exception as e:
         logger.exception(e)
         return 1
+
+    # if no exceptions were produced
+    else:
+        logger.success("Processing completed successfully")
+        return 0

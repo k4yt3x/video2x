@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Interpolator
 Author: K4YT3X
 Date Created: May 27, 2021
-Last Modified: February 16, 2022
+Last Modified: February 28, 2022
 """
 
 # local imports
@@ -113,7 +113,6 @@ class Interpolator(multiprocessing.Process):
                 break
 
         logger.info(f"Interpolator process {self.name} terminating")
-        self.running = False
         return super().run()
 
     def _stop(self, _signal_number, _frame) -> None:

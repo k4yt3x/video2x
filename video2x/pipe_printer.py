@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: PIPE Printer
 Author: K4YT3X
 Date Created: February 27, 2022
-Last Modified: February 27, 2022
+Last Modified: February 28, 2022
 """
 
 # built-in imports
@@ -39,6 +39,11 @@ class PipePrinter(threading.Thread):
         # set read mode to non-blocking
         os.set_blocking(self.stderr.fileno(), False)
 
+    def _print_output(self) -> None:
+        output = self.stderr.read()
+        if output is not None and len(output) != 0:
+            print(output.decode(), file=sys.stderr)
+
     def run(self) -> None:
         self.running = True
 
@@ -46,9 +51,12 @@ class PipePrinter(threading.Thread):
         while self.running:
             time.sleep(0.5)
 
-            output = self.stderr.read()
-            if output is not None:
-                print(output.decode(), file=sys.stderr)
+            try:
+                self._print_output()
+
+            # pipe closed
+            except ValueError:
+                break
 
         return super().run()
 

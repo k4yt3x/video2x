@@ -167,27 +167,26 @@ class VideoEncoder(threading.Thread):
         else:
             logger.debug("Encoding queue depleted")
 
-        # flush the remaining data in STDIN and close PIPE
+        # flush the remaining data in STDIN and STDERR
         self.encoder.stdin.flush()
-        self.encoder.stdin.close()
-
-        # flush the remaining data in STDERR and wait for it to be read
         self.encoder.stderr.flush()
 
         # send SIGINT (2) to FFmpeg
         # this instructs it to finalize and exit
         self.encoder.send_signal(signal.SIGINT)
 
-        # wait for process to terminate
-        self.pipe_printer.stop()
+        # close PIPEs to prevent process from getting stuck
+        self.encoder.stdin.close()
         self.encoder.stderr.close()
 
-        # wait for processes and threads to stop
-        self.pipe_printer.join()
+        # wait for process to exit
         self.encoder.wait()
-        logger.info("Encoder thread exiting")
 
-        self.running = False
+        # wait for PIPE printer to exit
+        self.pipe_printer.stop()
+        self.pipe_printer.join()
+
+        logger.info("Encoder thread exiting")
         return super().run()
 
     def stop(self) -> None:

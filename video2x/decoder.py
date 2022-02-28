@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Decoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: February 27, 2022
+Last Modified: February 28, 2022
 """
 
 # local imports
@@ -163,27 +163,26 @@ class VideoDecoder(threading.Thread):
         else:
             logger.debug("Decoding queue depleted")
 
-        # flush the remaining data in STDOUT and close PIPE
+        # flush the remaining data in STDOUT and STDERR
         self.decoder.stdout.flush()
-        self.decoder.stdout.close()
-
-        # flush the remaining data in STDERR and wait for it to be read
         self.decoder.stderr.flush()
 
         # send SIGINT (2) to FFmpeg
         # this instructs it to finalize and exit
         self.decoder.send_signal(signal.SIGINT)
 
-        # wait for process to terminate
-        self.pipe_printer.stop()
+        # close PIPEs to prevent process from getting stuck
+        self.decoder.stdout.close()
         self.decoder.stderr.close()
 
-        # wait for processes and threads to stop
-        self.pipe_printer.join()
+        # wait for process to exit
         self.decoder.wait()
-        logger.info("Decoder thread exiting")
 
-        self.running = False
+        # wait for PIPE printer to exit
+        self.pipe_printer.stop()
+        self.pipe_printer.join()
+
+        logger.info("Decoder thread exiting")
         return super().run()
 
     def stop(self) -> None:
