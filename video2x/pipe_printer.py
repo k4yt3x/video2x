@@ -22,12 +22,11 @@ Date Created: February 27, 2022
 Last Modified: February 28, 2022
 """
 
-# built-in imports
-from typing import IO
 import os
 import sys
 import threading
 import time
+from typing import IO
 
 
 class PipePrinter(threading.Thread):

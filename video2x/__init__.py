@@ -26,7 +26,6 @@ Last Modified: February 16, 2022
 # prevent setup.cfg from producing import errors
 __version__ = "5.0.0-beta5"
 
-# local imports
-from .video2x import Video2X
-from .upscaler import Upscaler
 from .interpolator import Interpolator
+from .upscaler import Upscaler
+from .video2x import Video2X

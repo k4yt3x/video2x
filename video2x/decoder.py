@@ -19,14 +19,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Decoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: February 28, 2022
+Last Modified: March 1, 2022
 """
 
-# local imports
-from .pipe_printer import PipePrinter
-
-# built-in imports
 import contextlib
+import multiprocessing
 import os
 import pathlib
 import queue
@@ -34,11 +31,11 @@ import signal
 import subprocess
 import threading
 
-# third-party imports
+import ffmpeg
 from loguru import logger
 from PIL import Image
-import ffmpeg
 
+from .pipe_printer import PipePrinter
 
 # map Loguru log levels to FFmpeg log levels
 LOGURU_FFMPEG_LOGLEVELS = {
@@ -59,7 +56,7 @@ class VideoDecoder(threading.Thread):
         input_width: int,
         input_height: int,
         frame_rate: float,
-        processing_queue: queue.Queue,
+        processing_queue: multiprocessing.Queue,
         processing_settings: tuple,
         ignore_max_image_pixels=True,
     ) -> None:

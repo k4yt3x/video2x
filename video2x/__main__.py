@@ -22,12 +22,9 @@ Date Created: July 3, 2021
 Last Modified: February 26, 2022
 """
 
-# local imports
-from .video2x import main
-
-# built-in imports
 import sys
 
+from .video2x import main
 
 if __name__ == "__main__":
     sys.exit(main())
