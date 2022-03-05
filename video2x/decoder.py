@@ -76,7 +76,7 @@ class VideoDecoder(threading.Thread):
         self.decoder = subprocess.Popen(
             ffmpeg.compile(
                 ffmpeg.input(input_path, r=frame_rate)["v"]
-                .output("pipe:1", format="rawvideo", pix_fmt="rgb24", vsync="1")
+                .output("pipe:1", format="rawvideo", pix_fmt="rgb24", vsync="cfr")
                 .global_args("-hide_banner")
                 .global_args("-nostats")
                 .global_args(

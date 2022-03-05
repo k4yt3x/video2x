@@ -19,13 +19,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Encoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: February 27, 2022
+Last Modified: March 1, 2022
 """
 
-# local imports
-from .pipe_printer import PipePrinter
-
-# built-in imports
 import multiprocessing
 import multiprocessing.managers
 import multiprocessing.sharedctypes
@@ -36,10 +32,10 @@ import subprocess
 import threading
 import time
 
-# third-party imports
-from loguru import logger
 import ffmpeg
+from loguru import logger
 
+from .pipe_printer import PipePrinter
 
 # map Loguru log levels to FFmpeg log levels
 LOGURU_FFMPEG_LOGLEVELS = {
@@ -88,7 +84,7 @@ class VideoEncoder(threading.Thread):
             "pipe:0",
             format="rawvideo",
             pix_fmt="rgb24",
-            vsync="1",
+            vsync="cfr",
             s=f"{output_width}x{output_height}",
             r=frame_rate,
         )
@@ -110,12 +106,14 @@ class VideoEncoder(threading.Thread):
                     frames,
                     *[s for s in additional_streams if s is not None],
                     str(self.output_path),
-                    pix_fmt="yuv420p",
                     vcodec="libx264",
-                    # acodec="copy",
-                    r=frame_rate,
+                    vsync="cfr",
+                    pix_fmt="yuv420p",
                     crf=17,
-                    vsync="1",
+                    preset="veryslow",
+                    # acodec="libfdk_aac",
+                    # cutoff=20000,
+                    r=frame_rate,
                     map_metadata=1,
                     metadata="comment=Processed with Video2X",
                 )
