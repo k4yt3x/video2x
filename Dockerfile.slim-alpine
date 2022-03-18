@@ -1,20 +1,18 @@
 # Name: Video2X Dockerfile (Slim Alpine)
 # Creator: K4YT3X
 # Date Created: February 1, 2022
-# Last Modified: February 4, 2022
+# Last Modified: March 18, 2022
 
 # stage: build python components into heels
 FROM docker.io/library/python:3.10.2-alpine3.15 AS builder
 COPY . /video2x
 WORKDIR /video2x
 RUN apk add --no-cache \
-        cmake g++ gcc git ninja swig \
+        cmake g++ gcc git ninja swig linux-headers \
         ffmpeg-dev glslang-dev jpeg-dev vulkan-loader-dev zlib-dev \
-        linux-headers \
     && pip install -U pip \
     && CMAKE_ARGS="-DWITH_FFMPEG=YES" pip wheel -w /wheels opencv-python \
-    && pip wheel -w /wheels wheel setuptools setuptools_scm \
-        rife-ncnn-vulkan-python@git+https://github.com/media2x/rife-ncnn-vulkan-python.git .
+    && pip wheel -w /wheels wheel pdm-pep517 .
 
 # stage 2: install wheels into final image
 FROM docker.io/library/python:3.10.2-alpine3.15
