@@ -22,10 +22,6 @@ Date Created: May 27, 2021
 Last Modified: February 28, 2022
 """
 
-# local imports
-from rife_ncnn_vulkan_python.rife_ncnn_vulkan import Rife
-
-# built-in imports
 import multiprocessing
 import multiprocessing.managers
 import multiprocessing.sharedctypes
@@ -33,10 +29,9 @@ import queue
 import signal
 import time
 
-# third-party imports
-from PIL import ImageChops, ImageStat
 from loguru import logger
-
+from PIL import ImageChops, ImageStat
+from rife_ncnn_vulkan_python.rife_ncnn_vulkan import Rife
 
 ALGORITHM_CLASSES = {"rife": Rife}
 

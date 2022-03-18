@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: February 24, 2018
-Last Modified: February 28, 2022
+Last Modified: March 18, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -39,14 +39,6 @@ Editor: 28598519a
 Last Modified: March 23, 2020
 """
 
-# local imports
-from . import __version__
-from .decoder import VideoDecoder
-from .encoder import VideoEncoder
-from .interpolator import Interpolator
-from .upscaler import Upscaler
-
-# built-in imports
 import argparse
 import math
 import multiprocessing
@@ -55,7 +47,8 @@ import pathlib
 import sys
 import time
 
-# third-party imports
+import cv2
+import ffmpeg
 from loguru import logger
 from rich import print
 from rich.console import Console
@@ -69,9 +62,12 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 from rich.text import Text
-import cv2
-import ffmpeg
 
+from . import __version__
+from .decoder import VideoDecoder
+from .encoder import VideoEncoder
+from .interpolator import Interpolator
+from .upscaler import Upscaler
 
 LEGAL_INFO = """Video2X\t\t{}
 Author:\t\tK4YT3X
@@ -526,7 +522,7 @@ def main() -> int:
             logger.critical(f"Cannot find input file: {args.input}")
             return 1
         elif not args.input.is_file():
-            logger.critical(f"Input path is not a file")
+            logger.critical("Input path is not a file")
             return 1
 
         # set logger level
@@ -570,7 +566,7 @@ def main() -> int:
             )
 
     # don't print the traceback for manual terminations
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         return 2
 
     except Exception as e:

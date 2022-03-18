@@ -148,7 +148,7 @@ class VideoDecoder(threading.Thread):
                 self.exception = e
 
                 # ignore queue closed
-                if not "is closed" in str(e):
+                if "is closed" not in str(e):
                     logger.exception(e)
                 break
 

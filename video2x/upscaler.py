@@ -22,12 +22,6 @@ Date Created: May 27, 2021
 Last Modified: February 16, 2022
 """
 
-# local imports
-from realsr_ncnn_vulkan_python.realsr_ncnn_vulkan import Realsr
-from srmd_ncnn_vulkan_python.srmd_ncnn_vulkan import Srmd
-from waifu2x_ncnn_vulkan_python.waifu2x_ncnn_vulkan import Waifu2x
-
-# built-in imports
 import math
 import multiprocessing
 import multiprocessing.managers
@@ -36,9 +30,11 @@ import queue
 import signal
 import time
 
-# third-party imports
-from PIL import Image, ImageChops, ImageStat
 from loguru import logger
+from PIL import Image, ImageChops, ImageStat
+from realsr_ncnn_vulkan_python.realsr_ncnn_vulkan import Realsr
+from srmd_ncnn_vulkan_python.srmd_ncnn_vulkan import Srmd
+from waifu2x_ncnn_vulkan_python.waifu2x_ncnn_vulkan import Waifu2x
 
 # fixed scaling ratios supported by the algorithms
 # that only support certain fixed scale ratios
@@ -175,7 +171,8 @@ class Upscaler(multiprocessing.Process):
                         # process the image with the selected algorithm
                         image1 = processor_object.process(image1)
 
-                    # downscale the image to the desired output size and save the image to disk
+                    # downscale the image to the desired output size and
+                    # save the image to disk
                     image1 = image1.resize((output_width, output_height), Image.LANCZOS)
                     self.processed_frames[frame_index] = image1
 
