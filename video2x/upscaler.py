@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Upscaler
 Author: K4YT3X
 Date Created: May 27, 2021
-Last Modified: February 16, 2022
+Last Modified: March 19, 2022
 """
 
 import math
@@ -32,9 +32,10 @@ import time
 
 from loguru import logger
 from PIL import Image, ImageChops, ImageStat
-from realsr_ncnn_vulkan_python.realsr_ncnn_vulkan import Realsr
-from srmd_ncnn_vulkan_python.srmd_ncnn_vulkan import Srmd
-from waifu2x_ncnn_vulkan_python.waifu2x_ncnn_vulkan import Waifu2x
+from realcugan_ncnn_vulkan_python import Realcugan
+from realsr_ncnn_vulkan_python import Realsr
+from srmd_ncnn_vulkan_python import Srmd
+from waifu2x_ncnn_vulkan_python import Waifu2x
 
 # fixed scaling ratios supported by the algorithms
 # that only support certain fixed scale ratios
@@ -42,9 +43,15 @@ ALGORITHM_FIXED_SCALING_RATIOS = {
     "waifu2x": [1, 2],
     "srmd": [2, 3, 4],
     "realsr": [4],
+    "realcugan": [1, 2, 3, 4],
 }
 
-ALGORITHM_CLASSES = {"waifu2x": Waifu2x, "srmd": Srmd, "realsr": Realsr}
+ALGORITHM_CLASSES = {
+    "waifu2x": Waifu2x,
+    "srmd": Srmd,
+    "realsr": Realsr,
+    "realcugan": Realcugan,
+}
 
 
 class Upscaler(multiprocessing.Process):
@@ -164,7 +171,7 @@ class Upscaler(multiprocessing.Process):
                         processor_object = processor_objects.get((algorithm, job))
                         if processor_object is None:
                             processor_object = ALGORITHM_CLASSES[algorithm](
-                                scale=job, noise=noise
+                                noise=noise, scale=job
                             )
                             processor_objects[(algorithm, job)] = processor_object
 

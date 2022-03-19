@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: February 24, 2018
-Last Modified: March 18, 2022
+Last Modified: March 19, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -82,6 +82,7 @@ UPSCALING_ALGORITHMS = [
     "waifu2x",
     "srmd",
     "realsr",
+    "realcugan",
 ]
 
 # algorithms available for frame interpolation tasks

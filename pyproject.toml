@@ -27,13 +27,14 @@ classifiers = [
 dependencies = [
   "ffmpeg-python>=0.2.0",
   "loguru>=0.6.0",
-  "opencv-python>=4.5.5.62",
+  "opencv-python>=4.5.5.64",
   "pillow>=9.0.1",
-  "rich>=11.2.0",
+  "rich>=12.0.0",
   "waifu2x-ncnn-vulkan-python>=1.0.1",
   "srmd-ncnn-vulkan-python>=1.0.2",
-  "realsr-ncnn-vulkan-python>=1.0.3",
-  "rife-ncnn-vulkan-python>=1.0.4",
+  "realsr-ncnn-vulkan-python>=1.0.4",
+  "rife-ncnn-vulkan-python>=1.1.2.post3",
+  "realcugan-ncnn-vulkan-python>=1.0.0",
 ]
 dynamic = ["version"]
 
