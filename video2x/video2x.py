@@ -258,7 +258,7 @@ class Video2X:
             disable=True,
         )
 
-        self.description = f"[cyan]{MODE_LABELS.get(self.mode, 'Unknown')}"
+        self.description = f"[cyan]{MODE_LABELS.get(mode, 'Unknown')}"
         self.task = self.progress.add_task(self.description, total=total_frames)
 
         # allow sending SIGUSR1 to pause/resume processing
