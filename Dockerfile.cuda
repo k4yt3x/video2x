@@ -1,7 +1,7 @@
 # Name: Video2X Dockerfile (CUDA)
 # Creator: K4YT3X
 # Date Created: February 3, 2022
-# Last Modified: March 18, 2022
+# Last Modified: March 20, 2022
 
 # stage 1: build the python components into wheels
 FROM docker.io/nvidia/cuda:11.6.0-runtime-ubuntu20.04 AS builder
@@ -22,6 +22,9 @@ LABEL maintainer="K4YT3X <i@k4yt3x.com>" \
       org.opencontainers.image.source="https://github.com/k4yt3x/video2x" \
       org.opencontainers.image.description="A lossless video/GIF/image upscaler"
 ENV DEBIAN_FRONTEND=noninteractive
+ENV VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json\
+:/usr/share/vulkan/icd.d/radeon_icd.x86_64.json\
+:/usr/share/vulkan/icd.d/intel_icd.x86_64.json
 
 COPY --from=builder /var/lib/apt/lists* /var/lib/apt/lists/
 COPY --from=builder /wheels /wheels
