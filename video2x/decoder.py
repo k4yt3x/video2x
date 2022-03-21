@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Decoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: March 1, 2022
+Last Modified: March 20, 2022
 """
 
 import contextlib
@@ -30,6 +30,8 @@ import queue
 import signal
 import subprocess
 import threading
+import time
+from multiprocessing.sharedctypes import Synchronized
 
 import ffmpeg
 from loguru import logger
@@ -58,6 +60,7 @@ class VideoDecoder(threading.Thread):
         frame_rate: float,
         processing_queue: multiprocessing.Queue,
         processing_settings: tuple,
+        pause: Synchronized,
         ignore_max_image_pixels=True,
     ) -> None:
         threading.Thread.__init__(self)
@@ -67,6 +70,7 @@ class VideoDecoder(threading.Thread):
         self.input_height = input_height
         self.processing_queue = processing_queue
         self.processing_settings = processing_settings
+        self.pause = pause
 
         # this disables the "possible DDoS" warning
         if ignore_max_image_pixels:
@@ -109,6 +113,12 @@ class VideoDecoder(threading.Thread):
         # continue running until an exception occurs
         # or all frames have been decoded
         while self.running:
+
+            # pause if pause flag is set
+            if self.pause.value is True:
+                time.sleep(0.1)
+                continue
+
             try:
                 buffer = self.decoder.stdout.read(
                     3 * self.input_width * self.input_height

@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: February 24, 2018
-Last Modified: March 19, 2022
+Last Modified: March 20, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -40,15 +40,19 @@ Last Modified: March 23, 2020
 """
 
 import argparse
+import ctypes
 import math
 import multiprocessing
 import os
 import pathlib
+import signal
 import sys
 import time
+from typing import Union
 
 import cv2
 import ffmpeg
+import pynput
 from loguru import logger
 from rich import print
 from rich.console import Console
@@ -150,6 +154,22 @@ class Video2X:
 
         return video_info["width"], video_info["height"], total_frames, frame_rate
 
+    def _toggle_pause(self, _signal_number: int = -1, _frame=None):
+        # print console messages and update the progress bar's status
+        if self.pause.value is False:
+            self.progress.update(self.task, description=self.description + " (paused)")
+            self.progress.stop_task(self.task)
+            logger.warning("Processing paused, press Ctrl+Alt+V again to resume")
+
+        elif self.pause.value is True:
+            self.progress.update(self.task, description=self.description)
+            logger.warning("Resuming processing")
+            self.progress.start_task(self.task)
+
+        # invert the value of the pause flag
+        with self.pause.get_lock():
+            self.pause.value = not self.pause.value
+
     def _run(
         self,
         input_path: pathlib.Path,
@@ -186,6 +206,7 @@ class Video2X:
         self.processing_queue = multiprocessing.Queue(maxsize=processes * 10)
         processed_frames = multiprocessing.Manager().list([None] * total_frames)
         self.processed = multiprocessing.Value("I", 0)
+        self.pause = multiprocessing.Value(ctypes.c_bool, False)
 
         # set up and start decoder thread
         logger.info("Starting video decoder")
@@ -196,6 +217,7 @@ class Video2X:
             frame_rate,
             self.processing_queue,
             processing_settings,
+            self.pause,
         )
         self.decoder.start()
 
@@ -210,84 +232,110 @@ class Video2X:
             total_frames,
             processed_frames,
             self.processed,
+            self.pause,
         )
         self.encoder.start()
 
         # create processor processes
         for process_name in range(processes):
-            process = Processor(self.processing_queue, processed_frames)
+            process = Processor(self.processing_queue, processed_frames, self.pause)
             process.name = str(process_name)
             process.daemon = True
             process.start()
             self.processor_processes.append(process)
 
+        # create progress bar
+        self.progress = Progress(
+            "[progress.description]{task.description}",
+            BarColumn(complete_style="blue", finished_style="green"),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            "[color(240)]({task.completed}/{task.total})",
+            ProcessingSpeedColumn(),
+            TimeElapsedColumn(),
+            "<",
+            TimeRemainingColumn(),
+            console=console,
+            disable=True,
+        )
+
+        self.description = f"[cyan]{MODE_LABELS.get(self.mode, 'Unknown')}"
+        self.task = self.progress.add_task(self.description, total=total_frames)
+
+        # allow sending SIGUSR1 to pause/resume processing
+        signal.signal(signal.SIGUSR1, self._toggle_pause)
+
+        # create global pause hotkey
+        pause_hotkey = pynput.keyboard.HotKey(
+            pynput.keyboard.HotKey.parse("<ctrl>+<alt>+v"), self._toggle_pause
+        )
+
+        # create global keyboard input listener
+        keyboard_listener = pynput.keyboard.Listener(
+            on_press=(lambda key: pause_hotkey.press(keyboard_listener.canonical(key))),
+            on_release=(
+                lambda key: pause_hotkey.release(keyboard_listener.canonical(key))
+            ),
+        )
+
+        # start monitoring global key presses
+        keyboard_listener.start()
+
         # a temporary variable that stores the exception
         exception = []
 
         try:
-            # create progress bar
-            with Progress(
-                "[progress.description]{task.description}",
-                BarColumn(complete_style="blue", finished_style="green"),
-                "[progress.percentage]{task.percentage:>3.0f}%",
-                "[color(240)]({task.completed}/{task.total})",
-                ProcessingSpeedColumn(),
-                TimeElapsedColumn(),
-                "<",
-                TimeRemainingColumn(),
-                console=console,
-                disable=True,
-            ) as progress:
-                task = progress.add_task(
-                    f"[cyan]{MODE_LABELS.get(mode, 'Unknown')}", total=total_frames
-                )
 
-                # wait for jobs in queue to deplete
-                while self.processed.value < total_frames - 1:
-                    time.sleep(0.5)
+            # wait for jobs in queue to deplete
+            while self.processed.value < total_frames - 1:
+                time.sleep(1)
 
-                    # check processor health
-                    for process in self.processor_processes:
-                        if not process.is_alive():
-                            raise Exception("process died unexpectedly")
+                # check processor health
+                for process in self.processor_processes:
+                    if not process.is_alive():
+                        raise Exception("process died unexpectedly")
 
-                    # check decoder health
-                    if (
-                        not self.decoder.is_alive()
-                        and self.decoder.exception is not None
-                    ):
-                        raise Exception("decoder died unexpectedly")
+                # check decoder health
+                if not self.decoder.is_alive() and self.decoder.exception is not None:
+                    raise Exception("decoder died unexpectedly")
 
-                    # check encoder health
-                    if (
-                        not self.encoder.is_alive()
-                        and self.encoder.exception is not None
-                    ):
-                        raise Exception("encoder died unexpectedly")
+                # check encoder health
+                if not self.encoder.is_alive() and self.encoder.exception is not None:
+                    raise Exception("encoder died unexpectedly")
 
-                    # show progress bar when upscale starts
-                    if progress.disable is True and self.processed.value > 0:
-                        progress.disable = False
-                        progress.start()
+                # show progress bar when upscale starts
+                if self.progress.disable is True and self.processed.value > 0:
+                    self.progress.disable = False
+                    self.progress.start()
 
-                    # update progress
-                    progress.update(task, completed=self.processed.value)
+                # update progress
+                if self.pause.value is False:
+                    self.progress.update(self.task, completed=self.processed.value)
 
-                progress.update(task, completed=total_frames)
+            self.progress.update(self.task, completed=total_frames)
+            self.progress.stop()
             logger.info("Processing has completed")
 
         # if SIGTERM is received or ^C is pressed
         # TODO: pause and continue here
         except (SystemExit, KeyboardInterrupt) as e:
+            self.progress.stop()
             logger.warning("Exit signal received, exiting gracefully")
             logger.warning("Press ^C again to force terminate")
             exception.append(e)
 
         except Exception as e:
+            self.progress.stop()
             logger.exception(e)
             exception.append(e)
 
         finally:
+            # stop keyboard listener
+            keyboard_listener.stop()
+            keyboard_listener.join()
+
+            # stop progress display
+            self.progress.stop()
+
             # stop processor processes
             logger.info("Stopping processor processes")
             for process in self.processor_processes:

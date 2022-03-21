@@ -19,16 +19,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Upscaler
 Author: K4YT3X
 Date Created: May 27, 2021
-Last Modified: March 19, 2022
+Last Modified: March 20, 2022
 """
 
 import math
 import multiprocessing
-import multiprocessing.managers
-import multiprocessing.sharedctypes
 import queue
 import signal
 import time
+from multiprocessing.managers import ListProxy
+from multiprocessing.sharedctypes import Synchronized
 
 from loguru import logger
 from PIL import Image, ImageChops, ImageStat
@@ -58,12 +58,14 @@ class Upscaler(multiprocessing.Process):
     def __init__(
         self,
         processing_queue: multiprocessing.Queue,
-        processed_frames: multiprocessing.managers.ListProxy,
+        processed_frames: ListProxy,
+        pause: Synchronized,
     ) -> None:
         multiprocessing.Process.__init__(self)
         self.running = False
         self.processing_queue = processing_queue
         self.processed_frames = processed_frames
+        self.pause = pause
 
         signal.signal(signal.SIGTERM, self._stop)
 
@@ -75,6 +77,11 @@ class Upscaler(multiprocessing.Process):
         processor_objects = {}
         while self.running:
             try:
+                # pause if pause flag is set
+                if self.pause.value is True:
+                    time.sleep(0.1)
+                    continue
+
                 try:
                     # get new job from queue
                     (

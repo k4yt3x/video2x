@@ -19,18 +19,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Encoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: March 1, 2022
+Last Modified: March 20, 2022
 """
 
-import multiprocessing
-import multiprocessing.managers
-import multiprocessing.sharedctypes
 import os
 import pathlib
 import signal
 import subprocess
 import threading
 import time
+from multiprocessing.managers import ListProxy
+from multiprocessing.sharedctypes import Synchronized
 
 import ffmpeg
 from loguru import logger
@@ -58,8 +57,9 @@ class VideoEncoder(threading.Thread):
         output_width: int,
         output_height: int,
         total_frames: int,
-        processed_frames: multiprocessing.managers.ListProxy,
-        processed: multiprocessing.sharedctypes.Synchronized,
+        processed_frames: ListProxy,
+        processed: Synchronized,
+        pause: Synchronized,
         copy_audio: bool = True,
         copy_subtitle: bool = True,
         copy_data: bool = False,
@@ -72,6 +72,7 @@ class VideoEncoder(threading.Thread):
         self.total_frames = total_frames
         self.processed_frames = processed_frames
         self.processed = processed
+        self.pause = pause
 
         # stores exceptions if the thread exits with errors
         self.exception = None
@@ -140,6 +141,12 @@ class VideoEncoder(threading.Thread):
         self.running = True
         frame_index = 0
         while self.running and frame_index < self.total_frames:
+
+            # pause if pause flag is set
+            if self.pause.value is True:
+                time.sleep(0.1)
+                continue
+
             try:
                 image = self.processed_frames[frame_index]
                 if image is None:
