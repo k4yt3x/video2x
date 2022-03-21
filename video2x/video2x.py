@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: February 24, 2018
-Last Modified: March 20, 2022
+Last Modified: March 21, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -48,11 +48,9 @@ import pathlib
 import signal
 import sys
 import time
-from typing import Union
 
 import cv2
 import ffmpeg
-import pynput
 from loguru import logger
 from rich import print
 from rich.console import Console
@@ -72,6 +70,15 @@ from .decoder import VideoDecoder
 from .encoder import VideoEncoder
 from .interpolator import Interpolator
 from .upscaler import Upscaler
+
+# for desktop environments only
+# if pynput can be loaded, enable global pause hotkey support
+try:
+    import pynput
+except ImportError:
+    ENABLE_HOTKEY = False
+else:
+    ENABLE_HOTKEY = True
 
 LEGAL_INFO = """Video2X\t\t{}
 Author:\t\tK4YT3X
@@ -255,6 +262,7 @@ class Video2X:
             "<",
             TimeRemainingColumn(),
             console=console,
+            speed_estimate_period=300.0,
             disable=True,
         )
 
@@ -264,21 +272,26 @@ class Video2X:
         # allow sending SIGUSR1 to pause/resume processing
         signal.signal(signal.SIGUSR1, self._toggle_pause)
 
-        # create global pause hotkey
-        pause_hotkey = pynput.keyboard.HotKey(
-            pynput.keyboard.HotKey.parse("<ctrl>+<alt>+v"), self._toggle_pause
-        )
+        # enable global pause hotkey if it's supported
+        if ENABLE_HOTKEY is True:
 
-        # create global keyboard input listener
-        keyboard_listener = pynput.keyboard.Listener(
-            on_press=(lambda key: pause_hotkey.press(keyboard_listener.canonical(key))),
-            on_release=(
-                lambda key: pause_hotkey.release(keyboard_listener.canonical(key))
-            ),
-        )
+            # create global pause hotkey
+            pause_hotkey = pynput.keyboard.HotKey(
+                pynput.keyboard.HotKey.parse("<ctrl>+<alt>+v"), self._toggle_pause
+            )
 
-        # start monitoring global key presses
-        keyboard_listener.start()
+            # create global keyboard input listener
+            keyboard_listener = pynput.keyboard.Listener(
+                on_press=(
+                    lambda key: pause_hotkey.press(keyboard_listener.canonical(key))
+                ),
+                on_release=(
+                    lambda key: pause_hotkey.release(keyboard_listener.canonical(key))
+                ),
+            )
+
+            # start monitoring global key presses
+            keyboard_listener.start()
 
         # a temporary variable that stores the exception
         exception = []
@@ -329,9 +342,11 @@ class Video2X:
             exception.append(e)
 
         finally:
+
             # stop keyboard listener
-            keyboard_listener.stop()
-            keyboard_listener.join()
+            if ENABLE_HOTKEY is True:
+                keyboard_listener.stop()
+                keyboard_listener.join()
 
             # stop progress display
             self.progress.stop()

@@ -27,6 +27,11 @@ version = "0.9.1"
 summary = "Python parser for the CommonMark Markdown spec"
 
 [[package]]
+name = "evdev"
+version = "1.4.0"
+summary = "Bindings to the Linux input handling subsystem"
+
+[[package]]
 name = "ffmpeg-python"
 version = "0.2.0"
 summary = "Python bindings for FFmpeg - with complex filtering support"
@@ -116,10 +121,66 @@ requires_python = ">=3.5"
 summary = "Pygments is a syntax highlighting package written in Python."
 
 [[package]]
+name = "pynput"
+version = "1.7.6"
+summary = "Monitor and control user input devices"
+dependencies = [
+    "evdev>=1.3; \"linux\" in sys_platform",
+    "pyobjc-framework-ApplicationServices>=8.0; sys_platform == \"darwin\"",
+    "pyobjc-framework-Quartz>=8.0; sys_platform == \"darwin\"",
+    "python-xlib>=0.17; \"linux\" in sys_platform",
+    "six",
+]
+
+[[package]]
+name = "pyobjc-core"
+version = "8.4.1"
+requires_python = ">=3.6"
+summary = "Python<->ObjC Interoperability Module"
+
+[[package]]
+name = "pyobjc-framework-applicationservices"
+version = "8.4.1"
+requires_python = ">=3.6"
+summary = "Wrappers for the framework ApplicationServices on macOS"
+dependencies = [
+    "pyobjc-core>=8.4.1",
+    "pyobjc-framework-Cocoa>=8.4.1",
+    "pyobjc-framework-Quartz>=8.4.1",
+]
+
+[[package]]
+name = "pyobjc-framework-cocoa"
+version = "8.4.1"
+requires_python = ">=3.6"
+summary = "Wrappers for the Cocoa frameworks on macOS"
+dependencies = [
+    "pyobjc-core>=8.4.1",
+]
+
+[[package]]
+name = "pyobjc-framework-quartz"
+version = "8.4.1"
+requires_python = ">=3.6"
+summary = "Wrappers for the Quartz frameworks on macOS"
+dependencies = [
+    "pyobjc-core>=8.4.1",
+    "pyobjc-framework-Cocoa>=8.4.1",
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.0.7"
 requires_python = ">=3.6"
 summary = "Python parsing module"
+
+[[package]]
+name = "python-xlib"
+version = "0.31"
+summary = "Python X Library"
+dependencies = [
+    "six>=1.10.0",
+]
 
 [[package]]
 name = "realcugan-ncnn-vulkan-python"
@@ -177,6 +238,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "six"
+version = "1.16.0"
+requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
+summary = "Python 2 and 3 compatibility utilities"
+
+[[package]]
 name = "smmap"
 version = "5.0.0"
 requires_python = ">=3.6"
@@ -222,7 +289,7 @@ summary = "A small Python utility to set file creation time on Windows"
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:248e178bd4147998c85a6996a6dfc8738f2f697b1f84ca620c581ee0dcf24203"
+content_hash = "sha256:f72fb9417f87c737f6a94710af1039611dc2d723d056e2479172fc6b695cab7c"
 
 [metadata.files]
 "cmake 3.22.3" = [
@@ -254,6 +321,9 @@ content_hash = "sha256:248e178bd4147998c85a6996a6dfc8738f2f697b1f84ca620c581ee0d
 "commonmark 0.9.1" = [
     {file = "commonmark-0.9.1-py2.py3-none-any.whl", hash = "sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9"},
     {file = "commonmark-0.9.1.tar.gz", hash = "sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60"},
+]
+"evdev 1.4.0" = [
+    {file = "evdev-1.4.0.tar.gz", hash = "sha256:8782740eb1a86b187334c07feb5127d3faa0b236e113206dfe3ae8f77fb1aaf1"},
 ]
 "ffmpeg-python 0.2.0" = [
     {file = "ffmpeg_python-0.2.0-py3-none-any.whl", hash = "sha256:ac441a0404e053f8b6a1113a77c0f452f1cfc62f6344a769475ffdc0f56c23c5"},
@@ -366,9 +436,53 @@ content_hash = "sha256:248e178bd4147998c85a6996a6dfc8738f2f697b1f84ca620c581ee0d
     {file = "Pygments-2.11.2-py3-none-any.whl", hash = "sha256:44238f1b60a76d78fc8ca0528ee429702aae011c265fe6a8dd8b63049ae41c65"},
     {file = "Pygments-2.11.2.tar.gz", hash = "sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a"},
 ]
+"pynput 1.7.6" = [
+    {file = "pynput-1.7.6-py2.py3-none-any.whl", hash = "sha256:19861b2a0c430d646489852f89500e0c9332e295f2c020e7c2775e7046aa2e2f"},
+    {file = "pynput-1.7.6.tar.gz", hash = "sha256:3a5726546da54116b687785d38b1db56997ce1d28e53e8d22fc656d8b92e533c"},
+]
+"pyobjc-core 8.4.1" = [
+    {file = "pyobjc_core-8.4.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:9a89cac910fbd64728fe7ec0c7a3a7cf20959bc1d7e2f41db4d7800556e47745"},
+    {file = "pyobjc_core-8.4.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:2cf1d4348cb99fcba04fa38199a46e35263b2fe7bb66e6dfbd4f19bc2602998d"},
+    {file = "pyobjc_core-8.4.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:a130324b25c0f5f4cfe30b6a28b8e70865d6e1eee158caababb603906ef431d2"},
+    {file = "pyobjc_core-8.4.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:c31195d1a8f00da99abf79643f902d09c709dbbe9c9b6feb6b585303c57d720c"},
+    {file = "pyobjc_core-8.4.1-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:e7fd2aefb53a96a8f688c8bb36c6ebd5446250a7251bfa6b688a045e05afc60b"},
+    {file = "pyobjc_core-8.4.1-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:b3191173ce268e23c84d84f036fc94c3a8749a6726fc7fe73baf27dbac14f7d0"},
+    {file = "pyobjc-core-8.4.1.tar.gz", hash = "sha256:df98669e957adb33566d9ef46773a5ac876a81afe8849c282d6a80448e35dd74"},
+]
+"pyobjc-framework-applicationservices 8.4.1" = [
+    {file = "pyobjc_framework_ApplicationServices-8.4.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:362d178c624a617fc60c3a35397550193d82da9a59272b215cf1dc6fb68c011c"},
+    {file = "pyobjc_framework_ApplicationServices-8.4.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:41f0f6be6d343f91de92cab053be4a983e3936b364ca267a94c6e06bc34ff7fe"},
+    {file = "pyobjc_framework_ApplicationServices-8.4.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:73287b758a70a037b6e74a60036f4adb1677407dfeaddee94102074d92539e6e"},
+    {file = "pyobjc_framework_ApplicationServices-8.4.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:287b541b66c5c931a11dde90d7be69ddd2e5c3624c2e980e679f5242ec3ee0da"},
+    {file = "pyobjc_framework_ApplicationServices-8.4.1-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:780fbe2e3b02237f79e2f5780094dd95b7308ecdb265c062b78a507b9564eb4d"},
+    {file = "pyobjc_framework_ApplicationServices-8.4.1-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:092c4835e73e5dab1f3c498511b28b2e96503671fc7c1bc25f732c5e687b7214"},
+    {file = "pyobjc-framework-ApplicationServices-8.4.1.tar.gz", hash = "sha256:b058466266412d2bf24b0303785c91538961367f26db616bf2f9f45c498a83a3"},
+]
+"pyobjc-framework-cocoa 8.4.1" = [
+    {file = "pyobjc_framework_Cocoa-8.4.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:cfbe038a0108ae1b45f8f7067af70af5811b8352d2dc3d86a7bcb4484ff5d56e"},
+    {file = "pyobjc_framework_Cocoa-8.4.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:118225562064d991bafb41d0913899d6b3d723984d1888cb7181e4dba63b22c2"},
+    {file = "pyobjc_framework_Cocoa-8.4.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:d117a1eb24fd317e9f63792ac6a8703ed899de5d42e8a861c7bf885625668c31"},
+    {file = "pyobjc_framework_Cocoa-8.4.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:3af8577acbd6b980d3b9270ec99bc0164f66ef8397351a72fcdee527f23c1a34"},
+    {file = "pyobjc_framework_Cocoa-8.4.1-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:91fdc964acb4dee4d37ae81fb603d48397739dbbfcc1eadbe0cdafaa8144b6e6"},
+    {file = "pyobjc_framework_Cocoa-8.4.1-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:197dd28668e786b55d7d4139afd85c285f780564ebbccc166e84a24be31de34f"},
+    {file = "pyobjc-framework-Cocoa-8.4.1.tar.gz", hash = "sha256:dc596bac0f5d424f67944e95b2d0d7c94a07c4166359d7b4a4d4ae4f8e112822"},
+]
+"pyobjc-framework-quartz 8.4.1" = [
+    {file = "pyobjc_framework_Quartz-8.4.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:a82d9eab3b2a6fca46602465f731815026d06e4fd0ba65b5b5211f1a0472b861"},
+    {file = "pyobjc_framework_Quartz-8.4.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:1bd0a506385141b81330464b6e2537a7056cdca56deb98222b6926a04f72a3e6"},
+    {file = "pyobjc_framework_Quartz-8.4.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:64cc616386b7a387dce53d3adb8c12a8461c2720861ab36aeeb53768cd0ba7e4"},
+    {file = "pyobjc_framework_Quartz-8.4.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:a2dff998c4d1286998390f58a3131b99bdc9dbf5c3d881562b33f168098bbe2e"},
+    {file = "pyobjc_framework_Quartz-8.4.1-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:a98c58e1b265d5b413f5ecc6ec186b9e305fb6e37909d8b4b97fd681176f5f1c"},
+    {file = "pyobjc_framework_Quartz-8.4.1-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:39f55426ef883cbe12a53969f90886f71e2a94513c98cf3730efdf404cdc5c83"},
+    {file = "pyobjc-framework-Quartz-8.4.1.tar.gz", hash = "sha256:f8acebf0b526f0687e79ea6946e8f2528ced4ef02d0ed3fbf7116124b2749e52"},
+]
 "pyparsing 3.0.7" = [
     {file = "pyparsing-3.0.7-py3-none-any.whl", hash = "sha256:a6c06a88f252e6c322f65faf8f418b16213b51bdfaece0524c1c1bc30c63c484"},
     {file = "pyparsing-3.0.7.tar.gz", hash = "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"},
+]
+"python-xlib 0.31" = [
+    {file = "python_xlib-0.31-py2.py3-none-any.whl", hash = "sha256:1ec6ce0de73d9e6592ead666779a5732b384e5b8fb1f1886bd0a81cafa477759"},
+    {file = "python-xlib-0.31.tar.gz", hash = "sha256:74d83a081f532bc07f6d7afcd6416ec38403d68f68b9b9dc9e1f28fbf2d799e9"},
 ]
 "realcugan-ncnn-vulkan-python 1.0.0" = [
     {file = "realcugan-ncnn-vulkan-python-1.0.0.tar.gz", hash = "sha256:f72764ffe0a0c53b13cdbe1ae328ff9b0eb5582b9d5d15a0ca0c0ac254d17410"},
@@ -390,6 +504,10 @@ content_hash = "sha256:248e178bd4147998c85a6996a6dfc8738f2f697b1f84ca620c581ee0d
 "setuptools-scm 6.4.2" = [
     {file = "setuptools_scm-6.4.2-py3-none-any.whl", hash = "sha256:acea13255093849de7ccb11af9e1fb8bde7067783450cee9ef7a93139bddf6d4"},
     {file = "setuptools_scm-6.4.2.tar.gz", hash = "sha256:6833ac65c6ed9711a4d5d2266f8024cfa07c533a0e55f4c12f6eff280a5a9e30"},
+]
+"six 1.16.0" = [
+    {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
+    {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
 "smmap 5.0.0" = [
     {file = "smmap-5.0.0-py3-none-any.whl", hash = "sha256:2aba19d6a040e78d8b09de5c57e96207b09ed71d8e55ce0959eeee6c8e190d94"},

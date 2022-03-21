@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Decoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: March 20, 2022
+Last Modified: March 21, 2022
 """
 
 import contextlib
@@ -83,6 +83,7 @@ class VideoDecoder(threading.Thread):
                 .output("pipe:1", format="rawvideo", pix_fmt="rgb24", vsync="cfr")
                 .global_args("-hide_banner")
                 .global_args("-nostats")
+                .global_args("-nostdin")
                 .global_args(
                     "-loglevel",
                     LOGURU_FFMPEG_LOGLEVELS.get(
@@ -92,6 +93,7 @@ class VideoDecoder(threading.Thread):
                 overwrite_output=True,
             ),
             env={"AV_LOG_FORCE_COLOR": "TRUE"},
+            stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
