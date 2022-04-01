@@ -94,6 +94,7 @@ This project includes or depends on these following projects:
 | [opencv-python](https://github.com/opencv/opencv-python)            | MIT License     |
 | [Pillow](https://github.com/python-pillow/Pillow)                   | HPND License    |
 | [Rich](https://github.com/Textualize/rich)                          | MIT License     |
+| [pynput](https://github.com/moses-palmer/pynput)                    | LGPLv3.0        |
 
 Legacy versions of this project includes or depends on these following projects:
 
@@ -117,6 +118,7 @@ Appreciations given to the following personnel who have contributed significantl
 - [@ddouglas87](https://github.com/ddouglas87)
 - [@lhanjian](https://github.com/lhanjian)
 - [@ArchieMeng](https://github.com/archiemeng)
+- [@nihui](https://github.com/nihui)
 
 ## Similar Projects
 

@@ -3,7 +3,7 @@ Copyright (c) 2018-2022 K4YT3X and contributors.
 
 This product depends on FFmpeg, which is available under
 the GNU Lesser General Public License 2.1. The source code can be found at
-https://www.gnu.org/licenses/agpl-3.0.txt.
+https://github.com/FFmpeg/FFmpeg.
 
 This product depends on waifu2x-ncnn-vulkan, which is available under
 the MIT License. The source code can be found at
@@ -41,3 +41,7 @@ https://github.com/python-pillow/Pillow.
 This product depends on Rich, which is available under
 the MIT License. The source code can be found at
 https://github.com/Textualize/rich.
+
+This product depends on pynput, which is available under
+the GNU Lesser General Public License 3.0. The source code can be found at
+https://github.com/moses-palmer/pynput.
