@@ -6,7 +6,7 @@ on:
 
 jobs:
   setup:
-    if: github.event.base_ref == "refs/heads/master"
+    if: github.event.base_ref == 'refs/heads/master'
     name: Setup
     runs-on: ubuntu-latest
     outputs:
