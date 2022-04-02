@@ -57,7 +57,7 @@ class Interpolator(multiprocessing.Process):
             f"Interpolator process <blue>{self.name}</blue> initiating"
         )
         processor_objects = {}
-        while self.running:
+        while self.running is True:
             try:
                 # pause if pause flag is set
                 if self.pause.value is True:

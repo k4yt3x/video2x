@@ -47,7 +47,7 @@ class PipePrinter(threading.Thread):
         self.running = True
 
         # keep printing contents in the PIPE
-        while self.running:
+        while self.running is True:
             time.sleep(0.5)
 
             try:

@@ -114,7 +114,7 @@ class VideoDecoder(threading.Thread):
 
         # continue running until an exception occurs
         # or all frames have been decoded
-        while self.running:
+        while self.running is True:
 
             # pause if pause flag is set
             if self.pause.value is True:
@@ -140,7 +140,7 @@ class VideoDecoder(threading.Thread):
 
                 # keep checking if the running flag is set to False
                 # while waiting to put the next image into the queue
-                while self.running:
+                while self.running is True:
                     with contextlib.suppress(queue.Full):
                         self.processing_queue.put(
                             (
