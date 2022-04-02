@@ -52,5 +52,5 @@ video2x = "video2x:main"
 version = { from = "video2x/__init__.py" }
 
 [build-system]
-requires = ["pdm-pep517"]
+requires = ["pdm-pep517>=0.12.0"]
 build-backend = "pdm.pep517.api"
