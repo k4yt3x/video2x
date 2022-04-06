@@ -108,6 +108,7 @@ class VideoEncoder(threading.Thread):
                     *[s for s in additional_streams if s is not None],
                     str(self.output_path),
                     vcodec="libx264",
+                    scodec="copy",
                     vsync="cfr",
                     pix_fmt="yuv420p",
                     crf=17,
