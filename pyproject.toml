@@ -35,7 +35,7 @@ dependencies = [
   "srmd-ncnn-vulkan-python>=1.0.2",
   "realsr-ncnn-vulkan-python>=1.0.4",
   "rife-ncnn-vulkan-python>=1.1.2.post3",
-  "realcugan-ncnn-vulkan-python>=1.0.0",
+  "realcugan-ncnn-vulkan-python>=1.0.2",
 ]
 dynamic = ["version"]
 
