@@ -156,18 +156,18 @@ class VideoDecoder(threading.Thread):
                 frame_index += 1
 
             # most likely "not enough image data"
-            except ValueError as e:
-                self.exception = e
+            except ValueError as error:
+                self.exception = error
 
                 # ignore queue closed
-                if "is closed" not in str(e):
-                    logger.exception(e)
+                if "is closed" not in str(error):
+                    logger.exception(error)
                 break
 
             # send exceptions into the client connection pipe
-            except Exception as e:
-                self.exception = e
-                logger.exception(e)
+            except Exception as error:
+                self.exception = error
+                logger.exception(error)
                 break
         else:
             logger.debug("Decoding queue depleted")

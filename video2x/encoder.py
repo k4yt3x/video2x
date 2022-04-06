@@ -165,9 +165,9 @@ class VideoEncoder(threading.Thread):
                 frame_index += 1
 
             # send exceptions into the client connection pipe
-            except Exception as e:
-                self.exception = e
-                logger.exception(e)
+            except Exception as error:
+                self.exception = error
+                logger.exception(error)
                 break
         else:
             logger.debug("Encoding queue depleted")

@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: February 24, 2018
-Last Modified: March 21, 2022
+Last Modified: April 5, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -49,10 +49,10 @@ import signal
 import sys
 import time
 
-import cv2
 import ffmpeg
+from cv2 import cv2
 from loguru import logger
-from rich import print
+from rich import print as rich_print
 from rich.console import Console
 from rich.file_proxy import FileProxy
 from rich.progress import (
@@ -80,13 +80,11 @@ except ImportError:
 else:
     ENABLE_HOTKEY = True
 
-LEGAL_INFO = """Video2X\t\t{}
+LEGAL_INFO = f"""Video2X\t\t{__version__}
 Author:\t\tK4YT3X
 License:\tGNU AGPL v3
 Github Page:\thttps://github.com/k4yt3x/video2x
-Contact:\ti@k4yt3x.com""".format(
-    __version__
-)
+Contact:\ti@k4yt3x.com"""
 
 # algorithms available for upscaling tasks
 UPSCALING_ALGORITHMS = [
@@ -133,7 +131,8 @@ class Video2X:
     def __init__(self) -> None:
         self.version = __version__
 
-    def _get_video_info(self, path: pathlib.Path) -> tuple:
+    @staticmethod
+    def _get_video_info(path: pathlib.Path) -> tuple:
         """
         get video file information with FFmpeg
 
@@ -329,17 +328,16 @@ class Video2X:
             logger.info("Processing has completed")
 
         # if SIGTERM is received or ^C is pressed
-        # TODO: pause and continue here
-        except (SystemExit, KeyboardInterrupt) as e:
+        except (SystemExit, KeyboardInterrupt) as error:
             self.progress.stop()
             logger.warning("Exit signal received, exiting gracefully")
             logger.warning("Press ^C again to force terminate")
-            exception.append(e)
+            exception.append(error)
 
-        except Exception as e:
+        except Exception as error:
             self.progress.stop()
-            logger.exception(e)
-            exception.append(e)
+            logger.exception(error)
+            exception.append(error)
 
         finally:
 
@@ -575,7 +573,7 @@ def main() -> int:
     try:
         # display version and lawful informaition
         if "--version" in sys.argv:
-            print(LEGAL_INFO)
+            rich_print(LEGAL_INFO)
             return 0
 
         # parse command line arguments
@@ -585,7 +583,7 @@ def main() -> int:
         if not args.input.exists():
             logger.critical(f"Cannot find input file: {args.input}")
             return 1
-        elif not args.input.is_file():
+        if not args.input.is_file():
             logger.critical("Input path is not a file")
             return 1
 
@@ -633,8 +631,8 @@ def main() -> int:
     except KeyboardInterrupt:
         return 2
 
-    except Exception as e:
-        logger.exception(e)
+    except Exception as error:
+        logger.exception(error)
         return 1
 
     # if no exceptions were produced

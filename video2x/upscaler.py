@@ -194,8 +194,8 @@ class Upscaler(multiprocessing.Process):
             except (SystemExit, KeyboardInterrupt):
                 break
 
-            except Exception as e:
-                logger.exception(e)
+            except Exception as error:
+                logger.exception(error)
                 break
 
         logger.opt(colors=True).info(
