@@ -92,7 +92,7 @@ class VideoDecoder(threading.Thread):
                 ),
                 overwrite_output=True,
             ),
-            env={"AV_LOG_FORCE_COLOR": "TRUE"},
+            env=dict(AV_LOG_FORCE_COLOR="TRUE", **os.environ),
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
