@@ -586,10 +586,8 @@ def main() -> int:
         if not args.input.is_file():
             logger.critical("Input path is not a file")
             return 1
-            
-        # Output file won't exist yet, but the parent directory should.
         if not args.output.parent.exists():
-            logger.critical(f"Output directory does not exist: {args.output}")
+            logger.critical(f"Output directory does not exist: {args.output.parent}")
             return 1
 
         # set logger level
