@@ -23,7 +23,7 @@ Last Modified: April 10, 2022
 """
 
 import math
-import queue
+import time
 
 from PIL import Image
 from realcugan_ncnn_vulkan_python import Realcugan
@@ -162,31 +162,41 @@ class UpscalerProcessor(Processor, Upscaler):
         task = self.tasks_queue.get()
         while task is not None:
 
-            # unpack the task's values
-            (
-                frame_index,
-                previous_frame,
-                current_frame,
-                processing_settings,
-            ) = task
+            try:
 
-            # calculate the %diff between the current frame and the previous frame
-            difference_ratio = 0
-            if previous_frame is not None:
-                difference_ratio = self.get_image_diff(previous_frame, current_frame)
+                if self.pause_flag.value is True:
+                    time.sleep(0.1)
+                    continue
 
-            # if the difference is lower than threshold, skip this frame
-            if difference_ratio < processing_settings["difference_threshold"]:
+                # unpack the task's values
+                (
+                    frame_index,
+                    previous_frame,
+                    current_frame,
+                    (output_width, output_height, algorithm, noise, threshold),
+                ) = task
 
-                # make the current image the same as the previous result
-                self.processed_frames[frame_index] = True
+                # calculate the %diff between the current frame and the previous frame
+                difference_ratio = 0
+                if previous_frame is not None:
+                    difference_ratio = self.get_image_diff(
+                        previous_frame, current_frame
+                    )
 
-            # if the difference is greater than threshold
-            # process this frame
-            else:
-                self.processed_frames[frame_index] = self.upscale_image(
-                    **processing_settings
-                )
+                # if the difference is lower than threshold, skip this frame
+                if difference_ratio < threshold:
 
-            self.tasks_queue.task_done()
-            task = self.tasks_queue.get()
+                    # make the current image the same as the previous result
+                    self.processed_frames[frame_index] = True
+
+                # if the difference is greater than threshold
+                # process this frame
+                else:
+                    self.processed_frames[frame_index] = self.upscale_image(
+                        current_frame, output_width, output_height, algorithm, noise
+                    )
+
+                task = self.tasks_queue.get()
+
+            except KeyboardInterrupt:
+                break
