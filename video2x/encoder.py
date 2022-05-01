@@ -119,6 +119,9 @@ class VideoEncoder:
         self.pipe_printer = PipePrinter(self.encoder.stderr)
         self.pipe_printer.start()
 
+    def kill(self):
+        self.encoder.send_signal(signal.SIGKILL)
+
     def write(self, frame: Image.Image) -> None:
         """
         write a frame into FFmpeg encoder's STDIN
