@@ -44,10 +44,12 @@ class Interpolator(multiprocessing.Process):
         pause: Synchronized,
     ) -> None:
         multiprocessing.Process.__init__(self)
-        self.running = False
         self.processing_queue = processing_queue
         self.processed_frames = processed_frames
         self.pause = pause
+
+        self.running = False
+        self.processor_objects = {}
 
         signal.signal(signal.SIGTERM, self._stop)
 
@@ -56,7 +58,6 @@ class Interpolator(multiprocessing.Process):
         logger.opt(colors=True).info(
             f"Interpolator process <blue>{self.name}</blue> initiating"
         )
-        processor_objects = {}
         while self.running is True:
             try:
                 # pause if pause flag is set
@@ -80,6 +81,7 @@ class Interpolator(multiprocessing.Process):
                 if image0 is None:
                     continue
 
+                # calculate the %diff between the current frame and the previous frame
                 difference = ImageChops.difference(image0, image1)
                 difference_stat = ImageStat.Stat(difference)
                 difference_ratio = (
@@ -92,10 +94,10 @@ class Interpolator(multiprocessing.Process):
 
                     # select a processor object with the required settings
                     # create a new object if none are available
-                    processor_object = processor_objects.get(algorithm)
+                    processor_object = self.processor_objects.get(algorithm)
                     if processor_object is None:
                         processor_object = ALGORITHM_CLASSES[algorithm](0)
-                        processor_objects[algorithm] = processor_object
+                        self.processor_objects[algorithm] = processor_object
                     interpolated_image = processor_object.process(image0, image1)
 
                 # if the difference is greater than threshold
