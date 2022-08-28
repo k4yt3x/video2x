@@ -89,7 +89,6 @@ class VideoEncoder:
                     str(output_path),
                     vcodec="libx264",
                     scodec="copy",
-                    fps_mode="cfr",
                     pix_fmt="yuv420p",
                     crf=17,
                     preset="veryslow",
