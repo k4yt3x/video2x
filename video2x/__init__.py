@@ -19,12 +19,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Package Init
 Author: K4YT3X
 Date Created: July 3, 2021
-Last Modified: April 1, 2022
+Last Modified: August 28, 2022
 """
 
 # version assignment has to precede imports to
 # prevent setup.cfg from producing import errors
-__version__ = "5.0.0-beta5"
+__version__ = "5.0.0-beta6"
 
 # flake8: noqa
 # let flake8 ignore this file to avoid F401 warnings
