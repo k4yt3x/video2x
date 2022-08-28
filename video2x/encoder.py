@@ -66,7 +66,6 @@ class VideoEncoder:
             "pipe:0",
             format="rawvideo",
             pix_fmt="rgb24",
-            vsync="cfr",
             s=f"{output_width}x{output_height}",
             r=frame_rate,
         )
@@ -90,7 +89,7 @@ class VideoEncoder:
                     str(output_path),
                     vcodec="libx264",
                     scodec="copy",
-                    vsync="cfr",
+                    fps_mode="cfr",
                     pix_fmt="yuv420p",
                     crf=17,
                     preset="veryslow",
