@@ -19,20 +19,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Encoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: March 20, 2022
+Last Modified: August 28, 2022
 """
 
 import os
 import pathlib
 import signal
 import subprocess
-import threading
-import time
-from multiprocessing.managers import ListProxy
-from multiprocessing.sharedctypes import Synchronized
 
 import ffmpeg
-from loguru import logger
+from PIL import Image
 
 from .pipe_printer import PipePrinter
 
@@ -48,7 +44,7 @@ LOGURU_FFMPEG_LOGLEVELS = {
 }
 
 
-class VideoEncoder(threading.Thread):
+class VideoEncoder:
     def __init__(
         self,
         input_path: pathlib.Path,
@@ -56,36 +52,20 @@ class VideoEncoder(threading.Thread):
         output_path: pathlib.Path,
         output_width: int,
         output_height: int,
-        total_frames: int,
-        processed_frames: ListProxy,
-        processed: Synchronized,
-        pause: Synchronized,
         copy_audio: bool = True,
         copy_subtitle: bool = True,
         copy_data: bool = False,
         copy_attachments: bool = False,
     ) -> None:
-        threading.Thread.__init__(self)
-        self.running = False
-        self.input_path = input_path
-        self.output_path = output_path
-        self.total_frames = total_frames
-        self.processed_frames = processed_frames
-        self.processed = processed
-        self.pause = pause
-
-        # stores exceptions if the thread exits with errors
-        self.exception = None
 
         # create FFmpeg input for the original input video
-        self.original = ffmpeg.input(input_path)
+        original = ffmpeg.input(input_path)
 
         # define frames as input
         frames = ffmpeg.input(
             "pipe:0",
             format="rawvideo",
             pix_fmt="rgb24",
-            vsync="cfr",
             s=f"{output_width}x{output_height}",
             r=frame_rate,
         )
@@ -93,11 +73,11 @@ class VideoEncoder(threading.Thread):
         # copy additional streams from original file
         # https://ffmpeg.org/ffmpeg.html#Stream-specifiers-1
         additional_streams = [
-            # self.original["1:v?"],
-            self.original["a?"] if copy_audio is True else None,
-            self.original["s?"] if copy_subtitle is True else None,
-            self.original["d?"] if copy_data is True else None,
-            self.original["t?"] if copy_attachments is True else None,
+            # original["1:v?"],
+            original["a?"] if copy_audio is True else None,
+            original["s?"] if copy_subtitle is True else None,
+            original["d?"] if copy_data is True else None,
+            original["t?"] if copy_attachments is True else None,
         ]
 
         # run FFmpeg and produce final output
@@ -106,10 +86,10 @@ class VideoEncoder(threading.Thread):
                 ffmpeg.output(
                     frames,
                     *[s for s in additional_streams if s is not None],
-                    str(self.output_path),
+                    str(output_path),
                     vcodec="libx264",
                     scodec="copy",
-                    vsync="cfr",
+                    fps_mode="cfr",
                     pix_fmt="yuv420p",
                     crf=17,
                     preset="veryslow",
@@ -138,48 +118,25 @@ class VideoEncoder(threading.Thread):
         self.pipe_printer = PipePrinter(self.encoder.stderr)
         self.pipe_printer.start()
 
-    def run(self) -> None:
-        self.running = True
-        frame_index = 0
-        while self.running and frame_index < self.total_frames:
+    def kill(self):
+        self.encoder.send_signal(signal.SIGKILL)
 
-            # pause if pause flag is set
-            if self.pause.value is True:
-                time.sleep(0.1)
-                continue
+    def write(self, frame: Image.Image) -> None:
+        """
+        write a frame into FFmpeg encoder's STDIN
 
-            try:
-                image = self.processed_frames[frame_index]
-                if image is None:
-                    time.sleep(0.1)
-                    continue
+        :param frame Image.Image: the Image object to use for writing
+        """
+        self.encoder.stdin.write(frame.tobytes())
 
-                # send the image to FFmpeg for encoding
-                self.encoder.stdin.write(image.tobytes())
-
-                # remove the image from memory
-                self.processed_frames[frame_index] = None
-
-                with self.processed.get_lock():
-                    self.processed.value += 1
-
-                frame_index += 1
-
-            # send exceptions into the client connection pipe
-            except Exception as error:
-                self.exception = error
-                logger.exception(error)
-                break
-        else:
-            logger.debug("Encoding queue depleted")
-
+    def join(self) -> None:
+        """
+        signal the encoder that all frames have been sent and the FFmpeg
+        should be instructed to wrap-up the processing
+        """
         # flush the remaining data in STDIN and STDERR
         self.encoder.stdin.flush()
         self.encoder.stderr.flush()
-
-        # send SIGINT (2) to FFmpeg
-        # this instructs it to finalize and exit
-        self.encoder.send_signal(signal.SIGINT)
 
         # close PIPEs to prevent process from getting stuck
         self.encoder.stdin.close()
@@ -191,9 +148,3 @@ class VideoEncoder(threading.Thread):
         # wait for PIPE printer to exit
         self.pipe_printer.stop()
         self.pipe_printer.join()
-
-        logger.info("Encoder thread exiting")
-        return super().run()
-
-    def stop(self) -> None:
-        self.running = False
