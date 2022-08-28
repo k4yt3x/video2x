@@ -27,7 +27,7 @@ classifiers = [
 dependencies = [
   "ffmpeg-python>=0.2.0",
   "loguru>=0.6.0",
-  "opencv-python>=4.5.5.64",
+  "opencv-python==4.5.5.64",
   "pillow>=9.0.1",
   "pynput>=1.7.6",
   "rich>=12.0.0",
