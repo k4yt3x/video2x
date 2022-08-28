@@ -82,19 +82,20 @@ Copyright (c) 2018-2022 K4YT3X and contributors.
 
 This project includes or depends on these following projects:
 
-| Project                                                             | License         |
-| ------------------------------------------------------------------- | --------------- |
-| [FFmpeg](https://www.ffmpeg.org/)                                   | LGPLv2.1, GPLv2 |
-| [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan) | MIT License     |
-| [srmd-ncnn-vulkan](https://github.com/nihui/srmd-ncnn-vulkan)       | MIT License     |
-| [realsr-ncnn-vulkan](https://github.com/nihui/realsr-ncnn-vulkan)   | MIT License     |
-| [rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)       | MIT License     |
-| [ffmpeg-python](https://github.com/kkroening/ffmpeg-python)         | Apache-2.0      |
-| [Loguru](https://github.com/Delgan/loguru)                          | MIT License     |
-| [opencv-python](https://github.com/opencv/opencv-python)            | MIT License     |
-| [Pillow](https://github.com/python-pillow/Pillow)                   | HPND License    |
-| [Rich](https://github.com/Textualize/rich)                          | MIT License     |
-| [pynput](https://github.com/moses-palmer/pynput)                    | LGPLv3.0        |
+| Project                                                                 | License         |
+| ----------------------------------------------------------------------- | --------------- |
+| [FFmpeg](https://www.ffmpeg.org/)                                       | LGPLv2.1, GPLv2 |
+| [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)     | MIT License     |
+| [srmd-ncnn-vulkan](https://github.com/nihui/srmd-ncnn-vulkan)           | MIT License     |
+| [realsr-ncnn-vulkan](https://github.com/nihui/realsr-ncnn-vulkan)       | MIT License     |
+| [rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)           | MIT License     |
+| [realcugan-ncnn-vulkan](https://github.com/nihui/realcugan-ncnn-vulkan) | MIT License     |
+| [ffmpeg-python](https://github.com/kkroening/ffmpeg-python)             | Apache-2.0      |
+| [Loguru](https://github.com/Delgan/loguru)                              | MIT License     |
+| [opencv-python](https://github.com/opencv/opencv-python)                | MIT License     |
+| [Pillow](https://github.com/python-pillow/Pillow)                       | HPND License    |
+| [Rich](https://github.com/Textualize/rich)                              | MIT License     |
+| [pynput](https://github.com/moses-palmer/pynput)                        | LGPLv3.0        |
 
 Legacy versions of this project includes or depends on these following projects:
 
