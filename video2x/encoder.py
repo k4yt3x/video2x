@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Video Encoder
 Author: K4YT3X
 Date Created: June 17, 2021
-Last Modified: April 9, 2022
+Last Modified: August 28, 2022
 """
 
 import os
@@ -137,10 +137,6 @@ class VideoEncoder:
         # flush the remaining data in STDIN and STDERR
         self.encoder.stdin.flush()
         self.encoder.stderr.flush()
-
-        # send SIGINT (2) to FFmpeg
-        # this instructs it to finalize and exit
-        self.encoder.send_signal(signal.SIGINT)
 
         # close PIPEs to prevent process from getting stuck
         self.encoder.stdin.close()

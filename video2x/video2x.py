@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: February 24, 2018
-Last Modified: April 30, 2022
+Last Modified: August 28, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -332,11 +332,6 @@ class Video2X:
             decoder_thread.stop()
             decoder_thread.join()
 
-            # stop the encoder
-            encoder.join()
-
-            logger.critical("ENCODER")
-
             # clear queue and signal processors to exit
             # multiprocessing.Queue has no Queue.queue.clear
             while tasks_queue.empty() is not True:
@@ -347,6 +342,9 @@ class Video2X:
             # close and join the process pool
             processor_pool.close()
             processor_pool.join()
+
+            # stop the encoder
+            encoder.join()
 
             # restore original STDOUT and STDERR
             sys.stdout = original_stdout
