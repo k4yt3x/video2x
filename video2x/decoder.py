@@ -104,14 +104,11 @@ class VideoDecoder:
     def __iter__(self):
 
         # continue yielding while FFmpeg continues to produce output
-        while (
-            len(
-                buffer := self.decoder.stdout.read(
-                    3 * self.input_width * self.input_height
-                )
-            )
-            > 0
-        ):
+        # it is possible to use := for this block to be more concise
+        # but it is purposefully avoided to remain compatible with Python 3.7
+        buffer = self.decoder.stdout.read(3 * self.input_width * self.input_height)
+
+        while len(buffer) > 0:
 
             # convert raw bytes into image object
             frame = Image.frombytes(
@@ -120,6 +117,9 @@ class VideoDecoder:
 
             # return this frame
             yield frame
+
+            # read the next frame
+            buffer = self.decoder.stdout.read(3 * self.input_width * self.input_height)
 
         # automatically self-join and clean up after iterations are done
         self.join()
