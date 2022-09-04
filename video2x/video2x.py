@@ -27,7 +27,7 @@ __      __  _       _                  ___   __   __
 Name: Video2X
 Creator: K4YT3X
 Date Created: February 24, 2018
-Last Modified: September 4, 2022
+Last Modified: August 28, 2022
 
 Editor: BrianPetkovsek
 Last Modified: June 17, 2019
@@ -41,7 +41,6 @@ Last Modified: March 23, 2020
 
 import ctypes
 import math
-import os
 import signal
 import sys
 import time
@@ -165,14 +164,8 @@ class Video2X:
         original_stdout = sys.stdout
         original_stderr = sys.stderr
 
-        # detect if the program is running in Google Colab
-        # COLAB_GPU should be set in Colab runtime environments
-        in_colab = os.environ.get("COLAB_GPU") is not None
-
         # create console for rich's Live display
-        # force_jupyter must be True if the script is running in Colab
-        # other wise the console will not print properly
-        console = Console(force_jupyter=True if in_colab is True else None)
+        console = Console()
 
         # redirect STDOUT and STDERR to console
         sys.stdout = FileProxy(console, sys.stdout)
