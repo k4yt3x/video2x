@@ -28,7 +28,7 @@ dependencies = [
   "ffmpeg-python>=0.2.0",
   "loguru>=0.6.0",
   "opencv-python==4.5.5.64",
-  "pillow>=9.0.1",
+  "pillow>=9.1.0",
   "pynput>=1.7.6",
   "rich>=12.0.0",
   "waifu2x-ncnn-vulkan-python>=1.0.2rc3",
