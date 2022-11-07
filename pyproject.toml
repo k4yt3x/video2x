@@ -3,7 +3,7 @@ name = "video2x"
 description = "A video/image upscaling and frame interpolation framework"
 readme = "README.md"
 requires-python = ">=3.7"
-license-expression = "AGPL-3.0-or-later"
+license = "AGPL-3.0-or-later"
 keywords = [
   "super-resolution",
   "upscaling",
