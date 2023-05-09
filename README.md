@@ -76,7 +76,7 @@ Copyright of this clip belongs to 株式会社アニプレックス.
 ## License
 
 This project is licensed under the [GNU Affero General Public License Version 3 (GNU AGPL v3)](https://www.gnu.org/licenses/agpl-3.0.txt)\
-Copyright (c) 2018-2022 K4YT3X and contributors.
+Copyright (c) 2018-2023 K4YT3X and contributors.
 
 ![AGPLv3](https://www.gnu.org/graphics/agplv3-155x51.png)
 

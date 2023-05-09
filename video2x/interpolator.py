@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (C) 2018-2022 K4YT3X and contributors.
+Copyright (C) 2018-2023 K4YT3X and contributors.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -91,7 +91,6 @@ class Interpolator(multiprocessing.Process):
                 # if the difference is lower than threshold
                 # process the interpolation
                 if difference_ratio < difference_threshold:
-
                     # select a processor object with the required settings
                     # create a new object if none are available
                     processor_object = self.processor_objects.get(algorithm)

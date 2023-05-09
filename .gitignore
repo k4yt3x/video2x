@@ -1,5 +1,5 @@
 # PDM
-.pdm.toml
+.pdm-python
 __pypackages__/
 
 # test videos

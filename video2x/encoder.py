@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (C) 2018-2022 K4YT3X and contributors.
+Copyright (C) 2018-2023 K4YT3X and contributors.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -57,7 +57,6 @@ class VideoEncoder:
         copy_data: bool = False,
         copy_attachments: bool = False,
     ) -> None:
-
         # create FFmpeg input for the original input video
         original = ffmpeg.input(input_path)
 

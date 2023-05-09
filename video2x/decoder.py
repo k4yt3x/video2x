@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (C) 2018-2022 K4YT3X and contributors.
+Copyright (C) 2018-2023 K4YT3X and contributors.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -102,14 +102,12 @@ class VideoDecoder:
         self.pipe_printer.start()
 
     def __iter__(self):
-
         # continue yielding while FFmpeg continues to produce output
         # it is possible to use := for this block to be more concise
         # but it is purposefully avoided to remain compatible with Python 3.7
         buffer = self.decoder.stdout.read(3 * self.input_width * self.input_height)
 
         while len(buffer) > 0:
-
             # convert raw bytes into image object
             frame = Image.frombytes(
                 "RGB", (self.input_width, self.input_height), buffer
@@ -128,7 +126,6 @@ class VideoDecoder:
         self.decoder.send_signal(signal.SIGKILL)
 
     def join(self):
-
         # close PIPEs to prevent process from getting stuck
         self.decoder.stdout.close()
         self.decoder.stderr.close()
@@ -156,9 +153,7 @@ class VideoDecoderThread(Thread):
         self.running = True
         previous_frame = None
         for frame_index, frame in enumerate(self.decoder):
-
             while True:
-
                 # check for the stop signal
                 if self.running is False:
                     self.decoder.join()
