@@ -3,6 +3,7 @@
 __pypackages__/
 
 # test videos
+data/
 *.mp4
 *.mkv
 *.mov
