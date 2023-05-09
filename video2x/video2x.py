@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 r"""
-Copyright (C) 2018-2022 K4YT3X and contributors.
+Copyright (C) 2018-2023 K4YT3X and contributors.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -47,6 +47,7 @@ import time
 from enum import Enum
 from multiprocessing import Manager, Pool, Queue, Value
 from pathlib import Path
+from typing import Any
 
 import ffmpeg
 from cv2 import cv2
@@ -69,7 +70,7 @@ from . import __version__
 from .decoder import VideoDecoder, VideoDecoderThread
 from .encoder import VideoEncoder
 from .interpolator import Interpolator
-from .upscaler import UpscalerProcessor
+from .upscaler import Upscaler, UpscalerProcessor
 
 # for desktop environments only
 # if pynput can be loaded, enable global pause hotkey support
@@ -159,6 +160,32 @@ class Video2X:
         processes: int,
         processing_settings: tuple,
     ) -> None:
+        # process by directly invoking the
+        # if the selected algorithm does not support frameserving
+        if mode == ProcessingMode.UPSCALE:
+            standalone_processor: Any = Upscaler.ALGORITHM_CLASSES[
+                processing_settings[2]
+            ]
+            if getattr(standalone_processor, "process", None) is None:
+                standalone_processor().process_video(
+                    input_path,
+                    output_path,
+                    width,
+                    height,
+                    output_width=output_width,
+                    output_height=output_height,
+                )
+                return
+        # elif mode == ProcessingMode.INTERPOLATE:
+        else:
+            standalone_processor: Any = Interpolator.ALGORITHM_CLASSES[
+                processing_settings[2]
+            ]
+            if getattr(standalone_processor, "process", None) is None:
+                standalone_processor().process_video(
+                    input_path, output_path, frame_rate=frame_rate
+                )
+                return
 
         # record original STDOUT and STDERR for restoration
         original_stdout = sys.stdout
@@ -224,7 +251,6 @@ class Video2X:
         task = progress.add_task(f"[cyan]{mode.value['label']}", total=total_frames)
 
         def _toggle_pause(_signal_number: int = -1, _frame=None):
-
             # allow the closure to modify external immutable flag
             nonlocal pause_flag
 
@@ -251,7 +277,6 @@ class Video2X:
 
         # enable global pause hotkey if it's supported
         if ENABLE_HOTKEY is True:
-
             # create global pause hotkey
             pause_hotkey = HotKey(HotKey.parse("<ctrl>+<alt>+v"), _toggle_pause)
 
@@ -272,13 +297,10 @@ class Video2X:
         exceptions = []
 
         try:
-
             # let the context manager automatically stop the progress bar
             with progress:
-
                 frame_index = 0
                 while frame_index < total_frames:
-
                     current_frame = processed_frames.get(frame_index)
 
                     if pause_flag.value is True or current_frame is None:
@@ -317,7 +339,6 @@ class Video2X:
             logger.info("Processing has completed")
 
         finally:
-
             # stop keyboard listener
             if ENABLE_HOTKEY is True:
                 keyboard_listener.stop()
@@ -369,7 +390,6 @@ class Video2X:
         threshold: float,
         algorithm: str,
     ) -> None:
-
         # get basic video information
         width, height, total_frames, frame_rate = self._get_video_info(input_path)
 
@@ -413,7 +433,6 @@ class Video2X:
         threshold: float,
         algorithm: str,
     ) -> None:
-
         # get video basic information
         width, height, original_frames, frame_rate = self._get_video_info(input_path)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (C) 2018-2022 K4YT3X and contributors.
+Copyright (C) 2018-2023 K4YT3X and contributors.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,12 +19,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Name: Package Init
 Author: K4YT3X
 Date Created: July 3, 2021
-Last Modified: August 28, 2022
+Last Modified: May 9, 2023
 """
 
 # version assignment has to precede imports to
 # prevent setup.cfg from producing import errors
-__version__ = "5.0.0-beta6"
+__version__ = "5.0.0-beta7"
 
 # flake8: noqa
 # let flake8 ignore this file to avoid F401 warnings

@@ -90,6 +90,7 @@ This project includes or depends on these following projects:
 | [realsr-ncnn-vulkan](https://github.com/nihui/realsr-ncnn-vulkan)       | MIT License     |
 | [rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)           | MIT License     |
 | [realcugan-ncnn-vulkan](https://github.com/nihui/realcugan-ncnn-vulkan) | MIT License     |
+| [Anime4K](https://github.com/bloc97/Anime4K)                            | MIT License     |
 | [ffmpeg-python](https://github.com/kkroening/ffmpeg-python)             | Apache-2.0      |
 | [Loguru](https://github.com/Delgan/loguru)                              | MIT License     |
 | [opencv-python](https://github.com/opencv/opencv-python)                | MIT License     |
@@ -103,7 +104,6 @@ Legacy versions of this project includes or depends on these following projects:
 | --------------------------------------------------------------------------- | -------------------- |
 | [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)                  | MIT License          |
 | [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp) | MIT License          |
-| [Anime4K](https://github.com/bloc97/Anime4K)                                | MIT License          |
 | [Anime4KCPP](https://github.com/TianZerL/Anime4KCPP)                        | MIT License          |
 | [Gifski](https://github.com/ImageOptim/gifski)                              | AGPLv3               |
 | [tqdm](https://github.com/tqdm/tqdm)                                        | MPLv2.0, MIT License |

@@ -2,7 +2,7 @@
 name = "video2x"
 description = "A video/image upscaling and frame interpolation framework"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = { text = "AGPL-3.0-or-later" }
 keywords = [
   "super-resolution",
@@ -31,11 +31,12 @@ dependencies = [
   "pillow>=9.1.0",
   "pynput>=1.7.6",
   "rich>=12.0.0",
-  "waifu2x-ncnn-vulkan-python>=1.0.2rc3",
+  "waifu2x-ncnn-vulkan-python>=1.0.4",
   "srmd-ncnn-vulkan-python>=1.0.2",
-  "realsr-ncnn-vulkan-python>=1.0.4",
-  "rife-ncnn-vulkan-python>=1.1.2.post3",
+  "realsr-ncnn-vulkan-python>=1.0.6",
+  "rife-ncnn-vulkan-python>=1.2.1",
   "realcugan-ncnn-vulkan-python>=1.0.2",
+  "anime4k-python>=1.0.0",
 ]
 dynamic = ["version"]
 
@@ -55,5 +56,5 @@ profile = "black"
 version = { from = "video2x/__init__.py" }
 
 [build-system]
-requires = ["pdm-pep517>=0.12.0"]
+requires = ["pdm-pep517>=1.0.0"]
 build-backend = "pdm.pep517.api"

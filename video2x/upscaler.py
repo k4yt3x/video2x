@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (C) 2018-2022 K4YT3X and contributors.
+Copyright (C) 2018-2023 K4YT3X and contributors.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -25,6 +25,7 @@ Last Modified: April 10, 2022
 import math
 import time
 
+from anime4k_python import Anime4K
 from PIL import Image
 from realcugan_ncnn_vulkan_python import Realcugan
 from realsr_ncnn_vulkan_python import Realsr
@@ -38,17 +39,19 @@ class Upscaler:
     # fixed scaling ratios supported by the algorithms
     # that only support certain fixed scale ratios
     ALGORITHM_FIXED_SCALING_RATIOS = {
-        "waifu2x": [1, 2],
-        "srmd": [2, 3, 4],
-        "realsr": [4],
+        "anime4k": [-1],
         "realcugan": [1, 2, 3, 4],
+        "realsr": [4],
+        "srmd": [2, 3, 4],
+        "waifu2x": [1, 2],
     }
 
     ALGORITHM_CLASSES = {
-        "waifu2x": Waifu2x,
-        "srmd": Srmd,
-        "realsr": Realsr,
+        "anime4k": Anime4K,
         "realcugan": Realcugan,
+        "realsr": Realsr,
+        "srmd": Srmd,
+        "waifu2x": Waifu2x,
     }
 
     processor_objects = {}
@@ -89,6 +92,11 @@ class Upscaler:
         # apply the smallest scaling ratio available
         if remaining_scaling_ratio == 1:
             return [supported_scaling_ratios[0]]
+
+        # if the processor supports arbitrary scales
+        # return only one job
+        if supported_scaling_ratios[0] == -1:
+            return [remaining_scaling_ratio]
 
         scaling_jobs = []
         while remaining_scaling_ratio > 1:
@@ -138,7 +146,6 @@ class Upscaler:
         for task in self._get_scaling_tasks(
             width, height, output_width, output_height, algorithm
         ):
-
             # select a processor object with the required settings
             # create a new object if none are available
             processor_object = self.processor_objects.get((algorithm, task))
@@ -158,12 +165,9 @@ class Upscaler:
 
 class UpscalerProcessor(Processor, Upscaler):
     def process(self) -> None:
-
         task = self.tasks_queue.get()
         while task is not None:
-
             try:
-
                 if self.pause_flag.value is True:
                     time.sleep(0.1)
                     continue
@@ -185,7 +189,6 @@ class UpscalerProcessor(Processor, Upscaler):
 
                 # if the difference is lower than threshold, skip this frame
                 if difference_ratio < threshold:
-
                     # make the current image the same as the previous result
                     self.processed_frames[frame_index] = True
 
