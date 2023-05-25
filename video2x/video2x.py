@@ -69,7 +69,7 @@ from video2x.processor import Processor
 from . import __version__
 from .decoder import VideoDecoder, VideoDecoderThread
 from .encoder import VideoEncoder
-from .interpolator import Interpolator
+from .interpolator import Interpolator, InterpolatorProcessor
 from .upscaler import Upscaler, UpscalerProcessor
 
 # for desktop environments only
@@ -102,7 +102,7 @@ class ProcessingSpeedColumn(ProgressColumn):
 
 class ProcessingMode(Enum):
     UPSCALE = {"label": "Upscaling", "processor": UpscalerProcessor}
-    INTERPOLATE = {"label": "Interpolating", "processor": Interpolator}
+    INTERPOLATE = {"label": "Interpolating", "processor": InterpolatorProcessor}
 
 
 class Video2X:
@@ -179,7 +179,7 @@ class Video2X:
         # elif mode == ProcessingMode.INTERPOLATE:
         else:
             standalone_processor: Any = Interpolator.ALGORITHM_CLASSES[
-                processing_settings[2]
+                processing_settings[1]
             ]
             if getattr(standalone_processor, "process", None) is None:
                 standalone_processor().process_video(
@@ -222,7 +222,7 @@ class Video2X:
         logger.info("Starting video encoder")
         encoder = VideoEncoder(
             input_path,
-            frame_rate * 2 if mode == "interpolate" else frame_rate,
+            frame_rate * 2 if mode == ProcessingMode.INTERPOLATE else frame_rate,
             output_path,
             output_width,
             output_height,
@@ -337,6 +337,7 @@ class Video2X:
 
         else:
             logger.info("Processing has completed")
+            logger.info("Writing video trailer")
 
         finally:
             # stop keyboard listener
