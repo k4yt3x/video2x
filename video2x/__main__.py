@@ -131,7 +131,7 @@ def parse_arguments() -> argparse.Namespace:
     interpolate.add_argument(
         "-a",
         "--algorithm",
-        choices=UPSCALING_ALGORITHMS,
+        choices=INTERPOLATION_ALGORITHMS,
         help="algorithm to use for upscaling",
         default=INTERPOLATION_ALGORITHMS[0],
     )

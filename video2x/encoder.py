@@ -92,7 +92,7 @@ class VideoEncoder:
                     crf=17,
                     preset="veryslow",
                     # acodec="libfdk_aac",
-                    # cutoff=20000,
+                    # cutoff=18000,
                     r=frame_rate,
                     map_metadata=1,
                     metadata="comment=Processed with Video2X",
