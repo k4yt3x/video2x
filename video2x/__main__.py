@@ -143,7 +143,7 @@ def parse_arguments() -> argparse.Namespace:
             "skip if the percent difference between two adjacent frames exceeds this"
             " value; set to 100 to interpolate all frames"
         ),
-        default=10,
+        default=5,
     )
 
     return parser.parse_args()
