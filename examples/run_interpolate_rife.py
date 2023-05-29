@@ -7,11 +7,11 @@ import pathlib
 # import video2x
 from video2x import Video2X
 
-
 # create video2x object
 video2x = Video2X()
 
 # run upscale
+# fmt: off
 video2x.interpolate(
     pathlib.Path("input.mp4"),   # input video path
     pathlib.Path("output.mp4"),  # another
