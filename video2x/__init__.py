@@ -17,9 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 Name: Package Init
-Author: K4YT3X
-Date Created: July 3, 2021
-Last Modified: May 9, 2023
+Author: K4YT3X <i@k4yt3x.com>
 """
 
 # version assignment has to precede imports to

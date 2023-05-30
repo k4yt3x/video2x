@@ -17,9 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 Name: Video Encoder
-Author: K4YT3X
-Date Created: June 17, 2021
-Last Modified: August 28, 2022
+Author: K4YT3X <i@k4yt3x.com>
 """
 
 import os

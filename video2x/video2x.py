@@ -25,18 +25,10 @@ __      __  _       _                  ___   __   __
 
 
 Name: Video2X
-Creator: K4YT3X
-Date Created: February 24, 2018
-Last Modified: August 28, 2022
-
-Editor: BrianPetkovsek
-Last Modified: June 17, 2019
-
-Editor: SAT3LL
-Last Modified: June 25, 2019
-
-Editor: 28598519a
-Last Modified: March 23, 2020
+Author: K4YT3X <i@k4yt3x.com>
+Maintainer: BrianPetkovsek
+Maintainer: SAT3LL
+Maintainer: 28598519a
 """
 
 import ctypes

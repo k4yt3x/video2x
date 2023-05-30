@@ -17,9 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 Name: Processor Abstract Class
-Author: K4YT3X
-Date Created: April 9, 2022
-Last Modified: April 9, 2022
+Author: K4YT3X <i@k4yt3x.com>
 """
 
 from abc import ABC, abstractmethod

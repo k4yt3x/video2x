@@ -17,9 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 Name: Video Decoder
-Author: K4YT3X
-Date Created: June 17, 2021
-Last Modified: April 9, 2022
+Author: K4YT3X <i@k4yt3x.com>
 """
 
 import contextlib
