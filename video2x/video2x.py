@@ -159,6 +159,7 @@ class Video2X:
                 processing_settings[2]
             ]
             if getattr(standalone_processor, "process", None) is None:
+                logger.warning("No progress bar available for this processor")
                 standalone_processor().process_video(
                     input_path,
                     output_path,
@@ -174,6 +175,7 @@ class Video2X:
                 processing_settings[1]
             ]
             if getattr(standalone_processor, "process", None) is None:
+                logger.warning("No progress bar available for this processor")
                 standalone_processor().process_video(
                     input_path, output_path, frame_rate=frame_rate
                 )
