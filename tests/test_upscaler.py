@@ -29,16 +29,11 @@ def test_upscaling():
 
 
 def test_upscale_image():
-
     # initialize upscaler instance
-    processing_queue = multiprocessing.Queue(maxsize=30)
-    processed_frames = multiprocessing.Manager().list([None])
-    pause = multiprocessing.Value(ctypes.c_bool, False)
-    upscaler = Upscaler(processing_queue, processed_frames, pause)
+    upscaler = Upscaler()
 
     image = Image.open("data/test_image.png")
     upscaled_image = upscaler.upscale_image(image, 1680, 960, "waifu2x", 3)
-
     reference_image = Image.open("data/test_image_ref.png")
     assert utils.get_image_diff(upscaled_image, reference_image) < 0.5
 
