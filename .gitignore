@@ -11,9 +11,6 @@ data/
 *.flv
 *.webm
 
-# vim session file
-Session.vim
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
