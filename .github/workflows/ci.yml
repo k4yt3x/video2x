@@ -8,13 +8,13 @@ on:
   workflow_dispatch: {}
 jobs:
   ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       DEBIAN_FRONTEND: noninteractive
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
+        with: self-hosted
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -38,12 +38,4 @@ jobs:
         with:
           name: video2x-nightly-wheels
           path: /tmp/video2x-nightly-wheels.txz
-
-- name: Download a Build Artifact
-  uses: actions/download-artifact@v2.1.1
-  with: video2x-nightly-wheels
-    # Artifact name
-    name: # optional
-    # Destination path
-    path: # optional
-
+          runs-on: self-hosted
