@@ -39,3 +39,12 @@ jobs:
         with:
           name: video2x-nightly-wheels
           path: /tmp/video2x-nightly-wheels.txz
+
+- name: Download a Build Artifact
+  uses: actions/download-artifact@v2.1.1
+  with: video2x-nightly-wheels
+    # Artifact name
+    name: # optional
+    # Destination path
+    path: # optional
+
