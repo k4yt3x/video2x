@@ -2,7 +2,7 @@
 name = "video2x"
 description = "A video/image upscaling and frame interpolation framework"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { text = "AGPL-3.0-or-later" }
 keywords = [
   "super-resolution",
@@ -54,6 +54,19 @@ profile = "black"
 
 [tool.pdm]
 version = { source = "file", path = "video2x/__init__.py" }
+
+[tool.pdm.dev-dependencies]
+lint = [
+    "flake8>=6.1.0",
+    "flake8-black>=0.3.6",
+    "flake8-isort>=6.0.0",
+    "pylint>=2.17.5",
+    "pylint-venv>=3.0.2",
+]
+format = [
+    "black>=23.7.0",
+    "isort>=5.12.0",
+]
 
 [build-system]
 requires = ["pdm-backend"]
