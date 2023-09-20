@@ -394,10 +394,10 @@ class Video2X:
         width, height, total_frames, frame_rate = self._get_video_info(input_path)
 
         # automatically calculate output width and height if only one is given
-        if output_width == 0:
+        if output_width == 0 or output_width is None:
             output_width = output_height / height * width
 
-        elif output_height == 0:
+        elif output_height == 0 or output_width is None:
             output_height = output_width / width * height
 
         # sanitize output width and height to be divisible by 2
