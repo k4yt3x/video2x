@@ -21,16 +21,16 @@ Author: K4YT3X <i@k4yt3x.com>
 """
 
 import time
+from importlib import import_module
 
 from loguru import logger
 from PIL import ImageChops, ImageStat
-from rife_ncnn_vulkan_python.rife_ncnn_vulkan import Rife
 
 from .processor import Processor
 
 
 class Interpolator:
-    ALGORITHM_CLASSES = {"rife": Rife}
+    ALGORITHM_CLASSES = {"rife": "rife_ncnn_vulkan_python.rife_ncnn_vulkan.Rife"}
 
     processor_objects = {}
 
@@ -43,9 +43,16 @@ class Interpolator:
 
         if difference_ratio < difference_threshold:
             processor_object = self.processor_objects.get(algorithm)
+
             if processor_object is None:
-                processor_object = self.ALGORITHM_CLASSES[algorithm](0)
+                module_name, class_name = self.ALGORITHM_CLASSES[algorithm].rsplit(
+                    ".", 1
+                )
+                processor_module = import_module(module_name)
+                processor_class = getattr(processor_module, class_name)
+                processor_object = processor_class(0)
                 self.processor_objects[algorithm] = processor_object
+
             interpolated_image = processor_object.process(image0, image1)
 
         else:

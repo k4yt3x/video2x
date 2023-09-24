@@ -22,13 +22,9 @@ Author: K4YT3X <i@k4yt3x.com>
 
 import math
 import time
+from importlib import import_module
 
-from anime4k_python import Anime4K
 from PIL import Image
-from realcugan_ncnn_vulkan_python import Realcugan
-from realsr_ncnn_vulkan_python import Realsr
-from srmd_ncnn_vulkan_python import Srmd
-from waifu2x_ncnn_vulkan_python import Waifu2x
 
 from .processor import Processor
 
@@ -45,11 +41,11 @@ class Upscaler:
     }
 
     ALGORITHM_CLASSES = {
-        "anime4k": Anime4K,
-        "realcugan": Realcugan,
-        "realsr": Realsr,
-        "srmd": Srmd,
-        "waifu2x": Waifu2x,
+        "anime4k": "anime4k_python.Anime4K",
+        "realcugan": "realcugan_ncnn_vulkan_python.Realcugan",
+        "realsr": "realsr_ncnn_vulkan_python.Realsr",
+        "srmd": "srmd_ncnn_vulkan_python.Srmd",
+        "waifu2x": "waifu2x_ncnn_vulkan_python.Waifu2x",
     }
 
     processor_objects = {}
@@ -148,9 +144,12 @@ class Upscaler:
             # create a new object if none are available
             processor_object = self.processor_objects.get((algorithm, task))
             if processor_object is None:
-                processor_object = self.ALGORITHM_CLASSES[algorithm](
-                    noise=noise, scale=task
+                module_name, class_name = self.ALGORITHM_CLASSES[algorithm].rsplit(
+                    ".", 1
                 )
+                processor_module = import_module(module_name)
+                processor_class = getattr(processor_module, class_name)
+                processor_object = processor_class(noise=noise, scale=task)
                 self.processor_objects[(algorithm, task)] = processor_object
 
             # process the image with the selected algorithm

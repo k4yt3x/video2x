@@ -37,9 +37,10 @@ import signal
 import sys
 import time
 from enum import Enum
+from importlib import import_module
 from multiprocessing import Manager, Pool, Queue, Value
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 import ffmpeg
 from cv2 import cv2
@@ -156,9 +157,12 @@ class Video2X:
         # process by directly invoking the
         # if the selected algorithm does not support frameserving
         if mode == ProcessingMode.UPSCALE:
-            standalone_processor: Any = Upscaler.ALGORITHM_CLASSES[
+            standalone_processor_path: str = Upscaler.ALGORITHM_CLASSES[
                 processing_settings[2]
             ]
+            module_name, class_name = standalone_processor_path.rsplit(".", 1)
+            processor_module = import_module(module_name)
+            standalone_processor = getattr(processor_module, class_name)
             if getattr(standalone_processor, "process", None) is None:
                 logger.warning("No progress bar available for this processor")
                 standalone_processor().process_video(
@@ -172,9 +176,12 @@ class Video2X:
                 return
         # elif mode == ProcessingMode.INTERPOLATE:
         else:
-            standalone_processor: Any = Interpolator.ALGORITHM_CLASSES[
+            standalone_processor_path: str = Interpolator.ALGORITHM_CLASSES[
                 processing_settings[1]
             ]
+            module_name, class_name = standalone_processor_path.rsplit(".", 1)
+            processor_module = import_module(module_name)
+            standalone_processor = getattr(processor_module, class_name)
             if getattr(standalone_processor, "process", None) is None:
                 logger.warning("No progress bar available for this processor")
                 standalone_processor().process_video(
