@@ -13,15 +13,18 @@ keywords = [
 authors = [{ name = "K4YT3X", email = "i@k4yt3x.com" }]
 classifiers = [
   "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: GNU Affero General Public License v3",
   "Operating System :: OS Independent",
-  "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.6",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python",
   "Topic :: Multimedia :: Video",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
   "Topic :: Scientific/Engineering :: Image Processing",
 ]
 dependencies = [
@@ -31,14 +34,16 @@ dependencies = [
   "pillow>=9.1.0",
   "pynput>=1.7.6",
   "rich>=12.0.0",
-  "waifu2x-ncnn-vulkan-python>=1.0.4",
-  "srmd-ncnn-vulkan-python>=1.0.2",
-  "realsr-ncnn-vulkan-python>=1.0.6",
-  "rife-ncnn-vulkan-python>=1.2.1",
-  "realcugan-ncnn-vulkan-python>=1.0.2",
-  "anime4k-python>=1.0.0",
 ]
 dynamic = ["version"]
+
+[project.optional-dependencies]
+waifu2x = ["waifu2x-ncnn-vulkan-python>=1.0.4"]
+srmd = ["srmd-ncnn-vulkan-python>=1.0.2"]
+realsr = ["realsr-ncnn-vulkan-python>=1.0.6"]
+rife = ["rife-ncnn-vulkan-python>=1.2.1"]
+realcugan = ["realcugan-ncnn-vulkan-python>=1.0.2"]
+anime4k = ["anime4k-python>=1.0.0"]
 
 [project.urls]
 homepage = "https://github.com/k4yt3x/video2x/"
