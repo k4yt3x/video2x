@@ -38,6 +38,14 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
+all = [
+  "waifu2x-ncnn-vulkan-python>=1.0.4",
+  "srmd-ncnn-vulkan-python>=1.0.2",
+  "realsr-ncnn-vulkan-python>=1.0.6",
+  "rife-ncnn-vulkan-python>=1.2.1",
+  "realcugan-ncnn-vulkan-python>=1.0.2",
+  "anime4k-python>=1.0.0",
+]
 waifu2x = ["waifu2x-ncnn-vulkan-python>=1.0.4"]
 srmd = ["srmd-ncnn-vulkan-python>=1.0.2"]
 realsr = ["realsr-ncnn-vulkan-python>=1.0.6"]
