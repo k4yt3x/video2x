@@ -9,6 +9,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 COPY . /video2x
 WORKDIR /video2x
+# Manually add the new NVIDIA GPG keys since the docker.io/nvidia/vulkan container is old.
+# https://github.com/NVIDIA/nvidia-docker/issues/1632
 RUN gpg --keyserver=keyserver.ubuntu.com --receive-keys A4B469963BF863CC \
     && gpg --export A4B469963BF863CC > /etc/apt/trusted.gpg.d/cuda.gpg
 RUN apt-get update \
@@ -33,6 +35,8 @@ COPY --from=builder /var/lib/apt/lists* /var/lib/apt/lists/
 COPY --from=builder /wheels /wheels
 COPY . /video2x
 WORKDIR /video2x
+RUN gpg --keyserver=keyserver.ubuntu.com --receive-keys A4B469963BF863CC \
+    && gpg --export A4B469963BF863CC > /etc/apt/trusted.gpg.d/cuda.gpg
 RUN apt-get install -y --no-install-recommends \
         python3.9-full python3.9-dev curl mesa-vulkan-drivers cuda-drivers ffmpeg \
     && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
