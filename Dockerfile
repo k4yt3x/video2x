@@ -19,7 +19,7 @@ RUN apt-get update \
         build-essential swig \
     && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
     && python3.9 get-pip.py \
-    && python3.9 -m pip wheel -w /wheels wheel pdm-backend opencv-python pillow .
+    && python3.9 -m pip wheel -w /wheels wheel pdm-backend opencv-python pillow .[all]
 
 # stage 2: install wheels into the final image
 FROM docker.io/nvidia/vulkan:1.3-470
@@ -42,7 +42,7 @@ RUN apt-get install -y --no-install-recommends \
     && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
     && python3.9 get-pip.py \
     && python3.9 -m pip install --no-cache-dir --no-index -f \
-        /wheels opencv-python pillow . \
+        /wheels opencv-python pillow .[all] \
     && apt-get clean \
     && rm -rf /wheels /video2x /var/lib/apt/lists/* /get-pip.py
 
