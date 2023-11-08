@@ -17,7 +17,7 @@ RUN apt-get update \
         build-essential swig \
     && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
     && python3.9 get-pip.py \
-    && python3.9 -m pip wheel -w /wheels wheel pdm-pep517 opencv-python pillow .
+    && python3.9 -m pip wheel -w /wheels wheel pdm-backend opencv-python pillow .
 
 # stage 2: install wheels into the final image
 FROM docker.io/nvidia/vulkan:1.3-470
