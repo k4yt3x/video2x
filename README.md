@@ -73,6 +73,29 @@ The following clip can be used to test if your setup works properly. This is als
 The original clip came from the anime "さくら荘のペットな彼女."\
 Copyright of this clip belongs to 株式会社アニプレックス.
 
+## the basics of using Video2X's command line interface.
+
+The easiest way to run Video2X is to use the full build. Download the latest GUI release from [here](https://github.com/k4yt3x/video2x/releases/tag/4.8.1). Extract the full release ZIP file and you'll get these files:
+
+![Video2X Release Files](https://user-images.githubusercontent.com/21986859/81489846-28633380-926a-11ea-9e81-fb92f492e14c.png)
+
+Simply double click on `video2x_gui.exe` to launch the GUI.
+
+![Screenshot 2024-01-15 121224](https://github.com/aa-sikkkk/video2x/assets/152005759/063a22ac-b9dd-414f-8f14-0360ba8204ec)
+
+
+Then, drag the videos you wish to upscale into the window and select the appropriate output path.
+For your convenience Make a new folder and add the image you want to upscale; after you drag the file in the input section, make sure to choose the same file as output; After that you're good to go!
+![Screenshot 2024-01-15 121525](https://github.com/aa-sikkkk/video2x/assets/152005759/c4125ecc-354e-4b11-8d18-fe8901175ca4)
+
+
+
+Tweak the settings if you want to, then hit the start button at the bottom and the upscale will start. Now you'll just have to wait for it to complete. Not that the progress bar might freeze at the beginning of processing and after it reaches 100%. FFmpeg will need some time to decode/encode the frames, and there's no way for Video2X to know & display those two steps' progress.
+![Screenshot 2024-01-15 121330](https://github.com/aa-sikkkk/video2x/assets/152005759/8cb67975-7bf4-4170-8022-b01071588cce)
+
+
+
+
 ## License
 
 This project is licensed under the [GNU Affero General Public License Version 3 (GNU AGPL v3)](https://www.gnu.org/licenses/agpl-3.0.txt)\
