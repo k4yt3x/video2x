@@ -42,8 +42,8 @@ from multiprocessing import Manager, Pool, Queue, Value
 from pathlib import Path
 from typing import Callable, Optional
 
+import cv2
 import ffmpeg
-from cv2 import cv2
 from loguru import logger
 from rich.console import Console
 from rich.file_proxy import FileProxy
