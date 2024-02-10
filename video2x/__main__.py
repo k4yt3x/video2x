@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Copyright (C) 2018-2023 K4YT3X and contributors.
+Copyright (C) 2018-2024 K4YT3X and contributors.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -187,7 +187,7 @@ def main() -> int:
         # print package version and copyright notice
         logger.opt(colors=True).info(f"<magenta>Video2X {__version__}</magenta>")
         logger.opt(colors=True).info(
-            "<magenta>Copyright (C) 2018-2023 K4YT3X and contributors.</magenta>"
+            "<magenta>Copyright (C) 2018-2024 K4YT3X and contributors.</magenta>"
         )
 
         # initialize video2x object
