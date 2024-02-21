@@ -160,10 +160,10 @@ class Video2X:
             standalone_processor_path: str = Upscaler.ALGORITHM_CLASSES[
                 processing_settings[2]
             ]
-            module_name, class_name = standalone_processor_path.rsplit(".", 1)
+            module_name, class_name, function_name = standalone_processor_path.rsplit(".", 2)
             processor_module = import_module(module_name)
             standalone_processor = getattr(processor_module, class_name)
-            if getattr(standalone_processor, "process", None) is None:
+            if getattr(standalone_processor, function_name, None) is None:
                 logger.warning("No progress bar available for this processor")
                 standalone_processor().process_video(
                     input_path,
@@ -179,10 +179,10 @@ class Video2X:
             standalone_processor_path: str = Interpolator.ALGORITHM_CLASSES[
                 processing_settings[1]
             ]
-            module_name, class_name = standalone_processor_path.rsplit(".", 1)
+            module_name, class_name, function_name = standalone_processor_path.rsplit(".", 2)
             processor_module = import_module(module_name)
             standalone_processor = getattr(processor_module, class_name)
-            if getattr(standalone_processor, "process", None) is None:
+            if getattr(standalone_processor, function_name, None) is None:
                 logger.warning("No progress bar available for this processor")
                 standalone_processor().process_video(
                     input_path, output_path, frame_rate=frame_rate

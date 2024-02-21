@@ -38,17 +38,19 @@ class Upscaler:
         "realsr": [4],
         "srmd": [2, 3, 4],
         "waifu2x": [1, 2],
+        "realesrgan": [2, 3, 4],
     }
 
     ALGORITHM_CLASSES = {
-        "anime4k": "anime4k_python.Anime4K",
-        "realcugan": "realcugan_ncnn_vulkan_python.Realcugan",
-        "realsr": "realsr_ncnn_vulkan_python.Realsr",
-        "srmd": "srmd_ncnn_vulkan_python.Srmd",
-        "waifu2x": "waifu2x_ncnn_vulkan_python.Waifu2x",
+        "anime4k": "anime4k_python.Anime4K.process",
+        "realcugan": "realcugan_ncnn_vulkan_python.Realcugan.process",
+        "realsr": "realsr_ncnn_vulkan_python.Realsr.process",
+        "srmd": "srmd_ncnn_vulkan_python.Srmd.process",
+        "waifu2x": "waifu2x_ncnn_vulkan_python.Waifu2x.process",
+        "realesrgan": "realesrgan_ncnn_py.Realesrgan.process_pil",
     }
 
-    processor_objects = {}
+    processor_functions = {}
 
     @staticmethod
     def _get_scaling_tasks(
@@ -142,18 +144,19 @@ class Upscaler:
         ):
             # select a processor object with the required settings
             # create a new object if none are available
-            processor_object = self.processor_objects.get((algorithm, task))
-            if processor_object is None:
-                module_name, class_name = self.ALGORITHM_CLASSES[algorithm].rsplit(
-                    ".", 1
+            processor_function = self.processor_functions.get((algorithm, task))
+            if processor_function is None:
+                module_name, class_name, function_name = self.ALGORITHM_CLASSES[algorithm].rsplit(
+                    ".", 2
                 )
                 processor_module = import_module(module_name)
                 processor_class = getattr(processor_module, class_name)
-                processor_object = processor_class(noise=noise, scale=task)
-                self.processor_objects[(algorithm, task)] = processor_object
+                processor_object = processor_class(gpuid=0, model=4, scale=task) if algorithm == "realesrgan" else processor_class(noise=noise, scale=task)
+                processor_function = getattr(processor_object, function_name)
+                self.processor_functions[(algorithm, task)] = processor_function
 
             # process the image with the selected algorithm
-            image = processor_object.process(image)
+            image = processor_function(image)
 
         # downscale the image to the desired output size and
         # save the image to disk

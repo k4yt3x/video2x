@@ -38,7 +38,7 @@ Github Page:\thttps://github.com/k4yt3x/video2x
 Contact:\ti@k4yt3x.com"""
 
 # algorithms available for upscaling tasks
-UPSCALING_ALGORITHMS = ["waifu2x", "srmd", "realsr", "realcugan", "anime4k"]
+UPSCALING_ALGORITHMS = ["waifu2x", "srmd", "realsr", "realcugan", "anime4k", "realesrgan"]
 
 # algorithms available for frame interpolation tasks
 INTERPOLATION_ALGORITHMS = ["rife"]
