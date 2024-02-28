@@ -35,7 +35,7 @@ WORKDIR /video2x
 RUN apt-get install -y --no-install-recommends \
         python3.9 python3-pip python3.9-dev \
         python3-opencv python3-pil \
-        mesa-vulkan-drivers cuda-drivers ffmpeg \
+        mesa-vulkan-drivers cuda-drivers ffmpeg libomp5 \
     && python3.9 -m pip install --no-cache-dir --no-index -f /wheels '.[all]' \
     && apt-get clean \
     && rm -rf /wheels /video2x /var/lib/apt/lists/*

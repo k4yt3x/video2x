@@ -38,7 +38,7 @@ class Upscaler:
         "realsr": [4],
         "srmd": [2, 3, 4],
         "waifu2x": [1, 2],
-        "realesrgan": [2, 3, 4],
+        "realesrgan": [4],
     }
 
     ALGORITHM_CLASSES = {
@@ -151,7 +151,7 @@ class Upscaler:
                 )
                 processor_module = import_module(module_name)
                 processor_class = getattr(processor_module, class_name)
-                processor_object = processor_class(gpuid=0, model=4, scale=task) if algorithm == "realesrgan" else processor_class(noise=noise, scale=task)
+                processor_object = processor_class(gpuid=0, model=4) if algorithm == "realesrgan" else processor_class(noise=noise, scale=task)
                 processor_function = getattr(processor_object, function_name)
                 self.processor_functions[(algorithm, task)] = processor_function
 
