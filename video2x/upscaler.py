@@ -38,7 +38,9 @@ class Upscaler:
         "realsr": [4],
         "srmd": [2, 3, 4],
         "waifu2x": [1, 2],
-        "realesrgan": [4],
+        "realesr-animevideov3":[2, 3, 4],
+        "realesrgan-x4plus-anime":[4],
+        "realesrgan-x4plus":[4],
     }
 
     ALGORITHM_CLASSES = {
@@ -47,7 +49,16 @@ class Upscaler:
         "realsr": "realsr_ncnn_vulkan_python.Realsr.process",
         "srmd": "srmd_ncnn_vulkan_python.Srmd.process",
         "waifu2x": "waifu2x_ncnn_vulkan_python.Waifu2x.process",
-        "realesrgan": "realesrgan_ncnn_py.Realesrgan.process_pil",
+        "realesr-animevideov3":"realesrgan_ncnn_py.Realesrgan.process_pil",
+        "realesrgan-x4plus-anime":"realesrgan_ncnn_py.Realesrgan.process_pil",
+        "realesrgan-x4plus":"realesrgan_ncnn_py.Realesrgan.process_pil",
+    }
+
+    # compute the actual model id by adding the scale to it
+    REALESRGAN_MODEL_BASE = {
+        "realesr-animevideov3":-2,
+        "realesrgan-x4plus-anime":-1,
+        "realesrgan-x4plus":0,
     }
 
     processor_functions = {}
@@ -151,7 +162,11 @@ class Upscaler:
                 )
                 processor_module = import_module(module_name)
                 processor_class = getattr(processor_module, class_name)
-                processor_object = processor_class(gpuid=0, model=4) if algorithm == "realesrgan" else processor_class(noise=noise, scale=task)
+                processor_object = (
+                    processor_class(gpuid=0, model=self.REALESRGAN_MODEL_BASE[algorithm] + task)
+                    if algorithm in self.REALESRGAN_MODEL_BASE else
+                    processor_class(noise=noise, scale=task)
+                )
                 processor_function = getattr(processor_object, function_name)
                 self.processor_functions[(algorithm, task)] = processor_function
 
