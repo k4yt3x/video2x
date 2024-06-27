@@ -28,6 +28,39 @@ from PIL import Image
 
 from .processor import Processor
 
+import os
+import sys
+from contextlib import contextmanager
+
+def fileno(file_or_fd):
+    fd = getattr(file_or_fd, 'fileno', lambda: file_or_fd)()
+    if not isinstance(fd, int):
+        raise ValueError("Expected a file (`.fileno()`) or a file descriptor")
+    return fd
+
+@contextmanager
+def stdout_redirected(to=os.devnull, stdout=None):
+    if stdout is None:
+       stdout = sys.stdout
+
+    stdout_fd = fileno(stdout)
+    # copy stdout_fd before it is overwritten
+    # NOTE: `copied` is inheritable on Windows when duplicating a standard stream
+    with os.fdopen(os.dup(stdout_fd), 'wb') as copied:
+        stdout.flush()  # flush library buffers that dup2 knows nothing about
+        try:
+            os.dup2(fileno(to), stdout_fd)  # $ exec >&to
+        except ValueError:  # filename
+            with open(to, 'wb') as to_file:
+                os.dup2(to_file.fileno(), stdout_fd)  # $ exec > to
+        try:
+            yield stdout # allow code to be run with the redirected stdout
+        finally:
+            # restore stdout to its previous value
+            #NOTE: dup2 makes stdout_fd inheritable unconditionally
+            stdout.flush()
+            os.dup2(copied.fileno(), stdout_fd)  # $ exec >&copied
+
 
 class Upscaler:
     # fixed scaling ratios supported by the algorithms
@@ -181,40 +214,48 @@ class Upscaler:
 class UpscalerProcessor(Processor, Upscaler):
     def process(self) -> None:
         task = self.tasks_queue.get()
-        while task is not None:
-            try:
-                if self.pause_flag.value is True:
-                    time.sleep(0.1)
-                    continue
+        # some precessors do output a lot of nonsense that messes the
+        # output and the progress bars... so redirect it in this
+        # process.  We use file level redirection, instead of just
+        # replacing sys.stdout, to make sure it is effective also in
+        # subprocesses that are in C++ or what not
+        with stdout_redirected() as stdout, \
+             stdout_redirected(stdout=sys.stderr) as stderr:
+            while task is not None:
+                try:
+                    task = self._do_process(task)
+                except KeyboardInterrupt:
+                    break
 
-                # unpack the task's values
-                (
-                    frame_index,
-                    previous_frame,
-                    current_frame,
-                    (output_width, output_height, algorithm, noise, threshold),
-                ) = task
+    def _do_process(self, task) -> None:
+        if self.pause_flag.value is True:
+            time.sleep(0.1)
+            return task
 
-                # calculate the %diff between the current frame and the previous frame
-                difference_ratio = 0
-                if previous_frame is not None:
-                    difference_ratio = self.get_image_diff(
-                        previous_frame, current_frame
-                    )
+        # unpack the task's values
+        (
+            frame_index,
+            previous_frame,
+            current_frame,
+            (output_width, output_height, algorithm, noise, threshold),
+        ) = task
 
-                # if the difference is lower than threshold, skip this frame
-                if difference_ratio < threshold:
-                    # make the current image the same as the previous result
-                    self.processed_frames[frame_index] = True
+        # calculate the %diff between the current frame and the previous frame
+        difference_ratio = 0
+        if previous_frame is not None:
+            difference_ratio = self.get_image_diff(
+                previous_frame, current_frame
+            )
 
-                # if the difference is greater than threshold
-                # process this frame
-                else:
-                    self.processed_frames[frame_index] = self.upscale_image(
-                        current_frame, output_width, output_height, algorithm, noise
-                    )
+        if difference_ratio < threshold:
+            # if the difference is lower than threshold, skip this frame,
+            # make the current image the same as the previous result
+            self.processed_frames[frame_index] = True
+        else:
+            # if the difference is greater than threshold
+            # process this frame
+            self.processed_frames[frame_index] = self.upscale_image(
+                current_frame, output_width, output_height, algorithm, noise
+            )
 
-                task = self.tasks_queue.get()
-
-            except KeyboardInterrupt:
-                break
+        return self.tasks_queue.get()
