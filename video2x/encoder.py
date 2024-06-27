@@ -56,13 +56,17 @@ class VideoEncoder:
         copy_attachments: bool = False,
     ) -> None:
         # create FFmpeg input for the original input video
-        original = ffmpeg.input(input_path)
+        original = ffmpeg.input(
+            input_path,
+            thread_queue_size="128",
+        )
 
         # define frames as input
         frames = ffmpeg.input(
             "pipe:0",
             format="rawvideo",
             pix_fmt="rgb24",
+            thread_queue_size="128",
             s=f"{output_width}x{output_height}",
             r=frame_rate,
         )

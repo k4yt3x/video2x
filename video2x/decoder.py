@@ -76,7 +76,10 @@ class VideoDecoder:
 
         self.decoder = subprocess.Popen(
             ffmpeg.compile(
-                ffmpeg.input(input_path)["v"]
+                ffmpeg.input(
+                    input_path,
+                    thread_queue_size='128',
+                )["v"]
                 # Some files (particularly mkv), even if they have a
                 # more or less stable frame-rate, have some time
                 # miss-aligned frames. With this filter we fully
