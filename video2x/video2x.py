@@ -76,6 +76,11 @@ except ImportError:
 else:
     ENABLE_HOTKEY = True
 
+import threading
+import ctypes
+import time
+
+
 def setup_logger():
     """
     Setup a pretty logger.
@@ -101,6 +106,34 @@ def setup_logger():
     )
 
 
+class KillableThreadMixin:
+    """
+    Adds support to a thread so that it can be killed:
+    https://www.geeksforgeeks.org/python-different-ways-to-kill-a-thread
+    """
+    def get_id(self):
+        # returns id of the respective thread
+        if hasattr(self, '_thread_id'):
+            return self._thread_id
+        for id, thread in threading._active.items():
+            if thread is self:
+                return id
+
+    def kill(self):
+        thread_id = self.get_id()
+        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
+              ctypes.py_object(SystemExit))
+        if res > 1:
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
+            logger.debug('Exception raise failure')
+
+
+class KillableListener(Listener, KillableThreadMixin):
+    """
+    A killable version of pyinput.keyboard.Listener, as joining()
+    seems to hang on some systems even after properly calling close().
+    """
+    pass
 
 
 class ProcessingSpeedColumn(ProgressColumn):
@@ -314,11 +347,12 @@ class Video2X:
 
         # enable global pause hotkey if it's supported
         if ENABLE_HOTKEY is True:
+            logger.debug("Enabling hotkeys")
             # create global pause hotkey
             pause_hotkey = HotKey(HotKey.parse("<ctrl>+<alt>+v"), _toggle_pause)
 
             # create global keyboard input listener
-            keyboard_listener = Listener(
+            keyboard_listener = KillableListener(
                 on_press=(
                     lambda key: pause_hotkey.press(keyboard_listener.canonical(key))
                 ),
@@ -381,8 +415,9 @@ class Video2X:
         finally:
             # stop keyboard listener
             if ENABLE_HOTKEY is True:
+                logger.debug("Stopping keyboard listener")
                 keyboard_listener.stop()
-                keyboard_listener.join()
+                keyboard_listener.kill()
 
             # if errors have occurred, kill the FFmpeg processes
             if len(exceptions) > 0:
