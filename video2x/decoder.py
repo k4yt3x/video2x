@@ -76,8 +76,29 @@ class VideoDecoder:
 
         self.decoder = subprocess.Popen(
             ffmpeg.compile(
-                ffmpeg.input(input_path, r=frame_rate)["v"]
-                .output("pipe:1", format="rawvideo", pix_fmt="rgb24")
+                ffmpeg.input(input_path)["v"]
+                # Some files (particularly mkv), even if they have a
+                # more or less stable frame-rate, have some time
+                # miss-aligned frames. With this filter we fully
+                # stabilizie the frame-rate, which is required to
+                # avoid issues since we lose frame timing information
+                # when convertion to `rawvideo`.
+                #
+                # Note that we do not pass r=frame_rate to the input.
+                # If we do, this filter does not see the
+                # misalignment between the target frame rate and the
+                # frames and can't fix them!
+                .filter(
+                    "fps",
+                    fps=frame_rate,
+                )
+                .output(
+                    "pipe:1",
+                    format="rawvideo",
+                    pix_fmt="rgb24",
+                    fps_mode="cfr",
+                    r=frame_rate,
+                )
                 .global_args("-hide_banner")
                 .global_args("-nostats")
                 .global_args("-nostdin")
