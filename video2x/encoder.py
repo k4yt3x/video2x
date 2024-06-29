@@ -52,8 +52,8 @@ class VideoEncoder:
         output_height: int,
         copy_audio: bool = True,
         copy_subtitle: bool = True,
-        copy_data: bool = False,
-        copy_attachments: bool = False,
+        copy_data: bool = True,
+        copy_attachments: bool = True,
     ) -> None:
         # create FFmpeg input for the original input video
         original = ffmpeg.input(
