@@ -367,6 +367,7 @@ class Video2X:
         # a temporary variable that stores the exception
         exceptions = []
 
+        logger.debug("Starting main loop")
         try:
             # let the context manager automatically stop the progress bar
             with self.progress:
@@ -421,10 +422,12 @@ class Video2X:
 
             # if errors have occurred, kill the FFmpeg processes
             if len(exceptions) > 0:
+                logger.debug("Killing ffmpeg due to exceptions")
                 decoder.kill()
                 encoder.kill()
 
             # stop the decoder
+            logger.debug("Stopping decode thread")
             decoder_thread.stop()
             decoder_thread.join()
 
@@ -432,17 +435,22 @@ class Video2X:
             # multiprocessing.Queue has no Queue.queue.clear
             while tasks_queue.empty() is not True:
                 tasks_queue.get()
+
+            logger.debug("Signaling work is done")
             for _ in range(processes):
                 tasks_queue.put(None)
 
             # close and join the process pool
+            logger.debug("Joining process pool")
             processor_pool.close()
             processor_pool.join()
 
             # stop the encoder
+            logger.debug("Joining encoder")
             encoder.join()
 
             # restore original STDOUT and STDERR
+            logger.debug("Restoring stdout and closing")
             sys.stdout = original_stdout
             sys.stderr = original_stderr
 
