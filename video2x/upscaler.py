@@ -242,7 +242,7 @@ class UpscalerProcessor(Processor, Upscaler):
 
         # calculate the %diff between the current frame and the previous frame
         difference_ratio = 0
-        if previous_frame is not None:
+        if threshold > 0 and previous_frame is not None:
             difference_ratio = self.get_image_diff(
                 previous_frame, current_frame
             )
