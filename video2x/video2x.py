@@ -121,8 +121,9 @@ class Video2X:
         :raises RuntimeError: raised when video stream isn't found
         """
         # probe video file info
-        logger.info("Reading input video information...")
-        for stream in ffmpeg.probe(path, count_frames=None)["streams"]:
+        logger.info("Reading input video information")
+        information = ffmpeg.probe(path)
+        for stream in information["streams"]:
             if stream["codec_type"] == "video":
                 video_info = stream
                 break
@@ -133,9 +134,24 @@ class Video2X:
             logger.error("Can't process video with variable frame rate")
             raise RuntimeError("variable frame rate video")
 
+        # We estimate the frame count from the frame rate and the
+        # duration.  This is equivalent to the old code that used
+        # OpenCV, as that library does the same thing.
+        #
+        # There is a more precise way to get the frame count, using
+        # ffmpeg.probe(count_frames=None), which counts the actual
+        # number of frames.  However, those frames may be positioned
+        # at uneven positions in time (particularly for variable frame
+        # rates or containers like .mkv).  Since we work only with
+        # constant fps, and transform with filter=fps fom ffmpeg, this
+        # is actually more accurate for our purposes.  It may still be
+        # off by one or two samples in some edge cases, so we have to
+        # still consider the case where the Decoder thread finishes
+        # early.
         logger.debug("Input video information:\n{}", stream)
-        frame_count = int(video_info["nb_read_frames"])
+        duration = float(information["format"]["duration"]) # in seconds
         frame_rate = Fraction(video_info["r_frame_rate"])
+        frame_count = int(duration * frame_rate)
         return (video_info["width"], video_info["height"], frame_count, frame_rate)
 
     def _run(
