@@ -36,13 +36,14 @@ import math
 import signal
 import sys
 import time
+
+from fractions import Fraction
 from enum import Enum
 from importlib import import_module
 from multiprocessing import Manager, Pool, Queue, Value
 from pathlib import Path
 from typing import Callable, Optional
 
-import cv2
 import ffmpeg
 from loguru import logger
 from rich.console import Console
@@ -120,25 +121,22 @@ class Video2X:
         :raises RuntimeError: raised when video stream isn't found
         """
         # probe video file info
-        logger.info("Reading input video information")
-        for stream in ffmpeg.probe(path)["streams"]:
+        logger.info("Reading input video information...")
+        for stream in ffmpeg.probe(path, count_frames=None)["streams"]:
             if stream["codec_type"] == "video":
                 video_info = stream
                 break
         else:
             raise RuntimeError("unable to find video stream")
 
-        # get total number of frames to be processed
-        capture = cv2.VideoCapture(str(path))
+        if video_info["r_frame_rate"] != video_info["avg_frame_rate"]:
+            logger.error("Can't process video with variable frame rate")
+            raise RuntimeError("variable frame rate video")
 
-        # check if file is opened successfully
-        if not capture.isOpened():
-            raise RuntimeError("OpenCV has failed to open the input file")
-
-        total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-        frame_rate = capture.get(cv2.CAP_PROP_FPS)
-
-        return video_info["width"], video_info["height"], total_frames, frame_rate
+        logger.debug("Input video information:\n{}", stream)
+        frame_count = int(video_info["nb_read_frames"])
+        frame_rate = Fraction(video_info["r_frame_rate"])
+        return (video_info["width"], video_info["height"], frame_count, frame_rate)
 
     def _run(
         self,

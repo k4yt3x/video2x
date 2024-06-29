@@ -28,13 +28,12 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Image Processing",
 ]
 dependencies = [
-  "ffmpeg-python>=0.2.0",
-  "loguru>=0.6.0",
-  "opencv-python>=4.9.0.80",
-  "pillow>=9.1.0",
-  "pynput>=1.7.6",
-  "rich>=12.0.0",
-  "numpy>=1.26.4",
+    "ffmpeg-python>=0.2.0",
+    "loguru>=0.6.0",
+    "pillow>=9.1.0",
+    "pynput>=1.7.6",
+    "rich>=12.0.0",
+    "numpy>=1.26.4",
 ]
 dynamic = ["version"]
 

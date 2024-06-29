@@ -5,7 +5,7 @@
 groups = ["default", "all", "anime4k", "format", "lint", "realcugan", "realesrgan", "realsr", "rife", "srmd", "waifu2x"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:a7c8c02898b60a8eb9cb402a44e24dc30ae5d4747bce25bd1d3105112c26b21a"
+content_hash = "sha256:4562e370705de1e880c174cd7eff679529f9f806dda9cfcd1b537b6bce1a90b5"
 
 [[package]]
 name = "anime4k-python"
@@ -323,7 +323,7 @@ name = "opencv-python"
 version = "4.10.0.84"
 requires_python = ">=3.6"
 summary = "Wrapper package for OpenCV python bindings."
-groups = ["all", "default", "realesrgan"]
+groups = ["all", "realesrgan"]
 dependencies = [
     "numpy>=1.17.0; python_version >= \"3.7\"",
     "numpy>=1.17.3; python_version >= \"3.8\"",
