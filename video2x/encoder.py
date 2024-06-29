@@ -121,6 +121,7 @@ class VideoEncoder:
 
     def kill(self):
         self.encoder.send_signal(signal.SIGKILL)
+        self.pipe_printer.stop()
 
     def write(self, frame: Image.Image) -> None:
         """

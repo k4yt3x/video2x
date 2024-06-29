@@ -66,6 +66,7 @@ class VideoDecoder:
         frame_rate: float,
         pil_ignore_max_image_pixels: bool = True,
     ) -> None:
+        self.is_done = False
         self.input_path = input_path
         self.input_width = input_width
         self.input_height = input_height
@@ -142,10 +143,11 @@ class VideoDecoder:
             buffer = self.decoder.stdout.read(3 * self.input_width * self.input_height)
 
         # automatically self-join and clean up after iterations are done
-        self.join()
+        self.is_done = True
 
     def kill(self):
         self.decoder.send_signal(signal.SIGKILL)
+        self.pipe_printer.stop()
 
     def join(self):
         # close PIPEs to prevent process from getting stuck
@@ -176,17 +178,16 @@ class VideoDecoderThread(Thread):
         previous_frame = None
         for frame_index, frame in enumerate(self.decoder):
             while True:
-                # check for the stop signal
-                if self.running is False:
-                    self.decoder.join()
-                    return
-
                 with contextlib.suppress(Full):
                     self.tasks_queue.put(
                         (frame_index, previous_frame, frame, self.processing_settings),
                         timeout=0.1,
                     )
                     break
+
+                # check for the stop signal
+                if self.running is False:
+                    return
 
             previous_frame = frame
 

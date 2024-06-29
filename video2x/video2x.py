@@ -375,6 +375,12 @@ class Video2X:
                 while frame_index < total_frames:
                     current_frame = processed_frames.get(frame_index)
 
+                    if current_frame is None and decoder.is_done:
+                        # this can happen when we over-estimated how
+                        # many frames there are...
+                        logger.debug("Decoder is done early, finishing...")
+                        break
+
                     if pause_flag.value is True or current_frame is None:
                         time.sleep(0.1)
                         continue
@@ -431,10 +437,14 @@ class Video2X:
             decoder_thread.stop()
             decoder_thread.join()
 
-            # clear queue and signal processors to exit
-            # multiprocessing.Queue has no Queue.queue.clear
-            while tasks_queue.empty() is not True:
-                tasks_queue.get()
+            # if we wanna exit early due to exceptions, empty the task
+            # queue by fetching everything from it.  otherwise leave
+            # any pending tasks there so they fully complete and those
+            # frames get into the video
+            if len(exceptions) > 0:
+                logger.debug("Emptying task queue")
+                while tasks_queue.empty() is not True:
+                    tasks_queue.get()
 
             logger.debug("Signaling work is done")
             for _ in range(processes):
