@@ -108,7 +108,7 @@ class VideoDecoder:
                 .global_args(
                     "-loglevel",
                     LOGURU_FFMPEG_LOGLEVELS.get(
-                        os.environ.get("LOGURU_LEVEL", "INFO").lower()
+                        os.environ.get("LOGURU_FFMPEG_LEVEL", "INFO").lower()
                     ),
                 ),
                 overwrite_output=True,

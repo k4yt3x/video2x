@@ -36,6 +36,7 @@ import math
 import signal
 import sys
 import time
+import os
 
 from fractions import Fraction
 from enum import Enum
@@ -75,12 +76,31 @@ except ImportError:
 else:
     ENABLE_HOTKEY = True
 
-# format string for Loguru loggers
-LOGURU_FORMAT = (
-    "<green>{time:HH:mm:ss.SSSSSS!UTC}</green> | "
-    "<level>{level: <8}</level> | "
-    "<level>{message}</level>"
-)
+def setup_logger():
+    """
+    Setup a pretty logger.
+
+    This can be called multiple times, whenever sys.stderr changes,
+    in order to restore proper functioning of the logger
+    """
+    LOGURU_FORMAT = (
+        "<green>{time:HH:mm:ss.SSSSSS!UTC}</green> | "
+        "<level>{level: <8}</level> | "
+        "<level>{message}</level>"
+    )
+
+    # remove default or previous handlers
+    logger.remove()
+
+    # add new sink with custom handler
+    logger.add(
+        sys.stderr,
+        colorize=True,
+        format=LOGURU_FORMAT,
+        level=os.environ["LOGURU_LEVEL"],
+    )
+
+
 
 
 class ProcessingSpeedColumn(ProgressColumn):
@@ -215,8 +235,7 @@ class Video2X:
         sys.stderr = FileProxy(console, sys.stderr)
 
         # re-add Loguru to point to the new STDERR
-        logger.remove()
-        logger.add(sys.stderr, colorize=True, format=LOGURU_FORMAT)
+        setup_logger()
 
         # TODO: add docs
         tasks_queue = Queue(maxsize=processes * 10)
@@ -393,8 +412,7 @@ class Video2X:
             sys.stderr = original_stderr
 
             # re-add Loguru to point to the restored STDERR
-            logger.remove()
-            logger.add(sys.stderr, colorize=True, format=LOGURU_FORMAT)
+            setup_logger()
 
             # raise the first collected error
             if len(exceptions) > 0:

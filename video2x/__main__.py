@@ -29,7 +29,7 @@ from loguru import logger
 from rich import print as rich_print
 
 from . import __version__
-from .video2x import LOGURU_FORMAT, Video2X
+from .video2x import setup_logger, Video2X
 
 LEGAL_INFO = f"""Video2X\t\t{__version__}
 Author:\t\tK4YT3X
@@ -80,6 +80,13 @@ def parse_arguments() -> argparse.Namespace:
         "--loglevel",
         choices=["trace", "debug", "info", "success", "warning", "error", "critical"],
         default="info",
+    )
+    parser.add_argument(
+        "-L",
+        "--loglevel-ffmpeg",
+        choices=["trace", "debug", "info", "success", "warning", "error", "critical"],
+        default="info",
+        help="log level for ffmpeg processes",
     )
 
     # upscaler arguments
@@ -178,12 +185,11 @@ def main() -> int:
         # set logger level
         if os.environ.get("LOGURU_LEVEL") is None:
             os.environ["LOGURU_LEVEL"] = args.loglevel.upper()
+        if os.environ.get("LOGURU_FFMPEG_LEVEL") is None:
+            os.environ["LOGURU_FFMPEG_LEVEL"] = args.loglevel_ffmpeg.upper()
 
-        # remove default handler
-        logger.remove()
-
-        # add new sink with custom handler
-        logger.add(sys.stderr, colorize=True, format=LOGURU_FORMAT)
+        # Set the logger up
+        setup_logger()
 
         # print package version and copyright notice
         logger.opt(colors=True).info(f"<magenta>Video2X {__version__}</magenta>")
