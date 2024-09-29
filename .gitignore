@@ -1,117 +1,77 @@
-# PDM
-.pdm-python
-__pypackages__/
-
-# test videos
+# Data files
 data/
-*.mp4
-*.mkv
-*.mov
-*.avi
-*.flv
-*.webm
 
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
+# Built-binaries
+bin/
 build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+# Prerequisites
+*.d
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
+# Linker output
+*.ilk
+*.map
+*.exp
 
-# Translations
-#*.mo
-#*.pot
+# Precompiled Headers
+*.gch
+*.pch
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
 
-# Flask stuff:
-instance/
-.webassets-cache
+# Shared objects (inc. Windows DLLs)
+*.dll
+#*.so
+*.so.*
+*.dylib
 
-# Scrapy stuff:
-.scrapy
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
 
-# Sphinx documentation
-docs/_build/
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
 
-# PyBuilder
-target/
+# Kernel Module Compile Results
+#*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# clang tooling compilation databases
+.cache/
+*.plist
 
-# pyenv
-.python-version
-
-# celery beat schedule file
-celerybeat-schedule
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
