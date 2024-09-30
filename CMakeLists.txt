@@ -45,12 +45,22 @@ endforeach()
 list(REMOVE_DUPLICATES ALL_INCLUDE_DIRS)
 list(REMOVE_DUPLICATES ALL_LIBRARIES)
 
+# Add all source files for libvideo2x
+set(LIBVIDEO2X_SOURCES
+    src/libvideo2x.c
+    src/encoder.c
+    src/decoder.c
+)
+
 # Create the shared library 'libvideo2x'
-add_library(video2x SHARED src/libvideo2x.c)
-set_target_properties(video2x PROPERTIES OUTPUT_NAME libvideo2x)
+add_library(video2x SHARED ${LIBVIDEO2X_SOURCES})
+set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
 
 # Include directories for the shared library
-target_include_directories(video2x PRIVATE ${ALL_INCLUDE_DIRS})
+target_include_directories(video2x PRIVATE
+    ${ALL_INCLUDE_DIRS}
+    ${PROJECT_SOURCE_DIR}/include  # Include projectroot/include directory
+)
 
 # Compile options for the shared library
 target_compile_options(video2x PRIVATE
@@ -68,7 +78,9 @@ add_executable(video2x_exe src/video2x.c)
 set_target_properties(video2x_exe PROPERTIES OUTPUT_NAME video2x)
 
 # Include directories for the executable
-target_include_directories(video2x_exe PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(video2x_exe PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+)
 
 # Compile options for the executable
 target_compile_options(video2x_exe PRIVATE
