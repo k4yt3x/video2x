@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavfilter/avfilter.h>
 #include <libavfilter/buffersink.h>
@@ -10,6 +11,7 @@
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/rational.h>
+}
 
 int init_encoder(
     const char *output_filename,
