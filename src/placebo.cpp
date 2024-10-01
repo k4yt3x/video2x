@@ -67,16 +67,21 @@ int init_libplacebo(
         return AVERROR_FILTER_NOT_FOUND;
     }
 
+    printf("Width: %d, Height: %d\n", output_width, output_height);
+    printf("Shader path: %s\n", shader_path);
+
     // Prepare the filter arguments
     char filter_args[512];
     snprintf(
         filter_args,
         sizeof(filter_args),
-        "w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path='%s'",
+        "w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s",
         output_width,
         output_height,
         shader_path
     );
+
+    printf("Filter args: %s\n", filter_args);
 
     AVFilterContext *libplacebo_ctx;
     ret = avfilter_graph_create_filter(
