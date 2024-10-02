@@ -21,8 +21,8 @@ extern "C" {
 #include "realesrgan.h"
 
 // ncnn includes
-#include "gpu.h"
-#include "mat.h"
+#include <gpu.h>
+#include <mat.h>
 
 // Abstract base class for filters
 class Filter {
@@ -173,7 +173,6 @@ class RealesrganFilter : public Filter {
     virtual ~RealesrganFilter() { cleanup(); }
 
     int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) override {
-        __asm__("int3");
         // Initialize ncnn GPU instance
         ncnn::create_gpu_instance();
 
