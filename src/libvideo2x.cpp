@@ -30,7 +30,7 @@ class Filter {
    public:
     virtual int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) = 0;
     virtual int
-    process_frame(AVFrame *input_frame, AVFrame *output_frame, AVCodecContext *enc_ctx) = 0;
+    process_frame(AVFrame *input_frame, AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) = 0;
     virtual int flush(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) = 0;
     virtual void cleanup() = 0;
     virtual ~Filter() {}
@@ -71,7 +71,7 @@ class LibplaceboFilter : public Filter {
         return ret;
     }
 
-    int process_frame(AVFrame *input_frame, AVFrame *output_frame, AVCodecContext *enc_ctx)
+    int process_frame(AVFrame *input_frame, AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx)
         override {
         int ret;
 
@@ -82,25 +82,41 @@ class LibplaceboFilter : public Filter {
             return ret;
         }
 
-        // Get the filtered frame
+        // Get the filtered frames
         while (1) {
+            AVFrame *output_frame = av_frame_alloc();
+            if (!output_frame) {
+                return AVERROR(ENOMEM);
+            }
+
             ret = av_buffersink_get_frame(buffersink_ctx, output_frame);
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                return 0;  // No frame available right now
+                av_frame_free(&output_frame);
+                break;
             }
             if (ret < 0) {
+                av_frame_free(&output_frame);
                 return ret;
             }
 
             output_frame->pict_type = AV_PICTURE_TYPE_NONE;
+
             // Rescale PTS to encoder's time base
             output_frame->pts = av_rescale_q(
                 output_frame->pts, buffersink_ctx->inputs[0]->time_base, enc_ctx->time_base
             );
 
-            // Successfully processed a frame
-            return 1;
+            // Encode and write the filtered frame
+            ret = encode_and_write_frame(output_frame, enc_ctx, ofmt_ctx);
+            if (ret < 0) {
+                av_frame_free(&output_frame);
+                return ret;
+            }
+
+            av_frame_free(&output_frame);
         }
+
+        return 0;
     }
 
     int flush(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) override {
@@ -112,15 +128,16 @@ class LibplaceboFilter : public Filter {
             return ret;
         }
 
-        AVFrame *filt_frame = av_frame_alloc();
-        if (!filt_frame) {
-            return AVERROR(ENOMEM);
-        }
-
-        // Get all the remaining frames from the filter graph
+        // Get all remaining frames from the filter graph
         while (1) {
+            AVFrame *filt_frame = av_frame_alloc();
+            if (!filt_frame) {
+                return AVERROR(ENOMEM);
+            }
+
             ret = av_buffersink_get_frame(buffersink_ctx, filt_frame);
-            if (ret == AVERROR(EOF) || ret == AVERROR(EAGAIN)) {
+            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                av_frame_free(&filt_frame);
                 break;
             }
             if (ret < 0) {
@@ -129,6 +146,8 @@ class LibplaceboFilter : public Filter {
             }
 
             filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
+
+            // Rescale PTS to encoder's time base
             filt_frame->pts = av_rescale_q(
                 filt_frame->pts, buffersink_ctx->inputs[0]->time_base, enc_ctx->time_base
             );
@@ -139,9 +158,9 @@ class LibplaceboFilter : public Filter {
                 av_frame_free(&filt_frame);
                 return ret;
             }
-            av_frame_unref(filt_frame);
+
+            av_frame_free(&filt_frame);
         }
-        av_frame_free(&filt_frame);
 
         // Flush the encoder
         ret = flush_encoder(enc_ctx, ofmt_ctx);
@@ -149,11 +168,17 @@ class LibplaceboFilter : public Filter {
     }
 
     void cleanup() override {
+        if (buffersrc_ctx) {
+            avfilter_free(buffersrc_ctx);
+            buffersrc_ctx = nullptr;
+        }
+        if (buffersink_ctx) {
+            avfilter_free(buffersink_ctx);
+            buffersink_ctx = nullptr;
+        }
         if (filter_graph) {
             avfilter_graph_free(&filter_graph);
             filter_graph = nullptr;
-            buffersrc_ctx = nullptr;
-            buffersink_ctx = nullptr;
         }
     }
 };
@@ -166,6 +191,8 @@ class RealesrganFilter : public Filter {
     bool tta_mode;
     std::string model_param_path;
     std::string model_bin_path;
+    AVRational input_time_base;
+    AVRational output_time_base;
 
    public:
     RealesrganFilter(int gpuid = 0, bool tta_mode = false)
@@ -184,6 +211,10 @@ class RealesrganFilter : public Filter {
         model_param_path = "models/realesr-animevideov3-x4.param";
         model_bin_path = "models/realesr-animevideov3-x4.bin";
 
+        // Store the time bases
+        input_time_base = dec_ctx->time_base;
+        output_time_base = enc_ctx->time_base;
+
         // Load the model
         if (realesrgan->load(model_param_path, model_bin_path) != 0) {
             fprintf(stderr, "Failed to load RealESRGAN model\n");
@@ -199,7 +230,7 @@ class RealesrganFilter : public Filter {
         return 0;
     }
 
-    int process_frame(AVFrame *input_frame, AVFrame *output_frame, AVCodecContext *enc_ctx)
+    int process_frame(AVFrame *input_frame, AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx)
         override {
         // Convert AVFrame to ncnn::Mat
         ncnn::Mat inimage = avframe_to_ncnn_mat(input_frame);
@@ -218,17 +249,31 @@ class RealesrganFilter : public Filter {
         }
 
         // Convert ncnn::Mat back to AVFrame
+        AVFrame *output_frame = av_frame_alloc();
+        if (!output_frame) {
+            fprintf(stderr, "Could not allocate output frame\n");
+            return AVERROR(ENOMEM);
+        }
+
         if (ncnn_mat_to_avframe(outimage, output_frame, enc_ctx->pix_fmt) != 0) {
             fprintf(stderr, "Failed to convert ncnn::Mat to AVFrame\n");
+            av_frame_free(&output_frame);
             return -1;
         }
 
         // Rescale PTS to encoder's time base
-        output_frame->pts =
-            av_rescale_q(input_frame->pts, enc_ctx->pkt_timebase, enc_ctx->time_base);
+        output_frame->pts = av_rescale_q(input_frame->pts, input_time_base, enc_ctx->time_base);
 
-        // Indicate that a frame is ready
-        return 1;
+        // Encode and write the output frame
+        int ret = encode_and_write_frame(output_frame, enc_ctx, ofmt_ctx);
+        if (ret < 0) {
+            av_frame_free(&output_frame);
+            return ret;
+        }
+
+        av_frame_free(&output_frame);
+
+        return 0;
     }
 
     int flush(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) override {
@@ -375,8 +420,7 @@ class RealesrganFilter : public Filter {
             fprintf(stderr, "Could not allocate RGB frame\n");
             return AVERROR(ENOMEM);
         }
-        rgb_frame->format =
-            AV_PIX_FMT_RGB24;  // or AV_PIX_FMT_BGR24 depending on your ncnn::Mat format
+        rgb_frame->format = AV_PIX_FMT_RGB24;
         rgb_frame->width = width;
         rgb_frame->height = height;
 
@@ -477,9 +521,8 @@ int process_frames(
     int ret;
     AVPacket packet;
     AVFrame *frame = av_frame_alloc();
-    AVFrame *filtered_frame = av_frame_alloc();
 
-    if (!frame || !filtered_frame) {
+    if (!frame) {
         ret = AVERROR(ENOMEM);
         goto end;
     }
@@ -498,7 +541,7 @@ int process_frames(
                 break;
             }
 
-            while (ret >= 0) {
+            while (1) {
                 ret = avcodec_receive_frame(dec_ctx, frame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     break;
@@ -513,19 +556,12 @@ int process_frames(
                 }
 
                 // Process the frame using the selected filter
-                ret = filter->process_frame(frame, filtered_frame, enc_ctx);
+                ret = filter->process_frame(frame, enc_ctx, ofmt_ctx);
                 if (ret < 0) {
                     fprintf(stderr, "Error processing frame\n");
                     goto end;
                 }
-                if (ret == 1) {
-                    // Encode and write the filtered frame
-                    ret = encode_and_write_frame(filtered_frame, enc_ctx, ofmt_ctx);
-                    if (ret < 0) {
-                        goto end;
-                    }
-                    av_frame_unref(filtered_frame);
-                }
+
                 av_frame_unref(frame);
             }
         }
@@ -540,7 +576,6 @@ int process_frames(
 
 end:
     av_frame_free(&frame);
-    av_frame_free(&filtered_frame);
     return ret;
 }
 

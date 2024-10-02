@@ -12,12 +12,4 @@ int init_decoder(
     int *video_stream_index
 );
 
-int flush_decoder(
-    AVCodecContext *dec_ctx,
-    AVFilterContext *buffersrc_ctx,
-    AVFilterContext *buffersink_ctx,
-    AVCodecContext *enc_ctx,
-    AVFormatContext *ofmt_ctx
-);
-
 #endif  // DECODER_H

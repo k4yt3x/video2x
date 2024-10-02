@@ -13,8 +13,6 @@ extern "C" {
 #include <libavutil/rational.h>
 }
 
-#include "encoder.h"
-
 int init_decoder(
     const char *input_filename,
     AVFormatContext **fmt_ctx,
@@ -79,72 +77,4 @@ int init_decoder(
     *video_stream_index = stream_index;
 
     return 0;
-}
-
-int flush_decoder(
-    AVCodecContext *dec_ctx,
-    AVFilterContext *buffersrc_ctx,
-    AVFilterContext *buffersink_ctx,
-    AVCodecContext *enc_ctx,
-    AVFormatContext *ofmt_ctx
-) {
-    int ret;
-    AVFrame *frame = av_frame_alloc();
-    AVFrame *filt_frame = av_frame_alloc();
-
-    if (!frame || !filt_frame) {
-        ret = AVERROR(ENOMEM);
-        goto end;
-    }
-
-    ret = avcodec_send_packet(dec_ctx, NULL);
-    while (ret >= 0) {
-        ret = avcodec_receive_frame(dec_ctx, frame);
-        if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN)) {
-            break;
-        } else if (ret < 0) {
-            fprintf(stderr, "Error during decoding\n");
-            goto end;
-        }
-
-        if (av_buffersrc_add_frame(buffersrc_ctx, frame) < 0) {
-            fprintf(stderr, "Error while feeding the filter graph\n");
-            break;
-        }
-
-        while (1) {
-            ret = av_buffersink_get_frame(buffersink_ctx, filt_frame);
-            if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN)) {
-                break;
-            }
-            if (ret < 0) {
-                goto end;
-            }
-
-            filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
-            // Rescale PTS to encoder's time base
-            filt_frame->pts = av_rescale_q(
-                filt_frame->pts, buffersink_ctx->inputs[0]->time_base, enc_ctx->time_base
-            );
-
-            // Encode the filtered frame
-            if ((ret = encode_and_write_frame(filt_frame, enc_ctx, ofmt_ctx)) < 0) {
-                goto end;
-            }
-
-            av_frame_unref(filt_frame);
-        }
-        av_frame_unref(frame);
-    }
-
-    // Flush the encoder
-    ret = flush_encoder(enc_ctx, ofmt_ctx);
-    if (ret < 0) {
-        goto end;
-    }
-
-end:
-    av_frame_free(&frame);
-    av_frame_free(&filt_frame);
-    return ret;
 }
