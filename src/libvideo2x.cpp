@@ -12,6 +12,7 @@ extern "C" {
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/rational.h>
+#include <libswscale/swscale.h>
 }
 
 #include "decoder.h"
@@ -189,10 +190,11 @@ class RealesrganFilter : public Filter {
             return -1;
         }
 
+        // TODO: Set RealESRGAN parameters programmatically
         // Set RealESRGAN parameters
-        realesrgan->scale = 4;        // Assuming scale factor is 4
-        realesrgan->tilesize = 0;     // Auto tilesize
-        realesrgan->prepadding = 10;  // Prepadding as per the model
+        realesrgan->scale = 4;
+        realesrgan->tilesize = 200;
+        realesrgan->prepadding = 10;
 
         return 0;
     }
@@ -207,7 +209,9 @@ class RealesrganFilter : public Filter {
         }
 
         // Process with RealESRGAN
-        ncnn::Mat outimage;
+        ncnn::Mat outimage = ncnn::Mat(
+            input_frame->width * realesrgan->scale, input_frame->height * realesrgan->scale, 3
+        );
         if (realesrgan->process(inimage, outimage) != 0) {
             fprintf(stderr, "RealESRGAN processing failed\n");
             return -1;
@@ -244,7 +248,6 @@ class RealesrganFilter : public Filter {
    private:
     ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame) {
         // Convert AVFrame to ncnn::Mat
-        // Assuming input is in AV_PIX_FMT_RGB24 or AV_PIX_FMT_BGR24
 
         int width = frame->width;
         int height = frame->height;
@@ -252,59 +255,210 @@ class RealesrganFilter : public Filter {
 
         ncnn::Mat ncnn_image;
 
-        if (pix_fmt == AV_PIX_FMT_RGB24) {
-            // Create ncnn::Mat from AVFrame data (RGB)
-            ncnn_image =
-                ncnn::Mat::from_pixels(frame->data[0], ncnn::Mat::PIXEL_RGB, width, height);
-        } else if (pix_fmt == AV_PIX_FMT_BGR24) {
-            // Create ncnn::Mat from AVFrame data (BGR)
-            ncnn_image =
-                ncnn::Mat::from_pixels(frame->data[0], ncnn::Mat::PIXEL_BGR, width, height);
-        } else if (pix_fmt == AV_PIX_FMT_RGBA) {
-            // Create ncnn::Mat from AVFrame data (RGBA)
-            ncnn_image =
-                ncnn::Mat::from_pixels(frame->data[0], ncnn::Mat::PIXEL_RGBA, width, height);
-        } else {
-            fprintf(
-                stderr,
-                "Unsupported pixel format for RealESRGAN: %s\n",
-                av_get_pix_fmt_name((AVPixelFormat)pix_fmt)
+        // Choose the target pixel format (AV_PIX_FMT_RGB24 or AV_PIX_FMT_BGR24)
+        AVPixelFormat target_pix_fmt = AV_PIX_FMT_BGR24;  // or AV_PIX_FMT_RGB24
+
+        // Check if conversion is needed
+        if (pix_fmt != target_pix_fmt) {
+            // Set up sws context for conversion
+            struct SwsContext *sws_ctx = sws_getContext(
+                width,
+                height,
+                (AVPixelFormat)pix_fmt,
+                width,
+                height,
+                target_pix_fmt,
+                SWS_BILINEAR,
+                NULL,
+                NULL,
+                NULL
             );
-            return ncnn::Mat();
+
+            if (!sws_ctx) {
+                fprintf(stderr, "Could not initialize sws context\n");
+                return ncnn::Mat();
+            }
+
+            // Allocate a frame to hold the converted image
+            AVFrame *converted_frame = av_frame_alloc();
+            if (!converted_frame) {
+                fprintf(stderr, "Could not allocate converted frame\n");
+                sws_freeContext(sws_ctx);
+                return ncnn::Mat();
+            }
+
+            converted_frame->format = target_pix_fmt;
+            converted_frame->width = width;
+            converted_frame->height = height;
+
+            // Allocate buffer for the converted frame
+            int ret = av_frame_get_buffer(converted_frame, 32);  // 32-byte alignment
+            if (ret < 0) {
+                fprintf(stderr, "Could not allocate frame data\n");
+                av_frame_free(&converted_frame);
+                sws_freeContext(sws_ctx);
+                return ncnn::Mat();
+            }
+
+            // Perform the conversion
+            ret = sws_scale(
+                sws_ctx,
+                frame->data,
+                frame->linesize,
+                0,
+                height,
+                converted_frame->data,
+                converted_frame->linesize
+            );
+
+            if (ret < 0) {
+                fprintf(stderr, "Error converting pixel format\n");
+                av_frame_free(&converted_frame);
+                sws_freeContext(sws_ctx);
+                return ncnn::Mat();
+            }
+
+            // Create ncnn::Mat from the converted frame
+            if (target_pix_fmt == AV_PIX_FMT_RGB24) {
+                ncnn_image = ncnn::Mat::from_pixels(
+                    converted_frame->data[0], ncnn::Mat::PIXEL_RGB, width, height
+                );
+            } else if (target_pix_fmt == AV_PIX_FMT_BGR24) {
+                ncnn_image = ncnn::Mat::from_pixels(
+                    converted_frame->data[0], ncnn::Mat::PIXEL_BGR, width, height
+                );
+            } else if (target_pix_fmt == AV_PIX_FMT_RGBA) {
+                ncnn_image = ncnn::Mat::from_pixels(
+                    converted_frame->data[0], ncnn::Mat::PIXEL_RGBA, width, height
+                );
+            } else {
+                fprintf(stderr, "Unsupported target pixel format for ncnn::Mat\n");
+                av_frame_free(&converted_frame);
+                sws_freeContext(sws_ctx);
+                return ncnn::Mat();
+            }
+
+            // Clean up
+            av_frame_free(&converted_frame);
+            sws_freeContext(sws_ctx);
+        } else {
+            // If the pixel format is already supported, create ncnn::Mat directly
+            if (pix_fmt == AV_PIX_FMT_RGB24) {
+                ncnn_image =
+                    ncnn::Mat::from_pixels(frame->data[0], ncnn::Mat::PIXEL_RGB, width, height);
+            } else if (pix_fmt == AV_PIX_FMT_BGR24) {
+                ncnn_image =
+                    ncnn::Mat::from_pixels(frame->data[0], ncnn::Mat::PIXEL_BGR, width, height);
+            } else if (pix_fmt == AV_PIX_FMT_RGBA) {
+                ncnn_image =
+                    ncnn::Mat::from_pixels(frame->data[0], ncnn::Mat::PIXEL_RGBA, width, height);
+            } else {
+                fprintf(
+                    stderr,
+                    "Unsupported pixel format for RealESRGAN: %s\n",
+                    av_get_pix_fmt_name((AVPixelFormat)pix_fmt)
+                );
+                return ncnn::Mat();
+            }
         }
 
         return ncnn_image;
     }
 
     int ncnn_mat_to_avframe(const ncnn::Mat &ncnn_image, AVFrame *frame, AVPixelFormat pix_fmt) {
-        // Convert ncnn::Mat back to AVFrame
         int width = ncnn_image.w;
         int height = ncnn_image.h;
-        int channels = ncnn_image.c;
 
-        // Allocate frame buffer
-        frame->format = pix_fmt;
-        frame->width = width;
-        frame->height = height;
+        // Allocate frame buffer for the RGB frame
+        AVFrame *rgb_frame = av_frame_alloc();
+        if (!rgb_frame) {
+            fprintf(stderr, "Could not allocate RGB frame\n");
+            return AVERROR(ENOMEM);
+        }
+        rgb_frame->format =
+            AV_PIX_FMT_RGB24;  // or AV_PIX_FMT_BGR24 depending on your ncnn::Mat format
+        rgb_frame->width = width;
+        rgb_frame->height = height;
 
-        int ret = av_frame_get_buffer(frame, 32);  // Align to 32 bytes
+        int ret = av_frame_get_buffer(rgb_frame, 32);  // Align to 32 bytes
         if (ret < 0) {
-            fprintf(stderr, "Could not allocate frame data.\n");
+            fprintf(stderr, "Could not allocate RGB frame data.\n");
+            av_frame_free(&rgb_frame);
             return ret;
         }
 
-        // Copy data from ncnn::Mat to AVFrame
-        if (pix_fmt == AV_PIX_FMT_RGB24) {
-            ncnn_image.to_pixels(frame->data[0], ncnn::Mat::PIXEL_RGB);
-        } else if (pix_fmt == AV_PIX_FMT_BGR24) {
-            ncnn_image.to_pixels(frame->data[0], ncnn::Mat::PIXEL_BGR);
-        } else if (pix_fmt == AV_PIX_FMT_RGBA) {
-            ncnn_image.to_pixels(frame->data[0], ncnn::Mat::PIXEL_RGBA);
-        } else {
-            fprintf(
-                stderr, "Unsupported pixel format for output: %s\n", av_get_pix_fmt_name(pix_fmt)
+        // Copy data from ncnn::Mat to RGB AVFrame
+        // Assuming ncnn_image is in PIXEL_RGB format
+        ncnn_image.to_pixels(rgb_frame->data[0], ncnn::Mat::PIXEL_RGB);
+
+        if (pix_fmt != AV_PIX_FMT_RGB24 && pix_fmt != AV_PIX_FMT_BGR24 &&
+            pix_fmt != AV_PIX_FMT_RGBA) {
+            // Convert RGB frame to desired pixel format (e.g., YUV420P) using sws_scale
+            // Allocate frame buffer for the output frame
+            frame->format = pix_fmt;
+            frame->width = width;
+            frame->height = height;
+
+            ret = av_frame_get_buffer(frame, 32);  // Align to 32 bytes
+            if (ret < 0) {
+                fprintf(stderr, "Could not allocate output frame data.\n");
+                av_frame_free(&rgb_frame);
+                return ret;
+            }
+
+            // Set up sws context for conversion
+            struct SwsContext *sws_ctx = sws_getContext(
+                width,
+                height,
+                AV_PIX_FMT_RGB24,  // Source format
+                width,
+                height,
+                pix_fmt,  // Destination format
+                SWS_BILINEAR,
+                NULL,
+                NULL,
+                NULL
             );
-            return -1;
+
+            if (!sws_ctx) {
+                fprintf(
+                    stderr, "Could not initialize sws context for RGB to output format conversion\n"
+                );
+                av_frame_free(&rgb_frame);
+                return AVERROR(EINVAL);
+            }
+
+            // Perform the conversion
+            ret = sws_scale(
+                sws_ctx,
+                rgb_frame->data,
+                rgb_frame->linesize,
+                0,
+                height,
+                frame->data,
+                frame->linesize
+            );
+
+            if (ret < 0) {
+                fprintf(stderr, "Error converting RGB to output pixel format\n");
+                av_frame_free(&rgb_frame);
+                sws_freeContext(sws_ctx);
+                return ret;
+            }
+
+            // Clean up
+            av_frame_free(&rgb_frame);
+            sws_freeContext(sws_ctx);
+        } else {
+            // If the desired output format is RGB24, we can directly use rgb_frame
+            // Copy the data from rgb_frame to frame
+            ret = av_frame_copy(frame, rgb_frame);
+            if (ret < 0) {
+                fprintf(stderr, "Could not copy RGB frame data to output frame.\n");
+                av_frame_free(&rgb_frame);
+                return ret;
+            }
+            av_frame_free(&rgb_frame);
         }
 
         return 0;
@@ -438,7 +592,7 @@ int process_video(
         }
         filter = new LibplaceboFilter(output_width, output_height, shader_path);
     } else if (filter_type == FILTER_REALESRGAN) {
-        filter = new RealesrganFilter();  // You can pass gpuid and tta_mode if needed
+        filter = new RealesrganFilter();
     } else {
         fprintf(stderr, "Unknown filter type\n");
         ret = -1;
