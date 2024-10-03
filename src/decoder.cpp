@@ -64,8 +64,7 @@ int init_decoder(
     // Set decoder time base and frame rate
     codec_ctx->time_base = video_stream->time_base;
     codec_ctx->pkt_timebase = video_stream->time_base;
-    AVRational frame_rate = av_guess_frame_rate(ifmt_ctx, video_stream, NULL);
-    codec_ctx->framerate = frame_rate;
+    codec_ctx->framerate = av_guess_frame_rate(ifmt_ctx, video_stream, NULL);
 
     if ((ret = avcodec_open2(codec_ctx, dec, NULL)) < 0) {
         fprintf(stderr, "Failed to open decoder for stream #%u\n", stream_index);

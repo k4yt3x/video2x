@@ -9,30 +9,32 @@ extern "C" {
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 #include <libavformat/avformat.h>
+#include <libavutil/frame.h>
+#include <libavutil/imgutils.h>
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
+#include <libavutil/pixfmt.h>
 #include <libavutil/rational.h>
 #include <libswscale/swscale.h>
 }
 
+// ncnn includes
+#include <ncnn/mat.h>
+
+#include "conversions.h"
 #include "decoder.h"
 #include "encoder.h"
 #include "libvideo2x.h"
 #include "placebo.h"
 #include "realesrgan.h"
 
-// ncnn includes
-#include <gpu.h>
-#include <mat.h>
-
 // Abstract base class for filters
 class Filter {
    public:
+    virtual ~Filter() {}
     virtual int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) = 0;
     virtual AVFrame *process_frame(AVFrame *input_frame) = 0;
     virtual int flush(std::vector<AVFrame *> &processed_frames) = 0;
-    virtual void cleanup() = 0;
-    virtual ~Filter() {}
 };
 
 // Libplacebo filter implementation
@@ -55,7 +57,20 @@ class LibplaceboFilter : public Filter {
           output_height(height),
           shader_path(shader) {}
 
-    virtual ~LibplaceboFilter() { cleanup(); }
+    virtual ~LibplaceboFilter() {
+        if (buffersrc_ctx) {
+            avfilter_free(buffersrc_ctx);
+            buffersrc_ctx = nullptr;
+        }
+        if (buffersink_ctx) {
+            avfilter_free(buffersink_ctx);
+            buffersink_ctx = nullptr;
+        }
+        if (filter_graph) {
+            avfilter_graph_free(&filter_graph);
+            filter_graph = nullptr;
+        }
+    }
 
     int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) override {
         // Save the output time base
@@ -74,7 +89,13 @@ class LibplaceboFilter : public Filter {
 
     AVFrame *process_frame(AVFrame *input_frame) override {
         int ret;
-        AVFrame *output_frame = nullptr;
+
+        // Get the filtered frame
+        AVFrame *output_frame = av_frame_alloc();
+        if (output_frame == nullptr) {
+            fprintf(stderr, "Failed to allocate output frame\n");
+            return nullptr;
+        }
 
         // Feed the frame to the filter graph
         ret = av_buffersrc_add_frame(buffersrc_ctx, input_frame);
@@ -83,19 +104,14 @@ class LibplaceboFilter : public Filter {
             return nullptr;
         }
 
-        // Get the filtered frame
-        output_frame = av_frame_alloc();
-        if (!output_frame) {
-            return nullptr;
-        }
-
         ret = av_buffersink_get_frame(buffersink_ctx, output_frame);
         if (ret < 0) {
             av_frame_free(&output_frame);
             if (ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
                 fprintf(stderr, "Error getting frame from filter graph: %s\n", av_err2str(ret));
+                return nullptr;
             }
-            return nullptr;
+            return (AVFrame *)-1;
         }
 
         // Rescale PTS to encoder's time base
@@ -116,7 +132,7 @@ class LibplaceboFilter : public Filter {
         // Retrieve all remaining frames from the filter graph
         while (1) {
             AVFrame *filt_frame = av_frame_alloc();
-            if (!filt_frame) {
+            if (filt_frame == nullptr) {
                 return AVERROR(ENOMEM);
             }
 
@@ -141,21 +157,6 @@ class LibplaceboFilter : public Filter {
 
         return 0;
     }
-
-    void cleanup() override {
-        if (buffersrc_ctx) {
-            avfilter_free(buffersrc_ctx);
-            buffersrc_ctx = nullptr;
-        }
-        if (buffersink_ctx) {
-            avfilter_free(buffersink_ctx);
-            buffersink_ctx = nullptr;
-        }
-        if (filter_graph) {
-            avfilter_graph_free(&filter_graph);
-            filter_graph = nullptr;
-        }
-    }
 };
 
 // Realesrgan filter implementation
@@ -174,10 +175,14 @@ class RealesrganFilter : public Filter {
     RealesrganFilter(int gpuid = 0, bool tta_mode = false)
         : realesrgan(nullptr), gpuid(gpuid), tta_mode(tta_mode) {}
 
-    virtual ~RealesrganFilter() { cleanup(); }
+    virtual ~RealesrganFilter() {
+        if (realesrgan) {
+            delete realesrgan;
+            realesrgan = nullptr;
+        }
+    }
 
     int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) override {
-        ncnn::create_gpu_instance();
         realesrgan = new RealESRGAN(gpuid, tta_mode);
         model_param_path = "models/realesr-animevideov3-x4.param";
         model_bin_path = "models/realesr-animevideov3-x4.bin";
@@ -193,6 +198,7 @@ class RealesrganFilter : public Filter {
             return -1;
         }
 
+        // TODO: Set these values programmatically
         // Set RealESRGAN parameters
         realesrgan->scale = 4;
         realesrgan->tilesize = 200;
@@ -202,34 +208,24 @@ class RealesrganFilter : public Filter {
     }
 
     AVFrame *process_frame(AVFrame *input_frame) override {
-        // Convert AVFrame to ncnn::Mat
-        ncnn::Mat inimage = avframe_to_ncnn_mat(input_frame);
-        if (inimage.empty()) {
+        // Convert the input frame to RGB24
+        ncnn::Mat input_mat = avframe_to_ncnn_mat(input_frame);
+        if (input_mat.empty()) {
             fprintf(stderr, "Failed to convert AVFrame to ncnn::Mat\n");
             return nullptr;
         }
 
-        // Process with RealESRGAN
-        ncnn::Mat outimage = ncnn::Mat(
-            input_frame->width * realesrgan->scale, input_frame->height * realesrgan->scale, 3
-        );
-        if (realesrgan->process(inimage, outimage) != 0) {
+        // Allocate space for ouptut ncnn::Mat
+        ncnn::Mat output_mat =
+            ncnn::Mat(input_mat.w * realesrgan->scale, input_mat.h * realesrgan->scale, 3);
+
+        if (realesrgan->process(input_mat, output_mat) != 0) {
             fprintf(stderr, "RealESRGAN processing failed\n");
             return nullptr;
         }
 
-        // Convert ncnn::Mat back to AVFrame
-        AVFrame *output_frame = av_frame_alloc();
-        if (!output_frame) {
-            fprintf(stderr, "Could not allocate output frame\n");
-            return nullptr;
-        }
-
-        if (ncnn_mat_to_avframe(outimage, output_frame, output_pix_fmt) != 0) {
-            fprintf(stderr, "Failed to convert ncnn::Mat to AVFrame\n");
-            av_frame_free(&output_frame);
-            return nullptr;
-        }
+        // Convert ncnn::Mat to AVFrame
+        AVFrame *output_frame = ncnn_mat_to_avframe(output_mat, output_pix_fmt);
 
         // Rescale PTS to encoder's time base
         output_frame->pts = av_rescale_q(input_frame->pts, input_time_base, output_time_base);
@@ -240,232 +236,6 @@ class RealesrganFilter : public Filter {
 
     int flush(std::vector<AVFrame *> &processed_frames) override {
         // No special flushing needed for RealESRGAN
-        return 0;
-    }
-
-    void cleanup() override {
-        if (realesrgan) {
-            delete realesrgan;
-            realesrgan = nullptr;
-            ncnn::destroy_gpu_instance();
-        }
-    }
-
-   private:
-    ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame) {
-        // Convert AVFrame to ncnn::Mat
-
-        int width = frame->width;
-        int height = frame->height;
-        int pix_fmt = frame->format;
-
-        ncnn::Mat ncnn_image;
-
-        // Choose the target pixel format (AV_PIX_FMT_RGB24 or AV_PIX_FMT_BGR24)
-        AVPixelFormat target_pix_fmt = AV_PIX_FMT_BGR24;  // or AV_PIX_FMT_RGB24
-
-        // Check if conversion is needed
-        if (pix_fmt != target_pix_fmt) {
-            // Set up sws context for conversion
-            struct SwsContext *sws_ctx = sws_getContext(
-                width,
-                height,
-                (AVPixelFormat)pix_fmt,
-                width,
-                height,
-                target_pix_fmt,
-                SWS_BILINEAR,
-                NULL,
-                NULL,
-                NULL
-            );
-
-            if (!sws_ctx) {
-                fprintf(stderr, "Could not initialize sws context\n");
-                return ncnn::Mat();
-            }
-
-            // Allocate a frame to hold the converted image
-            AVFrame *converted_frame = av_frame_alloc();
-            if (!converted_frame) {
-                fprintf(stderr, "Could not allocate converted frame\n");
-                sws_freeContext(sws_ctx);
-                return ncnn::Mat();
-            }
-
-            converted_frame->format = target_pix_fmt;
-            converted_frame->width = width;
-            converted_frame->height = height;
-
-            // Allocate buffer for the converted frame
-            int ret = av_frame_get_buffer(converted_frame, 32);  // 32-byte alignment
-            if (ret < 0) {
-                fprintf(stderr, "Could not allocate frame data\n");
-                av_frame_free(&converted_frame);
-                sws_freeContext(sws_ctx);
-                return ncnn::Mat();
-            }
-
-            // Perform the conversion
-            ret = sws_scale(
-                sws_ctx,
-                frame->data,
-                frame->linesize,
-                0,
-                height,
-                converted_frame->data,
-                converted_frame->linesize
-            );
-
-            if (ret < 0) {
-                fprintf(stderr, "Error converting pixel format\n");
-                av_frame_free(&converted_frame);
-                sws_freeContext(sws_ctx);
-                return ncnn::Mat();
-            }
-
-            // Create ncnn::Mat from the converted frame
-            if (target_pix_fmt == AV_PIX_FMT_RGB24) {
-                ncnn_image = ncnn::Mat::from_pixels(
-                    converted_frame->data[0], ncnn::Mat::PIXEL_RGB, width, height
-                );
-            } else if (target_pix_fmt == AV_PIX_FMT_BGR24) {
-                ncnn_image = ncnn::Mat::from_pixels(
-                    converted_frame->data[0], ncnn::Mat::PIXEL_BGR, width, height
-                );
-            } else if (target_pix_fmt == AV_PIX_FMT_RGBA) {
-                ncnn_image = ncnn::Mat::from_pixels(
-                    converted_frame->data[0], ncnn::Mat::PIXEL_RGBA, width, height
-                );
-            } else {
-                fprintf(stderr, "Unsupported target pixel format for ncnn::Mat\n");
-                av_frame_free(&converted_frame);
-                sws_freeContext(sws_ctx);
-                return ncnn::Mat();
-            }
-
-            // Clean up
-            av_frame_free(&converted_frame);
-            sws_freeContext(sws_ctx);
-        } else {
-            // If the pixel format is already supported, create ncnn::Mat directly
-            if (pix_fmt == AV_PIX_FMT_RGB24) {
-                ncnn_image =
-                    ncnn::Mat::from_pixels(frame->data[0], ncnn::Mat::PIXEL_RGB, width, height);
-            } else if (pix_fmt == AV_PIX_FMT_BGR24) {
-                ncnn_image =
-                    ncnn::Mat::from_pixels(frame->data[0], ncnn::Mat::PIXEL_BGR, width, height);
-            } else if (pix_fmt == AV_PIX_FMT_RGBA) {
-                ncnn_image =
-                    ncnn::Mat::from_pixels(frame->data[0], ncnn::Mat::PIXEL_RGBA, width, height);
-            } else {
-                fprintf(
-                    stderr,
-                    "Unsupported pixel format for RealESRGAN: %s\n",
-                    av_get_pix_fmt_name((AVPixelFormat)pix_fmt)
-                );
-                return ncnn::Mat();
-            }
-        }
-
-        return ncnn_image;
-    }
-
-    int ncnn_mat_to_avframe(const ncnn::Mat &ncnn_image, AVFrame *frame, AVPixelFormat pix_fmt) {
-        int width = ncnn_image.w;
-        int height = ncnn_image.h;
-
-        // Allocate frame buffer for the RGB frame
-        AVFrame *rgb_frame = av_frame_alloc();
-        if (!rgb_frame) {
-            fprintf(stderr, "Could not allocate RGB frame\n");
-            return AVERROR(ENOMEM);
-        }
-        rgb_frame->format = AV_PIX_FMT_RGB24;
-        rgb_frame->width = width;
-        rgb_frame->height = height;
-
-        int ret = av_frame_get_buffer(rgb_frame, 32);  // Align to 32 bytes
-        if (ret < 0) {
-            fprintf(stderr, "Could not allocate RGB frame data.\n");
-            av_frame_free(&rgb_frame);
-            return ret;
-        }
-
-        // Copy data from ncnn::Mat to RGB AVFrame
-        // Assuming ncnn_image is in PIXEL_RGB format
-        ncnn_image.to_pixels(rgb_frame->data[0], ncnn::Mat::PIXEL_RGB);
-
-        if (pix_fmt != AV_PIX_FMT_RGB24 && pix_fmt != AV_PIX_FMT_BGR24 &&
-            pix_fmt != AV_PIX_FMT_RGBA) {
-            // Convert RGB frame to desired pixel format (e.g., YUV420P) using sws_scale
-            // Allocate frame buffer for the output frame
-            frame->format = pix_fmt;
-            frame->width = width;
-            frame->height = height;
-
-            ret = av_frame_get_buffer(frame, 32);  // Align to 32 bytes
-            if (ret < 0) {
-                fprintf(stderr, "Could not allocate output frame data.\n");
-                av_frame_free(&rgb_frame);
-                return ret;
-            }
-
-            // Set up sws context for conversion
-            struct SwsContext *sws_ctx = sws_getContext(
-                width,
-                height,
-                AV_PIX_FMT_RGB24,  // Source format
-                width,
-                height,
-                pix_fmt,  // Destination format
-                SWS_BILINEAR,
-                NULL,
-                NULL,
-                NULL
-            );
-
-            if (!sws_ctx) {
-                fprintf(
-                    stderr, "Could not initialize sws context for RGB to output format conversion\n"
-                );
-                av_frame_free(&rgb_frame);
-                return AVERROR(EINVAL);
-            }
-
-            // Perform the conversion
-            ret = sws_scale(
-                sws_ctx,
-                rgb_frame->data,
-                rgb_frame->linesize,
-                0,
-                height,
-                frame->data,
-                frame->linesize
-            );
-
-            if (ret < 0) {
-                fprintf(stderr, "Error converting RGB to output pixel format\n");
-                av_frame_free(&rgb_frame);
-                sws_freeContext(sws_ctx);
-                return ret;
-            }
-
-            // Clean up
-            av_frame_free(&rgb_frame);
-            sws_freeContext(sws_ctx);
-        } else {
-            // If the desired output format is RGB24, we can directly use rgb_frame
-            // Copy the data from rgb_frame to frame
-            ret = av_frame_copy(frame, rgb_frame);
-            if (ret < 0) {
-                fprintf(stderr, "Could not copy RGB frame data to output frame.\n");
-                av_frame_free(&rgb_frame);
-                return ret;
-            }
-            av_frame_free(&rgb_frame);
-        }
-
         return 0;
     }
 };
@@ -481,14 +251,15 @@ int process_frames(
 ) {
     int ret;
     AVPacket packet;
-    AVFrame *frame = av_frame_alloc();
-    std::vector<AVFrame *> flushed_frames;  // Moved declaration to the top
+    std::vector<AVFrame *> flushed_frames;
 
-    if (!frame) {
+    AVFrame *frame = av_frame_alloc();
+    if (frame == nullptr) {
         ret = AVERROR(ENOMEM);
         goto end;
     }
 
+    // Read frames from the input file
     while (1) {
         ret = av_read_frame(fmt_ctx, &packet);
         if (ret < 0) {
@@ -496,13 +267,15 @@ int process_frames(
         }
 
         if (packet.stream_index == video_stream_index) {
+            // Send the packet to the decoder
             ret = avcodec_send_packet(dec_ctx, &packet);
             if (ret < 0) {
                 fprintf(stderr, "Error sending packet to decoder: %s\n", av_err2str(ret));
                 av_packet_unref(&packet);
-                goto end;  // Changed to goto end after variable declaration
+                goto end;
             }
 
+            // Receive and process frames from the decoder
             while (1) {
                 ret = avcodec_receive_frame(dec_ctx, frame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
@@ -514,7 +287,7 @@ int process_frames(
 
                 // Process the frame using the selected filter
                 AVFrame *processed_frame = filter->process_frame(frame);
-                if (processed_frame) {
+                if (processed_frame != nullptr && processed_frame != (AVFrame *)-1) {
                     // Encode and write the processed frame
                     ret = encode_and_write_frame(processed_frame, enc_ctx, ofmt_ctx);
                     if (ret < 0) {
@@ -524,13 +297,23 @@ int process_frames(
                     }
 
                     av_frame_free(&processed_frame);
+                } else if (processed_frame != (AVFrame *)-1) {
+                    fprintf(stderr, "Error processing frame\n");
+                    goto end;
                 }
 
                 av_frame_unref(frame);
+
+                // TODO: remove this
+                printf(".");
+                fflush(stdout);
             }
         }
         av_packet_unref(&packet);
     }
+    // TODO: remove this
+    printf("\n");
+    fflush(stdout);
 
     // Flush the filter
     ret = filter->flush(flushed_frames);
@@ -643,7 +426,6 @@ int process_video(
 end:
     // Cleanup
     if (filter) {
-        filter->cleanup();
         delete filter;
     }
     if (dec_ctx) {

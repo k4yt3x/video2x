@@ -94,9 +94,6 @@ target_compile_options(libvideo2x PRIVATE
     $<$<CONFIG:Debug>:-g -DDEBUG>
 )
 
-# Ensure the shared library uses at least C++17
-set_target_properties(libvideo2x PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
-
 # Define the path to the built libresrgan-ncnn-vulkan library
 set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
 
@@ -117,9 +114,6 @@ target_compile_options(video2x PRIVATE
     -Wall
     $<$<CONFIG:Debug>:-g -DDEBUG>
 )
-
-# Ensure the executable uses at least C++17
-set_target_properties(video2x PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 
 # Link the executable with the shared library
 target_link_libraries(video2x PRIVATE libvideo2x)

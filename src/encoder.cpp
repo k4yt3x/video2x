@@ -54,11 +54,7 @@ int init_encoder(
     codec_ctx->height = output_height;
     codec_ctx->width = output_width;
     codec_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
-    if (enc->pix_fmts) {
-        codec_ctx->pix_fmt = enc->pix_fmts[0];
-    } else {
-        codec_ctx->pix_fmt = dec_ctx->pix_fmt;
-    }
+    codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
     codec_ctx->time_base = av_inv_q(dec_ctx->framerate);
 
     if (codec_ctx->time_base.num == 0 || codec_ctx->time_base.den == 0) {
