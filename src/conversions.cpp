@@ -96,9 +96,9 @@ ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame) {
 
     // Manually copy the pixel data from AVFrame to the new ncnn::Mat
     const uint8_t *src_data = converted_frame->data[0];
-    for (int i = 0; i < height; i++) {
-        uint8_t *dst_row = ncnn_image.row<uint8_t>(i);
-        const uint8_t *src_row = src_data + i * converted_frame->linesize[0];
+    for (int y = 0; y < height; y++) {
+        uint8_t *dst_row = ncnn_image.row<uint8_t>(y);
+        const uint8_t *src_row = src_data + y * converted_frame->linesize[0];
         memcpy(dst_row, src_row, width * 3);  // Copy 3 channels (BGR) per pixel
     }
 
@@ -112,6 +112,8 @@ ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame) {
 
 // Convert ncnn::Mat to AVFrame with a specified pixel format (this part is unchanged)
 AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
+    int ret;
+
     // Step 1: Allocate a destination AVFrame for the specified pixel format
     AVFrame *dst_frame = av_frame_alloc();
     if (!dst_frame) {
@@ -125,7 +127,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
 
     // Allocate memory for the frame buffer
     if (av_image_alloc(
-            dst_frame->data, dst_frame->linesize, dst_frame->width, dst_frame->height, pix_fmt, 1
+            dst_frame->data, dst_frame->linesize, dst_frame->width, dst_frame->height, pix_fmt, 32
         ) < 0) {
         fprintf(stderr, "Failed to allocate memory for destination AVFrame.\n");
         av_frame_free(&dst_frame);
@@ -151,7 +153,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
             bgr_frame->width,
             bgr_frame->height,
             AV_PIX_FMT_BGR24,
-            1
+            32
         ) < 0) {
         fprintf(stderr, "Failed to allocate memory for BGR AVFrame.\n");
         av_frame_free(&dst_frame);
@@ -160,23 +162,30 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     }
 
     // Copy data from ncnn::Mat to the BGR AVFrame
-    mat.to_pixels(bgr_frame->data[0], ncnn::Mat::PIXEL_BGR);
+    // mat.to_pixels(bgr_frame->data[0], ncnn::Mat::PIXEL_BGR);
+
+    // Manually copy the pixel data from ncnn::Mat to the BGR AVFrame
+    for (int y = 0; y < mat.h; y++) {
+        uint8_t *dst_row = bgr_frame->data[0] + y * bgr_frame->linesize[0];
+        const uint8_t *src_row = mat.row<const uint8_t>(y);
+        memcpy(dst_row, src_row, mat.w * 3);  // Copy 3 channels (BGR) per pixel
+    }
 
     // Step 3: Convert the BGR frame to the desired pixel format
     SwsContext *sws_ctx = sws_getContext(
         bgr_frame->width,
         bgr_frame->height,
-        AV_PIX_FMT_BGR24,  // Source
+        AV_PIX_FMT_BGR24,
         dst_frame->width,
         dst_frame->height,
-        pix_fmt,  // Destination
+        pix_fmt,
         SWS_BILINEAR,
         nullptr,
         nullptr,
         nullptr
     );
 
-    if (!sws_ctx) {
+    if (sws_ctx == nullptr) {
         fprintf(stderr, "Failed to initialize swscale context.\n");
         av_frame_free(&bgr_frame);
         av_frame_free(&dst_frame);
@@ -184,7 +193,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     }
 
     // Perform the conversion
-    sws_scale(
+    ret = sws_scale(
         sws_ctx,
         bgr_frame->data,
         bgr_frame->linesize,
@@ -198,5 +207,11 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     sws_freeContext(sws_ctx);
     av_frame_free(&bgr_frame);
 
-    return dst_frame;  // Return the converted frame
+    if (ret != dst_frame->height) {
+        fprintf(stderr, "Failed to convert BGR AVFrame to destination pixel format.\n");
+        av_frame_free(&dst_frame);
+        return nullptr;
+    }
+
+    return dst_frame;
 }

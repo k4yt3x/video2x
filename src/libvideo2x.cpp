@@ -216,8 +216,9 @@ class RealesrganFilter : public Filter {
         }
 
         // Allocate space for ouptut ncnn::Mat
-        ncnn::Mat output_mat =
-            ncnn::Mat(input_mat.w * realesrgan->scale, input_mat.h * realesrgan->scale, 3);
+        int output_width = input_mat.w * realesrgan->scale;
+        int output_height = input_mat.h * realesrgan->scale;
+        ncnn::Mat output_mat = ncnn::Mat(output_width, output_height, (size_t)3, 3);
 
         if (realesrgan->process(input_mat, output_mat) != 0) {
             fprintf(stderr, "RealESRGAN processing failed\n");
