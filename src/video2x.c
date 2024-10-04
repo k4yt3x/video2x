@@ -203,12 +203,14 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    // TODO: Allow configuration through command-line arguments
     // Setup encoder configuration
     struct EncoderConfig encoder_config = {
         .output_width = 0,   // To be filled by libvideo2x
         .output_height = 0,  // To be filled by libvideo2x
         .codec = AV_CODEC_ID_H264,
         .pix_fmt = AV_PIX_FMT_YUV420P,
+        .preset = "veryslow",
         .bit_rate = 2 * 1000 * 1000,  // 2 Mbps
         .crf = 17.0,
     };

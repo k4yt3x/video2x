@@ -74,6 +74,7 @@ int init_encoder(
     snprintf(crf_str, sizeof(crf_str), "%.f", encoder_config->crf);
     if (encoder_config->codec == AV_CODEC_ID_H264 || encoder_config->codec == AV_CODEC_ID_HEVC) {
         av_opt_set(codec_ctx->priv_data, "crf", crf_str, 0);
+        av_opt_set(codec_ctx->priv_data, "preset", encoder_config->preset, 0);
     }
 
     if (fmt_ctx->oformat->flags & AVFMT_GLOBALHEADER) {

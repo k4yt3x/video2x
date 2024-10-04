@@ -1,4 +1,5 @@
 #include <linux/limits.h>
+#include <cstdint>
 #include <cstdio>
 
 extern "C" {
@@ -74,11 +75,21 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
         return -1;
     }
 
-    // TODO: Set these values programmatically
     // Set RealESRGAN parameters
     realesrgan->scale = scaling_factor;
-    realesrgan->tilesize = 200;
     realesrgan->prepadding = 10;
+
+    // Calculate tilesize based on GPU heap budget
+    uint32_t heap_budget = ncnn::get_gpu_device(gpuid)->get_heap_budget();
+    if (heap_budget > 1900) {
+        realesrgan->tilesize = 200;
+    } else if (heap_budget > 550) {
+        realesrgan->tilesize = 100;
+    } else if (heap_budget > 190) {
+        realesrgan->tilesize = 64;
+    } else {
+        realesrgan->tilesize = 32;
+    }
 
     return 0;
 }

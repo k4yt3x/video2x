@@ -48,6 +48,7 @@ struct EncoderConfig {
     int output_height;
     enum AVCodecID codec;
     enum AVPixelFormat pix_fmt;
+    const char *preset;
     int64_t bit_rate;
     float crf;
 };
