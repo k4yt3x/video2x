@@ -82,44 +82,25 @@ Copyright (C) 2018-2024 K4YT3X and contributors.
 
 This project includes or depends on these following projects:
 
-| Project                                                                 | License         |
-| ----------------------------------------------------------------------- | --------------- |
-| [FFmpeg](https://www.ffmpeg.org/)                                       | LGPLv2.1, GPLv2 |
-| [waifu2x-ncnn-vulkan](https://github.com/nihui/waifu2x-ncnn-vulkan)     | MIT License     |
-| [srmd-ncnn-vulkan](https://github.com/nihui/srmd-ncnn-vulkan)           | MIT License     |
-| [realsr-ncnn-vulkan](https://github.com/nihui/realsr-ncnn-vulkan)       | MIT License     |
-| [rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)           | MIT License     |
-| [realcugan-ncnn-vulkan](https://github.com/nihui/realcugan-ncnn-vulkan) | MIT License     |
-| [Anime4K](https://github.com/bloc97/Anime4K)                            | MIT License     |
-| [ffmpeg-python](https://github.com/kkroening/ffmpeg-python)             | Apache-2.0      |
-| [Loguru](https://github.com/Delgan/loguru)                              | MIT License     |
-| [opencv-python](https://github.com/opencv/opencv-python)                | MIT License     |
-| [Pillow](https://github.com/python-pillow/Pillow)                       | HPND License    |
-| [Rich](https://github.com/Textualize/rich)                              | MIT License     |
-| [pynput](https://github.com/moses-palmer/pynput)                        | LGPLv3.0        |
-
-Legacy versions of this project includes or depends on these following projects:
-
-| Project                                                                     | License              |
-| --------------------------------------------------------------------------- | -------------------- |
-| [waifu2x-caffe](https://github.com/lltcggie/waifu2x-caffe)                  | MIT License          |
-| [waifu2x-converter-cpp](https://github.com/DeadSix27/waifu2x-converter-cpp) | MIT License          |
-| [Anime4KCPP](https://github.com/TianZerL/Anime4KCPP)                        | MIT License          |
-| [Gifski](https://github.com/ImageOptim/gifski)                              | AGPLv3               |
-| [tqdm](https://github.com/tqdm/tqdm)                                        | MPLv2.0, MIT License |
+| Project                                                                       | License         |
+| ----------------------------------------------------------------------------- | --------------- |
+| [Anime4K](https://github.com/bloc97/Anime4K)                                  | MIT License     |
+| [FFmpeg](https://www.ffmpeg.org/)                                             | LGPLv2.1, GPLv2 |
+| [Real-ESRGAN ncnn Vulkan](https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan) | MIT License     |
+| [ncnn](https://github.com/Tencent/ncnn)                                       | BSD 3-Clause    |
 
 More licensing information can be found in the [NOTICES](NOTICES) file.
 
 ## Special Thanks
 
-Appreciations given to the following personnel who have contributed significantly to the project.
+Appreciations are given to the following personnel who have contributed significantly to the project.
 
+- [@ArchieMeng](https://github.com/archiemeng)
 - [@BrianPetkovsek](https://github.com/BrianPetkovsek)
-- [@sat3ll](https://github.com/sat3ll)
 - [@ddouglas87](https://github.com/ddouglas87)
 - [@lhanjian](https://github.com/lhanjian)
-- [@ArchieMeng](https://github.com/archiemeng)
 - [@nihui](https://github.com/nihui)
+- [@sat3ll](https://github.com/sat3ll)
 
 ## Similar Projects
 
