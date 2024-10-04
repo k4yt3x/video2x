@@ -40,9 +40,14 @@ LibplaceboFilter::~LibplaceboFilter() {
 
 int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
     // Construct the shader path
-    char shader_path[PATH_MAX] = {0};
-    snprintf(shader_path, PATH_MAX, "models/%s.glsl", shader);
-    path_t shader_full_path = find_resource_file(shader_path);
+    path_t shader_full_path;
+    if (filepath_is_readable(shader)) {
+        shader_full_path = shader;
+    } else {
+        char shader_path[PATH_MAX] = {0};
+        snprintf(shader_path, PATH_MAX, "models/%s.glsl", shader);
+        shader_full_path = find_resource_file(shader_path);
+    }
 
     // Save the output time base
     output_time_base = enc_ctx->time_base;
