@@ -4,6 +4,8 @@
 
 extern "C" {
 #include <libavcodec/avcodec.h>
+#include <libavcodec/codec.h>
+#include <libavcodec/codec_id.h>
 #include <libavfilter/avfilter.h>
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
@@ -13,13 +15,14 @@ extern "C" {
 #include <libavutil/rational.h>
 }
 
+#include "libvideo2x.h"
+
 int init_encoder(
     const char *output_filename,
     AVFormatContext **ofmt_ctx,
     AVCodecContext **enc_ctx,
     AVCodecContext *dec_ctx,
-    int output_width,
-    int output_height
+    EncoderConfig *encoder_config
 ) {
     AVFormatContext *fmt_ctx = NULL;
     AVCodecContext *codec_ctx = NULL;
@@ -32,7 +35,7 @@ int init_encoder(
     }
 
     // Create a new video stream
-    const AVCodec *enc = avcodec_find_encoder(AV_CODEC_ID_H264);
+    const AVCodec *enc = avcodec_find_encoder(encoder_config->codec);
     if (!enc) {
         fprintf(stderr, "Necessary encoder not found\n");
         return AVERROR_ENCODER_NOT_FOUND;
@@ -51,10 +54,10 @@ int init_encoder(
     }
 
     // Set encoding parameters
-    codec_ctx->height = output_height;
-    codec_ctx->width = output_width;
+    codec_ctx->height = encoder_config->output_height;
+    codec_ctx->width = encoder_config->output_width;
     codec_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
-    codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+    codec_ctx->pix_fmt = encoder_config->pix_fmt;
     codec_ctx->time_base = av_inv_q(dec_ctx->framerate);
 
     if (codec_ctx->time_base.num == 0 || codec_ctx->time_base.den == 0) {
@@ -62,10 +65,16 @@ int init_encoder(
     }
 
     // Set the bit rate and other encoder parameters if needed
-    codec_ctx->bit_rate = 2 * 1000 * 1000;  // 2 Mbps
-    codec_ctx->gop_size = 60;               // Keyframe interval
-    codec_ctx->max_b_frames = 3;            // B-frames
-    codec_ctx->keyint_min = 60;             // Maximum GOP size
+    codec_ctx->bit_rate = encoder_config->bit_rate;
+    codec_ctx->gop_size = 60;     // Keyframe interval
+    codec_ctx->max_b_frames = 3;  // B-frames
+    codec_ctx->keyint_min = 60;   // Maximum GOP size
+
+    char crf_str[16];
+    snprintf(crf_str, sizeof(crf_str), "%.f", encoder_config->crf);
+    if (encoder_config->codec == AV_CODEC_ID_H264 || encoder_config->codec == AV_CODEC_ID_HEVC) {
+        av_opt_set(codec_ctx->priv_data, "crf", crf_str, 0);
+    }
 
     if (fmt_ctx->oformat->flags & AVFMT_GLOBALHEADER) {
         codec_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;

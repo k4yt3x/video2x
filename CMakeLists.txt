@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
-project(video2x VERSION 1.0 LANGUAGES CXX)
+project(video2x VERSION 1.0 LANGUAGES CXX C)
+
+# Set the C standard
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# Set clang as the default compiler if not specified
+if (NOT CMAKE_C_COMPILER)
+    set(CMAKE_C_COMPILER clang)
+endif()
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -69,7 +78,7 @@ ExternalProject_Add(
 )
 
 # Add all source files for libvideo2x
-file(GLOB LIBVIDEO2X_SOURCES src/*.cpp)
+file(GLOB LIBVIDEO2X_SOURCES src/*.cpp src/*.c)
 
 # Create the shared library 'libvideo2x'
 add_library(libvideo2x SHARED ${LIBVIDEO2X_SOURCES})
@@ -101,7 +110,7 @@ set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn
 target_link_libraries(libvideo2x PRIVATE ${ALL_LIBRARIES} ncnn ${REALESRGAN_LIB})
 
 # Create the executable 'video2x'
-add_executable(video2x src/video2x.cpp)
+add_executable(video2x src/video2x.c)
 set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
 
 # Include directories for the executable
