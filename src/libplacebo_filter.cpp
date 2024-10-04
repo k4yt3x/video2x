@@ -4,6 +4,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
+#include <libavutil/buffer.h>
 }
 
 #include "fsutils.h"
@@ -27,6 +28,10 @@ LibplaceboFilter::~LibplaceboFilter() {
         avfilter_free(buffersink_ctx);
         buffersink_ctx = nullptr;
     }
+    if (device_ctx) {
+        av_buffer_unref(&device_ctx);
+        device_ctx = nullptr;
+    }
     if (filter_graph) {
         avfilter_graph_free(&filter_graph);
         filter_graph = nullptr;
@@ -46,6 +51,7 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
         &filter_graph,
         &buffersrc_ctx,
         &buffersink_ctx,
+        &device_ctx,
         dec_ctx,
         output_width,
         output_height,

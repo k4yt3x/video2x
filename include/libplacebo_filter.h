@@ -1,6 +1,8 @@
 #ifndef LIBPLACEBO_FILTER_H
 #define LIBPLACEBO_FILTER_H
 
+#include <libavutil/buffer.h>
+
 #include "filter.h"
 
 // LibplaceboFilter class definition
@@ -9,6 +11,7 @@ class LibplaceboFilter : public Filter {
     AVFilterGraph *filter_graph;
     AVFilterContext *buffersrc_ctx;
     AVFilterContext *buffersink_ctx;
+    AVBufferRef *device_ctx;
     int output_width;
     int output_height;
     const char *shader;
