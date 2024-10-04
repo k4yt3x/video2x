@@ -58,8 +58,8 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
     }
 
     // Get the full paths
-    path_t model_param_full_path = get_full_path(model_param_path);
-    path_t model_bin_full_path = get_full_path(model_bin_path);
+    path_t model_param_full_path = find_resource_file(model_param_path);
+    path_t model_bin_full_path = find_resource_file(model_bin_path);
 
     // Create a new RealESRGAN instance
     realesrgan = new RealESRGAN(gpuid, tta_mode);

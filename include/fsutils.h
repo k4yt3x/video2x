@@ -58,9 +58,13 @@ static bool filepath_is_readable(const path_t &path) {
     return true;
 }
 
-static path_t get_full_path(const path_t &path) {
+static path_t find_resource_file(const path_t &path) {
     if (filepath_is_readable(path)) {
         return path;
+    }
+
+    if (filepath_is_readable(PATHSTR("/usr/share/video2x/") + path)) {
+        return PATHSTR("/usr/share/video2x/") + path;
     }
 
     return get_executable_directory() + path;

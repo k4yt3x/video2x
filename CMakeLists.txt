@@ -141,3 +141,5 @@ install(FILES ${REALESRGAN_LIB} DESTINATION lib
                 WORLD_READ WORLD_EXECUTE
 )
 
+# Install model files to /usr/share
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION share/video2x)
