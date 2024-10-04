@@ -25,12 +25,6 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Define the output directories
-set(BINARY_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BINARY_OUTPUT_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BINARY_OUTPUT_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_OUTPUT_DIR})
-
 # Find the required packages using pkg-config
 find_package(PkgConfig REQUIRED)
 set(REQUIRED_PKGS
@@ -126,4 +120,24 @@ target_compile_options(video2x PRIVATE
 
 # Link the executable with the shared library
 target_link_libraries(video2x PRIVATE libvideo2x)
+
+# Install the shared library to the appropriate directory (e.g., /usr/local/lib)
+install(TARGETS libvideo2x
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+
+# Install the executable
+install(TARGETS video2x RUNTIME DESTINATION bin)
+
+# Install header files
+install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x.h DESTINATION include)
+
+# Install external dependencies
+install(FILES ${REALESRGAN_LIB} DESTINATION lib
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                GROUP_READ GROUP_EXECUTE
+                WORLD_READ WORLD_EXECUTE
+)
 
