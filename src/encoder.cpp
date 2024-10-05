@@ -15,6 +15,7 @@ extern "C" {
 #include <libavutil/rational.h>
 }
 
+#include "conversions.h"
 #include "libvideo2x.h"
 
 int init_encoder(
@@ -111,6 +112,19 @@ int init_encoder(
 
 int encode_and_write_frame(AVFrame *frame, AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) {
     int ret;
+
+    // Convert the frame to the encoder's pixel format if needed
+    if (frame->format != enc_ctx->pix_fmt) {
+        AVFrame *converted_frame = convert_avframe_pix_fmt(frame, enc_ctx->pix_fmt);
+        if (!converted_frame) {
+            fprintf(stderr, "Error converting frame to encoder's pixel format\n");
+            return AVERROR_EXTERNAL;
+        }
+
+        converted_frame->pts = frame->pts;
+        frame = converted_frame;
+    }
+
     AVPacket *enc_pkt = av_packet_alloc();
     if (!enc_pkt) {
         fprintf(stderr, "Could not allocate AVPacket\n");

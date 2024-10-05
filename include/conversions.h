@@ -4,10 +4,13 @@
 #include <libavutil/frame.h>
 #include <ncnn/mat.h>
 
+// Convert AVFrame to another pixel format
+AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt);
+
+// Convert AVFrame to ncnn::Mat
 ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame);
 
-AVFrame *convert_avframe_to_bgr24(AVFrame *src_frame);
-
+// Convert ncnn::Mat to AVFrame
 AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt);
 
 #endif  // CONVERSIONS_H

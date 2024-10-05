@@ -11,28 +11,23 @@ extern "C" {
 
 #include "conversions.h"
 
-// Convert AVFrame to BGR24 format
-AVFrame *convert_avframe_to_bgr24(AVFrame *src_frame) {
+// Convert AVFrame format
+AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt) {
     AVFrame *dst_frame = av_frame_alloc();
     if (dst_frame == nullptr) {
         fprintf(stderr, "Failed to allocate destination AVFrame.\n");
         return nullptr;
     }
 
-    dst_frame->format = AV_PIX_FMT_BGR24;
+    dst_frame->format = pix_fmt;
     dst_frame->width = src_frame->width;
     dst_frame->height = src_frame->height;
 
     // Allocate memory for the converted frame
     if (av_image_alloc(
-            dst_frame->data,
-            dst_frame->linesize,
-            dst_frame->width,
-            dst_frame->height,
-            AV_PIX_FMT_BGR24,
-            32
+            dst_frame->data, dst_frame->linesize, dst_frame->width, dst_frame->height, pix_fmt, 32
         ) < 0) {
-        fprintf(stderr, "Failed to allocate memory for BGR24 AVFrame.\n");
+        fprintf(stderr, "Failed to allocate memory for AVFrame.\n");
         av_frame_free(&dst_frame);
         return nullptr;
     }
@@ -44,7 +39,7 @@ AVFrame *convert_avframe_to_bgr24(AVFrame *src_frame) {
         static_cast<AVPixelFormat>(src_frame->format),
         dst_frame->width,
         dst_frame->height,
-        AV_PIX_FMT_BGR24,
+        pix_fmt,
         SWS_BILINEAR,
         nullptr,
         nullptr,
@@ -53,6 +48,7 @@ AVFrame *convert_avframe_to_bgr24(AVFrame *src_frame) {
 
     if (sws_ctx == nullptr) {
         fprintf(stderr, "Failed to initialize swscale context.\n");
+        av_freep(&dst_frame->data[0]);
         av_frame_free(&dst_frame);
         return nullptr;
     }
@@ -80,7 +76,7 @@ ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame) {
 
     // Convert to BGR24 format if necessary
     if (frame->format != AV_PIX_FMT_BGR24) {
-        converted_frame = convert_avframe_to_bgr24(frame);
+        converted_frame = convert_avframe_pix_fmt(frame, AV_PIX_FMT_BGR24);
         if (!converted_frame) {
             fprintf(stderr, "Failed to convert AVFrame to BGR24.\n");
             return ncnn::Mat();  // Return an empty ncnn::Mat on failure

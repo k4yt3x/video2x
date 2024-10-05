@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libavutil/pixdesc.h>
+#include <libavutil/pixfmt.h>
+
 #include <libvideo2x.h>
 
 const char *VIDEO2X_VERSION = "6.0.0";
@@ -13,9 +16,16 @@ static char args_doc[] = "";
 
 // Define the options struct
 static struct argp_option options[] = {
-    {"input", 'i', "INPUT", 0, "Input video file (required)"},
-    {"output", 'o', "OUTPUT", 0, "Output video file (required)"},
+    {"input", 'i', "INPUT", 0, "Input video file path (required)"},
+    {"output", 'o', "OUTPUT", 0, "Output video file path (required)"},
     {"filter", 'f', "FILTER", 0, "Filter to use: 'libplacebo' or 'realesrgan' (required)"},
+
+    // Encoder options
+    {"codec", 'c', "CODEC", 0, "Output codec (default: libx264)"},
+    {"preset", 'p', "PRESET", 0, "Encoder preset (default: veryslow)"},
+    {"pixfmt", 'x', "PIXFMT", 0, "Output pixel format (default: yuv420p)"},
+    {"bitrate", 'b', "BITRATE", 0, "Bitrate in bits per second (default: 2 Mbps)"},
+    {"crf", 'q', "CRF", 0, "Constant Rate Factor (default: 17.0)"},
 
     // libplacebo
     {"shader", 's', "SHADER", 0, "Path to custom GLSL shader file (libplacebo only)"},
@@ -35,6 +45,11 @@ struct arguments {
     const char *input_filename;
     const char *output_filename;
     const char *filter_type;
+    const char *codec;
+    const char *pix_fmt;
+    const char *preset;
+    int64_t bitrate;
+    float crf;
     const char *shader_path;
     const char *model;
     int output_width;
@@ -73,6 +88,26 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case 'f':
             arguments->filter_type = arg;
+            break;
+        case 'c':
+            arguments->codec = arg;
+            break;
+        case 'x':
+            arguments->pix_fmt = arg;
+            break;
+        case 'p':
+            arguments->preset = arg;
+            break;
+        case 'b': {
+            char *endptr;
+            arguments->bitrate = strtoll(arg, &endptr, 10);
+            if (*endptr != '\0' || *arg == '\0') {
+                argp_error(state, "Invalid bitrate specified.");
+            }
+            break;
+        }
+        case 'q':
+            arguments->crf = atof(arg);
             break;
         case 's':
             arguments->shader_path = arg;
@@ -115,8 +150,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
             // Validate filter and related options
             if (!arguments->filter_type) {
                 argp_failure(state, 1, 0, "Filter type is required.");
-            }
-            if (strcmp(arguments->filter_type, "libplacebo") == 0) {
+            } else if (strcmp(arguments->filter_type, "libplacebo") == 0) {
                 // Libplacebo specific validations
                 if (!arguments->output_width && !arguments->output_height) {
                     argp_failure(
@@ -176,6 +210,11 @@ int main(int argc, char **argv) {
     arguments.input_filename = NULL;
     arguments.output_filename = NULL;
     arguments.filter_type = NULL;
+    arguments.codec = "libx264";
+    arguments.preset = "veryslow";
+    arguments.pix_fmt = "yuv420p";
+    arguments.bitrate = 2 * 1000 * 1000;
+    arguments.crf = 17.0;
     arguments.shader_path = NULL;
     arguments.model = NULL;
     arguments.output_width = 0;
@@ -203,16 +242,29 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // TODO: Allow configuration through command-line arguments
+    // Parse codec to AVCodec
+    const AVCodec *codec = avcodec_find_encoder_by_name(arguments.codec);
+    if (!codec) {
+        fprintf(stderr, "Error: Codec '%s' not found.\n", arguments.codec);
+        return 1;
+    }
+
+    // Parse pixel format to AVPixelFormat
+    enum AVPixelFormat pix_fmt = av_get_pix_fmt(arguments.pix_fmt);
+    if (pix_fmt == AV_PIX_FMT_NONE) {
+        fprintf(stderr, "Error: Invalid pixel format '%s'.\n", arguments.pix_fmt);
+        return 1;
+    }
+
     // Setup encoder configuration
     struct EncoderConfig encoder_config = {
         .output_width = 0,   // To be filled by libvideo2x
         .output_height = 0,  // To be filled by libvideo2x
-        .codec = AV_CODEC_ID_H264,
-        .pix_fmt = AV_PIX_FMT_YUV420P,
-        .preset = "veryslow",
-        .bit_rate = 2 * 1000 * 1000,  // 2 Mbps
-        .crf = 17.0,
+        .codec = codec->id,
+        .pix_fmt = pix_fmt,
+        .preset = arguments.preset,
+        .bit_rate = arguments.bitrate,
+        .crf = arguments.crf,
     };
 
     // Setup struct to store processing status

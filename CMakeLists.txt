@@ -119,7 +119,7 @@ target_compile_options(video2x PRIVATE
 )
 
 # Link the executable with the shared library
-target_link_libraries(video2x PRIVATE libvideo2x)
+target_link_libraries(video2x PRIVATE ${ALL_LIBRARIES} libvideo2x)
 
 # Install the shared library to the appropriate directory (e.g., /usr/local/lib)
 install(TARGETS libvideo2x
