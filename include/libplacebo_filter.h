@@ -1,6 +1,8 @@
 #ifndef LIBPLACEBO_FILTER_H
 #define LIBPLACEBO_FILTER_H
 
+#include <filesystem>
+
 #include <libavutil/buffer.h>
 
 #include "filter.h"
@@ -14,12 +16,12 @@ class LibplaceboFilter : public Filter {
     AVBufferRef *device_ctx;
     int output_width;
     int output_height;
-    const char *shader;
+    const std::filesystem::path shader_path;
     AVRational output_time_base;
 
    public:
     // Constructor
-    LibplaceboFilter(int width, int height, const char *shader);
+    LibplaceboFilter(int width, int height, const std::filesystem::path &shader_path);
 
     // Destructor
     virtual ~LibplaceboFilter();

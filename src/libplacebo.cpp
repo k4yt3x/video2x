@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <filesystem>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -23,7 +24,7 @@ int init_libplacebo(
     AVCodecContext *dec_ctx,
     int output_width,
     int output_height,
-    const char *shader_path
+    const std::filesystem::path &shader_path
 ) {
     char args[512];
     int ret;
@@ -88,7 +89,7 @@ int init_libplacebo(
         "w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s",
         output_width,
         output_height,
-        shader_path
+        shader_path.c_str()
     );
 
     AVFilterContext *libplacebo_ctx;

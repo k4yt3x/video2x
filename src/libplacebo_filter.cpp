@@ -11,13 +11,14 @@ extern "C" {
 #include "libplacebo.h"
 #include "libplacebo_filter.h"
 
-LibplaceboFilter::LibplaceboFilter(int width, int height, const char *shader)
+LibplaceboFilter::LibplaceboFilter(int width, int height, const std::filesystem::path &shader_path)
     : filter_graph(nullptr),
       buffersrc_ctx(nullptr),
       buffersink_ctx(nullptr),
+      device_ctx(nullptr),
       output_width(width),
       output_height(height),
-      shader(shader) {}
+      shader_path(std::move(shader_path)) {}
 
 LibplaceboFilter::~LibplaceboFilter() {
     if (buffersrc_ctx) {
@@ -40,13 +41,14 @@ LibplaceboFilter::~LibplaceboFilter() {
 
 int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
     // Construct the shader path
-    path_t shader_full_path;
-    if (filepath_is_readable(shader)) {
-        shader_full_path = shader;
+    std::filesystem::path shader_full_path;
+    if (filepath_is_readable(shader_path)) {
+        // If the shader path is directly readable, use it
+        shader_full_path = shader_path;
     } else {
-        char shader_path[PATH_MAX] = {0};
-        snprintf(shader_path, PATH_MAX, "models/%s.glsl", shader);
-        shader_full_path = find_resource_file(shader_path);
+        // Construct the fallback path using std::filesystem
+        shader_full_path =
+            find_resource_file(std::filesystem::path("models") / (shader_path.string() + ".glsl"));
     }
 
     // Save the output time base
@@ -60,7 +62,7 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
         dec_ctx,
         output_width,
         output_height,
-        shader_full_path.c_str()
+        shader_full_path
     );
 }
 

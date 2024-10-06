@@ -1,4 +1,3 @@
-#include <linux/limits.h>
 #include <cstdint>
 #include <cstdio>
 
@@ -18,16 +17,16 @@ RealesrganFilter::RealesrganFilter(
     bool tta_mode,
     int scaling_factor,
     const char *model,
-    const char *custom_model_param_path,
-    const char *custom_model_bin_path
+    const std::filesystem::path custom_model_param_path,
+    const std::filesystem::path custom_model_bin_path
 )
     : realesrgan(nullptr),
       gpuid(gpuid),
       tta_mode(tta_mode),
       scaling_factor(scaling_factor),
       model(model),
-      custom_model_param_path(custom_model_param_path),
-      custom_model_bin_path(custom_model_bin_path) {}
+      custom_model_param_path(std::move(custom_model_param_path)),
+      custom_model_bin_path(std::move(custom_model_bin_path)) {}
 
 RealesrganFilter::~RealesrganFilter() {
     if (realesrgan) {
@@ -36,30 +35,34 @@ RealesrganFilter::~RealesrganFilter() {
     }
 }
 
+#include <filesystem>
+#include <iostream>
+#include <string>
+
 int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
-    // Construct the model paths
-    char model_param_path[PATH_MAX] = {0};
-    char model_bin_path[PATH_MAX] = {0};
+    // Construct the model paths using std::filesystem
+    std::filesystem::path model_param_path;
+    std::filesystem::path model_bin_path;
 
     if (model) {
         // Find the model paths by model name if provided
-        snprintf(model_param_path, PATH_MAX, "models/%s-x%d.param", model, scaling_factor);
-        snprintf(model_bin_path, PATH_MAX, "models/%s-x%d.bin", model, scaling_factor);
-
-    } else if (custom_model_param_path && custom_model_bin_path) {
+        model_param_path = std::filesystem::path("models") /
+                           (std::string(model) + "-x" + std::to_string(scaling_factor) + ".param");
+        model_bin_path = std::filesystem::path("models") /
+                         (std::string(model) + "-x" + std::to_string(scaling_factor) + ".bin");
+    } else if (!custom_model_param_path.empty() && !custom_model_bin_path.empty()) {
         // Use the custom model paths if provided
-        snprintf(model_param_path, PATH_MAX, "%s", custom_model_param_path);
-        snprintf(model_bin_path, PATH_MAX, "%s", custom_model_bin_path);
-
+        model_param_path = custom_model_param_path;
+        model_bin_path = custom_model_bin_path;
     } else {
         // Neither model name nor custom model paths provided
         fprintf(stderr, "Model or model paths must be provided for RealESRGAN filter\n");
         return -1;
     }
 
-    // Get the full paths
-    path_t model_param_full_path = find_resource_file(model_param_path);
-    path_t model_bin_full_path = find_resource_file(model_bin_path);
+    // Get the full paths using a function that possibly modifies or validates the path
+    std::filesystem::path model_param_full_path = find_resource_file(model_param_path);
+    std::filesystem::path model_bin_full_path = find_resource_file(model_bin_path);
 
     // Create a new RealESRGAN instance
     realesrgan = new RealESRGAN(gpuid, tta_mode);
