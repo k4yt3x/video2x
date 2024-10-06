@@ -29,6 +29,7 @@ int process_frames(
     int ret;
     AVPacket packet;
     std::vector<AVFrame *> flushed_frames;
+    char errbuf[AV_ERROR_MAX_STRING_SIZE];
 
     // Get the total number of frames in the video
     AVStream *video_stream = fmt_ctx->streams[video_stream_index];
@@ -66,7 +67,8 @@ int process_frames(
             // Send the packet to the decoder
             ret = avcodec_send_packet(dec_ctx, &packet);
             if (ret < 0) {
-                fprintf(stderr, "Error sending packet to decoder: %s\n", av_err2str(ret));
+                av_strerror(ret, errbuf, sizeof(errbuf));
+                fprintf(stderr, "Error sending packet to decoder: %s\n", errbuf);
                 av_packet_unref(&packet);
                 goto end;
             }
@@ -77,7 +79,8 @@ int process_frames(
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     break;
                 } else if (ret < 0) {
-                    fprintf(stderr, "Error decoding video frame: %s\n", av_err2str(ret));
+                    av_strerror(ret, errbuf, sizeof(errbuf));
+                    fprintf(stderr, "Error decoding video frame: %s\n", errbuf);
                     goto end;
                 }
 
@@ -87,7 +90,8 @@ int process_frames(
                     // Encode and write the processed frame
                     ret = encode_and_write_frame(processed_frame, enc_ctx, ofmt_ctx);
                     if (ret < 0) {
-                        fprintf(stderr, "Error encoding/writing frame: %s\n", av_err2str(ret));
+                        av_strerror(ret, errbuf, sizeof(errbuf));
+                        fprintf(stderr, "Error encoding/writing frame: %s\n", errbuf);
                         av_frame_free(&processed_frame);
                         goto end;
                     }
@@ -121,7 +125,8 @@ int process_frames(
     // Flush the filter
     ret = filter->flush(flushed_frames);
     if (ret < 0) {
-        fprintf(stderr, "Error flushing filter: %s\n", av_err2str(ret));
+        av_strerror(ret, errbuf, sizeof(errbuf));
+        fprintf(stderr, "Error flushing filter: %s\n", errbuf);
         goto end;
     }
 
@@ -129,7 +134,8 @@ int process_frames(
     for (AVFrame *&flushed_frame : flushed_frames) {
         ret = encode_and_write_frame(flushed_frame, enc_ctx, ofmt_ctx);
         if (ret < 0) {
-            fprintf(stderr, "Error encoding/writing flushed frame: %s\n", av_err2str(ret));
+            av_strerror(ret, errbuf, sizeof(errbuf));
+            fprintf(stderr, "Error encoding/writing flushed frame: %s\n", errbuf);
             av_frame_free(&flushed_frame);
             flushed_frame = nullptr;
             goto end;
@@ -141,7 +147,8 @@ int process_frames(
     // Flush the encoder
     ret = flush_encoder(enc_ctx, ofmt_ctx);
     if (ret < 0) {
-        fprintf(stderr, "Error flushing encoder: %s\n", av_err2str(ret));
+        av_strerror(ret, errbuf, sizeof(errbuf));
+        fprintf(stderr, "Error flushing encoder: %s\n", errbuf);
         goto end;
     }
 
@@ -311,7 +318,9 @@ extern "C" int process_video(
     cleanup(fmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, filter);
 
     if (ret < 0 && ret != AVERROR_EOF) {
-        fprintf(stderr, "Error occurred: %s\n", av_err2str(ret));
+        char errbuf[AV_ERROR_MAX_STRING_SIZE];
+        av_strerror(ret, errbuf, sizeof(errbuf));
+        fprintf(stderr, "Error occurred: %s\n", errbuf);
         return 1;
     }
     return 0;

@@ -30,27 +30,52 @@ option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
 option(BUILD_VIDEO2X "Build the video2x executable" ON)
 option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
 
-# Find the required packages using pkg-config
-find_package(PkgConfig REQUIRED)
-set(REQUIRED_PKGS
-    libavformat
-    libavcodec
-    libavfilter
-    libavutil
-    libswscale
-    libavdevice
-    libplacebo
-)
+set(ALL_INCLUDE_DIRS)
+set(ALL_LIBRARIES)
 
-# Loop through each package to find and collect include dirs and libraries
-set(ALL_INCLUDE_DIRS "")
-set(ALL_LIBRARIES "")
+if(WIN32)
+    # Define base paths for FFmpeg and ncnn
+    set(FFMPEG_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ffmpeg-7.1-full_build-shared)
+    set(NCNN_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ncnn-20240820-windows-vs2022-shared/x64)
 
-foreach(PKG ${REQUIRED_PKGS})
-    pkg_check_modules(${PKG} REQUIRED ${PKG})
-    list(APPEND ALL_INCLUDE_DIRS ${${PKG}_INCLUDE_DIRS})
-    list(APPEND ALL_LIBRARIES ${${PKG}_LIBRARIES})
-endforeach()
+    # FFmpeg
+    list(APPEND ALL_LIBRARIES
+        ${FFMPEG_BASE_PATH}/lib/avformat.lib
+        ${FFMPEG_BASE_PATH}/lib/avcodec.lib
+        ${FFMPEG_BASE_PATH}/lib/avfilter.lib
+        ${FFMPEG_BASE_PATH}/lib/avutil.lib
+        ${FFMPEG_BASE_PATH}/lib/swscale.lib
+        ${FFMPEG_BASE_PATH}/lib/avdevice.lib
+    )
+    list(APPEND ALL_INCLUDE_DIRS ${FFMPEG_BASE_PATH}/include)
+
+    # ncnn
+    list(APPEND ALL_LIBRARIES
+        ${NCNN_BASE_PATH}/lib/ncnn.lib
+        # TODO: Figure out why this file is not being copied to the install directory
+        ${CMAKE_BINARY_DIR}/realesrgan-prefix/src/realesrgan-build/ncnn/glslang/SPIRV/Debug/SPIRVd.lib
+        ${CMAKE_BINARY_DIR}
+    )
+    list(APPEND ALL_INCLUDE_DIRS ${NCNN_BASE_PATH}/include/ncnn)
+else()
+    # Find the required packages using pkg-config
+    find_package(PkgConfig REQUIRED)
+    set(REQUIRED_PKGS
+        libavformat
+        libavcodec
+        libavfilter
+        libavutil
+        libswscale
+        libavdevice
+    )
+
+    # Loop through each package to find and collect include dirs and libraries
+    foreach(PKG ${REQUIRED_PKGS})
+        pkg_check_modules(${PKG} REQUIRED ${PKG})
+        list(APPEND ALL_INCLUDE_DIRS ${${PKG}_INCLUDE_DIRS})
+        list(APPEND ALL_LIBRARIES ${${PKG}_LIBRARIES})
+    endforeach()
+endif()
 
 # Remove duplicate entries
 list(REMOVE_DUPLICATES ALL_INCLUDE_DIRS)
@@ -167,12 +192,13 @@ ExternalProject_Add(
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realesrgan_install
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
         -DUSE_SYSTEM_NCNN=${USE_SYSTEM_NCNN}
+        -DLIBRARY_EXPORTS=ON
     BUILD_ALWAYS ON
-    INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install
+    INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
 )
 
 # Add all source files for libvideo2x
-file(GLOB LIBVIDEO2X_SOURCES src/*.cpp src/*.c)
+file(GLOB LIBVIDEO2X_SOURCES src/*.cpp)
 
 # Create the shared library 'libvideo2x'
 add_library(libvideo2x ${LIBVIDEO2X_SOURCES})
@@ -197,15 +223,21 @@ target_compile_options(libvideo2x PRIVATE
 )
 
 # Define the path to the built libresrgan-ncnn-vulkan library
-set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
+if(WIN32)
+    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/realesrgan-ncnn-vulkan.lib)
+else()
+    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
+endif()
 
 # Link the shared library with the dependencies
 target_link_libraries(libvideo2x PRIVATE ${ALL_LIBRARIES} ${REALESRGAN_LIB})
 
-if (USE_SYSTEM_NCNN)
-    target_link_libraries(libvideo2x PUBLIC ncnn)
-else()
-    target_link_libraries(libvideo2x PRIVATE ncnn)
+if(NOT WIN32)
+    if (USE_SYSTEM_NCNN)
+        target_link_libraries(libvideo2x PUBLIC ncnn)
+    else()
+        target_link_libraries(libvideo2x PRIVATE ncnn)
+    endif()
 endif()
 
 # Create the executable 'video2x'
@@ -228,27 +260,53 @@ if (BUILD_VIDEO2X)
     target_link_libraries(video2x PRIVATE ${ALL_LIBRARIES} libvideo2x)
 endif()
 
-# Install the shared library to the appropriate directory (e.g., /usr/local/lib)
-install(TARGETS libvideo2x
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-)
+# Installation rules for Windows
+if(WIN32)
+    # Install everything directly into CMAKE_INSTALL_PREFIX
+    install(TARGETS libvideo2x
+        LIBRARY DESTINATION .    
+        ARCHIVE DESTINATION .    
+        RUNTIME DESTINATION .    
+    )
 
-# Install header files
-install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x.h DESTINATION include)
+    # Install external dependencies
+    install(FILES ${CMAKE_BINARY_DIR}/realesrgan_install/bin/realesrgan-ncnn-vulkan.dll
+        DESTINATION .
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+    )
+    
+    # Install model files to the models directory
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION models)
 
-# Install external dependencies
-install(FILES ${REALESRGAN_LIB} DESTINATION lib
-    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                GROUP_READ GROUP_EXECUTE
-                WORLD_READ WORLD_EXECUTE
-)
+    # Install the executable
+    if(BUILD_VIDEO2X)
+        install(TARGETS video2x RUNTIME DESTINATION .)
+    endif()
 
-# Install model files to /usr/share
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION share/video2x)
+# Installation rules for Unix-like systems
+else()
+    # Install the shared library to the appropriate directory
+    install(TARGETS libvideo2x
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+    )
+    # Install external dependencies
+    install(FILES ${REALESRGAN_LIB} DESTINATION lib
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+    )
 
-# Install the executable
-if(BUILD_VIDEO2X)
-    install(TARGETS video2x RUNTIME DESTINATION bin)
+    # Install model files to /usr/share
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION share/video2x)
+
+    # Install the executable
+    if(BUILD_VIDEO2X)
+        install(TARGETS video2x RUNTIME DESTINATION bin)
+    endif()
 endif()
+
+install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x.h DESTINATION include)

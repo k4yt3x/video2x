@@ -87,7 +87,9 @@ AVFrame *LibplaceboFilter::process_frame(AVFrame *input_frame) {
     if (ret < 0) {
         av_frame_free(&output_frame);
         if (ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
-            fprintf(stderr, "Error getting frame from filter graph: %s\n", av_err2str(ret));
+            char errbuf[AV_ERROR_MAX_STRING_SIZE];
+            av_strerror(ret, errbuf, sizeof(errbuf));
+            fprintf(stderr, "Error getting frame from filter graph: %s\n", errbuf);
             return nullptr;
         }
         return (AVFrame *)-1;

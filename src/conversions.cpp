@@ -7,7 +7,7 @@ extern "C" {
 }
 
 // ncnn includes
-#include <ncnn/mat.h>
+#include <mat.h>
 
 #include "conversions.h"
 

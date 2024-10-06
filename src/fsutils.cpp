@@ -32,8 +32,8 @@ std::filesystem::path get_executable_directory() {
     }
 
     // Create a std::filesystem::path from the filepath and return its parent path
-    std::filesystem::path filepath(filepath.data());
-    return filepath.parent_path();
+    std::filesystem::path execpath(filepath.data());
+    return execpath.parent_path();
 }
 #else   // _WIN32
 std::filesystem::path get_executable_directory() {

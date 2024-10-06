@@ -2,7 +2,7 @@
 #define CONVERSIONS_H
 
 #include <libavutil/frame.h>
-#include <ncnn/mat.h>
+#include <mat.h>
 
 // Convert AVFrame to another pixel format
 AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt);
