@@ -25,6 +25,11 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# Build options
+option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
+option(BUILD_VIDEO2X "Build the video2x executable" ON)
+option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
+
 # Find the required packages using pkg-config
 find_package(PkgConfig REQUIRED)
 set(REQUIRED_PKGS
@@ -52,7 +57,103 @@ list(REMOVE_DUPLICATES ALL_INCLUDE_DIRS)
 list(REMOVE_DUPLICATES ALL_LIBRARIES)
 
 # Find ncnn package
-find_package(ncnn REQUIRED)
+if(USE_SYSTEM_NCNN)
+    find_package(ncnn REQUIRED)
+else()
+    option(NCNN_INSTALL_SDK "" OFF)
+    option(NCNN_PIXEL_ROTATE "" OFF)
+    option(NCNN_VULKAN "" ON)
+    option(NCNN_VULKAN_ONLINE_SPIRV "" ON)
+    option(NCNN_BUILD_BENCHMARK "" OFF)
+    option(NCNN_BUILD_TESTS "" OFF)
+    option(NCNN_BUILD_TOOLS "" OFF)
+    option(NCNN_BUILD_EXAMPLES "" OFF)
+    option(NCNN_DISABLE_RTTI "" ON)
+    option(NCNN_DISABLE_EXCEPTION "" ON)
+    option(NCNN_BUILD_SHARED_LIBS "" OFF)
+    option(SKIP_GLSLANG_INSTALL "" ON)
+
+    option(WITH_LAYER_absval "" OFF)
+    option(WITH_LAYER_argmax "" OFF)
+    option(WITH_LAYER_batchnorm "" OFF)
+    option(WITH_LAYER_bias "" OFF)
+    option(WITH_LAYER_bnll "" OFF)
+    option(WITH_LAYER_concat "" ON)
+    option(WITH_LAYER_convolution "" ON)
+    option(WITH_LAYER_crop "" ON)
+    option(WITH_LAYER_deconvolution "" OFF)
+    option(WITH_LAYER_dropout "" OFF)
+    option(WITH_LAYER_eltwise "" ON)
+    option(WITH_LAYER_elu "" OFF)
+    option(WITH_LAYER_embed "" OFF)
+    option(WITH_LAYER_exp "" OFF)
+    option(WITH_LAYER_flatten "" ON)
+    option(WITH_LAYER_innerproduct "" ON)
+    option(WITH_LAYER_input "" ON)
+    option(WITH_LAYER_log "" OFF)
+    option(WITH_LAYER_lrn "" OFF)
+    option(WITH_LAYER_memorydata "" OFF)
+    option(WITH_LAYER_mvn "" OFF)
+    option(WITH_LAYER_pooling "" OFF)
+    option(WITH_LAYER_power "" OFF)
+    option(WITH_LAYER_prelu "" ON)
+    option(WITH_LAYER_proposal "" OFF)
+    option(WITH_LAYER_reduction "" OFF)
+    option(WITH_LAYER_relu "" ON)
+    option(WITH_LAYER_reshape "" OFF)
+    option(WITH_LAYER_roipooling "" OFF)
+    option(WITH_LAYER_scale "" OFF)
+    option(WITH_LAYER_sigmoid "" OFF)
+    option(WITH_LAYER_slice "" OFF)
+    option(WITH_LAYER_softmax "" OFF)
+    option(WITH_LAYER_split "" ON)
+    option(WITH_LAYER_spp "" OFF)
+    option(WITH_LAYER_tanh "" OFF)
+    option(WITH_LAYER_threshold "" OFF)
+    option(WITH_LAYER_tile "" OFF)
+    option(WITH_LAYER_rnn "" OFF)
+    option(WITH_LAYER_lstm "" OFF)
+    option(WITH_LAYER_binaryop "" ON)
+    option(WITH_LAYER_unaryop "" OFF)
+    option(WITH_LAYER_convolutiondepthwise "" OFF)
+    option(WITH_LAYER_padding "" ON)
+    option(WITH_LAYER_squeeze "" OFF)
+    option(WITH_LAYER_expanddims "" OFF)
+    option(WITH_LAYER_normalize "" OFF)
+    option(WITH_LAYER_permute "" OFF)
+    option(WITH_LAYER_priorbox "" OFF)
+    option(WITH_LAYER_detectionoutput "" OFF)
+    option(WITH_LAYER_interp "" ON)
+    option(WITH_LAYER_deconvolutiondepthwise "" OFF)
+    option(WITH_LAYER_shufflechannel "" OFF)
+    option(WITH_LAYER_instancenorm "" OFF)
+    option(WITH_LAYER_clip "" OFF)
+    option(WITH_LAYER_reorg "" OFF)
+    option(WITH_LAYER_yolodetectionoutput "" OFF)
+    option(WITH_LAYER_quantize "" OFF)
+    option(WITH_LAYER_dequantize "" OFF)
+    option(WITH_LAYER_yolov3detectionoutput "" OFF)
+    option(WITH_LAYER_psroipooling "" OFF)
+    option(WITH_LAYER_roialign "" OFF)
+    option(WITH_LAYER_packing "" ON)
+    option(WITH_LAYER_requantize "" OFF)
+    option(WITH_LAYER_cast "" ON)
+    option(WITH_LAYER_hardsigmoid "" OFF)
+    option(WITH_LAYER_selu "" OFF)
+    option(WITH_LAYER_hardswish "" OFF)
+    option(WITH_LAYER_noop "" OFF)
+    option(WITH_LAYER_pixelshuffle "" ON)
+    option(WITH_LAYER_deepcopy "" OFF)
+    option(WITH_LAYER_mish "" OFF)
+    option(WITH_LAYER_statisticspooling "" OFF)
+    option(WITH_LAYER_swish "" OFF)
+    option(WITH_LAYER_gemm "" OFF)
+    option(WITH_LAYER_groupnorm "" OFF)
+    option(WITH_LAYER_layernorm "" OFF)
+    option(WITH_LAYER_softplus "" OFF)
+
+    add_subdirectory(third_party/ncnn)
+endif()
 
 # Include ExternalProject module
 include(ExternalProject)
@@ -65,8 +166,7 @@ ExternalProject_Add(
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realesrgan_install
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-        -DUSE_SYSTEM_NCNN=ON
-        -Dncnn_DIR=${ncnn_DIR}
+        -DUSE_SYSTEM_NCNN=${USE_SYSTEM_NCNN}
     BUILD_ALWAYS ON
     INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install
 )
@@ -75,7 +175,7 @@ ExternalProject_Add(
 file(GLOB LIBVIDEO2X_SOURCES src/*.cpp src/*.c)
 
 # Create the shared library 'libvideo2x'
-add_library(libvideo2x SHARED ${LIBVIDEO2X_SOURCES})
+add_library(libvideo2x ${LIBVIDEO2X_SOURCES})
 set_target_properties(libvideo2x PROPERTIES OUTPUT_NAME video2x)
 
 # Ensure libvideo2x depends on realesrgan being built and installed
@@ -85,7 +185,6 @@ add_dependencies(libvideo2x realesrgan)
 target_include_directories(libvideo2x PRIVATE
     ${ALL_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include
-    ${ncnn_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/third_party/libreal_esrgan_ncnn_vulkan/src
 )
 
@@ -101,25 +200,33 @@ target_compile_options(libvideo2x PRIVATE
 set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
 
 # Link the shared library with the dependencies
-target_link_libraries(libvideo2x PRIVATE ${ALL_LIBRARIES} ncnn ${REALESRGAN_LIB})
+target_link_libraries(libvideo2x PRIVATE ${ALL_LIBRARIES} ${REALESRGAN_LIB})
+
+if (USE_SYSTEM_NCNN)
+    target_link_libraries(libvideo2x PUBLIC ncnn)
+else()
+    target_link_libraries(libvideo2x PRIVATE ncnn)
+endif()
 
 # Create the executable 'video2x'
-add_executable(video2x src/video2x.c)
-set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
+if (BUILD_VIDEO2X)
+    add_executable(video2x src/video2x.c)
+    set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
 
-# Include directories for the executable
-target_include_directories(video2x PRIVATE
-    ${PROJECT_SOURCE_DIR}/include
-)
+    # Include directories for the executable
+    target_include_directories(video2x PRIVATE
+        ${PROJECT_SOURCE_DIR}/include
+    )
 
-# Compile options for the executable
-target_compile_options(video2x PRIVATE
-    -Wall
-    $<$<CONFIG:Debug>:-g -DDEBUG>
-)
+    # Compile options for the executable
+    target_compile_options(video2x PRIVATE
+        -Wall
+        $<$<CONFIG:Debug>:-g -DDEBUG>
+    )
 
-# Link the executable with the shared library
-target_link_libraries(video2x PRIVATE ${ALL_LIBRARIES} libvideo2x)
+    # Link the executable with the shared library
+    target_link_libraries(video2x PRIVATE ${ALL_LIBRARIES} libvideo2x)
+endif()
 
 # Install the shared library to the appropriate directory (e.g., /usr/local/lib)
 install(TARGETS libvideo2x
@@ -127,9 +234,6 @@ install(TARGETS libvideo2x
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
 )
-
-# Install the executable
-install(TARGETS video2x RUNTIME DESTINATION bin)
 
 # Install header files
 install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x.h DESTINATION include)
@@ -143,3 +247,8 @@ install(FILES ${REALESRGAN_LIB} DESTINATION lib
 
 # Install model files to /usr/share
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION share/video2x)
+
+# Install the executable
+if(BUILD_VIDEO2X)
+    install(TARGETS video2x RUNTIME DESTINATION bin)
+endif()

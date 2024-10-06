@@ -1,3 +1,6 @@
 [submodule "third_party/libreal_esrgan_ncnn_vulkan"]
 	path = third_party/libreal_esrgan_ncnn_vulkan
 	url = https://github.com/k4yt3x/libreal-esrgan-ncnn-vulkan.git
+[submodule "third_party/ncnn"]
+	path = third_party/ncnn
+	url = https://github.com/Tencent/ncnn.git
