@@ -192,7 +192,6 @@ ExternalProject_Add(
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realesrgan_install
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
         -DUSE_SYSTEM_NCNN=${USE_SYSTEM_NCNN}
-        -DLIBRARY_EXPORTS=ON
     BUILD_ALWAYS ON
     INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
 )
@@ -264,9 +263,9 @@ endif()
 if(WIN32)
     # Install everything directly into CMAKE_INSTALL_PREFIX
     install(TARGETS libvideo2x
-        LIBRARY DESTINATION .    
-        ARCHIVE DESTINATION .    
-        RUNTIME DESTINATION .    
+        LIBRARY DESTINATION .
+        ARCHIVE DESTINATION .
+        RUNTIME DESTINATION .
     )
 
     # Install external dependencies
@@ -276,7 +275,7 @@ if(WIN32)
                     GROUP_READ GROUP_EXECUTE
                     WORLD_READ WORLD_EXECUTE
     )
-    
+
     # Install model files to the models directory
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION models)
 

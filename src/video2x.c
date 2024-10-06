@@ -1,4 +1,4 @@
-#include <argp.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,34 +10,31 @@
 
 const char *VIDEO2X_VERSION = "6.0.0";
 
-// Program documentation
-static char doc[] = "";
-static char args_doc[] = "";
+// Define command line options
+static struct option long_options[] = {
+    // General Options
+    {"input", required_argument, NULL, 'i'},
+    {"output", required_argument, NULL, 'o'},
+    {"filter", required_argument, NULL, 'f'},
+    {"version", no_argument, NULL, 'v'},
+    {"help", no_argument, NULL, 0},
 
-// Define the options struct
-static struct argp_option options[] = {
-    {"input", 'i', "INPUT", 0, "Input video file path (required)"},
-    {"output", 'o', "OUTPUT", 0, "Output video file path (required)"},
-    {"filter", 'f', "FILTER", 0, "Filter to use: 'libplacebo' or 'realesrgan' (required)"},
+    // Encoder Options
+    {"codec", required_argument, NULL, 'c'},
+    {"preset", required_argument, NULL, 'p'},
+    {"pixfmt", required_argument, NULL, 'x'},
+    {"bitrate", required_argument, NULL, 'b'},
+    {"crf", required_argument, NULL, 'q'},
 
-    // Encoder options
-    {"codec", 'c', "CODEC", 0, "Output codec (default: libx264)"},
-    {"preset", 'p', "PRESET", 0, "Encoder preset (default: veryslow)"},
-    {"pixfmt", 'x', "PIXFMT", 0, "Output pixel format (default: yuv420p)"},
-    {"bitrate", 'b', "BITRATE", 0, "Bitrate in bits per second (default: 2 Mbps)"},
-    {"crf", 'q', "CRF", 0, "Constant Rate Factor (default: 17.0)"},
+    // Libplacebo Options
+    {"shader", required_argument, NULL, 's'},
+    {"width", required_argument, NULL, 'w'},
+    {"height", required_argument, NULL, 'h'},
 
-    // libplacebo
-    {"shader", 's', "SHADER", 0, "Path to custom GLSL shader file (libplacebo only)"},
-    {"width", 'w', "WIDTH", 0, "Output width (libplacebo only)"},
-    {"height", 'h', "HEIGHT", 0, "Output height (libplacebo only)"},
-
-    // realesrgan
-    {"scale", 'r', "SCALE", 0, "Scaling factor (2, 3, or 4 for realesrgan only)"},
-    {"model", 'm', "MODEL", 0, "Name of the model to use (realesrgan only)"},
-
-    {"version", 'v', 0, 0, "Print program version"},
-    {0}  // Last element must be 0 to signal the end of options
+    // RealESRGAN Options
+    {"scale", required_argument, NULL, 'r'},
+    {"model", required_argument, NULL, 'm'},
+    {0, 0, 0, 0}
 };
 
 // Structure to hold parsed arguments
@@ -75,154 +72,169 @@ int is_valid_realesrgan_model(const char *model) {
     return 0;
 }
 
-// Parse a single option
-static error_t parse_opt(int key, char *arg, struct argp_state *state) {
-    struct arguments *arguments = state->input;
+void print_help() {
+    printf("Usage: video2x [OPTIONS]\n");
+    printf("\nGeneral Options:\n");
+    printf("  -i, --input		Input video file path\n");
+    printf("  -o, --output		Output video file path\n");
+    printf("  -f, --filter		Filter to use: 'libplacebo' or 'realesrgan'\n");
+    printf("  -v, --version		Print program version\n");
+    printf("  --help		Display this help page\n");
 
-    switch (key) {
-        case 'i':
-            arguments->input_filename = arg;
-            break;
-        case 'o':
-            arguments->output_filename = arg;
-            break;
-        case 'f':
-            arguments->filter_type = arg;
-            break;
-        case 'c':
-            arguments->codec = arg;
-            break;
-        case 'x':
-            arguments->pix_fmt = arg;
-            break;
-        case 'p':
-            arguments->preset = arg;
-            break;
-        case 'b': {
-            char *endptr;
-            arguments->bitrate = strtoll(arg, &endptr, 10);
-            if (*endptr != '\0' || *arg == '\0') {
-                argp_error(state, "Invalid bitrate specified.");
-            }
-            break;
-        }
-        case 'q':
-            arguments->crf = atof(arg);
-            break;
-        case 's':
-            arguments->shader_path = arg;
-            break;
-        case 'w':
-            arguments->output_width = atoi(arg);
-            break;
-        case 'h':
-            arguments->output_height = atoi(arg);
-            break;
-        case 'r':
-            arguments->scaling_factor = atoi(arg);
-            if (arguments->scaling_factor != 2 && arguments->scaling_factor != 3 &&
-                arguments->scaling_factor != 4) {
-                argp_error(state, "Invalid scaling factor: Must be 2, 3, or 4.");
-            }
-            break;
-        case 'm':
-            arguments->model = arg;
-            break;
-        case 'v':
-            printf("video2x %s\n", VIDEO2X_VERSION);
-            exit(0);
-        case ARGP_KEY_ARG:
-            if (state->arg_num > 0) {
-                argp_usage(state);
-            }
-            break;
-        case ARGP_KEY_END:
-            // Ensure mandatory arguments are provided
-            if (!arguments->input_filename || !arguments->output_filename) {
-                argp_failure(state, 1, 0, "Input and output files are required.");
-            }
+    printf("\nEncoder Options (Optional):\n");
+    printf("  -c, --codec		Output codec (default: libx264)\n");
+    printf("  -p, --preset		Encoder preset (default: veryslow)\n");
+    printf("  -x, --pixfmt		Output pixel format (default: yuv420p)\n");
+    printf("  -b, --bitrate		Bitrate in bits per second (default: 2000000)\n");
+    printf("  -q, --crf		Constant Rate Factor (default: 17.0)\n");
 
-            // Ensure filter is specified
-            if (!arguments->filter_type) {
-                argp_failure(state, 1, 0, "Filter type (libplacebo or realesrgan) is required.");
-            }
+    printf("\nlibplacebo Options:\n");
+    printf("  -s, --shader		Name or path to custom GLSL shader file\n");
+    printf("  -w, --width		Output width\n");
+    printf("  -h, --height		Output height\n");
 
-            // Validate filter and related options
-            if (!arguments->filter_type) {
-                argp_failure(state, 1, 0, "Filter type is required.");
-            } else if (strcmp(arguments->filter_type, "libplacebo") == 0) {
-                // Libplacebo specific validations
-                if (!arguments->output_width && !arguments->output_height) {
-                    argp_failure(
-                        state, 1, 0, "Either width or height must be specified for libplacebo."
-                    );
-                }
-                if (!arguments->shader_path) {
-                    argp_failure(state, 1, 0, "Shader path is required for libplacebo.");
-                }
-                if (arguments->scaling_factor) {
-                    argp_failure(state, 1, 0, "Scaling factor is not valid for libplacebo.");
-                }
-            } else if (strcmp(arguments->filter_type, "realesrgan") == 0) {
-                // RealESRGAN specific validations
-                if (!arguments->scaling_factor) {
-                    argp_failure(state, 1, 0, "Scaling factor is required for realesrgan.");
-                }
-                if (!arguments->model) {
-                    argp_failure(
-                        state,
-                        1,
-                        0,
-                        "Model name is required for realesrgan. Must be 'realesrgan-plus', 'realesrgan-plus-anime', or 'realesr-animevideov3'."
-                    );
-                }
-                if (!is_valid_realesrgan_model(arguments->model)) {
-                    argp_failure(
-                        state,
-                        1,
-                        0,
-                        "Invalid model specified. Must be 'realesrgan-plus', 'realesrgan-plus-anime', or 'realesr-animevideov3'."
-                    );
-                }
-            } else {
-                argp_failure(
-                    state,
-                    1,
-                    0,
-                    "Invalid filter type specified. Must be 'libplacebo' or 'realesrgan'."
-                );
-            }
-
-            break;
-        default:
-            return ARGP_ERR_UNKNOWN;
-    }
-    return 0;
+    printf("\nRealESRGAN Options:\n");
+    printf("  -r, --scale		Scaling factor (2, 3, or 4)\n");
+    printf("  -m, --model		Name of the model to use\n");
 }
 
-// Our argp parser
-static struct argp argp = {options, parse_opt, args_doc, doc};
+void parse_arguments(int argc, char **argv, struct arguments *arguments) {
+    int option_index = 0;
+    int c;
+
+    // Default argument values
+    arguments->input_filename = NULL;
+    arguments->output_filename = NULL;
+    arguments->filter_type = NULL;
+    arguments->codec = "libx264";
+    arguments->preset = "veryslow";
+    arguments->pix_fmt = "yuv420p";
+    arguments->bitrate = 2 * 1000 * 1000;
+    arguments->crf = 17.0;
+    arguments->shader_path = NULL;
+    arguments->model = NULL;
+    arguments->output_width = 0;
+    arguments->output_height = 0;
+    arguments->scaling_factor = 0;
+
+    while ((c = getopt_long(argc, argv, "i:o:f:c:x:p:b:q:s:w:h:r:m:v", long_options, &option_index)
+           ) != -1) {
+        switch (c) {
+            case 'i':
+                arguments->input_filename = optarg;
+                break;
+            case 'o':
+                arguments->output_filename = optarg;
+                break;
+            case 'f':
+                arguments->filter_type = optarg;
+                break;
+            case 'c':
+                arguments->codec = optarg;
+                break;
+            case 'x':
+                arguments->pix_fmt = optarg;
+                break;
+            case 'p':
+                arguments->preset = optarg;
+                break;
+            case 'b':
+                arguments->bitrate = strtoll(optarg, NULL, 10);
+                if (arguments->bitrate <= 0) {
+                    fprintf(stderr, "Error: Invalid bitrate specified.\n");
+                    exit(1);
+                }
+                break;
+            case 'q':
+                arguments->crf = atof(optarg);
+                if (arguments->crf < 0.0 || arguments->crf > 51.0) {
+                    fprintf(stderr, "Error: CRF must be between 0 and 51.\n");
+                    exit(1);
+                }
+                break;
+            case 's':
+                arguments->shader_path = optarg;
+                break;
+            case 'w':
+                arguments->output_width = atoi(optarg);
+                if (arguments->output_width <= 0) {
+                    fprintf(stderr, "Error: Output width must be greater than 0.\n");
+                    exit(1);
+                }
+                break;
+            case 'h':
+                arguments->output_height = atoi(optarg);
+                if (arguments->output_height <= 0) {
+                    fprintf(stderr, "Error: Output height must be greater than 0.\n");
+                    exit(1);
+                }
+                break;
+            case 'r':
+                arguments->scaling_factor = atoi(optarg);
+                if (arguments->scaling_factor != 2 && arguments->scaling_factor != 3 &&
+                    arguments->scaling_factor != 4) {
+                    fprintf(stderr, "Error: Scaling factor must be 2, 3, or 4.\n");
+                    exit(1);
+                }
+                break;
+            case 'm':
+                arguments->model = optarg;
+                if (!is_valid_realesrgan_model(arguments->model)) {
+                    fprintf(
+                        stderr,
+                        "Error: Invalid model specified. Must be 'realesrgan-plus', 'realesrgan-plus-anime', or 'realesr-animevideov3'.\n"
+                    );
+                    exit(1);
+                }
+                break;
+            case 'v':
+                printf("video2x %s\n", VIDEO2X_VERSION);
+                exit(0);
+            case 0:  // Long-only options without short equivalents (e.g., help)
+                if (strcmp(long_options[option_index].name, "help") == 0) {
+                    print_help();
+                    exit(0);
+                }
+                break;
+            default:
+                fprintf(stderr, "Invalid options provided.\n");
+                exit(1);
+        }
+    }
+
+    // Check for required arguments
+    if (!arguments->input_filename || !arguments->output_filename) {
+        fprintf(stderr, "Error: Input and output files are required.\n");
+        exit(1);
+    }
+
+    if (!arguments->filter_type) {
+        fprintf(stderr, "Error: Filter type is required (libplacebo or realesrgan).\n");
+        exit(1);
+    }
+
+    if (strcmp(arguments->filter_type, "libplacebo") == 0) {
+        if (!arguments->shader_path || arguments->output_width == 0 ||
+            arguments->output_height == 0) {
+            fprintf(
+                stderr,
+                "Error: For libplacebo, shader name/path (-s), width (-w), and height (-e) are required.\n"
+            );
+            exit(1);
+        }
+    } else if (strcmp(arguments->filter_type, "realesrgan") == 0) {
+        if (arguments->scaling_factor == 0 || !arguments->model) {
+            fprintf(
+                stderr, "Error: For realesrgan, scaling factor (-r) and model (-m) are required.\n"
+            );
+            exit(1);
+        }
+    }
+}
 
 int main(int argc, char **argv) {
     struct arguments arguments;
-
-    // Default argument values
-    arguments.input_filename = NULL;
-    arguments.output_filename = NULL;
-    arguments.filter_type = NULL;
-    arguments.codec = "libx264";
-    arguments.preset = "veryslow";
-    arguments.pix_fmt = "yuv420p";
-    arguments.bitrate = 2 * 1000 * 1000;
-    arguments.crf = 17.0;
-    arguments.shader_path = NULL;
-    arguments.model = NULL;
-    arguments.output_width = 0;
-    arguments.output_height = 0;
-    arguments.scaling_factor = 0;
-
-    // Parse command-line arguments
-    argp_parse(&argp, argc, argv, 0, 0, &arguments);
+    parse_arguments(argc, argv, &arguments);
 
     // Setup filter configurations based on the parsed arguments
     struct FilterConfig filter_config;
