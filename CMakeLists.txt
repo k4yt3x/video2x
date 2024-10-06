@@ -50,10 +50,17 @@ if(WIN32)
     list(APPEND ALL_INCLUDE_DIRS ${FFMPEG_BASE_PATH}/include)
 
     # ncnn
+    # TODO: Figure out why this file is not being copied to the install directory
+    set(SPIRV_BUILD_PATH ${CMAKE_BINARY_DIR}/realesrgan-prefix/src/realesrgan-build/ncnn/glslang/SPIRV)
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(SPIRV_LIB ${SPIRV_BUILD_PATH}/Release/SPIRV.lib)
+    else()
+        set(SPIRV_LIB ${SPIRV_BUILD_PATH}//Debug/SPIRVd.lib)
+    endif()
+
     list(APPEND ALL_LIBRARIES
         ${NCNN_BASE_PATH}/lib/ncnn.lib
-        # TODO: Figure out why this file is not being copied to the install directory
-        ${CMAKE_BINARY_DIR}/realesrgan-prefix/src/realesrgan-build/ncnn/glslang/SPIRV/Debug/SPIRVd.lib
+        ${SPIRV_LIB}
         ${CMAKE_BINARY_DIR}
     )
     list(APPEND ALL_INCLUDE_DIRS ${NCNN_BASE_PATH}/include/ncnn)
@@ -201,7 +208,12 @@ file(GLOB LIBVIDEO2X_SOURCES src/*.cpp)
 
 # Create the shared library 'libvideo2x'
 add_library(libvideo2x ${LIBVIDEO2X_SOURCES})
-set_target_properties(libvideo2x PROPERTIES OUTPUT_NAME video2x)
+target_compile_definitions(libvideo2x PRIVATE LIBVIDEO2X_EXPORTS)
+if(WIN32)
+    set_target_properties(libvideo2x PROPERTIES OUTPUT_NAME libvideo2x)
+else()
+    set_target_properties(libvideo2x PROPERTIES OUTPUT_NAME video2x)
+endif()
 
 # Ensure libvideo2x depends on realesrgan being built and installed
 add_dependencies(libvideo2x realesrgan)
@@ -241,11 +253,12 @@ endif()
 
 # Create the executable 'video2x'
 if (BUILD_VIDEO2X)
-    add_executable(video2x src/video2x.c)
+    add_executable(video2x src/video2x.c src/getopt.c)
     set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
 
     # Include directories for the executable
     target_include_directories(video2x PRIVATE
+        ${ALL_INCLUDE_DIRS}
         ${PROJECT_SOURCE_DIR}/include
     )
 
@@ -268,7 +281,7 @@ if(WIN32)
         RUNTIME DESTINATION .
     )
 
-    # Install external dependencies
+    # Install libreal-esrgan-ncnn-vulkan
     install(FILES ${CMAKE_BINARY_DIR}/realesrgan_install/bin/realesrgan-ncnn-vulkan.dll
         DESTINATION .
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -276,8 +289,15 @@ if(WIN32)
                     WORLD_READ WORLD_EXECUTE
     )
 
+    # Install ncnn
+    install(FILES ${NCNN_BASE_PATH}/bin/ncnn.dll DESTINATION .
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+    )
+
     # Install model files to the models directory
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION models)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION .)
 
     # Install the executable
     if(BUILD_VIDEO2X)

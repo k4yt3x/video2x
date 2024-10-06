@@ -8,6 +8,16 @@
 #include <libavcodec/avcodec.h>
 #include <libavcodec/codec_id.h>
 
+#ifdef _WIN32
+#ifdef LIBVIDEO2X_EXPORTS
+#define LIBVIDEO2X_API __declspec(dllexport)
+#else
+#define LIBVIDEO2X_API __declspec(dllimport)
+#endif
+#else
+#define LIBVIDEO2X_API
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,7 +71,7 @@ struct ProcessingStatus {
 };
 
 // C-compatible process_video function
-int process_video(
+LIBVIDEO2X_API int process_video(
     const char *input_filename,
     const char *output_filename,
     const struct FilterConfig *filter_config,

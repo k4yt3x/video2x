@@ -16,6 +16,8 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
+#include "fsutils.h"
+
 int init_libplacebo(
     AVFilterGraph **filter_graph,
     AVFilterContext **buffersrc_ctx,
@@ -81,6 +83,14 @@ int init_libplacebo(
         return AVERROR_FILTER_NOT_FOUND;
     }
 
+    // Convert the shader path to a string since filter args is const char *
+    std::string shader_path_string = path_to_string(shader_path);
+
+#ifdef _WIN32
+    // libplacebo does not recognize the Windows '\\' path separator
+    std::replace(shader_path_string.begin(), shader_path_string.end(), '\\', '/');
+#endif
+
     // Prepare the filter arguments
     char filter_args[512];
     snprintf(
@@ -89,7 +99,7 @@ int init_libplacebo(
         "w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s",
         output_width,
         output_height,
-        shader_path.c_str()
+        shader_path_string.c_str()
     );
 
     AVFilterContext *libplacebo_ctx;

@@ -74,3 +74,18 @@ std::filesystem::path find_resource_file(const std::filesystem::path &path) {
 
     return get_executable_directory() / path;
 }
+
+std::string path_to_string(const std::filesystem::path& path) {
+#if _WIN32
+    std::wstring wide_path = path.wstring();
+    int buffer_size = WideCharToMultiByte(CP_UTF8, 0, wide_path.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (buffer_size == 0) {
+        return std::string();
+    }
+    std::vector<char> buffer(buffer_size);
+    WideCharToMultiByte(CP_UTF8, 0, wide_path.c_str(), -1, buffer.data(), buffer_size, nullptr, nullptr);
+    return std::string(buffer.data());
+#else
+    return path.string();
+#endif
+}

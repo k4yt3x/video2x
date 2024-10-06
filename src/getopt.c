@@ -33,11 +33,19 @@
 
 #include "getopt.h"
 
-extern int opterr;   /* if error message should be printed */
-extern int optind;   /* index into parent argv vector */
-extern int optopt;   /* character checked for validity */
-extern int optreset; /* reset getopt */
-extern char *optarg; /* argument associated with option */
+/*
+extern int opterr;
+extern int optind;
+extern int optopt;
+extern int optreset;
+extern char *optarg;
+*/
+
+int opterr = 1;      /* if error message should be printed */
+int optind = 1;      /* index into parent argv vector */
+int optopt = 0;      /* character checked for validity */
+int optreset = 0;    /* reset getopt */
+char *optarg = NULL; /* argument associated with option */
 
 #define __P(x) x
 #define _DIAGASSERT(x) assert(x)
