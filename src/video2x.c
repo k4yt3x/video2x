@@ -1,4 +1,3 @@
-#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +6,8 @@
 #include <libavutil/pixfmt.h>
 
 #include <libvideo2x.h>
+
+#include "getopt.h"
 
 const char *VIDEO2X_VERSION = "6.0.0";
 
