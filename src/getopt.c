@@ -55,9 +55,7 @@ char *optarg = NULL; /* argument associated with option */
 static char *__progname __P((char *));
 int getopt_internal __P((int, char *const *, const char *));
 
-static char *__progname(nargv0)
-char *nargv0;
-{
+static char *__progname(char *nargv0) {
     char *tmp;
 
     _DIAGASSERT(nargv0 != NULL);
@@ -79,11 +77,7 @@ char *nargv0;
  * getopt --
  *	Parse argc/argv argument vector.
  */
-int getopt_internal(nargc, nargv, ostr)
-int nargc;
-char *const *nargv;
-const char *ostr;
-{
+int getopt_internal(int nargc, char *const *nargv, const char *ostr) {
     static char *place = EMSG; /* option letter processing */
     char *oli;                 /* option letter list index */
 
@@ -168,13 +162,13 @@ getopt2(nargc, nargv, ostr)
  * getopt_long --
  *	Parse argc/argv argument vector.
  */
-int getopt_long(nargc, nargv, options, long_options, index)
-int nargc;
-char **nargv;
-const char *options;
-const struct option *long_options;
-int *index;
-{
+int getopt_long(
+    int nargc,
+    char **nargv,
+    const char *options,
+    const struct option *long_options,
+    int *index
+) {
     int retval;
 
     _DIAGASSERT(nargv != NULL);

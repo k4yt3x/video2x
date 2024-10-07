@@ -18,11 +18,13 @@ endif()
 # Set the default optimization flags for Release builds
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /MD /DNDEBUG")
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /MD /DNDEBUG")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Ox /GL /LTCG /MD /DNDEBUG")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /GL /LTCG /MD /DNDEBUG")
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast -s")
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -s")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -flto")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto")
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -s")
+        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -s")
     endif()
 endif()
 
@@ -56,13 +58,12 @@ if(WIN32)
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
         set(SPIRV_LIB ${SPIRV_BUILD_PATH}/Release/SPIRV.lib)
     else()
-        set(SPIRV_LIB ${SPIRV_BUILD_PATH}//Debug/SPIRVd.lib)
+        set(SPIRV_LIB ${SPIRV_BUILD_PATH}/Debug/SPIRVd.lib)
     endif()
 
     list(APPEND ALL_LIBRARIES
         ${NCNN_BASE_PATH}/lib/ncnn.lib
         ${SPIRV_LIB}
-        ${CMAKE_BINARY_DIR}
     )
     list(APPEND ALL_INCLUDE_DIRS ${NCNN_BASE_PATH}/include/ncnn)
 else()
