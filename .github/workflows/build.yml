@@ -63,7 +63,7 @@ jobs:
           curl -Lo ncnn-shared.zip https://github.com/Tencent/ncnn/releases/download/20240820/ncnn-20240820-windows-vs2022-shared.zip
           powershell -Command "Expand-Archive -Path ncnn-shared.zip -DestinationPath third_party/ncnn-shared"
 
-          winget install -e --id=KhronosGroup.VulkanSDK --disable-interactivity --accept-source-agreements
+          winget install -e --id=KhronosGroup.VulkanSDK --disable-interactivity --accept-source-agreements --accept-package-agreements
       - name: Build Video2X
         run: |
           cmake -S . -B build -DUSE_SYSTEM_NCNN=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x_install
