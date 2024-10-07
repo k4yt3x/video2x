@@ -41,8 +41,8 @@ set(ALL_LIBRARIES)
 
 if(WIN32)
     # Define base paths for FFmpeg and ncnn
-    set(FFMPEG_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ffmpeg-7.1-full_build-shared)
-    set(NCNN_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ncnn-20240820-windows-vs2022-shared/x64)
+    set(FFMPEG_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ffmpeg-shared)
+    set(NCNN_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ncnn-shared/x64)
 
     # FFmpeg
     list(APPEND ALL_LIBRARIES
