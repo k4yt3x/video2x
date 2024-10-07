@@ -2,6 +2,7 @@
 
 // FFmpeg includes
 extern "C" {
+#include <libavutil/frame.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 }
@@ -24,9 +25,7 @@ AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt) {
     dst_frame->height = src_frame->height;
 
     // Allocate memory for the converted frame
-    if (av_image_alloc(
-            dst_frame->data, dst_frame->linesize, dst_frame->width, dst_frame->height, pix_fmt, 32
-        ) < 0) {
+    if (av_frame_get_buffer(dst_frame, 32) < 0) {
         fprintf(stderr, "Failed to allocate memory for AVFrame.\n");
         av_frame_free(&dst_frame);
         return nullptr;
@@ -48,7 +47,6 @@ AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt) {
 
     if (sws_ctx == nullptr) {
         fprintf(stderr, "Failed to initialize swscale context.\n");
-        av_freep(&dst_frame->data[0]);
         av_frame_free(&dst_frame);
         return nullptr;
     }
@@ -122,9 +120,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     dst_frame->height = mat.h;
 
     // Allocate memory for the frame buffer
-    if (av_image_alloc(
-            dst_frame->data, dst_frame->linesize, dst_frame->width, dst_frame->height, pix_fmt, 32
-        ) < 0) {
+    if (av_frame_get_buffer(dst_frame, 32) < 0) {
         fprintf(stderr, "Failed to allocate memory for destination AVFrame.\n");
         av_frame_free(&dst_frame);
         return nullptr;
@@ -143,14 +139,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     bgr_frame->height = mat.h;
 
     // Allocate memory for the intermediate BGR frame
-    if (av_image_alloc(
-            bgr_frame->data,
-            bgr_frame->linesize,
-            bgr_frame->width,
-            bgr_frame->height,
-            AV_PIX_FMT_BGR24,
-            32
-        ) < 0) {
+    if (av_frame_get_buffer(bgr_frame, 32) < 0) {
         fprintf(stderr, "Failed to allocate memory for BGR AVFrame.\n");
         av_frame_free(&dst_frame);
         av_frame_free(&bgr_frame);

@@ -1,5 +1,7 @@
 #include <cstdint>
 #include <cstdio>
+#include <filesystem>
+#include <string>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -34,10 +36,6 @@ RealesrganFilter::~RealesrganFilter() {
         realesrgan = nullptr;
     }
 }
-
-#include <filesystem>
-#include <iostream>
-#include <string>
 
 int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
     // Construct the model paths using std::filesystem
