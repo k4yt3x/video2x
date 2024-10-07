@@ -13,7 +13,7 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install dependencies
@@ -39,7 +39,7 @@ jobs:
         run: |
           tar cJvf /tmp/video2x-nightly.txz -C /tmp/install .
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: video2x-nightly
           path: /tmp/video2x-nightly.txz
