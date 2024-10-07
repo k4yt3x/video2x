@@ -278,60 +278,62 @@ if (BUILD_VIDEO2X)
     target_link_libraries(video2x PRIVATE ${ALL_LIBRARIES} libvideo2x)
 endif()
 
-# Installation rules for Windows
+# Define the default installation directories
 if(WIN32)
-    # Install everything directly into CMAKE_INSTALL_PREFIX
-    install(TARGETS libvideo2x
-        LIBRARY DESTINATION .
-        ARCHIVE DESTINATION .
-        RUNTIME DESTINATION .
-    )
-
-    # Install libreal-esrgan-ncnn-vulkan
-    install(FILES ${CMAKE_BINARY_DIR}/realesrgan_install/bin/realesrgan-ncnn-vulkan.dll
-        DESTINATION .
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
-    )
-
-    # Install ncnn
-    install(FILES ${NCNN_BASE_PATH}/bin/ncnn.dll DESTINATION .
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
-    )
-
-    # Install model files to the models directory
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION .)
-
-    # Install the executable
-    if(BUILD_VIDEO2X)
-        install(TARGETS video2x RUNTIME DESTINATION .)
-    endif()
-
-# Installation rules for Unix-like systems
+    set(BIN_DESTINATION_DEFAULT ".")
+    set(INCLUDE_DESTINATION_DEFAULT "include")
+    set(LIB_DESTINATION_DEFAULT ".")
+    set(MODEL_DESTINATION_DEFAULT ".")
 else()
-    # Install the shared library to the appropriate directory
-    install(TARGETS libvideo2x
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-    )
-    # Install external dependencies
-    install(FILES ${REALESRGAN_LIB} DESTINATION lib
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
-    )
-
-    # Install model files to /usr/share
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION share/video2x)
-
-    # Install the executable
-    if(BUILD_VIDEO2X)
-        install(TARGETS video2x RUNTIME DESTINATION bin)
-    endif()
+    set(BIN_DESTINATION_DEFAULT "bin")
+    set(INCLUDE_DESTINATION_DEFAULT "include")
+    set(LIB_DESTINATION_DEFAULT "lib")
+    set(MODEL_DESTINATION_DEFAULT "share/video2x")
 endif()
 
-install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x.h DESTINATION include)
+# Set the installation directories
+set(INSTALL_BIN_DESTINATION ${BIN_DESTINATION_DEFAULT} CACHE STRING "")
+set(INSTALL_INCLUDE_DESTINATION ${INCLUDE_DESTINATION_DEFAULT} CACHE STRING "")
+set(INSTALL_LIB_DESTINATION ${LIB_DESTINATION_DEFAULT} CACHE STRING "")
+set(INSTALL_MODEL_DESTINATION ${MODEL_DESTINATION_DEFAULT} CACHE STRING "")
+
+# Common installation rules for libvideo2x and models
+install(TARGETS libvideo2x
+    LIBRARY DESTINATION ${INSTALL_LIB_DESTINATION}
+    ARCHIVE DESTINATION ${INSTALL_LIB_DESTINATION}
+    RUNTIME DESTINATION ${INSTALL_BIN_DESTINATION}
+)
+
+# Install model files
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION ${INSTALL_MODEL_DESTINATION})
+
+# Install the executable if BUILD_VIDEO2X is enabled
+if(BUILD_VIDEO2X)
+    install(TARGETS video2x RUNTIME DESTINATION ${INSTALL_BIN_DESTINATION})
+endif()
+
+# Install the header file
+install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x.h DESTINATION ${INSTALL_INCLUDE_DESTINATION})
+
+# Platform-specific installation rules
+if(WIN32)
+    # Install Windows-specific dependencies
+    install(FILES ${CMAKE_BINARY_DIR}/realesrgan_install/bin/realesrgan-ncnn-vulkan.dll
+        DESTINATION ${INSTALL_BIN_DESTINATION}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+    )
+    install(FILES ${NCNN_BASE_PATH}/bin/ncnn.dll DESTINATION ${INSTALL_BIN_DESTINATION}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+    )
+else()
+    # Install Unix-specific dependencies
+    install(FILES ${REALESRGAN_LIB} DESTINATION ${INSTALL_LIB_DESTINATION}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+    )
+endif()

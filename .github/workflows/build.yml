@@ -33,7 +33,9 @@ jobs:
         run: |
           mkdir -p /tmp/build /tmp/install
           cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
-            -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \
+            -DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \
+            -DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
           cmake --build /tmp/build --config Release --target install --parallel
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
