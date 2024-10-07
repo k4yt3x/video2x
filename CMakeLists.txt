@@ -25,6 +25,12 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# Set the default optimization flags for Release builds
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast -s")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -s")
+endif()
+
 # Build options
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
 option(BUILD_VIDEO2X "Build the video2x executable" ON)
@@ -40,12 +46,12 @@ if(WIN32)
 
     # FFmpeg
     list(APPEND ALL_LIBRARIES
-        ${FFMPEG_BASE_PATH}/lib/avformat.lib
         ${FFMPEG_BASE_PATH}/lib/avcodec.lib
+        ${FFMPEG_BASE_PATH}/lib/avdevice.lib
         ${FFMPEG_BASE_PATH}/lib/avfilter.lib
+        ${FFMPEG_BASE_PATH}/lib/avformat.lib
         ${FFMPEG_BASE_PATH}/lib/avutil.lib
         ${FFMPEG_BASE_PATH}/lib/swscale.lib
-        ${FFMPEG_BASE_PATH}/lib/avdevice.lib
     )
     list(APPEND ALL_INCLUDE_DIRS ${FFMPEG_BASE_PATH}/include)
 
@@ -68,12 +74,12 @@ else()
     # Find the required packages using pkg-config
     find_package(PkgConfig REQUIRED)
     set(REQUIRED_PKGS
-        libavformat
         libavcodec
+        libavdevice
         libavfilter
+        libavformat
         libavutil
         libswscale
-        libavdevice
     )
 
     # Loop through each package to find and collect include dirs and libraries
