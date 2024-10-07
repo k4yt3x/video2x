@@ -1,20 +1,35 @@
 .PHONY: build static debug windows test-realesrgan test-libplacebo leakcheck clean
 
 BINDIR=build
+CC=clang
+CXX=clang++
 
 build:
-	cmake -S . -B $(BINDIR) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release
+	cmake -S . -B $(BINDIR) \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+		-DCMAKE_C_COMPILER=$(CC) \
+		-DCMAKE_CXX_COMPILER=$(CXX) \
+		-DCMAKE_BUILD_TYPE=Release
 	cmake --build $(BINDIR) --config Release --parallel
 	cp $(BINDIR)/compile_commands.json .
 
 static:
-	cmake -S . -B $(BINDIR) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release \
-		-DBUILD_SHARED_LIBS=OFF -DUSE_SYSTEM_NCNN=OFF
+	cmake -S . -B $(BINDIR) \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+		-DCMAKE_C_COMPILER=$(CC) \
+		-DCMAKE_CXX_COMPILER=$(CXX) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DBUILD_SHARED_LIBS=OFF \
+		-DUSE_SYSTEM_NCNN=OFF
 	cmake --build $(BINDIR) --config Release --parallel
 	cp $(BINDIR)/compile_commands.json .
 
 debug:
-	cmake -S . -B $(BINDIR) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug
+	cmake -S . -B $(BINDIR) \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+		-DCMAKE_C_COMPILER=$(CC) \
+		-DCMAKE_CXX_COMPILER=$(CXX) \
+		-DCMAKE_BUILD_TYPE=Debug
 	cmake --build $(BINDIR) --config Debug --parallel
 	cp $(BINDIR)/compile_commands.json .
 

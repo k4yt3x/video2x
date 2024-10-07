@@ -8,7 +8,7 @@ FROM docker.io/archlinux:latest AS builder
 
 # Install dependencies and create a non-root user
 RUN pacman -Syy --noconfirm \
-        base-devel ffmpeg ncnn git cmake make clang pkgconf vulkan-headers sudo \
+        base-devel ffmpeg ncnn git cmake make clang pkgconf vulkan-headers openmp sudo \
         nvidia-utils vulkan-radeon vulkan-intel vulkan-swrast \
     && useradd -m builder \
     && echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder

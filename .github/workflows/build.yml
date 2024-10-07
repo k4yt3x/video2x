@@ -28,11 +28,13 @@ jobs:
             libavutil-dev \
             libswscale-dev \
             libvulkan-dev \
-            glslang-tools
+            glslang-tools \
+            libomp-dev
       - name: Build Video2X
         run: |
           mkdir -p /tmp/build /tmp/install
           cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
+            -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \
             -DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \
             -DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
@@ -49,10 +51,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Install winget
-        uses: Cyberboss/install-winget@v1
+      - name: Install Vulkan SDK
+        uses: humbletim/setup-vulkan-sdk@v1.2.0
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          vulkan-query-version: 1.3.204.0
+          vulkan-components: Vulkan-Headers, Vulkan-Loader
+          vulkan-use-cache: true
       - name: Install dependencies
         run: |
           git submodule update --init --recursive
@@ -62,8 +66,6 @@ jobs:
 
           curl -Lo ncnn-shared.zip https://github.com/Tencent/ncnn/releases/download/20240820/ncnn-20240820-windows-vs2022-shared.zip
           powershell -Command "Expand-Archive -Path ncnn-shared.zip -DestinationPath third_party/ncnn-shared"
-
-          winget install -e --id=KhronosGroup.VulkanSDK --disable-interactivity --accept-source-agreements --accept-package-agreements
       - name: Build Video2X
         run: |
           cmake -S . -B build -DUSE_SYSTEM_NCNN=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x_install

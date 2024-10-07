@@ -6,7 +6,7 @@ arch=('x86_64')
 url="https://github.com/k4yt3x/video2x"
 license=('AGPL3')
 depends=('ffmpeg' 'ncnn' 'vulkan-driver')
-makedepends=('git' 'cmake' 'make' 'clang' 'pkgconf' 'vulkan-headers')
+makedepends=('git' 'cmake' 'make' 'clang' 'pkgconf' 'vulkan-headers' 'openmp')
 
 pkgver() {
     printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
