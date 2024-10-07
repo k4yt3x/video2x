@@ -35,11 +35,8 @@ jobs:
           cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install
           cmake --build /tmp/build --config Release --target install --parallel
-      - name: Package artifacts
-        run: |
-          tar cJvf /tmp/video2x-nightly.txz -C /tmp/install .
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: video2x-nightly
-          path: /tmp/video2x-nightly.txz
+          path: /tmp/install
