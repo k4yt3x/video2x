@@ -33,7 +33,7 @@ test-libplacebo:
 	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i data/standard-test.mp4 -o data/output.mp4 \
 		-f libplacebo -w 1920 -h 1080 -s anime4k-mode-a
 
-leakcheck:
+leakcheck-realesrgan:
 	LD_LIBRARY_PATH=$(BINDIR) valgrind \
 		--tool=memcheck \
 		--leak-check=full \
@@ -44,6 +44,19 @@ leakcheck:
 		$(BINDIR)/video2x \
 		-i data/standard-test.mp4 -o data/output.mp4 \
 		-f realesrgan -r 2 --model realesr-animevideov3 \
+		-p veryfast -b 1000000 -q 30
+
+leakcheck-libplacebo:
+	LD_LIBRARY_PATH=$(BINDIR) valgrind \
+		--tool=memcheck \
+		--leak-check=full \
+		--show-leak-kinds=all \
+		--track-origins=yes \
+		--show-reachable=yes \
+		--verbose --log-file="valgrind.log" \
+		$(BINDIR)/video2x \
+		-i data/standard-test.mp4 -o data/output.mp4 \
+		-f libplacebo -w 1920 -h 1080 -s anime4k-mode-a \
 		-p veryfast -b 1000000 -q 30
 
 clean:
