@@ -13,45 +13,54 @@ const char *VIDEO2X_VERSION = "6.0.0";
 
 // Define command line options
 static struct option long_options[] = {
-    // General Options
+    // General options
     {"input", required_argument, NULL, 'i'},
     {"output", required_argument, NULL, 'o'},
     {"filter", required_argument, NULL, 'f'},
     {"version", no_argument, NULL, 'v'},
     {"help", no_argument, NULL, 0},
 
-    // Encoder Options
+    // Encoder options
     {"codec", required_argument, NULL, 'c'},
     {"preset", required_argument, NULL, 'p'},
     {"pixfmt", required_argument, NULL, 'x'},
     {"bitrate", required_argument, NULL, 'b'},
     {"crf", required_argument, NULL, 'q'},
 
-    // Libplacebo Options
+    // Libplacebo options
     {"shader", required_argument, NULL, 's'},
     {"width", required_argument, NULL, 'w'},
     {"height", required_argument, NULL, 'h'},
 
-    // RealESRGAN Options
-    {"scale", required_argument, NULL, 'r'},
+    // RealESRGAN options
+    {"gpuid", required_argument, NULL, 'g'},
     {"model", required_argument, NULL, 'm'},
+    {"scale", required_argument, NULL, 'r'},
     {0, 0, 0, 0}
 };
 
 // Structure to hold parsed arguments
 struct arguments {
+    // General options
     const char *input_filename;
     const char *output_filename;
     const char *filter_type;
+
+    // Encoder options
     const char *codec;
     const char *pix_fmt;
     const char *preset;
     int64_t bitrate;
     float crf;
+
+    // libplacebo options
     const char *shader_path;
-    const char *model;
     int output_width;
     int output_height;
+
+    // RealESRGAN options
+    int gpuid;
+    const char *model;
     int scaling_factor;
 };
 
@@ -95,8 +104,9 @@ void print_help() {
     printf("  -h, --height		Output height\n");
 
     printf("\nRealESRGAN Options:\n");
-    printf("  -r, --scale		Scaling factor (2, 3, or 4)\n");
+    printf("  -g, --gpuid		Vulkan GPU ID (default: 0)\n");
     printf("  -m, --model		Name of the model to use\n");
+    printf("  -r, --scale		Scaling factor (2, 3, or 4)\n");
 }
 
 void parse_arguments(int argc, char **argv, struct arguments *arguments) {
@@ -107,15 +117,22 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     arguments->input_filename = NULL;
     arguments->output_filename = NULL;
     arguments->filter_type = NULL;
+
+    // Encoder options
     arguments->codec = "libx264";
     arguments->preset = "veryslow";
     arguments->pix_fmt = "yuv420p";
     arguments->bitrate = 2 * 1000 * 1000;
     arguments->crf = 17.0;
+
+    // libplacebo options
     arguments->shader_path = NULL;
-    arguments->model = NULL;
     arguments->output_width = 0;
     arguments->output_height = 0;
+
+    // RealESRGAN options
+    arguments->gpuid = 0;
+    arguments->model = NULL;
     arguments->scaling_factor = 0;
 
     while ((c = getopt_long(argc, argv, "i:o:f:c:x:p:b:q:s:w:h:r:m:v", long_options, &option_index)
@@ -170,13 +187,8 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                     exit(1);
                 }
                 break;
-            case 'r':
-                arguments->scaling_factor = atoi(optarg);
-                if (arguments->scaling_factor != 2 && arguments->scaling_factor != 3 &&
-                    arguments->scaling_factor != 4) {
-                    fprintf(stderr, "Error: Scaling factor must be 2, 3, or 4.\n");
-                    exit(1);
-                }
+            case 'g':
+                arguments->gpuid = atoi(optarg);
                 break;
             case 'm':
                 arguments->model = optarg;
@@ -185,6 +197,14 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                         stderr,
                         "Error: Invalid model specified. Must be 'realesrgan-plus', 'realesrgan-plus-anime', or 'realesr-animevideov3'.\n"
                     );
+                    exit(1);
+                }
+                break;
+            case 'r':
+                arguments->scaling_factor = atoi(optarg);
+                if (arguments->scaling_factor != 2 && arguments->scaling_factor != 3 &&
+                    arguments->scaling_factor != 4) {
+                    fprintf(stderr, "Error: Scaling factor must be 2, 3, or 4.\n");
                     exit(1);
                 }
                 break;
@@ -246,7 +266,7 @@ int main(int argc, char **argv) {
         filter_config.config.libplacebo.shader_path = arguments.shader_path;
     } else if (strcmp(arguments.filter_type, "realesrgan") == 0) {
         filter_config.filter_type = FILTER_REALESRGAN;
-        filter_config.config.realesrgan.gpuid = 0;
+        filter_config.config.realesrgan.gpuid = arguments.gpuid;
         filter_config.config.realesrgan.tta_mode = 0;
         filter_config.config.realesrgan.scaling_factor = arguments.scaling_factor;
         filter_config.config.realesrgan.model = arguments.model;
