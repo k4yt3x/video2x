@@ -55,7 +55,7 @@ jobs:
         uses: humbletim/setup-vulkan-sdk@v1.2.0
         with:
           vulkan-query-version: 1.3.204.0
-          vulkan-components: Vulkan-Headers, Vulkan-Loader
+          vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang, SPIRV-Tools, SPIRV-Headers
           vulkan-use-cache: true
       - name: Install dependencies
         run: |
