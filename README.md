@@ -1,5 +1,5 @@
 <p align="center">
-   <img src="https://github.com/user-attachments/assets/0c6c5d31-7fd5-4e50-b41e-91a58aae995c"/>
+   <img src="https://github.com/user-attachments/assets/5cd63373-e806-474f-94ec-6e04963bf90f"/>
    </br>
    <img src="https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square"/>
    <img src="https://img.shields.io/github/actions/workflow/status/k4yt3x/video2x/build.yml?label=Build&style=flat-square"/>
@@ -12,9 +12,10 @@
 
 Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 
-- actually works, with less pain;
+- actually works this time, with less pain;
 - is blazing fast, thanks to the redesigned efficient pipeline and the speed of C/C++;
 - is cross-platform, available right now for both Windows and Linux;
+- provides much better output quality with Anime4K v4 and RealESRGAN;
 - supports Anime4K v4 and all other custom MPV-compatible GLSL shaders;
 - supports RealESRGAN (all three models) via ncnn and Vulkan;
 - requires 0 disk space for processing the video, just space for storing the final output; and
@@ -28,10 +29,11 @@ These are available for download now:
 - 6.0.0 beta AUR package for Arch Linux (`video2x-git`).
 - 6.0.0 beta [container image](https://github.com/k4yt3x/video2x/pkgs/container/video2x).
 - A GUI for 6.0.0 is in the making. More information about it will be available soon.
+- A new Colab will be made for 6.0.0 at a later time.
 
 There is still much to be done and optimize. Stay tuned for more updates. As for why the 5.0.0 branch was abandoned, here are some of the reasons:
 
-- Wrapped C++ libraries for Python is too painful to build for cross-platform distribution.
+- Wrapped C++ libraries for Python are too painful to build for cross-platform distribution.
 - Some wrapped C++ libraires exhibited unexpected behaviors.
 - Running FFmpeg via commands and piping data through stdin/stdout are inefficient.
 - C/C++ native binaries are much smaller and much more efficient.
@@ -89,7 +91,7 @@ Copyright of this clip belongs to 株式会社アニプレックス.
 ## License
 
 This project is licensed under the [GNU Affero General Public License Version 3 (GNU AGPL v3)](https://www.gnu.org/licenses/agpl-3.0.txt)\
-Copyright (C) 2018-2024 K4YT3X and contributors.
+Copyright (C) 2018-2024 K4YT3X and [contributors](https://github.com/k4yt3x/video2x/graphs/contributors).
 
 ![AGPLv3](https://www.gnu.org/graphics/agplv3-155x51.png)
 
