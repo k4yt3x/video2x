@@ -3,6 +3,9 @@
 
 #include <filesystem>
 
+#include <libavutil/buffer.h>
+#include <libavutil/frame.h>
+
 #include "filter.h"
 #include "realesrgan.h"
 
@@ -35,10 +38,10 @@ class RealesrganFilter : public Filter {
     virtual ~RealesrganFilter();
 
     // Initializes the filter with decoder and encoder contexts
-    int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) override;
+    int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) override;
 
     // Processes an input frame and returns the processed frame
-    AVFrame *process_frame(AVFrame *input_frame) override;
+    int process_frame(AVFrame *input_frame, AVFrame **output_frame) override;
 
     // Flushes any remaining frames (if necessary)
     int flush(std::vector<AVFrame *> &processed_frames) override;

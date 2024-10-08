@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libavutil/hwcontext.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/pixfmt.h>
 
@@ -17,8 +18,9 @@ static struct option long_options[] = {
     {"input", required_argument, NULL, 'i'},
     {"output", required_argument, NULL, 'o'},
     {"filter", required_argument, NULL, 'f'},
+    {"hwaccel", required_argument, NULL, 'a'},
     {"version", no_argument, NULL, 'v'},
-    {"help", no_argument, NULL, 0},
+    {"help", no_argument, NULL, '?'},
 
     // Encoder options
     {"codec", required_argument, NULL, 'c'},
@@ -45,6 +47,7 @@ struct arguments {
     const char *input_filename;
     const char *output_filename;
     const char *filter_type;
+    const char *hwaccel;
 
     // Encoder options
     const char *codec;
@@ -88,14 +91,15 @@ void print_help() {
     printf("  -i, --input		Input video file path\n");
     printf("  -o, --output		Output video file path\n");
     printf("  -f, --filter		Filter to use: 'libplacebo' or 'realesrgan'\n");
+    printf("  -a, --hwaccel		Hardware acceleration method (default: none)\n");
     printf("  -v, --version		Print program version\n");
-    printf("  --help		Display this help page\n");
+    printf("  -?, --help		Display this help page\n");
 
     printf("\nEncoder Options (Optional):\n");
     printf("  -c, --codec		Output codec (default: libx264)\n");
     printf("  -p, --preset		Encoder preset (default: veryslow)\n");
-    printf("  -x, --pixfmt		Output pixel format (default: yuv420p)\n");
-    printf("  -b, --bitrate		Bitrate in bits per second (default: 2000000)\n");
+    printf("  -x, --pixfmt		Output pixel format (default: auto)\n");
+    printf("  -b, --bitrate		Bitrate in bits per second (default: 0 (VBR))\n");
     printf("  -q, --crf		Constant Rate Factor (default: 17.0)\n");
 
     printf("\nlibplacebo Options:\n");
@@ -117,12 +121,13 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     arguments->input_filename = NULL;
     arguments->output_filename = NULL;
     arguments->filter_type = NULL;
+    arguments->hwaccel = "none";
 
     // Encoder options
     arguments->codec = "libx264";
     arguments->preset = "veryslow";
-    arguments->pix_fmt = "yuv420p";
-    arguments->bitrate = 2 * 1000 * 1000;
+    arguments->pix_fmt = NULL;
+    arguments->bitrate = 0;
     arguments->crf = 17.0;
 
     // libplacebo options
@@ -135,8 +140,9 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     arguments->model = NULL;
     arguments->scaling_factor = 0;
 
-    while ((c = getopt_long(argc, argv, "i:o:f:c:x:p:b:q:s:w:h:r:m:v", long_options, &option_index)
-           ) != -1) {
+    while ((c = getopt_long(
+                argc, argv, "i:o:f:a:c:x:p:b:q:s:w:h:r:m:v", long_options, &option_index
+            )) != -1) {
         switch (c) {
             case 'i':
                 arguments->input_filename = optarg;
@@ -146,6 +152,9 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                 break;
             case 'f':
                 arguments->filter_type = optarg;
+                break;
+            case 'a':
+                arguments->hwaccel = optarg;
                 break;
             case 'c':
                 arguments->codec = optarg;
@@ -283,10 +292,13 @@ int main(int argc, char **argv) {
     }
 
     // Parse pixel format to AVPixelFormat
-    enum AVPixelFormat pix_fmt = av_get_pix_fmt(arguments.pix_fmt);
-    if (pix_fmt == AV_PIX_FMT_NONE) {
-        fprintf(stderr, "Error: Invalid pixel format '%s'.\n", arguments.pix_fmt);
-        return 1;
+    enum AVPixelFormat pix_fmt = AV_PIX_FMT_NONE;
+    if (arguments.pix_fmt) {
+        pix_fmt = av_get_pix_fmt(arguments.pix_fmt);
+        if (pix_fmt == AV_PIX_FMT_NONE) {
+            fprintf(stderr, "Error: Invalid pixel format '%s'.\n", arguments.pix_fmt);
+            return 1;
+        }
     }
 
     // Setup encoder configuration
@@ -300,6 +312,18 @@ int main(int argc, char **argv) {
         .crf = arguments.crf,
     };
 
+    // Parse hardware acceleration method
+    enum AVHWDeviceType hw_device_type;
+    if (strcmp(arguments.hwaccel, "none") == 0) {
+        hw_device_type = AV_HWDEVICE_TYPE_NONE;
+    } else {
+        hw_device_type = av_hwdevice_find_type_by_name(arguments.hwaccel);
+        if (hw_device_type == AV_HWDEVICE_TYPE_NONE) {
+            fprintf(stderr, "Error: Invalid hardware device type '%s'.\n", arguments.hwaccel);
+            return 1;
+        }
+    }
+
     // Setup struct to store processing status
     struct ProcessingStatus status = {0};
 
@@ -307,11 +331,12 @@ int main(int argc, char **argv) {
     if (process_video(
             arguments.input_filename,
             arguments.output_filename,
+            hw_device_type,
             &filter_config,
             &encoder_config,
             &status
         )) {
-        fprintf(stderr, "Video processing failed.\n");
+        fprintf(stderr, "Video processing failed\n");
         return 1;
     }
 

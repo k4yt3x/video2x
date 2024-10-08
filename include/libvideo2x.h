@@ -1,12 +1,13 @@
 #ifndef LIBVIDEO2X_H
 #define LIBVIDEO2X_H
 
-#include <libavutil/pixfmt.h>
 #include <stdint.h>
 #include <time.h>
 
 #include <libavcodec/avcodec.h>
 #include <libavcodec/codec_id.h>
+#include <libavutil/hwcontext.h>
+#include <libavutil/pixfmt.h>
 
 #ifdef _WIN32
 #ifdef LIBVIDEO2X_EXPORTS
@@ -74,6 +75,7 @@ struct ProcessingStatus {
 LIBVIDEO2X_API int process_video(
     const char *input_filename,
     const char *output_filename,
+    enum AVHWDeviceType hw_device_type,
     const struct FilterConfig *filter_config,
     struct EncoderConfig *encoder_config,
     struct ProcessingStatus *status

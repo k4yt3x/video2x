@@ -3,10 +3,12 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/buffer.h>
 
 #include "libvideo2x.h"
 
 int init_encoder(
+    AVBufferRef *hw_ctx,
     const char *output_filename,
     AVFormatContext **ofmt_ctx,
     AVCodecContext **enc_ctx,

@@ -2,10 +2,12 @@
 #define DECODER_H
 
 #include <libavcodec/avcodec.h>
-#include <libavfilter/avfilter.h>
 #include <libavformat/avformat.h>
+#include <libavutil/buffer.h>
 
 int init_decoder(
+    AVHWDeviceType hw_type,
+    AVBufferRef *hw_ctx,
     const char *input_filename,
     AVFormatContext **fmt_ctx,
     AVCodecContext **dec_ctx,
