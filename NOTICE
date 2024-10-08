@@ -1,47 +1,11 @@
 Video2X
 Copyright (C) 2018-2024 K4YT3X and contributors.
 
-This product depends on FFmpeg, which is available under
-the GNU Lesser General Public License 2.1. The source code can be found at
-https://github.com/FFmpeg/FFmpeg.
+This product depends on FFmpeg, which is available under the GNU Lesser General Public License 2.1.
+The source code can be found at https://github.com/FFmpeg/FFmpeg.
 
-This product depends on waifu2x-ncnn-vulkan, which is available under
-the MIT License. The source code can be found at
-https://github.com/nihui/waifu2x-ncnn-vulkan.
+This product depends on Real-ESRGAN ncnn Vulkan, which is available under the MIT License.
+The source code can be found at https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan.
 
-This product depends on srmd-ncnn-vulkan, which is available under
-the MIT License. The source code can be found at
-https://github.com/nihui/srmd-ncnn-vulkan.
-
-This product depends on realsr-ncnn-vulkan, which is available under
-the MIT License. The source code can be found at
-https://github.com/nihui/realsr-ncnn-vulkan.
-
-This product depends on rife-ncnn-vulkan, which is available under
-the MIT License. The source code can be found at
-https://github.com/nihui/rife-ncnn-vulkan.
-
-This product depends on ffmpeg-python, which is available under
-the Apache License Version 2.0. The source code can be found at
-https://github.com/kkroening/ffmpeg-python.
-
-This product depends on Loguru, which is available under
-the MIT License. The source code can be found at
-https://github.com/Delgan/loguru.
-
-This product depends on opencv-python, which is available under
-the MIT License. The source code can be found at
-https://github.com/opencv/opencv-python.
-
-This product depends on Pillow, which is available under
-the Historical Permission Notice and Disclaimer. The source code
-can be found at
-https://github.com/python-pillow/Pillow.
-
-This product depends on Rich, which is available under
-the MIT License. The source code can be found at
-https://github.com/Textualize/rich.
-
-This product depends on pynput, which is available under
-the GNU Lesser General Public License 3.0. The source code can be found at
-https://github.com/moses-palmer/pynput.
+This product depends on ncnn, which is available under the BSD 3-Clause License.
+The source code can be found at https://github.com/Tencent/ncnn.

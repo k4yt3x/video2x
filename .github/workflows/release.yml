@@ -16,10 +16,29 @@ jobs:
         id: get_tag
         run: echo ::set-output name=tag::${GITHUB_REF/refs\/tags\//}
 
+  container:
+    name: Build and upload container
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: Build & push the Docker image
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USER }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          dockerfile: Dockerfile
+          image: video2x
+          tags: latest, ${{ needs.setup.outputs.tag }}
+
   create-release:
     name: Create release
     needs:
       - setup
+      - container
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -34,22 +53,3 @@ jobs:
           release_name: Video2X ${{ needs.setup.outputs.tag }}
           draft: true
           prerelease: false
-
-  container:
-    name: Build and upload container
-    needs:
-      - setup
-      - create-release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: Build & push the Docker image
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.GHCR_USER }}
-          password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: Dockerfile
-          image: video2x
-          tags: latest, ${{ needs.setup.outputs.tag }}

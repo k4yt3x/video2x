@@ -1,0 +1,82 @@
+name: build
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request: {}
+  workflow_dispatch: {}
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          git submodule update --init --recursive
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libavcodec-dev \
+            libavdevice-dev \
+            libavfilter-dev \
+            libavformat-dev \
+            libavutil-dev \
+            libswscale-dev \
+            libvulkan-dev \
+            glslang-tools \
+            libomp-dev
+      - name: Build Video2X
+        run: |
+          mkdir -p /tmp/build /tmp/install
+          cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
+            -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/tmp/install \
+            -DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \
+            -DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
+          cmake --build /tmp/build --config Debug --target install --parallel
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: video2x-nightly-linux-amd64
+          path: /tmp/install
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Vulkan SDK
+        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        with:
+          vulkan-query-version: 1.3.204.0
+          vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang, SPIRV-Tools, SPIRV-Headers
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          $ffmpegVersion = "7.1"
+          $ncnnVersion = "20240820"
+
+          git submodule update --init --recursive
+
+          curl -Lo ffmpeg-shared.zip "https://github.com/GyanD/codexffmpeg/releases/download/$ffmpegVersion/ffmpeg-$ffmpegVersion-full_build-shared.zip"
+          Expand-Archive -Path ffmpeg-shared.zip -DestinationPath third_party
+          Rename-Item -Path "third_party/ffmpeg-$ffmpegVersion-full_build-shared" -NewName ffmpeg-shared
+
+          curl -Lo ncnn-shared.zip "https://github.com/Tencent/ncnn/releases/download/$ncnnVersion/ncnn-$ncnnVersion-windows-vs2022-shared.zip"
+          Expand-Archive -Path ncnn-shared.zip -DestinationPath third_party
+          Rename-Item -Path "third_party/ncnn-$ncnnVersion-windows-vs2022-shared" -NewName ncnn-shared
+      - name: Build Video2X
+        run: |
+          cmake -S . -B build -DUSE_SYSTEM_NCNN=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=build/video2x_install
+          cmake --build build --config Debug --parallel --target install
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: video2x-nightly-windows-amd64
+          path: build/video2x_install
