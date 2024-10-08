@@ -35,7 +35,8 @@ int process_frames(
     AVCodecContext *dec_ctx,
     AVCodecContext *enc_ctx,
     Filter *filter,
-    int video_stream_index
+    int video_stream_index,
+    bool benchmark = false
 ) {
     int ret;
     AVPacket packet;
@@ -100,12 +101,14 @@ int process_frames(
                 ret = filter->process_frame(frame, &processed_frame);
                 if (ret == 0 && processed_frame != nullptr) {
                     // Encode and write the processed frame
-                    ret = encode_and_write_frame(processed_frame, enc_ctx, ofmt_ctx);
-                    if (ret < 0) {
-                        av_strerror(ret, errbuf, sizeof(errbuf));
-                        fprintf(stderr, "Error encoding/writing frame: %s\n", errbuf);
-                        av_frame_free(&processed_frame);
-                        goto end;
+                    if (!benchmark) {
+                        ret = encode_and_write_frame(processed_frame, enc_ctx, ofmt_ctx);
+                        if (ret < 0) {
+                            av_strerror(ret, errbuf, sizeof(errbuf));
+                            fprintf(stderr, "Error encoding/writing frame: %s\n", errbuf);
+                            av_frame_free(&processed_frame);
+                            goto end;
+                        }
                     }
 
                     av_frame_free(&processed_frame);
@@ -221,6 +224,7 @@ void cleanup(
 extern "C" int process_video(
     const char *input_filename,
     const char *output_filename,
+    bool benchmark,
     AVHWDeviceType hw_type,
     const FilterConfig *filter_config,
     EncoderConfig *encoder_config,
@@ -344,7 +348,9 @@ extern "C" int process_video(
     }
 
     // Process frames
-    ret = process_frames(status, ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, filter, video_stream_index);
+    ret = process_frames(
+        status, ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, filter, video_stream_index, benchmark
+    );
     if (ret < 0) {
         fprintf(stderr, "Error processing frames\n");
         cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);

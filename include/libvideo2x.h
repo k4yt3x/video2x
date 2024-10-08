@@ -1,6 +1,7 @@
 #ifndef LIBVIDEO2X_H
 #define LIBVIDEO2X_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
@@ -75,6 +76,7 @@ struct ProcessingStatus {
 LIBVIDEO2X_API int process_video(
     const char *input_filename,
     const char *output_filename,
+    bool benchmark,
     enum AVHWDeviceType hw_device_type,
     const struct FilterConfig *filter_config,
     struct EncoderConfig *encoder_config,

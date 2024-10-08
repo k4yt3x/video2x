@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,8 +20,9 @@ static struct option long_options[] = {
     {"output", required_argument, NULL, 'o'},
     {"filter", required_argument, NULL, 'f'},
     {"hwaccel", required_argument, NULL, 'a'},
+    {"benchmark", no_argument, NULL, 0},
     {"version", no_argument, NULL, 'v'},
-    {"help", no_argument, NULL, '?'},
+    {"help", no_argument, NULL, 0},
 
     // Encoder options
     {"codec", required_argument, NULL, 'c'},
@@ -48,6 +50,7 @@ struct arguments {
     const char *output_filename;
     const char *filter_type;
     const char *hwaccel;
+    bool benchmark;
 
     // Encoder options
     const char *codec;
@@ -92,6 +95,7 @@ void print_help() {
     printf("  -o, --output		Output video file path\n");
     printf("  -f, --filter		Filter to use: 'libplacebo' or 'realesrgan'\n");
     printf("  -a, --hwaccel		Hardware acceleration method (default: none)\n");
+    printf("  --benchmark		Discard processed frames and calculate average FPS\n");
     printf("  -v, --version		Print program version\n");
     printf("  -?, --help		Display this help page\n");
 
@@ -111,6 +115,10 @@ void print_help() {
     printf("  -g, --gpuid		Vulkan GPU ID (default: 0)\n");
     printf("  -m, --model		Name of the model to use\n");
     printf("  -r, --scale		Scaling factor (2, 3, or 4)\n");
+
+    printf("\nExamples:\n");
+    printf("  video2x -i in.mp4 -o out.mp4 -f libplacebo -s anime4k-mode-a -w 3840 -h 2160\n");
+    printf("  video2x -i in.mp4 -o out.mp4 -f realesrgan -m realesr-animevideov3 -r 4\n");
 }
 
 void parse_arguments(int argc, char **argv, struct arguments *arguments) {
@@ -122,6 +130,7 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     arguments->output_filename = NULL;
     arguments->filter_type = NULL;
     arguments->hwaccel = "none";
+    arguments->benchmark = false;
 
     // Encoder options
     arguments->codec = "libx264";
@@ -218,12 +227,14 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                 }
                 break;
             case 'v':
-                printf("video2x %s\n", VIDEO2X_VERSION);
+                printf("Video2X v%s\n", VIDEO2X_VERSION);
                 exit(0);
-            case 0:  // Long-only options without short equivalents (e.g., help)
+            case 0:  // Long-only options without short equivalents
                 if (strcmp(long_options[option_index].name, "help") == 0) {
                     print_help();
                     exit(0);
+                } else if (strcmp(long_options[option_index].name, "benchmark") == 0) {
+                    arguments->benchmark = true;
                 }
                 break;
             default:
@@ -233,8 +244,13 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     }
 
     // Check for required arguments
-    if (!arguments->input_filename || !arguments->output_filename) {
-        fprintf(stderr, "Error: Input and output files are required.\n");
+    if (!arguments->input_filename) {
+        fprintf(stderr, "Error: Input file path is required.\n");
+        exit(1);
+    }
+
+    if (!arguments->output_filename && !arguments->benchmark) {
+        fprintf(stderr, "Error: Output file path is required.\n");
         exit(1);
     }
 
@@ -263,6 +279,13 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
 }
 
 int main(int argc, char **argv) {
+    // Print help if no arguments are provided
+    if (argc < 2) {
+        print_help();
+        return 1;
+    }
+
+    // Parse command line arguments
     struct arguments arguments;
     parse_arguments(argc, argv, &arguments);
 
@@ -331,6 +354,7 @@ int main(int argc, char **argv) {
     if (process_video(
             arguments.input_filename,
             arguments.output_filename,
+            arguments.benchmark,
             hw_device_type,
             &filter_config,
             &encoder_config,
@@ -340,11 +364,25 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    // Calculate statistics
+    time_t time_elapsed = time(NULL) - status.start_time;
+    float speed_fps = (float)status.processed_frames / time_elapsed;
+
     // Print processing summary
+    if (arguments.benchmark) {
+        printf("====== Video2X Benchmark summary ======\n");
+        printf("Video file processed: %s\n", arguments.input_filename);
+        printf("Total frames processed: %ld\n", status.processed_frames);
+        printf("Total time taken: %lds\n", time_elapsed);
+        printf("Average processing speed: %.2f FPS\n", speed_fps);
+        return 0;
+    }
+
     printf("====== Video2X Processing summary ======\n");
     printf("Video file processed: %s\n", arguments.input_filename);
     printf("Total frames processed: %ld\n", status.processed_frames);
-    printf("Total time taken: %lds\n", time(NULL) - status.start_time);
+    printf("Total time taken: %lds\n", time_elapsed);
+    printf("Average processing speed: %.2f FPS\n", speed_fps);
     printf("Output written to: %s\n", arguments.output_filename);
     return 0;
 }

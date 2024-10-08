@@ -7,13 +7,8 @@ extern "C" {
 #include <libavfilter/avfilter.h>
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
-#include <libavformat/avformat.h>
-#include <libavutil/buffer.h>
+#include <libavutil/avutil.h>
 #include <libavutil/hwcontext.h>
-#include <libavutil/opt.h>
-#include <libavutil/pixdesc.h>
-#include <libavutil/rational.h>
-#include <libswscale/swscale.h>
 }
 
 #include "fsutils.h"
