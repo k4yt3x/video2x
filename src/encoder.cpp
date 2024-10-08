@@ -95,9 +95,6 @@ int init_encoder(
 
     // Set the bit rate and other encoder parameters
     codec_ctx->bit_rate = encoder_config->bit_rate;
-    codec_ctx->gop_size = 60;     // Keyframe interval
-    codec_ctx->max_b_frames = 3;  // B-frames
-    codec_ctx->keyint_min = 60;   // Maximum GOP size
 
     char crf_str[16];
     snprintf(crf_str, sizeof(crf_str), "%.f", encoder_config->crf);
