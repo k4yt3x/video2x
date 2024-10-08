@@ -20,7 +20,7 @@ WORKDIR /video2x
 
 # Build the package
 RUN makepkg -s --noconfirm \
-    && find /video2x -maxdepth 1 -name '*.pkg.tar.zst' | head -n 1 | \
+    && find /video2x -maxdepth 1 -name 'video2x-*.pkg.tar.zst' ! -name '*-debug-*' | head -n 1 | \
         xargs -I {} cp {} /tmp/video2x.pkg.tar.zst
 
 # stage 2: install wheels into the final image
@@ -34,8 +34,6 @@ ENV VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json\
 :/usr/share/vulkan/icd.d/intel_icd.x86_64.json
 
 COPY --from=builder /tmp/video2x.pkg.tar.zst /video2x.pkg.tar.zst
-COPY . /video2x
-WORKDIR /video2x
 RUN pacman -Sy --noconfirm ffmpeg ncnn \
         nvidia-utils vulkan-radeon vulkan-intel vulkan-swrast \
     && pacman -U --noconfirm /video2x.pkg.tar.zst \
