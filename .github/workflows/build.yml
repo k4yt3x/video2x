@@ -35,10 +35,10 @@ jobs:
           mkdir -p /tmp/build /tmp/install
           cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
             -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \
+            -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/tmp/install \
             -DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \
             -DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
-          cmake --build /tmp/build --config Release --target install --parallel
+          cmake --build /tmp/build --config Debug --target install --parallel
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -58,18 +58,24 @@ jobs:
           vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang, SPIRV-Tools, SPIRV-Headers
           vulkan-use-cache: true
       - name: Install dependencies
+        shell: pwsh
         run: |
+          $ffmpegVersion = "7.1"
+          $ncnnVersion = "20240820"
+
           git submodule update --init --recursive
 
-          curl -Lo ffmpeg-shared.zip https://github.com/GyanD/codexffmpeg/releases/download/7.1/ffmpeg-7.1-full_build-shared.zip
-          powershell -Command "Expand-Archive -Path ffmpeg-shared.zip -DestinationPath third_party/ffmpeg-shared"
+          curl -Lo ffmpeg-shared.zip "https://github.com/GyanD/codexffmpeg/releases/download/$ffmpegVersion/ffmpeg-$ffmpegVersion-full_build-shared.zip"
+          Expand-Archive -Path ffmpeg-shared.zip -DestinationPath third_party
+          Rename-Item -Path "third_party/ffmpeg-$ffmpegVersion-full_build-shared" -NewName "third_party/ffmpeg-shared"
 
-          curl -Lo ncnn-shared.zip https://github.com/Tencent/ncnn/releases/download/20240820/ncnn-20240820-windows-vs2022-shared.zip
-          powershell -Command "Expand-Archive -Path ncnn-shared.zip -DestinationPath third_party/ncnn-shared"
+          curl -Lo ncnn-shared.zip "https://github.com/Tencent/ncnn/releases/download/$ncnnVersion/ncnn-$ncnnVersion-windows-vs2022-shared.zip"
+          Expand-Archive -Path ncnn-shared.zip -DestinationPath third_party
+          Rename-Item -Path "third_party/ncnn-$ncnnVersion-windows-vs2022-shared" -NewName "third_party/ncnn-shared"
       - name: Build Video2X
         run: |
-          cmake -S . -B build -DUSE_SYSTEM_NCNN=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x_install
-          cmake --build build --config Release --parallel --target install
+          cmake -S . -B build -DUSE_SYSTEM_NCNN=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=build/video2x_install
+          cmake --build build --config Debug --parallel --target install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
