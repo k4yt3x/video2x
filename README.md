@@ -1,5 +1,5 @@
 <p align="center">
-   <img src="https://user-images.githubusercontent.com/21986859/102733190-872a7880-4334-11eb-8e9e-0ca747f130b1.png"/>
+   <img src="https://github.com/user-attachments/assets/0c6c5d31-7fd5-4e50-b41e-91a58aae995c"/>
    </br>
    <img src="https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square"/>
    <img src="https://img.shields.io/github/actions/workflow/status/k4yt3x/video2x/ci.yml?label=CI&style=flat-square"/>
@@ -8,21 +8,45 @@
    <img src="https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square"/>
 </p>
 
+## 🌟 Version 6.0.0 Preview
+
+Version 6.0.0 is a complete rewrite of this project in C/C++. It:
+
+- actually works, with less pain;
+- is blazing fast, thanks to the redesigned efficient pipeline and the speed of C/C++;
+- is cross-platform, available right now for both Windows and Linux;
+- supports Anime4K v4 and all other custom MPV-compatible GLSL shaders;
+- supports RealESRGAN (all three models) via ncnn and Vulkan;
+- requires 0 disk space for processing the video, just space for storing the final output; and
+- exports a standard C function that can be easily integrated in your own projects!
+
+These are available for download now:
+
+- 6.0.0 beta CLI preview builds for Windows and Linux are on the [releases page](https://github.com/k4yt3x/video2x/releases).
+  - You will need to install the dependencies and set `LD_LIBRARY_PATH` for the Linux build to work. Refer to the [PKGBUILD](PKGBUILD) file to see what needs to be installed.
+  - Alternatively, you can build it from source. Take a look at the [Makefile](Makefile).
+- 6.0.0 beta AUR package for Arch Linux (`video2x-git`).
+- 6.0.0 beta [container image](https://github.com/k4yt3x/video2x/pkgs/container/video2x).
+- A GUI for 6.0.0 is in the making. More information about it will be available soon.
+
+There is still much to be done and optimize. Stay tuned for more updates. As for why the 5.0.0 branch was abandoned, here are some of the reasons:
+
+- Wrapped C++ libraries for Python is too painful to build for cross-platform distribution.
+- Some wrapped C++ libraires exhibited unexpected behaviors.
+- Running FFmpeg via commands and piping data through stdin/stdout are inefficient.
+- C/C++ native binaries are much smaller and much more efficient.
+
 ## [💬 Telegram Discussion Group](https://t.me/video2x)
 
-Join our Telegram discussion group to ask any questions you have about Video2X, chat directly with the developers, or discuss about upscaling technologies and the future of Video2X in general.
+Join our Telegram discussion group to ask any questions you have about Video2X, chat directly with the developers, or discuss about super resolution technologies and the future of Video2X in general.
 
 ## [🪟 Download Windows Releases](https://github.com/k4yt3x/video2x/releases/tag/4.8.1)
 
-The latest Windows update is built based on version 4.8.1. GUI is not available for 5.0.0 yet, but is already under development. Go to the [GUI](https://github.com/k4yt3x/video2x/wiki/GUI) page to see the basic usages of the GUI. Try the [mirror](https://files.k4yt3x.com/Projects/Video2X/latest) if you can't download releases directly from GitHub.
+The latest Windows update is built based on version 4.8.1. GUI is not available for 6.0.0 yet, but is already under development. Go to the [GUI](https://github.com/k4yt3x/video2x/wiki/GUI) page to see the basic usages of the GUI. Try the [mirror](https://files.k4yt3x.com/Projects/Video2X/latest) if you can't download releases directly from GitHub.
 
 ## [📔 Google Colab](https://colab.research.google.com/drive/1gWEwcA9y57EsxwOjmLNmNMXPsafw0kGo)
 
 You can use Video2X on [Google Colab](https://colab.research.google.com/) **for free** if you don't have a powerful GPU of your own. You can borrow a powerful GPU (Tesla K80, T4, P4, or P100) on Google's server for free for a maximum of 12 hours per session. **Please use the free resource fairly** and do not create sessions back-to-back and run upscaling 24/7. This might result in you getting banned. You can get [Colab Pro/Pro+](https://colab.research.google.com/signup/pricing) if you'd like to use better GPUs and get longer runtimes. Usage instructions are embedded in the [Colab Notebook](https://colab.research.google.com/drive/1gWEwcA9y57EsxwOjmLNmNMXPsafw0kGo).
-
-## [🌙 Download Nightly Releases](https://github.com/k4yt3x/video2x/actions/workflows/ci.yml)
-
-Nightly releases are automatically created by the GitHub Actions CI/CD pipelines. They usually contain more experimental features and bug fixes. However, they are much less stable to the stable releases. **You must log in to GitHub to download CI build artifacts.**
 
 ## [📦 Container Image](https://github.com/k4yt3x/video2x/pkgs/container/video2x)
 
@@ -51,24 +75,13 @@ _Upscale demo: Spirited Away's movie trailer_
   - 240P to 1080P 60FPS
   - The original video's copyright belongs to ASCII Media Works
 
-### GIF Upscaling
-
-![catfru](https://user-images.githubusercontent.com/21986859/81631069-96d4fc80-93f6-11ea-92fb-33d6545055e7.gif)
-![catfru4x](https://user-images.githubusercontent.com/21986859/81631070-976d9300-93f6-11ea-9137-072a3b386110.gif)\
-_Catfru scaled up to 4x its original size using waifu2x [(original image)](https://gfycat.com/craftyeasygoingankole-capoo-bug-cat)_
-
-### Image Upscaling
-
-![Jill Comparison](https://user-images.githubusercontent.com/21986859/81631903-79a12d80-93f8-11ea-9c3c-f340240cf08c.png)\
-_Image 8x upscaling demo ([original image](https://72915.tumblr.com/post/173793265673) by [nananicu](https://twitter.com/nananicu))_
-
 ### Standard Test Clip
 
 The following clip can be used to test if your setup works properly. This is also the standard clip used for running performance benchmarks.
 
 - [Standard Test Clip (240P)](https://files.k4yt3x.com/Resources/Videos/standard-test.mp4) 4.54 MiB
 - [waifu2x Upscaled Sample (1080P)](https://files.k4yt3x.com/Resources/Videos/standard-waifu2x.mp4) 4.54 MiB
-- [Original Ground Truth (1080P)](https://files.k4yt3x.com/Resources/Videos/standard-original.mp4) 22.2 MiB
+- [Ground Truth (1080P)](https://files.k4yt3x.com/Resources/Videos/standard-original.mp4) 22.2 MiB
 
 The original clip came from the anime "さくら荘のペットな彼女."\
 Copyright of this clip belongs to 株式会社アニプレックス.
@@ -89,7 +102,7 @@ This project includes or depends on these following projects:
 | [Real-ESRGAN ncnn Vulkan](https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan) | MIT License     |
 | [ncnn](https://github.com/Tencent/ncnn)                                       | BSD 3-Clause    |
 
-More licensing information can be found in the [NOTICES](NOTICES) file.
+More licensing information can be found in the [NOTICE](NOTICE) file.
 
 ## Special Thanks
 
