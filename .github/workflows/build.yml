@@ -67,11 +67,11 @@ jobs:
 
           curl -Lo ffmpeg-shared.zip "https://github.com/GyanD/codexffmpeg/releases/download/$ffmpegVersion/ffmpeg-$ffmpegVersion-full_build-shared.zip"
           Expand-Archive -Path ffmpeg-shared.zip -DestinationPath third_party
-          Rename-Item -Path "third_party/ffmpeg-$ffmpegVersion-full_build-shared" -NewName "third_party/ffmpeg-shared"
+          Rename-Item -Path "third_party/ffmpeg-$ffmpegVersion-full_build-shared" -NewName ffmpeg-shared
 
           curl -Lo ncnn-shared.zip "https://github.com/Tencent/ncnn/releases/download/$ncnnVersion/ncnn-$ncnnVersion-windows-vs2022-shared.zip"
           Expand-Archive -Path ncnn-shared.zip -DestinationPath third_party
-          Rename-Item -Path "third_party/ncnn-$ncnnVersion-windows-vs2022-shared" -NewName "third_party/ncnn-shared"
+          Rename-Item -Path "third_party/ncnn-$ncnnVersion-windows-vs2022-shared" -NewName ncnn-shared
       - name: Build Video2X
         run: |
           cmake -S . -B build -DUSE_SYSTEM_NCNN=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=build/video2x_install
