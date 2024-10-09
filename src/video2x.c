@@ -136,10 +136,10 @@ void print_help() {
 
     printf("\nEncoder Options (Optional):\n");
     printf("  -c, --codec		Output codec (default: libx264)\n");
-    printf("  -p, --preset		Encoder preset (default: veryslow)\n");
+    printf("  -p, --preset		Encoder preset (default: slow)\n");
     printf("  -x, --pixfmt		Output pixel format (default: auto)\n");
     printf("  -b, --bitrate		Bitrate in bits per second (default: 0 (VBR))\n");
-    printf("  -q, --crf		Constant Rate Factor (default: 17.0)\n");
+    printf("  -q, --crf		Constant Rate Factor (default: 20.0)\n");
 
     printf("\nlibplacebo Options:\n");
     printf("  -s, --shader		Name or path to custom GLSL shader file\n");
@@ -169,10 +169,10 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
 
     // Encoder options
     arguments->codec = "libx264";
-    arguments->preset = "veryslow";
+    arguments->preset = "slow";
     arguments->pix_fmt = NULL;
     arguments->bitrate = 0;
-    arguments->crf = 17.0;
+    arguments->crf = 20.0;
 
     // libplacebo options
     arguments->shader_path = NULL;
