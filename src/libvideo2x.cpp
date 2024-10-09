@@ -120,22 +120,11 @@ int process_frames(
 
                 av_frame_unref(frame);
 
-                // Print the processing status
-                printf(
-                    "\r[Video2X] Processing frame %ld/%ld (%.2f%%); time elapsed: %lds",
-                    status->processed_frames,
-                    status->total_frames,
-                    status->processed_frames * 100.0 / status->total_frames,
-                    time(NULL) - status->start_time
-                );
-                fflush(stdout);
+                // TODO: Print the debug processing status
             }
         }
         av_packet_unref(&packet);
     }
-
-    // Print a newline after processing all frames
-    printf("\n");
 
     // Flush the filter
     ret = filter->flush(flushed_frames);

@@ -1,9 +1,7 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
-#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/buffer.h>
 
 #include "libvideo2x.h"
 

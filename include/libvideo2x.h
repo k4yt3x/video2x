@@ -6,9 +6,6 @@
 #include <time.h>
 
 #include <libavcodec/avcodec.h>
-#include <libavcodec/codec_id.h>
-#include <libavutil/hwcontext.h>
-#include <libavutil/pixfmt.h>
 
 #ifdef _WIN32
 #ifdef LIBVIDEO2X_EXPORTS

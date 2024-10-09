@@ -4,17 +4,8 @@
 
 extern "C" {
 #include <libavcodec/avcodec.h>
-#include <libavcodec/codec.h>
-#include <libavcodec/codec_id.h>
-#include <libavfilter/avfilter.h>
-#include <libavfilter/buffersink.h>
-#include <libavfilter/buffersrc.h>
 #include <libavformat/avformat.h>
-#include <libavutil/buffer.h>
 #include <libavutil/opt.h>
-#include <libavutil/pixdesc.h>
-#include <libavutil/pixfmt.h>
-#include <libavutil/rational.h>
 }
 
 #include "conversions.h"
@@ -75,8 +66,9 @@ int init_encoder(
     codec_ctx->height = encoder_config->output_height;
     codec_ctx->width = encoder_config->output_width;
     codec_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
-    codec_ctx->time_base = av_inv_q(dec_ctx->framerate);
+    codec_ctx->bit_rate = encoder_config->bit_rate;
 
+    // Set the pixel format
     if (encoder_config->pix_fmt != AV_PIX_FMT_NONE) {
         // Use the specified pixel format
         codec_ctx->pix_fmt = encoder_config->pix_fmt;
@@ -89,17 +81,15 @@ int init_encoder(
         }
     }
 
+    // Set the time base
+    codec_ctx->time_base = av_inv_q(dec_ctx->framerate);
     if (codec_ctx->time_base.num == 0 || codec_ctx->time_base.den == 0) {
         codec_ctx->time_base = av_inv_q(av_guess_frame_rate(fmt_ctx, out_stream, NULL));
     }
 
-    // Set the bit rate and other encoder parameters
-    codec_ctx->bit_rate = encoder_config->bit_rate;
-
+    // Set the CRF and preset for any codecs that support it
     char crf_str[16];
     snprintf(crf_str, sizeof(crf_str), "%.f", encoder_config->crf);
-
-    // Set the CRF and preset for any codecs that support it
     av_opt_set(codec_ctx->priv_data, "crf", crf_str, 0);
     av_opt_set(codec_ctx->priv_data, "preset", encoder_config->preset, 0);
 
