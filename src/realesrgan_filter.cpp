@@ -1,19 +1,11 @@
+#include "realesrgan_filter.h"
+
 #include <cstdint>
 #include <cstdio>
-#include <filesystem>
 #include <string>
-
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavutil/avutil.h>
-#include <libavutil/buffer.h>
-#include <libavutil/imgutils.h>
-}
 
 #include "conversions.h"
 #include "fsutils.h"
-#include "realesrgan.h"
-#include "realesrgan_filter.h"
 
 RealesrganFilter::RealesrganFilter(
     int gpuid,

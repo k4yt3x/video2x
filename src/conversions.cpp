@@ -1,16 +1,6 @@
-#include <cstdio>
-
-// FFmpeg includes
-extern "C" {
-#include <libavutil/frame.h>
-#include <libavutil/imgutils.h>
-#include <libswscale/swscale.h>
-}
-
-// ncnn includes
-#include <mat.h>
-
 #include "conversions.h"
+
+#include <cstdio>
 
 // Convert AVFrame format
 AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt) {

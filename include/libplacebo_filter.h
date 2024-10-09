@@ -3,8 +3,11 @@
 
 #include <filesystem>
 
-#include <libavutil/buffer.h>
-#include <libavutil/frame.h>
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavfilter/buffersink.h>
+#include <libavfilter/buffersrc.h>
+}
 
 #include "filter.h"
 

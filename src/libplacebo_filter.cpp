@@ -1,15 +1,9 @@
-#include <cstdio>
+#include "libplacebo_filter.h"
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavfilter/buffersink.h>
-#include <libavfilter/buffersrc.h>
-#include <libavutil/buffer.h>
-}
+#include <cstdio>
 
 #include "fsutils.h"
 #include "libplacebo.h"
-#include "libplacebo_filter.h"
 
 LibplaceboFilter::LibplaceboFilter(int width, int height, const std::filesystem::path &shader_path)
     : filter_graph(nullptr),

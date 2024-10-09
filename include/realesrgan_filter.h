@@ -3,8 +3,9 @@
 
 #include <filesystem>
 
-#include <libavutil/buffer.h>
-#include <libavutil/frame.h>
+extern "C" {
+#include <libavcodec/avcodec.h>
+}
 
 #include "filter.h"
 #include "realesrgan.h"

@@ -1,19 +1,14 @@
+#include "libvideo2x.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <cstdint>
 
-// FFmpeg headers
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-}
-
 #include "decoder.h"
 #include "encoder.h"
 #include "filter.h"
 #include "libplacebo_filter.h"
-#include "libvideo2x.h"
 #include "realesrgan_filter.h"
 
 /**

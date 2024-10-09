@@ -1,18 +1,8 @@
+#include "decoder.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavfilter/avfilter.h>
-#include <libavfilter/buffersink.h>
-#include <libavfilter/buffersrc.h>
-#include <libavformat/avformat.h>
-#include <libavutil/hwcontext.h>
-#include <libavutil/opt.h>
-#include <libavutil/pixdesc.h>
-#include <libavutil/rational.h>
-}
 
 static enum AVPixelFormat hw_pix_fmt = AV_PIX_FMT_NONE;
 

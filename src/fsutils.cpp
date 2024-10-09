@@ -1,4 +1,4 @@
-#include <filesystem>
+#include "fsutils.h"
 
 #if _WIN32
 #include <windows.h>
@@ -7,8 +7,6 @@
 #include <unistd.h>
 #include <cstring>
 #endif
-
-#include "fsutils.h"
 
 #if _WIN32
 std::filesystem::path get_executable_directory() {

@@ -3,9 +3,10 @@
 
 #include <filesystem>
 
+extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavfilter/avfilter.h>
-#include <libavutil/buffer.h>
+}
 
 int init_libplacebo(
     AVBufferRef *hw_ctx,

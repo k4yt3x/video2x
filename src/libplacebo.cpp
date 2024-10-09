@@ -1,15 +1,7 @@
+#include "libplacebo.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <filesystem>
-
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavfilter/avfilter.h>
-#include <libavfilter/buffersink.h>
-#include <libavfilter/buffersrc.h>
-#include <libavutil/avutil.h>
-#include <libavutil/hwcontext.h>
-}
 
 #include "fsutils.h"
 

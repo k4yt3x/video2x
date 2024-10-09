@@ -1,15 +1,10 @@
+#include "encoder.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/opt.h>
-}
-
 #include "conversions.h"
-#include "libvideo2x.h"
 
 static enum AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder) {
     const enum AVPixelFormat *p = encoder->pix_fmts;

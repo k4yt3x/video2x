@@ -5,8 +5,6 @@
 #include <stdint.h>
 #include <time.h>
 
-#include <libavcodec/avcodec.h>
-
 #ifdef _WIN32
 #ifdef LIBVIDEO2X_EXPORTS
 #define LIBVIDEO2X_API __declspec(dllexport)
@@ -20,6 +18,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 
 // Enum to specify filter type
 enum FilterType {

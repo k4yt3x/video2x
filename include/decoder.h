@@ -1,9 +1,10 @@
 #ifndef DECODER_H
 #define DECODER_H
 
+extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/buffer.h>
+}
 
 int init_decoder(
     AVHWDeviceType hw_type,
