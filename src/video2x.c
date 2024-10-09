@@ -407,7 +407,7 @@ int main(int argc, char **argv) {
     while (!status.completed) {
         printf(
             "\r[Video2X] Processing frame %ld/%ld (%.2f%%); time elapsed: %lds",
-            atomic_load(&status.processed_frames),
+            status.processed_frames,
             status.total_frames,
             status.processed_frames * 100.0 / status.total_frames,
             time(NULL) - status.start_time
@@ -428,7 +428,7 @@ int main(int argc, char **argv) {
 
     // Calculate statistics
     time_t time_elapsed = time(NULL) - status.start_time;
-    float average_speed_fps = (float)atomic_load(&status.processed_frames) / time_elapsed;
+    float average_speed_fps = (float)status.processed_frames / time_elapsed;
 
     // Print processing summary
     if (arguments.benchmark) {

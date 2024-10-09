@@ -1,7 +1,6 @@
 #ifndef LIBVIDEO2X_H
 #define LIBVIDEO2X_H
 
-#include <stdatomic.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
@@ -66,7 +65,7 @@ struct EncoderConfig {
 
 // Processing status
 struct ProcessingStatus {
-    atomic_int_fast64_t processed_frames;
+    int64_t processed_frames;
     int64_t total_frames;
     time_t start_time;
     bool completed;
