@@ -201,7 +201,7 @@ int encode_and_write_frame(
 
     ret = avcodec_send_frame(enc_ctx, frame);
     if (ret < 0) {
-        fprintf(stderr, "Error sending frame to encoder: %s\n", av_err2str(ret));
+        fprintf(stderr, "Error sending frame to encoder\n");
         av_packet_free(&enc_pkt);
         return ret;
     }
@@ -212,7 +212,7 @@ int encode_and_write_frame(
             av_packet_unref(enc_pkt);
             break;
         } else if (ret < 0) {
-            fprintf(stderr, "Error during encoding: %s\n", av_err2str(ret));
+            fprintf(stderr, "Error encoding frame\n");
             av_packet_free(&enc_pkt);
             return ret;
         }
@@ -225,7 +225,7 @@ int encode_and_write_frame(
         ret = av_interleaved_write_frame(ofmt_ctx, enc_pkt);
         av_packet_unref(enc_pkt);
         if (ret < 0) {
-            fprintf(stderr, "Error muxing packet: %s\n", av_err2str(ret));
+            fprintf(stderr, "Error muxing packet\n");
             av_packet_free(&enc_pkt);
             return ret;
         }
@@ -250,7 +250,7 @@ int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) {
             av_packet_unref(enc_pkt);
             break;
         } else if (ret < 0) {
-            fprintf(stderr, "Error during encoding: %s\n", av_err2str(ret));
+            fprintf(stderr, "Error encoding frame\n");
             av_packet_free(&enc_pkt);
             return ret;
         }
@@ -263,7 +263,7 @@ int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) {
         ret = av_interleaved_write_frame(ofmt_ctx, enc_pkt);
         av_packet_unref(enc_pkt);
         if (ret < 0) {
-            fprintf(stderr, "Error muxing packet: %s\n", av_err2str(ret));
+            fprintf(stderr, "Error muxing packet\n");
             av_packet_free(&enc_pkt);
             return ret;
         }

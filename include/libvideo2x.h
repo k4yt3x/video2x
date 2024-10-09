@@ -38,7 +38,7 @@ struct LibplaceboConfig {
 // Configuration for RealESRGAN filter
 struct RealESRGANConfig {
     int gpuid;
-    int tta_mode;
+    bool tta_mode;
     int scaling_factor;
     const char *model;
 };

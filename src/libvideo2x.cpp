@@ -146,7 +146,7 @@ int process_frames(
             // If copy streams is enabled, copy the packet to the output
             ret = av_interleaved_write_frame(ofmt_ctx, &packet);
             if (ret < 0) {
-                fprintf(stderr, "Error muxing packet: %s\n", av_err2str(ret));
+                fprintf(stderr, "Error muxing packet\n");
                 av_packet_unref(&packet);
                 return ret;
             }
@@ -338,9 +338,9 @@ extern "C" int process_video(
                 return -1;
             }
 
-            filter = new LibplaceboFilter(
+            filter = new LibplaceboFilter{
                 config.output_width, config.output_height, std::filesystem::path(config.shader_path)
-            );
+            };
             break;
         }
         case FILTER_REALESRGAN: {
@@ -360,9 +360,9 @@ extern "C" int process_video(
                 return -1;
             }
 
-            filter = new RealesrganFilter(
+            filter = new RealesrganFilter{
                 config.gpuid, config.tta_mode, config.scaling_factor, config.model
-            );
+            };
             break;
         }
         default:
