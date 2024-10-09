@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <threads.h>
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/pixdesc.h>
@@ -31,7 +32,7 @@ static struct option long_options[] = {
     {"bitrate", required_argument, NULL, 'b'},
     {"crf", required_argument, NULL, 'q'},
 
-    // Libplacebo options
+    // libplacebo options
     {"shader", required_argument, NULL, 's'},
     {"width", required_argument, NULL, 'w'},
     {"height", required_argument, NULL, 'h'},
@@ -68,6 +69,14 @@ struct arguments {
     int gpuid;
     const char *model;
     int scaling_factor;
+};
+
+struct ProcessVideoThreadArguments {
+    struct arguments *arguments;
+    enum AVHWDeviceType hw_device_type;
+    struct FilterConfig *filter_config;
+    struct EncoderConfig *encoder_config;
+    struct ProcessingStatus *status;
 };
 
 const char *valid_models[] = {
@@ -278,6 +287,32 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     }
 }
 
+// Wrapper function for video processing thread
+int process_video_thread(void *arg) {
+    struct ProcessVideoThreadArguments *thread_args = (struct ProcessVideoThreadArguments *)arg;
+
+    // Extract individual arguments
+    struct arguments *arguments = thread_args->arguments;
+    enum AVHWDeviceType hw_device_type = thread_args->hw_device_type;
+    struct FilterConfig *filter_config = thread_args->filter_config;
+    struct EncoderConfig *encoder_config = thread_args->encoder_config;
+    struct ProcessingStatus *status = thread_args->status;
+
+    // Call the process_video function
+    int result = process_video(
+        arguments->input_filename,
+        arguments->output_filename,
+        arguments->benchmark,
+        hw_device_type,
+        filter_config,
+        encoder_config,
+        status
+    );
+
+    status->completed = true;
+    return result;
+}
+
 int main(int argc, char **argv) {
     // Print help if no arguments are provided
     if (argc < 2) {
@@ -348,25 +383,52 @@ int main(int argc, char **argv) {
     }
 
     // Setup struct to store processing status
-    struct ProcessingStatus status = {0};
+    struct ProcessingStatus status = {
+        .processed_frames = 0, .total_frames = 0, .start_time = time(NULL), .completed = false
+    };
 
-    // Process the video
-    if (process_video(
-            arguments.input_filename,
-            arguments.output_filename,
-            arguments.benchmark,
-            hw_device_type,
-            &filter_config,
-            &encoder_config,
-            &status
-        )) {
-        fprintf(stderr, "Video processing failed\n");
+    // Create a ThreadArguments struct to hold all the arguments for the thread
+    struct ProcessVideoThreadArguments thread_args = {
+        .arguments = &arguments,
+        .hw_device_type = hw_device_type,
+        .filter_config = &filter_config,
+        .encoder_config = &encoder_config,
+        .status = &status
+    };
+
+    // Create a thread for video processing
+    thrd_t processing_thread;
+    if (thrd_create(&processing_thread, process_video_thread, &thread_args) != thrd_success) {
+        fprintf(stderr, "Failed to create processing thread\n");
         return 1;
+    }
+
+    // Main thread loop to display progress
+    while (!status.completed) {
+        printf(
+            "\r[Video2X] Processing frame %ld/%ld (%.2f%%); time elapsed: %lds",
+            atomic_load(&status.processed_frames),
+            status.total_frames,
+            status.processed_frames * 100.0 / status.total_frames,
+            time(NULL) - status.start_time
+        );
+        fflush(stdout);
+        thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 100000000}, NULL);
+    }
+    puts("");  // Print newline after progress bar is complete
+
+    // Join the processing thread to ensure it completes before exiting
+    int process_result;
+    thrd_join(processing_thread, &process_result);
+
+    if (process_result != 0) {
+        fprintf(stderr, "Video processing failed\n");
+        return process_result;
     }
 
     // Calculate statistics
     time_t time_elapsed = time(NULL) - status.start_time;
-    float speed_fps = (float)status.processed_frames / time_elapsed;
+    float average_speed_fps = (float)atomic_load(&status.processed_frames) / time_elapsed;
 
     // Print processing summary
     if (arguments.benchmark) {
@@ -374,7 +436,7 @@ int main(int argc, char **argv) {
         printf("Video file processed: %s\n", arguments.input_filename);
         printf("Total frames processed: %ld\n", status.processed_frames);
         printf("Total time taken: %lds\n", time_elapsed);
-        printf("Average processing speed: %.2f FPS\n", speed_fps);
+        printf("Average processing speed: %.2f FPS\n", average_speed_fps);
         return 0;
     }
 
@@ -382,7 +444,7 @@ int main(int argc, char **argv) {
     printf("Video file processed: %s\n", arguments.input_filename);
     printf("Total frames processed: %ld\n", status.processed_frames);
     printf("Total time taken: %lds\n", time_elapsed);
-    printf("Average processing speed: %.2f FPS\n", speed_fps);
+    printf("Average processing speed: %.2f FPS\n", average_speed_fps);
     printf("Output written to: %s\n", arguments.output_filename);
     return 0;
 }
