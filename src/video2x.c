@@ -42,14 +42,16 @@ void set_nonblocking_input(bool enable) {
 
 // Define command line options
 static struct option long_options[] = {
+    {"version", no_argument, NULL, 'v'},
+    {"help", no_argument, NULL, 0},
+
     // General options
     {"input", required_argument, NULL, 'i'},
     {"output", required_argument, NULL, 'o'},
     {"filter", required_argument, NULL, 'f'},
     {"hwaccel", required_argument, NULL, 'a'},
+    {"nocopystreams", no_argument, NULL, 0},
     {"benchmark", no_argument, NULL, 0},
-    {"version", no_argument, NULL, 'v'},
-    {"help", no_argument, NULL, 0},
 
     // Encoder options
     {"codec", required_argument, NULL, 'c'},
@@ -77,6 +79,7 @@ struct arguments {
     const char *output_filename;
     const char *filter_type;
     const char *hwaccel;
+    bool nocopystreams;
     bool benchmark;
 
     // Encoder options
@@ -125,14 +128,16 @@ int is_valid_realesrgan_model(const char *model) {
 
 void print_help() {
     printf("Usage: video2x [OPTIONS]\n");
-    printf("\nGeneral Options:\n");
+    printf("\nOptions:\n");
+    printf("  -v, --version		Print program version\n");
+    printf("  -?, --help		Display this help page\n");
+    printf("\nGeneral Processing Options:\n");
     printf("  -i, --input		Input video file path\n");
     printf("  -o, --output		Output video file path\n");
     printf("  -f, --filter		Filter to use: 'libplacebo' or 'realesrgan'\n");
     printf("  -a, --hwaccel		Hardware acceleration method (default: none)\n");
+    printf("  --nocopystreams	Do not copy audio and subtitle streams\n");
     printf("  --benchmark		Discard processed frames and calculate average FPS\n");
-    printf("  -v, --version		Print program version\n");
-    printf("  -?, --help		Display this help page\n");
 
     printf("\nEncoder Options (Optional):\n");
     printf("  -c, --codec		Output codec (default: libx264)\n");
@@ -151,7 +156,7 @@ void print_help() {
     printf("  -m, --model		Name of the model to use\n");
     printf("  -r, --scale		Scaling factor (2, 3, or 4)\n");
 
-    printf("\nExamples:\n");
+    printf("\nExamples Usage:\n");
     printf("  video2x -i in.mp4 -o out.mp4 -f libplacebo -s anime4k-mode-a -w 3840 -h 2160\n");
     printf("  video2x -i in.mp4 -o out.mp4 -f realesrgan -m realesr-animevideov3 -r 4\n");
 }
@@ -165,6 +170,7 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     arguments->output_filename = NULL;
     arguments->filter_type = NULL;
     arguments->hwaccel = "none";
+    arguments->nocopystreams = false;
     arguments->benchmark = false;
 
     // Encoder options
@@ -269,6 +275,8 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                 if (strcmp(long_options[option_index].name, "help") == 0) {
                     print_help();
                     exit(0);
+                } else if (strcmp(long_options[option_index].name, "nocopystreams") == 0) {
+                    arguments->nocopystreams = true;
                 } else if (strcmp(long_options[option_index].name, "benchmark") == 0) {
                     arguments->benchmark = true;
                 }
@@ -391,6 +399,7 @@ int main(int argc, char **argv) {
     struct EncoderConfig encoder_config = {
         .output_width = 0,   // To be filled by libvideo2x
         .output_height = 0,  // To be filled by libvideo2x
+        .copy_streams = !arguments.nocopystreams,
         .codec = codec->id,
         .pix_fmt = pix_fmt,
         .preset = arguments.preset,

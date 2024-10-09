@@ -18,13 +18,17 @@ static enum AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder) {
 int init_encoder(
     AVBufferRef *hw_ctx,
     const char *output_filename,
+    AVFormatContext *ifmt_ctx,
     AVFormatContext **ofmt_ctx,
     AVCodecContext **enc_ctx,
     AVCodecContext *dec_ctx,
-    EncoderConfig *encoder_config
+    EncoderConfig *encoder_config,
+    int video_stream_index,
+    int **stream_mapping
 ) {
     AVFormatContext *fmt_ctx = NULL;
     AVCodecContext *codec_ctx = NULL;
+    int stream_index = 0;
     int ret;
 
     avformat_alloc_output_context2(&fmt_ctx, NULL, NULL, output_filename);
@@ -33,16 +37,27 @@ int init_encoder(
         return AVERROR_UNKNOWN;
     }
 
-    // Create a new video stream
+    // Initialize the stream map
+    *stream_mapping = (int *)av_malloc_array(ifmt_ctx->nb_streams, sizeof(**stream_mapping));
+    if (!*stream_mapping) {
+        fprintf(stderr, "Could not allocate stream mapping\n");
+        return AVERROR(ENOMEM);
+    }
+
     const AVCodec *encoder = avcodec_find_encoder(encoder_config->codec);
     if (!encoder) {
-        fprintf(stderr, "Necessary encoder not found\n");
+        fprintf(
+            stderr,
+            "Required video encoder not found for vcodec %s\n",
+            avcodec_get_name(encoder_config->codec)
+        );
         return AVERROR_ENCODER_NOT_FOUND;
     }
 
+    // Create a new video stream in the output file
     AVStream *out_stream = avformat_new_stream(fmt_ctx, NULL);
     if (!out_stream) {
-        fprintf(stderr, "Failed allocating output stream\n");
+        fprintf(stderr, "Failed to allocate the output video stream\n");
         return AVERROR_UNKNOWN;
     }
 
@@ -79,7 +94,7 @@ int init_encoder(
     // Set the time base
     codec_ctx->time_base = av_inv_q(dec_ctx->framerate);
     if (codec_ctx->time_base.num == 0 || codec_ctx->time_base.den == 0) {
-        codec_ctx->time_base = av_inv_q(av_guess_frame_rate(fmt_ctx, out_stream, NULL));
+        codec_ctx->time_base = av_inv_q(av_guess_frame_rate(ifmt_ctx, out_stream, NULL));
     }
 
     // Set the CRF and preset for any codecs that support it
@@ -99,11 +114,49 @@ int init_encoder(
 
     ret = avcodec_parameters_from_context(out_stream->codecpar, codec_ctx);
     if (ret < 0) {
-        fprintf(stderr, "Failed to copy encoder parameters to output stream\n");
+        fprintf(stderr, "Failed to copy encoder parameters to output video stream\n");
         return ret;
     }
 
     out_stream->time_base = codec_ctx->time_base;
+
+    if (encoder_config->copy_streams) {
+        // Loop through each stream in the input file
+        for (int i = 0; i < ifmt_ctx->nb_streams; i++) {
+            AVStream *in_stream = ifmt_ctx->streams[i];
+            AVCodecParameters *in_codecpar = in_stream->codecpar;
+
+            if (i == video_stream_index) {
+                // Video stream is already handled
+                continue;
+            }
+
+            if (in_codecpar->codec_type != AVMEDIA_TYPE_AUDIO &&
+                in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE) {
+                (*stream_mapping)[i] = -1;
+                continue;
+            }
+
+            // Create corresponding output stream
+            AVStream *out_stream = avformat_new_stream(fmt_ctx, NULL);
+            if (!out_stream) {
+                fprintf(stderr, "Failed allocating output stream\n");
+                return AVERROR_UNKNOWN;
+            }
+
+            ret = avcodec_parameters_copy(out_stream->codecpar, in_codecpar);
+            if (ret < 0) {
+                fprintf(stderr, "Failed to copy codec parameters\n");
+                return ret;
+            }
+            out_stream->codecpar->codec_tag = 0;
+
+            // Copy time base
+            out_stream->time_base = in_stream->time_base;
+
+            (*stream_mapping)[i] = stream_index++;
+        }
+    }
 
     // Open the output file
     if (!(fmt_ctx->oformat->flags & AVFMT_NOFILE)) {
@@ -120,7 +173,12 @@ int init_encoder(
     return 0;
 }
 
-int encode_and_write_frame(AVFrame *frame, AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) {
+int encode_and_write_frame(
+    AVFrame *frame,
+    AVCodecContext *enc_ctx,
+    AVFormatContext *ofmt_ctx,
+    int video_stream_index
+) {
     int ret;
 
     // Convert the frame to the encoder's pixel format if needed
@@ -143,7 +201,7 @@ int encode_and_write_frame(AVFrame *frame, AVCodecContext *enc_ctx, AVFormatCont
 
     ret = avcodec_send_frame(enc_ctx, frame);
     if (ret < 0) {
-        fprintf(stderr, "Error sending frame to encoder\n");
+        fprintf(stderr, "Error sending frame to encoder: %s\n", av_err2str(ret));
         av_packet_free(&enc_pkt);
         return ret;
     }
@@ -154,20 +212,20 @@ int encode_and_write_frame(AVFrame *frame, AVCodecContext *enc_ctx, AVFormatCont
             av_packet_unref(enc_pkt);
             break;
         } else if (ret < 0) {
-            fprintf(stderr, "Error during encoding\n");
+            fprintf(stderr, "Error during encoding: %s\n", av_err2str(ret));
             av_packet_free(&enc_pkt);
             return ret;
         }
 
         // Rescale packet timestamps
         av_packet_rescale_ts(enc_pkt, enc_ctx->time_base, ofmt_ctx->streams[0]->time_base);
-        enc_pkt->stream_index = ofmt_ctx->streams[0]->index;
+        enc_pkt->stream_index = video_stream_index;
 
         // Write the packet
         ret = av_interleaved_write_frame(ofmt_ctx, enc_pkt);
         av_packet_unref(enc_pkt);
         if (ret < 0) {
-            fprintf(stderr, "Error muxing packet\n");
+            fprintf(stderr, "Error muxing packet: %s\n", av_err2str(ret));
             av_packet_free(&enc_pkt);
             return ret;
         }
@@ -192,7 +250,7 @@ int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) {
             av_packet_unref(enc_pkt);
             break;
         } else if (ret < 0) {
-            fprintf(stderr, "Error during encoding\n");
+            fprintf(stderr, "Error during encoding: %s\n", av_err2str(ret));
             av_packet_free(&enc_pkt);
             return ret;
         }
@@ -205,7 +263,7 @@ int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) {
         ret = av_interleaved_write_frame(ofmt_ctx, enc_pkt);
         av_packet_unref(enc_pkt);
         if (ret < 0) {
-            fprintf(stderr, "Error muxing packet\n");
+            fprintf(stderr, "Error muxing packet: %s\n", av_err2str(ret));
             av_packet_free(&enc_pkt);
             return ret;
         }

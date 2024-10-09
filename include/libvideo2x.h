@@ -56,6 +56,7 @@ struct FilterConfig {
 struct EncoderConfig {
     int output_width;
     int output_height;
+    bool copy_streams;
     enum AVCodecID codec;
     enum AVPixelFormat pix_fmt;
     const char *preset;

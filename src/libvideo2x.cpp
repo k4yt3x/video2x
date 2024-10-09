@@ -1,5 +1,6 @@
 #include "libvideo2x.h"
 
+#include <libavutil/mathematics.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +26,7 @@
  * @return int 0 on success, negative value on error
  */
 int process_frames(
+    EncoderConfig *encoder_config,
     VideoProcessingContext *proc_ctx,
     AVFormatContext *ifmt_ctx,
     AVFormatContext *ofmt_ctx,
@@ -32,6 +34,7 @@ int process_frames(
     AVCodecContext *enc_ctx,
     Filter *filter,
     int video_stream_index,
+    int *stream_mapping,
     bool benchmark = false
 ) {
     int ret;
@@ -104,7 +107,9 @@ int process_frames(
                 if (ret == 0 && processed_frame != nullptr) {
                     // Encode and write the processed frame
                     if (!benchmark) {
-                        ret = encode_and_write_frame(processed_frame, enc_ctx, ofmt_ctx);
+                        ret = encode_and_write_frame(
+                            processed_frame, enc_ctx, ofmt_ctx, video_stream_index
+                        );
                         if (ret < 0) {
                             av_strerror(ret, errbuf, sizeof(errbuf));
                             fprintf(stderr, "Error encoding/writing frame: %s\n", errbuf);
@@ -123,6 +128,28 @@ int process_frames(
                 av_frame_unref(frame);
                 // TODO: Print the debug processing status
             }
+        } else if (encoder_config->copy_streams && stream_mapping[packet.stream_index] >= 0) {
+            AVStream *in_stream = ifmt_ctx->streams[packet.stream_index];
+            int out_stream_index = stream_mapping[packet.stream_index];
+            AVStream *out_stream = ofmt_ctx->streams[out_stream_index];
+
+            // Rescale packet pts
+            packet.pts = av_rescale_q_rnd(
+                packet.pts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF
+            );
+
+            // Rescale packet dts
+            packet.dts = av_rescale_q_rnd(
+                packet.dts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF
+            );
+
+            // If copy streams is enabled, copy the packet to the output
+            ret = av_interleaved_write_frame(ofmt_ctx, &packet);
+            if (ret < 0) {
+                fprintf(stderr, "Error muxing packet: %s\n", av_err2str(ret));
+                av_packet_unref(&packet);
+                return ret;
+            }
         }
         av_packet_unref(&packet);
     }
@@ -137,7 +164,7 @@ int process_frames(
 
     // Encode and write all flushed frames
     for (AVFrame *&flushed_frame : flushed_frames) {
-        ret = encode_and_write_frame(flushed_frame, enc_ctx, ofmt_ctx);
+        ret = encode_and_write_frame(flushed_frame, enc_ctx, ofmt_ctx, video_stream_index);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             fprintf(stderr, "Error encoding/writing flushed frame: %s\n", errbuf);
@@ -175,6 +202,7 @@ void cleanup(
     AVCodecContext *dec_ctx,
     AVCodecContext *enc_ctx,
     AVBufferRef *hw_ctx,
+    int *stream_mapping,
     Filter *filter
 ) {
     if (ifmt_ctx) {
@@ -194,6 +222,9 @@ void cleanup(
     }
     if (hw_ctx) {
         av_buffer_unref(&hw_ctx);
+    }
+    if (stream_mapping) {
+        av_free(stream_mapping);
     }
     if (filter) {
         delete filter;
@@ -225,6 +256,7 @@ extern "C" int process_video(
     AVCodecContext *dec_ctx = nullptr;
     AVCodecContext *enc_ctx = nullptr;
     AVBufferRef *hw_ctx = nullptr;
+    int *stream_mapping = nullptr;
     Filter *filter = nullptr;
     int video_stream_index = -1;
     int ret = 0;
@@ -242,7 +274,7 @@ extern "C" int process_video(
     ret = init_decoder(hw_type, hw_ctx, input_filename, &ifmt_ctx, &dec_ctx, &video_stream_index);
     if (ret < 0) {
         fprintf(stderr, "Failed to initialize decoder\n");
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
         return ret;
     }
 
@@ -262,10 +294,20 @@ extern "C" int process_video(
     // Initialize output encoder
     encoder_config->output_width = output_width;
     encoder_config->output_height = output_height;
-    ret = init_encoder(hw_ctx, output_filename, &ofmt_ctx, &enc_ctx, dec_ctx, encoder_config);
+    ret = init_encoder(
+        hw_ctx,
+        output_filename,
+        ifmt_ctx,
+        &ofmt_ctx,
+        &enc_ctx,
+        dec_ctx,
+        encoder_config,
+        video_stream_index,
+        &stream_mapping
+    );
     if (ret < 0) {
         fprintf(stderr, "Failed to initialize encoder\n");
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
         return ret;
     }
 
@@ -273,7 +315,7 @@ extern "C" int process_video(
     ret = avformat_write_header(ofmt_ctx, NULL);
     if (ret < 0) {
         fprintf(stderr, "Error occurred when opening output file\n");
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
         return ret;
     }
 
@@ -285,14 +327,14 @@ extern "C" int process_video(
             // Validate shader path
             if (!config.shader_path) {
                 fprintf(stderr, "Shader path must be provided for the libplacebo filter\n");
-                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
                 return -1;
             }
 
             // Validate output dimensions
             if (config.output_width <= 0 || config.output_height <= 0) {
                 fprintf(stderr, "Output dimensions must be provided for the libplacebo filter\n");
-                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
                 return -1;
             }
 
@@ -307,14 +349,14 @@ extern "C" int process_video(
             // Validate model name
             if (!config.model) {
                 fprintf(stderr, "Model name must be provided for the RealESRGAN filter\n");
-                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
                 return -1;
             }
 
             // Validate scaling factor
             if (config.scaling_factor <= 0) {
                 fprintf(stderr, "Scaling factor must be provided for the RealESRGAN filter\n");
-                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
                 return -1;
             }
 
@@ -325,7 +367,7 @@ extern "C" int process_video(
         }
         default:
             fprintf(stderr, "Unknown filter type\n");
-            cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+            cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
             return -1;
     }
 
@@ -333,17 +375,26 @@ extern "C" int process_video(
     ret = filter->init(dec_ctx, enc_ctx, hw_ctx);
     if (ret < 0) {
         fprintf(stderr, "Failed to initialize filter\n");
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
         return ret;
     }
 
     // Process frames
     ret = process_frames(
-        proc_ctx, ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, filter, video_stream_index, benchmark
+        encoder_config,
+        proc_ctx,
+        ifmt_ctx,
+        ofmt_ctx,
+        dec_ctx,
+        enc_ctx,
+        filter,
+        video_stream_index,
+        stream_mapping,
+        benchmark
     );
     if (ret < 0) {
         fprintf(stderr, "Error processing frames\n");
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
         return ret;
     }
 
@@ -351,7 +402,7 @@ extern "C" int process_video(
     av_write_trailer(ofmt_ctx);
 
     // Cleanup before returning
-    cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, filter);
+    cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
 
     if (ret < 0 && ret != AVERROR_EOF) {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
