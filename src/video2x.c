@@ -3,6 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <threads.h>
+#include <time.h>
+
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <fcntl.h>
+#include <termios.h>
+#include <unistd.h>
+#endif
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/pixdesc.h>
@@ -13,6 +22,23 @@
 #include "getopt.h"
 
 const char *VIDEO2X_VERSION = "6.0.0";
+
+// Set UNIX terminal input to non-blocking mode
+#ifndef _WIN32
+void set_nonblocking_input(bool enable) {
+    static struct termios oldt, newt;
+    if (enable) {
+        tcgetattr(STDIN_FILENO, &oldt);
+        newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+        fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+    } else {
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        fcntl(STDIN_FILENO, F_SETFL, 0);
+    }
+}
+#endif
 
 // Define command line options
 static struct option long_options[] = {
@@ -76,7 +102,7 @@ struct ProcessVideoThreadArguments {
     enum AVHWDeviceType hw_device_type;
     struct FilterConfig *filter_config;
     struct EncoderConfig *encoder_config;
-    struct ProcessingStatus *status;
+    struct VideoProcessingContext *proc_ctx;
 };
 
 const char *valid_models[] = {
@@ -222,7 +248,8 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                 if (!is_valid_realesrgan_model(arguments->model)) {
                     fprintf(
                         stderr,
-                        "Error: Invalid model specified. Must be 'realesrgan-plus', 'realesrgan-plus-anime', or 'realesr-animevideov3'.\n"
+                        "Error: Invalid model specified. Must be 'realesrgan-plus', "
+                        "'realesrgan-plus-anime', or 'realesr-animevideov3'.\n"
                     );
                     exit(1);
                 }
@@ -273,7 +300,8 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
             arguments->output_height == 0) {
             fprintf(
                 stderr,
-                "Error: For libplacebo, shader name/path (-s), width (-w), and height (-e) are required.\n"
+                "Error: For libplacebo, shader name/path (-s), width (-w), "
+                "and height (-e) are required.\n"
             );
             exit(1);
         }
@@ -296,7 +324,7 @@ int process_video_thread(void *arg) {
     enum AVHWDeviceType hw_device_type = thread_args->hw_device_type;
     struct FilterConfig *filter_config = thread_args->filter_config;
     struct EncoderConfig *encoder_config = thread_args->encoder_config;
-    struct ProcessingStatus *status = thread_args->status;
+    struct VideoProcessingContext *proc_ctx = thread_args->proc_ctx;
 
     // Call the process_video function
     int result = process_video(
@@ -306,10 +334,10 @@ int process_video_thread(void *arg) {
         hw_device_type,
         filter_config,
         encoder_config,
-        status
+        proc_ctx
     );
 
-    status->completed = true;
+    proc_ctx->completed = true;
     return result;
 }
 
@@ -371,10 +399,8 @@ int main(int argc, char **argv) {
     };
 
     // Parse hardware acceleration method
-    enum AVHWDeviceType hw_device_type;
-    if (strcmp(arguments.hwaccel, "none") == 0) {
-        hw_device_type = AV_HWDEVICE_TYPE_NONE;
-    } else {
+    enum AVHWDeviceType hw_device_type = AV_HWDEVICE_TYPE_NONE;
+    if (strcmp(arguments.hwaccel, "none") != 0) {
         hw_device_type = av_hwdevice_find_type_by_name(arguments.hwaccel);
         if (hw_device_type == AV_HWDEVICE_TYPE_NONE) {
             fprintf(stderr, "Error: Invalid hardware device type '%s'.\n", arguments.hwaccel);
@@ -382,9 +408,14 @@ int main(int argc, char **argv) {
         }
     }
 
-    // Setup struct to store processing status
-    struct ProcessingStatus status = {
-        .processed_frames = 0, .total_frames = 0, .start_time = time(NULL), .completed = false
+    // Setup struct to store processing context
+    struct VideoProcessingContext proc_ctx = {
+        .processed_frames = 0,
+        .total_frames = 0,
+        .start_time = time(NULL),
+        .pause = false,
+        .abort = false,
+        .completed = false
     };
 
     // Create a ThreadArguments struct to hold all the arguments for the thread
@@ -393,8 +424,13 @@ int main(int argc, char **argv) {
         .hw_device_type = hw_device_type,
         .filter_config = &filter_config,
         .encoder_config = &encoder_config,
-        .status = &status
+        .proc_ctx = &proc_ctx
     };
+
+// Enable non-blocking input
+#ifndef _WIN32
+    set_nonblocking_input(true);
+#endif
 
     // Create a thread for video processing
     thrd_t processing_thread;
@@ -402,24 +438,72 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Failed to create processing thread\n");
         return 1;
     }
+    printf("[Video2X] Video processing started.\n");
+    printf("[Video2X] Press SPACE to pause/resume, 'q' to abort.\n");
 
-    // Main thread loop to display progress
-    while (!status.completed) {
-        printf(
-            "\r[Video2X] Processing frame %ld/%ld (%.2f%%); time elapsed: %lds",
-            status.processed_frames,
-            status.total_frames,
-            status.processed_frames * 100.0 / status.total_frames,
-            time(NULL) - status.start_time
-        );
-        fflush(stdout);
-        thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 100000000}, NULL);
+    // Main thread loop to display progress and handle input
+    while (!proc_ctx.completed) {
+        // Check for key presses
+        int ch = -1;
+
+        // Check for key press
+#ifdef _WIN32
+        if (_kbhit()) {
+            ch = _getch();
+        }
+#else
+        ch = getchar();
+#endif
+
+        if (ch == ' ' || ch == '\n') {
+            // Toggle pause state
+            proc_ctx.pause = !proc_ctx.pause;
+            if (proc_ctx.pause) {
+                printf("\n[Video2X] Processing paused. Press SPACE to resume, 'q' to abort.");
+            } else {
+                printf("\n[Video2X] Resuming processing...");
+            }
+            fflush(stdout);
+        } else if (ch == 'q' || ch == 'Q') {
+            // Abort processing
+            printf("\n[Video2X] Aborting processing...");
+            fflush(stdout);
+            proc_ctx.abort = true;
+            break;
+        }
+
+        // Display progress
+        if (!proc_ctx.pause && proc_ctx.total_frames > 0) {
+            printf(
+                "\r[Video2X] Processing frame %ld/%ld (%.2f%%); time elapsed: %lds",
+                proc_ctx.processed_frames,
+                proc_ctx.total_frames,
+                proc_ctx.total_frames > 0
+                    ? proc_ctx.processed_frames * 100.0 / proc_ctx.total_frames
+                    : 0.0,
+                time(NULL) - proc_ctx.start_time
+            );
+            fflush(stdout);
+        }
+
+        // Sleep for a short duration
+        thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 100000000}, NULL);  // Sleep for 100ms
     }
     puts("");  // Print newline after progress bar is complete
+
+// Restore terminal to blocking mode
+#ifndef _WIN32
+    set_nonblocking_input(false);
+#endif
 
     // Join the processing thread to ensure it completes before exiting
     int process_result;
     thrd_join(processing_thread, &process_result);
+
+    if (proc_ctx.abort) {
+        fprintf(stderr, "Video processing aborted\n");
+        return 2;
+    }
 
     if (process_result != 0) {
         fprintf(stderr, "Video processing failed\n");
@@ -427,24 +511,21 @@ int main(int argc, char **argv) {
     }
 
     // Calculate statistics
-    time_t time_elapsed = time(NULL) - status.start_time;
-    float average_speed_fps = (float)status.processed_frames / time_elapsed;
+    time_t time_elapsed = time(NULL) - proc_ctx.start_time;
+    float average_speed_fps =
+        (float)proc_ctx.processed_frames / (time_elapsed > 0 ? time_elapsed : 1);
 
     // Print processing summary
-    if (arguments.benchmark) {
-        printf("====== Video2X Benchmark summary ======\n");
-        printf("Video file processed: %s\n", arguments.input_filename);
-        printf("Total frames processed: %ld\n", status.processed_frames);
-        printf("Total time taken: %lds\n", time_elapsed);
-        printf("Average processing speed: %.2f FPS\n", average_speed_fps);
-        return 0;
-    }
-
-    printf("====== Video2X Processing summary ======\n");
+    printf("====== Video2X %s summary ======\n", arguments.benchmark ? "Benchmark" : "Processing");
     printf("Video file processed: %s\n", arguments.input_filename);
-    printf("Total frames processed: %ld\n", status.processed_frames);
+    printf("Total frames processed: %ld\n", proc_ctx.processed_frames);
     printf("Total time taken: %lds\n", time_elapsed);
     printf("Average processing speed: %.2f FPS\n", average_speed_fps);
-    printf("Output written to: %s\n", arguments.output_filename);
+
+    // Print additional information if not in benchmark mode
+    if (!arguments.benchmark) {
+        printf("Output written to: %s\n", arguments.output_filename);
+    }
+
     return 0;
 }

@@ -63,11 +63,13 @@ struct EncoderConfig {
     float crf;
 };
 
-// Processing status
-struct ProcessingStatus {
+// Video processing context
+struct VideoProcessingContext {
     int64_t processed_frames;
     int64_t total_frames;
     time_t start_time;
+    bool pause;
+    bool abort;
     bool completed;
 };
 
@@ -79,7 +81,7 @@ LIBVIDEO2X_API int process_video(
     enum AVHWDeviceType hw_device_type,
     const struct FilterConfig *filter_config,
     struct EncoderConfig *encoder_config,
-    struct ProcessingStatus *status
+    struct VideoProcessingContext *proc_ctx
 );
 
 #ifdef __cplusplus

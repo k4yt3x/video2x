@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cstdint>
+#include <thread>
 
 #include "decoder.h"
 #include "encoder.h"
@@ -14,7 +15,7 @@
 /**
  * @brief Process frames using the selected filter.
  *
- * @param[in,out] status Struct containing the processing status
+ * @param[in,out] proc_ctx Struct containing the processing context
  * @param[in] fmt_ctx Input format context
  * @param[in] ofmt_ctx Output format context
  * @param[in] dec_ctx Decoder context
@@ -24,7 +25,7 @@
  * @return int 0 on success, negative value on error
  */
 int process_frames(
-    ProcessingStatus *status,
+    VideoProcessingContext *proc_ctx,
     AVFormatContext *ifmt_ctx,
     AVFormatContext *ofmt_ctx,
     AVCodecContext *dec_ctx,
@@ -40,20 +41,20 @@ int process_frames(
 
     // Get the total number of frames in the video
     AVStream *video_stream = ifmt_ctx->streams[video_stream_index];
-    status->total_frames = video_stream->nb_frames;
+    proc_ctx->total_frames = video_stream->nb_frames;
 
     // If nb_frames is not set, calculate total frames using duration and frame rate
-    if (status->total_frames == 0) {
+    if (proc_ctx->total_frames == 0) {
         int64_t duration = video_stream->duration;
         AVRational frame_rate = video_stream->avg_frame_rate;
         if (duration != AV_NOPTS_VALUE && frame_rate.num != 0 && frame_rate.den != 0) {
-            status->total_frames = duration * frame_rate.num / frame_rate.den;
+            proc_ctx->total_frames = duration * frame_rate.num / frame_rate.den;
         }
     }
 
     // Get start time
-    status->start_time = time(NULL);
-    if (status->start_time == -1) {
+    proc_ctx->start_time = time(NULL);
+    if (proc_ctx->start_time == -1) {
         perror("time");
     }
 
@@ -64,7 +65,7 @@ int process_frames(
     }
 
     // Read frames from the input file
-    while (1) {
+    while (!proc_ctx->abort) {
         ret = av_read_frame(ifmt_ctx, &packet);
         if (ret < 0) {
             break;  // End of file or error
@@ -81,7 +82,13 @@ int process_frames(
             }
 
             // Receive and process frames from the decoder
-            while (1) {
+            while (!proc_ctx->abort) {
+                // Check if the processing is paused
+                if (proc_ctx->pause) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    continue;
+                }
+
                 ret = avcodec_receive_frame(dec_ctx, frame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     break;
@@ -107,14 +114,13 @@ int process_frames(
                     }
 
                     av_frame_free(&processed_frame);
-                    status->processed_frames++;
+                    proc_ctx->processed_frames++;
                 } else if (ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
                     fprintf(stderr, "Filter returned an error\n");
                     goto end;
                 }
 
                 av_frame_unref(frame);
-
                 // TODO: Print the debug processing status
             }
         }
@@ -202,7 +208,7 @@ void cleanup(
  * @param[in] hw_type Hardware device type
  * @param[in] filter_config Filter configurations
  * @param[in] encoder_config Encoder configurations
- * @param[in,out] status Video processing status
+ * @param[in,out] proc_ctx Video processing context
  * @return int 0 on success, non-zero value on error
  */
 extern "C" int process_video(
@@ -212,7 +218,7 @@ extern "C" int process_video(
     AVHWDeviceType hw_type,
     const FilterConfig *filter_config,
     EncoderConfig *encoder_config,
-    ProcessingStatus *status
+    VideoProcessingContext *proc_ctx
 ) {
     AVFormatContext *ifmt_ctx = nullptr;
     AVFormatContext *ofmt_ctx = nullptr;
@@ -333,7 +339,7 @@ extern "C" int process_video(
 
     // Process frames
     ret = process_frames(
-        status, ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, filter, video_stream_index, benchmark
+        proc_ctx, ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, filter, video_stream_index, benchmark
     );
     if (ret < 0) {
         fprintf(stderr, "Error processing frames\n");
