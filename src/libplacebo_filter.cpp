@@ -1,21 +1,14 @@
-#include <cstdio>
+#include "libplacebo_filter.h"
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavfilter/buffersink.h>
-#include <libavfilter/buffersrc.h>
-#include <libavutil/buffer.h>
-}
+#include <cstdio>
 
 #include "fsutils.h"
 #include "libplacebo.h"
-#include "libplacebo_filter.h"
 
 LibplaceboFilter::LibplaceboFilter(int width, int height, const std::filesystem::path &shader_path)
     : filter_graph(nullptr),
       buffersrc_ctx(nullptr),
       buffersink_ctx(nullptr),
-      device_ctx(nullptr),
       output_width(width),
       output_height(height),
       shader_path(std::move(shader_path)) {}
@@ -29,17 +22,13 @@ LibplaceboFilter::~LibplaceboFilter() {
         avfilter_free(buffersink_ctx);
         buffersink_ctx = nullptr;
     }
-    if (device_ctx) {
-        av_buffer_unref(&device_ctx);
-        device_ctx = nullptr;
-    }
     if (filter_graph) {
         avfilter_graph_free(&filter_graph);
         filter_graph = nullptr;
     }
 }
 
-int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
+int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) {
     // Construct the shader path
     std::filesystem::path shader_full_path;
     if (filepath_is_readable(shader_path)) {
@@ -51,14 +40,20 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
             find_resource_file(std::filesystem::path("models") / (shader_path.string() + ".glsl"));
     }
 
+    // Check if the shader file exists
+    if (!std::filesystem::exists(shader_full_path)) {
+        fprintf(stderr, "libplacebo shader file not found: %s\n", shader_full_path.c_str());
+        return -1;
+    }
+
     // Save the output time base
     output_time_base = enc_ctx->time_base;
 
     return init_libplacebo(
+        hw_ctx,
         &filter_graph,
         &buffersrc_ctx,
         &buffersink_ctx,
-        &device_ctx,
         dec_ctx,
         output_width,
         output_height,
@@ -66,45 +61,39 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
     );
 }
 
-AVFrame *LibplaceboFilter::process_frame(AVFrame *input_frame) {
+int LibplaceboFilter::process_frame(AVFrame *input_frame, AVFrame **output_frame) {
     int ret;
 
     // Get the filtered frame
-    AVFrame *output_frame = av_frame_alloc();
-    if (output_frame == nullptr) {
+    *output_frame = av_frame_alloc();
+    if (*output_frame == nullptr) {
         fprintf(stderr, "Failed to allocate output frame\n");
-        return nullptr;
+        return -1;
     }
 
     // Feed the frame to the filter graph
     ret = av_buffersrc_add_frame(buffersrc_ctx, input_frame);
     if (ret < 0) {
         fprintf(stderr, "Error while feeding the filter graph\n");
-        return nullptr;
+        return ret;
     }
 
-    ret = av_buffersink_get_frame(buffersink_ctx, output_frame);
+    ret = av_buffersink_get_frame(buffersink_ctx, *output_frame);
     if (ret < 0) {
-        av_frame_free(&output_frame);
-        if (ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
-            char errbuf[AV_ERROR_MAX_STRING_SIZE];
-            av_strerror(ret, errbuf, sizeof(errbuf));
-            fprintf(stderr, "Error getting frame from filter graph: %s\n", errbuf);
-            return nullptr;
-        }
-        return (AVFrame *)-1;
+        av_frame_free(output_frame);
+        return ret;
     }
 
     // Rescale PTS to encoder's time base
-    output_frame->pts =
-        av_rescale_q(output_frame->pts, buffersink_ctx->inputs[0]->time_base, output_time_base);
+    (*output_frame)->pts =
+        av_rescale_q((*output_frame)->pts, buffersink_ctx->inputs[0]->time_base, output_time_base);
 
     // Return the processed frame to the caller
-    return output_frame;
+    return 0;
 }
 
 int LibplaceboFilter::flush(std::vector<AVFrame *> &processed_frames) {
-    int ret = av_buffersrc_add_frame(buffersrc_ctx, nullptr);  // Signal EOF to the filter graph
+    int ret = av_buffersrc_add_frame(buffersrc_ctx, nullptr);
     if (ret < 0) {
         fprintf(stderr, "Error while flushing filter graph\n");
         return ret;

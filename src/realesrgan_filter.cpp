@@ -1,18 +1,11 @@
+#include "realesrgan_filter.h"
+
 #include <cstdint>
 #include <cstdio>
-#include <filesystem>
 #include <string>
-
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavutil/avutil.h>
-#include <libavutil/imgutils.h>
-}
 
 #include "conversions.h"
 #include "fsutils.h"
-#include "realesrgan.h"
-#include "realesrgan_filter.h"
 
 RealesrganFilter::RealesrganFilter(
     int gpuid,
@@ -37,7 +30,7 @@ RealesrganFilter::~RealesrganFilter() {
     }
 }
 
-int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
+int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) {
     // Construct the model paths using std::filesystem
     std::filesystem::path model_param_path;
     std::filesystem::path model_bin_path;
@@ -61,6 +54,18 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
     // Get the full paths using a function that possibly modifies or validates the path
     std::filesystem::path model_param_full_path = find_resource_file(model_param_path);
     std::filesystem::path model_bin_full_path = find_resource_file(model_bin_path);
+
+    // Check if the model files exist
+    if (!std::filesystem::exists(model_param_full_path)) {
+        fprintf(
+            stderr, "RealESRGAN model param file not found: %s\n", model_param_full_path.c_str()
+        );
+        return -1;
+    }
+    if (!std::filesystem::exists(model_bin_full_path)) {
+        fprintf(stderr, "RealESRGAN model bin file not found: %s\n", model_bin_full_path.c_str());
+        return -1;
+    }
 
     // Create a new RealESRGAN instance
     realesrgan = new RealESRGAN(gpuid, tta_mode);
@@ -95,12 +100,14 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) {
     return 0;
 }
 
-AVFrame *RealesrganFilter::process_frame(AVFrame *input_frame) {
+int RealesrganFilter::process_frame(AVFrame *input_frame, AVFrame **output_frame) {
+    int ret;
+
     // Convert the input frame to RGB24
     ncnn::Mat input_mat = avframe_to_ncnn_mat(input_frame);
     if (input_mat.empty()) {
         fprintf(stderr, "Failed to convert AVFrame to ncnn::Mat\n");
-        return nullptr;
+        return -1;
     }
 
     // Allocate space for ouptut ncnn::Mat
@@ -108,19 +115,20 @@ AVFrame *RealesrganFilter::process_frame(AVFrame *input_frame) {
     int output_height = input_mat.h * realesrgan->scale;
     ncnn::Mat output_mat = ncnn::Mat(output_width, output_height, (size_t)3, 3);
 
-    if (realesrgan->process(input_mat, output_mat) != 0) {
+    ret = realesrgan->process(input_mat, output_mat);
+    if (ret != 0) {
         fprintf(stderr, "RealESRGAN processing failed\n");
-        return nullptr;
+        return ret;
     }
 
     // Convert ncnn::Mat to AVFrame
-    AVFrame *output_frame = ncnn_mat_to_avframe(output_mat, output_pix_fmt);
+    *output_frame = ncnn_mat_to_avframe(output_mat, output_pix_fmt);
 
     // Rescale PTS to encoder's time base
-    output_frame->pts = av_rescale_q(input_frame->pts, input_time_base, output_time_base);
+    (*output_frame)->pts = av_rescale_q(input_frame->pts, input_time_base, output_time_base);
 
     // Return the processed frame to the caller
-    return output_frame;
+    return ret;
 }
 
 int RealesrganFilter::flush(std::vector<AVFrame *> &processed_frames) {

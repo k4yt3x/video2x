@@ -3,7 +3,11 @@
 
 #include <filesystem>
 
-#include <libavutil/buffer.h>
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavfilter/buffersink.h>
+#include <libavfilter/buffersrc.h>
+}
 
 #include "filter.h"
 
@@ -13,7 +17,6 @@ class LibplaceboFilter : public Filter {
     AVFilterGraph *filter_graph;
     AVFilterContext *buffersrc_ctx;
     AVFilterContext *buffersink_ctx;
-    AVBufferRef *device_ctx;
     int output_width;
     int output_height;
     const std::filesystem::path shader_path;
@@ -27,10 +30,10 @@ class LibplaceboFilter : public Filter {
     virtual ~LibplaceboFilter();
 
     // Initializes the filter with decoder and encoder contexts
-    int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx) override;
+    int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) override;
 
     // Processes an input frame and returns the processed frame
-    AVFrame *process_frame(AVFrame *input_frame) override;
+    int process_frame(AVFrame *input_frame, AVFrame **output_frame) override;
 
     // Flushes any remaining frames
     int flush(std::vector<AVFrame *> &processed_frames) override;

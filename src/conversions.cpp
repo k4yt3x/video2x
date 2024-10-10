@@ -1,16 +1,6 @@
-#include <cstdio>
-
-// FFmpeg includes
-extern "C" {
-#include <libavutil/frame.h>
-#include <libavutil/imgutils.h>
-#include <libswscale/swscale.h>
-}
-
-// ncnn includes
-#include <mat.h>
-
 #include "conversions.h"
+
+#include <cstdio>
 
 // Convert AVFrame format
 AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt) {
@@ -77,10 +67,11 @@ ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame) {
         converted_frame = convert_avframe_pix_fmt(frame, AV_PIX_FMT_BGR24);
         if (!converted_frame) {
             fprintf(stderr, "Failed to convert AVFrame to BGR24.\n");
-            return ncnn::Mat();  // Return an empty ncnn::Mat on failure
+            return ncnn::Mat();
         }
     } else {
-        converted_frame = frame;  // If the frame is already in BGR24, use it directly
+        // If the frame is already in BGR24, use it directly
+        converted_frame = frame;
     }
 
     // Allocate a new ncnn::Mat and copy the data
@@ -146,10 +137,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
         return nullptr;
     }
 
-    // Copy data from ncnn::Mat to the BGR AVFrame
-    // mat.to_pixels(bgr_frame->data[0], ncnn::Mat::PIXEL_BGR);
-
-    // Manually copy the pixel data from ncnn::Mat to the BGR AVFrame
+    // Copy the pixel data from ncnn::Mat to the BGR AVFrame
     for (int y = 0; y < mat.h; y++) {
         uint8_t *dst_row = bgr_frame->data[0] + y * bgr_frame->linesize[0];
         const uint8_t *src_row = mat.row<const uint8_t>(y);

@@ -1,7 +1,10 @@
 #ifndef CONVERSIONS_H
 #define CONVERSIONS_H
 
-#include <libavutil/frame.h>
+extern "C" {
+#include <libswscale/swscale.h>
+}
+
 #include <mat.h>
 
 // Convert AVFrame to another pixel format
