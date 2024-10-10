@@ -133,15 +133,9 @@ int process_frames(
             int out_stream_index = stream_mapping[packet.stream_index];
             AVStream *out_stream = ofmt_ctx->streams[out_stream_index];
 
-            // Rescale packet pts
-            packet.pts = av_rescale_q_rnd(
-                packet.pts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF
-            );
-
-            // Rescale packet dts
-            packet.dts = av_rescale_q_rnd(
-                packet.dts, in_stream->time_base, out_stream->time_base, AV_ROUND_NEAR_INF
-            );
+            // Rescale packet timestamps
+            av_packet_rescale_ts(&packet, in_stream->time_base, out_stream->time_base);
+            packet.stream_index = out_stream_index;
 
             // If copy streams is enabled, copy the packet to the output
             ret = av_interleaved_write_frame(ofmt_ctx, &packet);

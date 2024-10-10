@@ -37,13 +37,6 @@ int init_encoder(
         return AVERROR_UNKNOWN;
     }
 
-    // Initialize the stream map
-    *stream_mapping = (int *)av_malloc_array(ifmt_ctx->nb_streams, sizeof(**stream_mapping));
-    if (!*stream_mapping) {
-        fprintf(stderr, "Could not allocate stream mapping\n");
-        return AVERROR(ENOMEM);
-    }
-
     const AVCodec *encoder = avcodec_find_encoder(encoder_config->codec);
     if (!encoder) {
         fprintf(
@@ -121,6 +114,16 @@ int init_encoder(
     out_stream->time_base = codec_ctx->time_base;
 
     if (encoder_config->copy_streams) {
+        // Allocate the stream map
+        *stream_mapping = (int *)av_malloc_array(ifmt_ctx->nb_streams, sizeof(**stream_mapping));
+        if (!*stream_mapping) {
+            fprintf(stderr, "Could not allocate stream mapping\n");
+            return AVERROR(ENOMEM);
+        }
+
+        // Map the video stream
+        (*stream_mapping)[video_stream_index] = stream_index++;
+
         // Loop through each stream in the input file
         for (int i = 0; i < ifmt_ctx->nb_streams; i++) {
             AVStream *in_stream = ifmt_ctx->streams[i];
@@ -218,7 +221,9 @@ int encode_and_write_frame(
         }
 
         // Rescale packet timestamps
-        av_packet_rescale_ts(enc_pkt, enc_ctx->time_base, ofmt_ctx->streams[0]->time_base);
+        av_packet_rescale_ts(
+            enc_pkt, enc_ctx->time_base, ofmt_ctx->streams[video_stream_index]->time_base
+        );
         enc_pkt->stream_index = video_stream_index;
 
         // Write the packet
