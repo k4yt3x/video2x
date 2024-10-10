@@ -8,6 +8,9 @@
    <img src="https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square"/>
 </p>
 
+> [!IMPORTANT]
+> Versions 4 and 5 have reached end-of-life (EOL) status. Due to limited development resources, issues related to any version earlier than 6 will no longer be addressed.
+
 ## 🌟 Version 6.0.0 Preview
 
 **[Direct download link for Windows](https://github.com/k4yt3x/video2x/releases/download/6.0.0-beta.2/video2x-qt6-windows-amd64.zip)**
