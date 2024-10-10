@@ -10,9 +10,13 @@
 
 ## 🌟 Version 6.0.0 Preview
 
+**[Direct download link for Windows](https://github.com/k4yt3x/video2x/releases/download/6.0.0-beta.2/video2x-qt6-windows-amd64.zip)**
+
+![6.0.0-beta-screenshot](https://github.com/user-attachments/assets/bde4e4e2-2f97-412f-8e34-848f384be720)
+
 Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 
-- actually works this time, with less pain;
+- actually works this time, with less pain (in comparison to 5.0.0 beta);
 - is blazing fast, thanks to the redesigned efficient pipeline and the speed of C/C++;
 - is cross-platform, available right now for both Windows and Linux;
 - provides much better output quality with Anime4K v4 and RealESRGAN;
@@ -23,12 +27,12 @@ Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 
 These are available for download now:
 
-- 6.0.0 beta CLI preview builds for Windows and Linux are on the [releases page](https://github.com/k4yt3x/video2x/releases).
+- **6.0.0 beta Qt6-based GUI for Windows** is on the [releases page](https://github.com/k4yt3x/video2x/releases).
+- **6.0.0 beta CLI preview builds for Windows and Linux** are on the [releases page](https://github.com/k4yt3x/video2x/releases).
   - You will need to install the dependencies and set `LD_LIBRARY_PATH` for the Linux build to work. Refer to the [PKGBUILD](PKGBUILD) file to see what needs to be installed.
   - Alternatively, you can build it from source. Take a look at the [Makefile](Makefile).
 - 6.0.0 beta AUR package for Arch Linux (`video2x-git`).
 - 6.0.0 beta [container image](https://github.com/k4yt3x/video2x/pkgs/container/video2x).
-- A GUI for 6.0.0 is in the making. More information about it will be available soon.
 - A new Colab will be made for 6.0.0 at a later time.
 
 There is still much to be done and optimize. Stay tuned for more updates. As for why the 5.0.0 branch was abandoned, here are some of the reasons:
@@ -44,7 +48,7 @@ Join our Telegram discussion group to ask any questions you have about Video2X, 
 
 ## [🪟 Download Windows Releases](https://github.com/k4yt3x/video2x/releases/tag/4.8.1)
 
-The latest Windows update is built based on version 4.8.1. GUI is not available for 6.0.0 yet, but is already under development. Go to the [GUI](https://github.com/k4yt3x/video2x/wiki/GUI) page to see the basic usages of the GUI. Try the [mirror](https://files.k4yt3x.com/Projects/Video2X/latest) if you can't download releases directly from GitHub.
+The latest Windows release build based on version 4.8.1. Go to the [GUI](https://github.com/k4yt3x/video2x/wiki/GUI) page to see the basic usages of the GUI. Try the [mirror](https://files.k4yt3x.com/Projects/Video2X/latest) if you can't download releases directly from GitHub.
 
 ## [📔 Google Colab](https://colab.research.google.com/drive/1gWEwcA9y57EsxwOjmLNmNMXPsafw0kGo)
 
@@ -95,7 +99,7 @@ Copyright (C) 2018-2024 K4YT3X and [contributors](https://github.com/k4yt3x/vide
 
 ![AGPLv3](https://www.gnu.org/graphics/agplv3-155x51.png)
 
-This project includes or depends on these following projects:
+This project (`libvideo2x`) includes or depends on these following projects:
 
 | Project                                                                       | License         |
 | ----------------------------------------------------------------------------- | --------------- |
