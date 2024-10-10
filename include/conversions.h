@@ -2,6 +2,7 @@
 #define CONVERSIONS_H
 
 extern "C" {
+#include <libavutil/frame.h>
 #include <libswscale/swscale.h>
 }
 
