@@ -13,7 +13,7 @@
 
 ## 🌟 Version 6.0.0 Preview
 
-**[Direct download link for Windows](https://github.com/k4yt3x/video2x/releases/download/6.0.0-beta.2/video2x-qt6-windows-amd64.zip)**
+**[Direct download link for Windows (Installer)](https://github.com/k4yt3x/video2x/releases/download/6.0.0-beta.2/video2x-qt6-windows-amd64-installer.exe)**
 
 ![6.0.0-beta-screenshot](https://github.com/user-attachments/assets/bde4e4e2-2f97-412f-8e34-848f384be720)
 
