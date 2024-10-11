@@ -237,7 +237,7 @@ target_compile_options(libvideo2x PRIVATE
 
 # Define the path to the built libresrgan-ncnn-vulkan library
 if(WIN32)
-    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/realesrgan-ncnn-vulkan.lib)
+    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.lib)
 else()
     set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
 endif()
@@ -317,7 +317,7 @@ install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x.h DESTINATION ${INSTALL_I
 # Platform-specific installation rules
 if(WIN32)
     # Install Windows-specific dependencies
-    install(FILES ${CMAKE_BINARY_DIR}/realesrgan_install/bin/realesrgan-ncnn-vulkan.dll
+    install(FILES ${CMAKE_BINARY_DIR}/realesrgan_install/bin/librealesrgan-ncnn-vulkan.dll
         DESTINATION ${INSTALL_BIN_DESTINATION}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_EXECUTE
