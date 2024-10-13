@@ -34,6 +34,13 @@ option(BUILD_VIDEO2X_CLI "Build the video2x executable" ON)
 option(USE_SYSTEM_SPDLOG "Use system spdlog library" ON)
 option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
 
+# Generate the version header file
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/libvideo2x/version.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h"
+  @ONLY
+)
+
 # Find the required packages
 set(ALL_INCLUDE_DIRS)
 set(ALL_LIBRARIES)
@@ -234,7 +241,9 @@ add_dependencies(libvideo2x realesrgan)
 # Include directories for the shared library
 target_include_directories(libvideo2x PRIVATE
     ${ALL_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/include/libvideo2x
     ${PROJECT_SOURCE_DIR}/third_party/libreal_esrgan_ncnn_vulkan/src
 )
 
@@ -272,6 +281,7 @@ if (BUILD_VIDEO2X_CLI)
     # Include directories for the executable
     target_include_directories(video2x PRIVATE
         ${ALL_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_BINARY_DIR}
         ${PROJECT_SOURCE_DIR}/include
     )
 

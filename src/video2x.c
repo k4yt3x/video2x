@@ -17,11 +17,10 @@
 #include <libavutil/pixdesc.h>
 #include <libavutil/pixfmt.h>
 
-#include <libvideo2x.h>
+#include <libvideo2x/libvideo2x.h>
+#include <libvideo2x/version.h>
 
 #include "getopt.h"
-
-const char *VIDEO2X_VERSION = "6.0.0";
 
 // Set UNIX terminal input to non-blocking mode
 #ifndef _WIN32
@@ -279,7 +278,7 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                 }
                 break;
             case 'v':
-                printf("Video2X v%s\n", VIDEO2X_VERSION);
+                printf("Video2X version %s\n", LIBVIDEO2X_VERSION_STRING);
                 exit(0);
             case 0:  // Long-only options without short equivalents
                 if (strcmp(long_options[option_index].name, "loglevel") == 0) {
