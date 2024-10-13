@@ -4,17 +4,20 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   setup:
     if: github.event.base_ref == 'refs/heads/master'
     name: Setup
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.get_tag.outputs.tag }}
+      version: ${{ steps.get_version.outputs.version }}
     steps:
-      - name: Get tag
-        id: get_tag
-        run: echo ::set-output name=tag::${GITHUB_REF/refs\/tags\//}
+      - name: Get version
+        id: get_version
+        run: echo version=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
 
   container:
     name: Build and upload container
@@ -32,7 +35,7 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
           dockerfile: Dockerfile
           image: video2x
-          tags: latest, ${{ needs.setup.outputs.tag }}
+          tags: latest, ${{ needs.setup.outputs.version }}
 
   create-release:
     name: Create release
@@ -45,11 +48,10 @@ jobs:
     steps:
       - name: Create release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.setup.outputs.tag }}
-          release_name: Video2X ${{ needs.setup.outputs.tag }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ needs.setup.outputs.version }}
+          release_name: Video2X ${{ needs.setup.outputs.version }}
           draft: true
           prerelease: false

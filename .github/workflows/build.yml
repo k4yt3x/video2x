@@ -6,6 +6,7 @@ on:
       - dev
   pull_request: {}
   workflow_dispatch: {}
+
 jobs:
   ubuntu:
     runs-on: ubuntu-latest
@@ -44,6 +45,7 @@ jobs:
         with:
           name: video2x-nightly-linux-amd64
           path: /tmp/install
+
   windows:
     runs-on: windows-latest
     steps:
