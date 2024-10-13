@@ -9,9 +9,7 @@ build:
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DUSE_SYSTEM_NCNN=ON \
-		-DUSE_SYSTEM_SPDLOG=ON
+		-DCMAKE_BUILD_TYPE=Release
 	cmake --build $(BINDIR) --config Release --parallel
 	cp $(BINDIR)/compile_commands.json .
 
@@ -46,8 +44,9 @@ debian:
 		libswscale-dev \
 		libvulkan-dev \
 		glslang-tools \
-		libomp-dev
-	cmake -B /tmp/build -S . \
+		libomp-dev \
+		libspdlog-dev
+	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
 		-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
 		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \
 		-DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \

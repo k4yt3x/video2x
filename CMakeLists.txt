@@ -31,8 +31,8 @@ endif()
 # Build options
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
 option(BUILD_VIDEO2X_CLI "Build the video2x executable" ON)
-option(USE_SYSTEM_SPDLOG "Use system spdlog library" OFF)
-option(USE_SYSTEM_NCNN "Use system ncnn library" OFF)
+option(USE_SYSTEM_SPDLOG "Use system spdlog library" ON)
+option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
 
 # Find the required packages
 set(ALL_INCLUDE_DIRS)
