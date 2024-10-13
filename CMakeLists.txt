@@ -298,12 +298,12 @@ endif()
 # Define the default installation directories
 if(WIN32)
     set(BIN_DESTINATION_DEFAULT ".")
-    set(INCLUDE_DESTINATION_DEFAULT "include")
+    set(INCLUDE_DESTINATION_DEFAULT "include/libvideo2x")
     set(LIB_DESTINATION_DEFAULT ".")
     set(MODEL_DESTINATION_DEFAULT ".")
 else()
     set(BIN_DESTINATION_DEFAULT "bin")
-    set(INCLUDE_DESTINATION_DEFAULT "include")
+    set(INCLUDE_DESTINATION_DEFAULT "include/libvideo2x")
     set(LIB_DESTINATION_DEFAULT "lib")
     set(MODEL_DESTINATION_DEFAULT "share/video2x")
 endif()
@@ -333,7 +333,9 @@ if(BUILD_VIDEO2X_CLI)
 endif()
 
 # Install the header file
-install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x.h DESTINATION ${INSTALL_INCLUDE_DESTINATION})
+install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x/libvideo2x.h
+    DESTINATION ${INSTALL_INCLUDE_DESTINATION}
+)
 
 # Platform-specific installation rules
 if(WIN32)
