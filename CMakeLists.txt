@@ -48,10 +48,11 @@ set(ALL_LIBRARIES)
 # spdlog
 if (USE_SYSTEM_SPDLOG)
     find_package(spdlog REQUIRED)
+    list(APPEND ALL_LIBRARIES spdlog::spdlog)
 else()
     add_subdirectory(third_party/spdlog)
+    list(APPEND ALL_LIBRARIES spdlog::spdlog_header_only)
 endif()
-list(APPEND ALL_LIBRARIES spdlog::spdlog)
 
 # Platform-specific dependencies
 if(WIN32)
