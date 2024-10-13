@@ -29,14 +29,14 @@ enum FilterType {
 };
 
 // Enum to specify log level
-enum LogLevel {
-    LOG_LEVEL_TRACE,
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_WARNING,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_CRITICAL,
-    LOG_LEVEL_OFF
+enum Libvideo2xLogLevel {
+    LIBVIDEO2X_LOG_LEVEL_TRACE,
+    LIBVIDEO2X_LOG_LEVEL_DEBUG,
+    LIBVIDEO2X_LOG_LEVEL_INFO,
+    LIBVIDEO2X_LOG_LEVEL_WARNING,
+    LIBVIDEO2X_LOG_LEVEL_ERROR,
+    LIBVIDEO2X_LOG_LEVEL_CRITICAL,
+    LIBVIDEO2X_LOG_LEVEL_OFF
 };
 
 // Configuration for Libplacebo filter
@@ -89,7 +89,7 @@ struct VideoProcessingContext {
 LIBVIDEO2X_API int process_video(
     const char *input_filename,
     const char *output_filename,
-    enum LogLevel log_level,
+    enum Libvideo2xLogLevel log_level,
     bool benchmark,
     enum AVHWDeviceType hw_device_type,
     const struct FilterConfig *filter_config,

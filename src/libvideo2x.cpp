@@ -248,7 +248,7 @@ void cleanup(
 extern "C" int process_video(
     const char *input_filename,
     const char *output_filename,
-    LogLevel log_level,
+    Libvideo2xLogLevel log_level,
     bool benchmark,
     AVHWDeviceType hw_type,
     const FilterConfig *filter_config,
@@ -268,31 +268,31 @@ extern "C" int process_video(
 
     // Set the log level for FFmpeg and spdlog (libvideo2x)
     switch (log_level) {
-        case LOG_LEVEL_TRACE:
+        case LIBVIDEO2X_LOG_LEVEL_TRACE:
             av_log_set_level(AV_LOG_TRACE);
             spdlog::set_level(spdlog::level::trace);
             break;
-        case LOG_LEVEL_DEBUG:
+        case LIBVIDEO2X_LOG_LEVEL_DEBUG:
             av_log_set_level(AV_LOG_DEBUG);
             spdlog::set_level(spdlog::level::debug);
             break;
-        case LOG_LEVEL_INFO:
+        case LIBVIDEO2X_LOG_LEVEL_INFO:
             av_log_set_level(AV_LOG_INFO);
             spdlog::set_level(spdlog::level::info);
             break;
-        case LOG_LEVEL_WARNING:
+        case LIBVIDEO2X_LOG_LEVEL_WARNING:
             av_log_set_level(AV_LOG_WARNING);
             spdlog::set_level(spdlog::level::warn);
             break;
-        case LOG_LEVEL_ERROR:
+        case LIBVIDEO2X_LOG_LEVEL_ERROR:
             av_log_set_level(AV_LOG_ERROR);
             spdlog::set_level(spdlog::level::err);
             break;
-        case LOG_LEVEL_CRITICAL:
+        case LIBVIDEO2X_LOG_LEVEL_CRITICAL:
             av_log_set_level(AV_LOG_FATAL);
             spdlog::set_level(spdlog::level::critical);
             break;
-        case LOG_LEVEL_OFF:
+        case LIBVIDEO2X_LOG_LEVEL_OFF:
             av_log_set_level(AV_LOG_QUIET);
             spdlog::set_level(spdlog::level::off);
             break;

@@ -336,24 +336,24 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     }
 }
 
-enum LogLevel parse_log_level(const char *level_name) {
+enum Libvideo2xLogLevel parse_log_level(const char *level_name) {
     if (strcmp(level_name, "trace") == 0) {
-        return LOG_LEVEL_TRACE;
+        return LIBVIDEO2X_LOG_LEVEL_TRACE;
     } else if (strcmp(level_name, "debug") == 0) {
-        return LOG_LEVEL_DEBUG;
+        return LIBVIDEO2X_LOG_LEVEL_DEBUG;
     } else if (strcmp(level_name, "info") == 0) {
-        return LOG_LEVEL_INFO;
+        return LIBVIDEO2X_LOG_LEVEL_INFO;
     } else if (strcmp(level_name, "warning") == 0) {
-        return LOG_LEVEL_WARNING;
+        return LIBVIDEO2X_LOG_LEVEL_WARNING;
     } else if (strcmp(level_name, "error") == 0) {
-        return LOG_LEVEL_ERROR;
+        return LIBVIDEO2X_LOG_LEVEL_ERROR;
     } else if (strcmp(level_name, "critical") == 0) {
-        return LOG_LEVEL_CRITICAL;
+        return LIBVIDEO2X_LOG_LEVEL_CRITICAL;
     } else if (strcmp(level_name, "off") == 0) {
-        return LOG_LEVEL_OFF;
+        return LIBVIDEO2X_LOG_LEVEL_OFF;
     } else {
         fprintf(stderr, "Warning: Invalid log level specified. Defaulting to 'info'.\n");
-        return LOG_LEVEL_INFO;
+        return LIBVIDEO2X_LOG_LEVEL_INFO;
     }
 }
 
@@ -362,7 +362,7 @@ int process_video_thread(void *arg) {
     struct ProcessVideoThreadArguments *thread_args = (struct ProcessVideoThreadArguments *)arg;
 
     // Extract individual arguments
-    enum LogLevel log_level = parse_log_level(thread_args->arguments->loglevel);
+    enum Libvideo2xLogLevel log_level = parse_log_level(thread_args->arguments->loglevel);
     struct arguments *arguments = thread_args->arguments;
     enum AVHWDeviceType hw_device_type = thread_args->hw_device_type;
     struct FilterConfig *filter_config = thread_args->filter_config;
