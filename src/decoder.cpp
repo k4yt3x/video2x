@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <spdlog/spdlog.h>
+
 static enum AVPixelFormat hw_pix_fmt = AV_PIX_FMT_NONE;
 
 // Callback function to choose the hardware-accelerated pixel format
@@ -13,7 +15,7 @@ static enum AVPixelFormat get_hw_format(AVCodecContext *ctx, const enum AVPixelF
             return *p;
         }
     }
-    fprintf(stderr, "Failed to get HW surface format.\n");
+    spdlog::error("Failed to get HW surface format.");
     return AV_PIX_FMT_NONE;
 }
 
@@ -30,19 +32,19 @@ int init_decoder(
     int ret;
 
     if ((ret = avformat_open_input(&ifmt_ctx, input_filename, NULL, NULL)) < 0) {
-        fprintf(stderr, "Could not open input file '%s'\n", input_filename);
+        spdlog::error("Could not open input file '{}'", input_filename);
         return ret;
     }
 
     if ((ret = avformat_find_stream_info(ifmt_ctx, NULL)) < 0) {
-        fprintf(stderr, "Failed to retrieve input stream information\n");
+        spdlog::error("Failed to retrieve input stream information");
         return ret;
     }
 
     // Find the first video stream
     ret = av_find_best_stream(ifmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
     if (ret < 0) {
-        fprintf(stderr, "Could not find video stream in the input, aborting\n");
+        spdlog::error("Could not find video stream in the input file");
         return ret;
     }
 
@@ -52,13 +54,15 @@ int init_decoder(
     // Set up the decoder
     const AVCodec *decoder = avcodec_find_decoder(video_stream->codecpar->codec_id);
     if (!decoder) {
-        fprintf(stderr, "Failed to find decoder for stream #%u\n", stream_index);
+        spdlog::error(
+            "Failed to find decoder for codec ID {}", (int)video_stream->codecpar->codec_id
+        );
         return AVERROR_DECODER_NOT_FOUND;
     }
 
     codec_ctx = avcodec_alloc_context3(decoder);
     if (!codec_ctx) {
-        fprintf(stderr, "Failed to allocate the decoder context\n");
+        spdlog::error("Failed to allocate the decoder context");
         return AVERROR(ENOMEM);
     }
 
@@ -71,9 +75,8 @@ int init_decoder(
         for (int i = 0;; i++) {
             const AVCodecHWConfig *config = avcodec_get_hw_config(decoder, i);
             if (config == nullptr) {
-                fprintf(
-                    stderr,
-                    "Decoder %s does not support device type %s.\n",
+                spdlog::error(
+                    "Decoder {} does not support device type {}.",
                     decoder->name,
                     av_hwdevice_get_type_name(hw_type)
                 );
@@ -90,7 +93,7 @@ int init_decoder(
     }
 
     if ((ret = avcodec_parameters_to_context(codec_ctx, video_stream->codecpar)) < 0) {
-        fprintf(stderr, "Failed to copy decoder parameters to input decoder context\n");
+        spdlog::error("Failed to copy decoder parameters to input decoder context");
         return ret;
     }
 
@@ -100,7 +103,7 @@ int init_decoder(
     codec_ctx->framerate = av_guess_frame_rate(ifmt_ctx, video_stream, NULL);
 
     if ((ret = avcodec_open2(codec_ctx, decoder, NULL)) < 0) {
-        fprintf(stderr, "Failed to open decoder for stream #%u\n", stream_index);
+        spdlog::error("Failed to open decoder for stream #{}", stream_index);
         return ret;
     }
 

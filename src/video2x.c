@@ -42,6 +42,8 @@ void set_nonblocking_input(bool enable) {
 
 // Define command line options
 static struct option long_options[] = {
+    {"loglevel", required_argument, NULL, 0},
+    {"noprogress", no_argument, NULL, 0},
     {"version", no_argument, NULL, 'v'},
     {"help", no_argument, NULL, 0},
 
@@ -75,6 +77,8 @@ static struct option long_options[] = {
 // Structure to hold parsed arguments
 struct arguments {
     // General options
+    const char *loglevel;
+    bool noprogress;
     const char *input_filename;
     const char *output_filename;
     const char *filter_type;
@@ -129,6 +133,10 @@ int is_valid_realesrgan_model(const char *model) {
 void print_help() {
     printf("Usage: video2x [OPTIONS]\n");
     printf("\nOptions:\n");
+    printf(
+        "  --loglevel		Set log level (trace, debug, info, warn, error, critical, none)\n"
+    );
+    printf("  --noprogress		Do not display the progress bar\n");
     printf("  -v, --version		Print program version\n");
     printf("  -?, --help		Display this help page\n");
     printf("\nGeneral Processing Options:\n");
@@ -166,6 +174,8 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     int c;
 
     // Default argument values
+    arguments->loglevel = "info";
+    arguments->noprogress = false;
     arguments->input_filename = NULL;
     arguments->output_filename = NULL;
     arguments->filter_type = NULL;
@@ -272,7 +282,11 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                 printf("Video2X v%s\n", VIDEO2X_VERSION);
                 exit(0);
             case 0:  // Long-only options without short equivalents
-                if (strcmp(long_options[option_index].name, "help") == 0) {
+                if (strcmp(long_options[option_index].name, "loglevel") == 0) {
+                    arguments->loglevel = optarg;
+                } else if (strcmp(long_options[option_index].name, "noprogress") == 0) {
+                    arguments->noprogress = true;
+                } else if (strcmp(long_options[option_index].name, "help") == 0) {
                     print_help();
                     exit(0);
                 } else if (strcmp(long_options[option_index].name, "nocopystreams") == 0) {
@@ -323,11 +337,33 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     }
 }
 
+enum LogLevel parse_log_level(const char *level_name) {
+    if (strcmp(level_name, "trace") == 0) {
+        return LOG_LEVEL_TRACE;
+    } else if (strcmp(level_name, "debug") == 0) {
+        return LOG_LEVEL_DEBUG;
+    } else if (strcmp(level_name, "info") == 0) {
+        return LOG_LEVEL_INFO;
+    } else if (strcmp(level_name, "warning") == 0) {
+        return LOG_LEVEL_WARNING;
+    } else if (strcmp(level_name, "error") == 0) {
+        return LOG_LEVEL_ERROR;
+    } else if (strcmp(level_name, "critical") == 0) {
+        return LOG_LEVEL_CRITICAL;
+    } else if (strcmp(level_name, "off") == 0) {
+        return LOG_LEVEL_OFF;
+    } else {
+        fprintf(stderr, "Warning: Invalid log level specified. Defaulting to 'info'.\n");
+        return LOG_LEVEL_INFO;
+    }
+}
+
 // Wrapper function for video processing thread
 int process_video_thread(void *arg) {
     struct ProcessVideoThreadArguments *thread_args = (struct ProcessVideoThreadArguments *)arg;
 
     // Extract individual arguments
+    enum LogLevel log_level = parse_log_level(thread_args->arguments->loglevel);
     struct arguments *arguments = thread_args->arguments;
     enum AVHWDeviceType hw_device_type = thread_args->hw_device_type;
     struct FilterConfig *filter_config = thread_args->filter_config;
@@ -338,6 +374,7 @@ int process_video_thread(void *arg) {
     int result = process_video(
         arguments->input_filename,
         arguments->output_filename,
+        log_level,
         arguments->benchmark,
         hw_device_type,
         filter_config,
@@ -436,19 +473,18 @@ int main(int argc, char **argv) {
         .proc_ctx = &proc_ctx
     };
 
-// Enable non-blocking input
-#ifndef _WIN32
-    set_nonblocking_input(true);
-#endif
-
     // Create a thread for video processing
     thrd_t processing_thread;
     if (thrd_create(&processing_thread, process_video_thread, &thread_args) != thrd_success) {
         fprintf(stderr, "Failed to create processing thread\n");
         return 1;
     }
-    printf("[Video2X] Video processing started.\n");
-    printf("[Video2X] Press SPACE to pause/resume, 'q' to abort.\n");
+    printf("Video processing started; press SPACE to pause/resume, 'q' to abort.\n");
+
+// Enable non-blocking input
+#ifndef _WIN32
+    set_nonblocking_input(true);
+#endif
 
     // Main thread loop to display progress and handle input
     while (!proc_ctx.completed) {
@@ -468,23 +504,21 @@ int main(int argc, char **argv) {
             // Toggle pause state
             proc_ctx.pause = !proc_ctx.pause;
             if (proc_ctx.pause) {
-                printf("\n[Video2X] Processing paused. Press SPACE to resume, 'q' to abort.");
+                printf("\nProcessing paused. Press SPACE to resume, 'q' to abort.\n");
             } else {
-                printf("\n[Video2X] Resuming processing...");
+                printf("Resuming processing...\n");
             }
-            fflush(stdout);
         } else if (ch == 'q' || ch == 'Q') {
             // Abort processing
-            printf("\n[Video2X] Aborting processing...");
-            fflush(stdout);
+            printf("Aborting processing...\n");
             proc_ctx.abort = true;
             break;
         }
 
         // Display progress
-        if (!proc_ctx.pause && proc_ctx.total_frames > 0) {
+        if (!arguments.noprogress && !proc_ctx.pause && proc_ctx.total_frames > 0) {
             printf(
-                "\r[Video2X] Processing frame %ld/%ld (%.2f%%); time elapsed: %lds",
+                "\rProcessing frame %ld/%ld (%.2f%%); time elapsed: %lds",
                 proc_ctx.processed_frames,
                 proc_ctx.total_frames,
                 proc_ctx.total_frames > 0
@@ -495,10 +529,9 @@ int main(int argc, char **argv) {
             fflush(stdout);
         }
 
-        // Sleep for a short duration
-        thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 100000000}, NULL);  // Sleep for 100ms
+        // Sleep for 50ms
+        thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 50000000}, NULL);
     }
-    puts("");  // Print newline after progress bar is complete
 
 // Restore terminal to blocking mode
 #ifndef _WIN32
@@ -508,6 +541,11 @@ int main(int argc, char **argv) {
     // Join the processing thread to ensure it completes before exiting
     int process_result;
     thrd_join(processing_thread, &process_result);
+
+    // Print a newline if progress bar was displayed
+    if (!arguments.noprogress && process_result == 0) {
+        puts("");
+    }
 
     if (proc_ctx.abort) {
         fprintf(stderr, "Video processing aborted\n");

@@ -9,7 +9,9 @@ build:
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
-		-DCMAKE_BUILD_TYPE=Release
+		-DCMAKE_BUILD_TYPE=Release \
+		-DUSE_SYSTEM_NCNN=ON \
+		-DUSE_SYSTEM_SPDLOG=ON
 	cmake --build $(BINDIR) --config Release --parallel
 	cp $(BINDIR)/compile_commands.json .
 
@@ -19,8 +21,7 @@ static:
 		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DBUILD_SHARED_LIBS=OFF \
-		-DUSE_SYSTEM_NCNN=OFF
+		-DBUILD_SHARED_LIBS=OFF
 	cmake --build $(BINDIR) --config Release --parallel
 	cp $(BINDIR)/compile_commands.json .
 
@@ -46,7 +47,7 @@ debian:
 		libvulkan-dev \
 		glslang-tools \
 		libomp-dev
-	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
+	cmake -B /tmp/build -S . \
 		-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
 		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \
 		-DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \

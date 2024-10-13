@@ -30,7 +30,8 @@ jobs:
             libswscale-dev \
             libvulkan-dev \
             glslang-tools \
-            libomp-dev
+            libomp-dev \
+            libspdlog-dev
       - name: Build Video2X
         run: |
           mkdir -p /tmp/build /tmp/install
@@ -75,7 +76,7 @@ jobs:
           Rename-Item -Path "third_party/ncnn-$ncnnVersion-windows-vs2022-shared" -NewName ncnn-shared
       - name: Build Video2X
         run: |
-          cmake -S . -B build -DUSE_SYSTEM_NCNN=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=build/video2x_install
+          cmake -S . -B build -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=build/video2x_install
           cmake --build build --config Debug --parallel --target install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

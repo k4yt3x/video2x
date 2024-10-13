@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <spdlog/spdlog.h>
+
 #include "fsutils.h"
 
 int init_libplacebo(
@@ -20,7 +22,7 @@ int init_libplacebo(
 
     AVFilterGraph *graph = avfilter_graph_alloc();
     if (!graph) {
-        fprintf(stderr, "Unable to create filter graph.\n");
+        spdlog::error("Unable to create filter graph.");
         return AVERROR(ENOMEM);
     }
 
@@ -30,7 +32,7 @@ int init_libplacebo(
         args,
         sizeof(args),
         "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:frame_rate=%d/%d:"
-        "pixel_aspect=%d/%d:colorspace=%d",
+        "pixel_aspect=%d/%d:colorspace=%d:range=%d",
         dec_ctx->width,
         dec_ctx->height,
         dec_ctx->pix_fmt,
@@ -40,12 +42,13 @@ int init_libplacebo(
         dec_ctx->framerate.den,
         dec_ctx->sample_aspect_ratio.num,
         dec_ctx->sample_aspect_ratio.den,
-        dec_ctx->colorspace
+        dec_ctx->colorspace,
+        dec_ctx->color_range
     );
 
     ret = avfilter_graph_create_filter(buffersrc_ctx, buffersrc, "in", args, NULL, graph);
     if (ret < 0) {
-        fprintf(stderr, "Cannot create buffer source\n");
+        spdlog::error("Cannot create buffer source.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -55,7 +58,7 @@ int init_libplacebo(
     // Create the libplacebo filter
     const AVFilter *libplacebo_filter = avfilter_get_by_name("libplacebo");
     if (!libplacebo_filter) {
-        fprintf(stderr, "Filter 'libplacebo' not found\n");
+        spdlog::error("Filter 'libplacebo' not found.");
         avfilter_graph_free(&graph);
         return AVERROR_FILTER_NOT_FOUND;
     }
@@ -84,7 +87,7 @@ int init_libplacebo(
         &libplacebo_ctx, libplacebo_filter, "libplacebo", filter_args, NULL, graph
     );
     if (ret < 0) {
-        fprintf(stderr, "Cannot create libplacebo filter\n");
+        spdlog::error("Cannot create libplacebo filter.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -97,7 +100,7 @@ int init_libplacebo(
     // Link buffersrc to libplacebo
     ret = avfilter_link(last_filter, 0, libplacebo_ctx, 0);
     if (ret < 0) {
-        fprintf(stderr, "Error connecting buffersrc to libplacebo filter\n");
+        spdlog::error("Error connecting buffersrc to libplacebo filter.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -108,7 +111,7 @@ int init_libplacebo(
     const AVFilter *buffersink = avfilter_get_by_name("buffersink");
     ret = avfilter_graph_create_filter(buffersink_ctx, buffersink, "out", NULL, NULL, graph);
     if (ret < 0) {
-        fprintf(stderr, "Cannot create buffer sink\n");
+        spdlog::error("Cannot create buffer sink.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -116,7 +119,7 @@ int init_libplacebo(
     // Link libplacebo to buffersink
     ret = avfilter_link(last_filter, 0, *buffersink_ctx, 0);
     if (ret < 0) {
-        fprintf(stderr, "Error connecting libplacebo filter to buffersink\n");
+        spdlog::error("Error connecting libplacebo filter to buffersink.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -124,7 +127,7 @@ int init_libplacebo(
     // Configure the filter graph
     ret = avfilter_graph_config(graph, NULL);
     if (ret < 0) {
-        fprintf(stderr, "Error configuring the filter graph\n");
+        spdlog::error("Error configuring the filter graph.");
         avfilter_graph_free(&graph);
         return ret;
     }

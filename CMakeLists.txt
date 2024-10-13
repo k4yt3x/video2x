@@ -30,12 +30,23 @@ endif()
 
 # Build options
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
-option(BUILD_VIDEO2X "Build the video2x executable" ON)
-option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
+option(BUILD_VIDEO2X_CLI "Build the video2x executable" ON)
+option(USE_SYSTEM_SPDLOG "Use system spdlog library" OFF)
+option(USE_SYSTEM_NCNN "Use system ncnn library" OFF)
 
+# Find the required packages
 set(ALL_INCLUDE_DIRS)
 set(ALL_LIBRARIES)
 
+# spdlog
+if (USE_SYSTEM_SPDLOG)
+    find_package(spdlog REQUIRED)
+else()
+    add_subdirectory(third_party/spdlog)
+endif()
+list(APPEND ALL_LIBRARIES spdlog::spdlog)
+
+# Platform-specific dependencies
 if(WIN32)
     # Define base paths for FFmpeg and ncnn
     set(FFMPEG_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ffmpeg-shared)
@@ -254,7 +265,7 @@ if(NOT WIN32)
 endif()
 
 # Create the executable 'video2x'
-if (BUILD_VIDEO2X)
+if (BUILD_VIDEO2X_CLI)
     add_executable(video2x src/video2x.c src/getopt.c)
     set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
 
@@ -306,8 +317,8 @@ install(TARGETS libvideo2x
 # Install model files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION ${INSTALL_MODEL_DESTINATION})
 
-# Install the executable if BUILD_VIDEO2X is enabled
-if(BUILD_VIDEO2X)
+# Install the executable if BUILD_VIDEO2X_CLI is enabled
+if(BUILD_VIDEO2X_CLI)
     install(TARGETS video2x RUNTIME DESTINATION ${INSTALL_BIN_DESTINATION})
 endif()
 

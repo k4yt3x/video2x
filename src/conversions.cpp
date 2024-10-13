@@ -2,11 +2,13 @@
 
 #include <cstdio>
 
+#include <spdlog/spdlog.h>
+
 // Convert AVFrame format
 AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt) {
     AVFrame *dst_frame = av_frame_alloc();
     if (dst_frame == nullptr) {
-        fprintf(stderr, "Failed to allocate destination AVFrame.\n");
+        spdlog::error("Failed to allocate destination AVFrame.");
         return nullptr;
     }
 
@@ -16,7 +18,7 @@ AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt) {
 
     // Allocate memory for the converted frame
     if (av_frame_get_buffer(dst_frame, 32) < 0) {
-        fprintf(stderr, "Failed to allocate memory for AVFrame.\n");
+        spdlog::error("Failed to allocate memory for AVFrame.");
         av_frame_free(&dst_frame);
         return nullptr;
     }
@@ -36,7 +38,7 @@ AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt) {
     );
 
     if (sws_ctx == nullptr) {
-        fprintf(stderr, "Failed to initialize swscale context.\n");
+        spdlog::error("Failed to initialize swscale context.");
         av_frame_free(&dst_frame);
         return nullptr;
     }
@@ -66,7 +68,7 @@ ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame) {
     if (frame->format != AV_PIX_FMT_BGR24) {
         converted_frame = convert_avframe_pix_fmt(frame, AV_PIX_FMT_BGR24);
         if (!converted_frame) {
-            fprintf(stderr, "Failed to convert AVFrame to BGR24.\n");
+            spdlog::error("Failed to convert AVFrame to BGR24.");
             return ncnn::Mat();
         }
     } else {
@@ -102,7 +104,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     // Step 1: Allocate a destination AVFrame for the specified pixel format
     AVFrame *dst_frame = av_frame_alloc();
     if (!dst_frame) {
-        fprintf(stderr, "Failed to allocate destination AVFrame.\n");
+        spdlog::error("Failed to allocate destination AVFrame.");
         return nullptr;
     }
 
@@ -112,7 +114,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
 
     // Allocate memory for the frame buffer
     if (av_frame_get_buffer(dst_frame, 32) < 0) {
-        fprintf(stderr, "Failed to allocate memory for destination AVFrame.\n");
+        spdlog::error("Failed to allocate memory for destination AVFrame.");
         av_frame_free(&dst_frame);
         return nullptr;
     }
@@ -120,7 +122,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     // Step 2: Convert ncnn::Mat to BGR AVFrame
     AVFrame *bgr_frame = av_frame_alloc();
     if (!bgr_frame) {
-        fprintf(stderr, "Failed to allocate intermediate BGR AVFrame.\n");
+        spdlog::error("Failed to allocate intermediate BGR AVFrame.");
         av_frame_free(&dst_frame);
         return nullptr;
     }
@@ -131,7 +133,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
 
     // Allocate memory for the intermediate BGR frame
     if (av_frame_get_buffer(bgr_frame, 32) < 0) {
-        fprintf(stderr, "Failed to allocate memory for BGR AVFrame.\n");
+        spdlog::error("Failed to allocate memory for BGR AVFrame.");
         av_frame_free(&dst_frame);
         av_frame_free(&bgr_frame);
         return nullptr;
@@ -159,7 +161,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     );
 
     if (sws_ctx == nullptr) {
-        fprintf(stderr, "Failed to initialize swscale context.\n");
+        spdlog::error("Failed to initialize swscale context.");
         av_frame_free(&bgr_frame);
         av_frame_free(&dst_frame);
         return nullptr;
@@ -181,7 +183,7 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     av_frame_free(&bgr_frame);
 
     if (ret != dst_frame->height) {
-        fprintf(stderr, "Failed to convert BGR AVFrame to destination pixel format.\n");
+        spdlog::error("Failed to convert BGR AVFrame to destination pixel format.");
         av_frame_free(&dst_frame);
         return nullptr;
     }

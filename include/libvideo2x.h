@@ -28,6 +28,17 @@ enum FilterType {
     FILTER_REALESRGAN
 };
 
+// Enum to specify log level
+enum LogLevel {
+    LOG_LEVEL_TRACE,
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_WARNING,
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_CRITICAL,
+    LOG_LEVEL_OFF
+};
+
 // Configuration for Libplacebo filter
 struct LibplaceboConfig {
     int output_width;
@@ -78,6 +89,7 @@ struct VideoProcessingContext {
 LIBVIDEO2X_API int process_video(
     const char *input_filename,
     const char *output_filename,
+    enum LogLevel log_level,
     bool benchmark,
     enum AVHWDeviceType hw_device_type,
     const struct FilterConfig *filter_config,

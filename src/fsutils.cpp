@@ -8,6 +8,8 @@
 #include <cstring>
 #endif
 
+#include <spdlog/spdlog.h>
+
 #if _WIN32
 std::filesystem::path get_executable_directory() {
     std::vector<wchar_t> filepath(MAX_PATH);
@@ -15,7 +17,7 @@ std::filesystem::path get_executable_directory() {
     // Get the executable path, expanding the buffer if necessary
     DWORD size = GetModuleFileNameW(NULL, filepath.data(), static_cast<DWORD>(filepath.size()));
     if (size == 0) {
-        fprintf(stderr, "Error getting executable path: %lu\n", GetLastError());
+        spdlog::error("Error getting executable path: {}", GetLastError());
         return std::filesystem::path();
     }
 
@@ -24,7 +26,7 @@ std::filesystem::path get_executable_directory() {
         filepath.resize(filepath.size() * 2);
         size = GetModuleFileNameW(NULL, filepath.data(), static_cast<DWORD>(filepath.size()));
         if (size == 0) {
-            fprintf(stderr, "Error getting executable path: %lu\n", GetLastError());
+            spdlog::error("Error getting executable path: {}", GetLastError());
             return std::filesystem::path();
         }
     }
@@ -39,7 +41,7 @@ std::filesystem::path get_executable_directory() {
     std::filesystem::path filepath = std::filesystem::read_symlink("/proc/self/exe", ec);
 
     if (ec) {
-        fprintf(stderr, "Error reading /proc/self/exe: %s\n", ec.message().c_str());
+        spdlog::error("Error reading /proc/self/exe: {}", ec.message());
         return std::filesystem::path();
     }
 
