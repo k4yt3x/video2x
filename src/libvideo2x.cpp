@@ -17,13 +17,16 @@
 /**
  * @brief Process frames using the selected filter.
  *
+ * @param[in] encoder_config Encoder configurations
  * @param[in,out] proc_ctx Struct containing the processing context
- * @param[in] fmt_ctx Input format context
+ * @param[in] ifmt_ctx Input format context
  * @param[in] ofmt_ctx Output format context
  * @param[in] dec_ctx Decoder context
  * @param[in] enc_ctx Encoder context
  * @param[in] filter Filter instance
  * @param[in] video_stream_index Index of the video stream in the input format context
+ * @param[in] stream_mapping Array mapping input stream indexes to output stream indexes
+ * @param[in] benchmark Flag to enable benchmarking mode
  * @return int 0 on success, negative value on error
  */
 int process_frames(
@@ -234,6 +237,8 @@ void cleanup(
  *
  * @param[in] input_filename Path to the input video file
  * @param[in] output_filename Path to the output video file
+ * @param[in] log_level Log level
+ * @param[in] benchmark Flag to enable benchmarking mode
  * @param[in] hw_type Hardware device type
  * @param[in] filter_config Filter configurations
  * @param[in] encoder_config Encoder configurations
