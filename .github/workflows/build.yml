@@ -30,12 +30,11 @@ jobs:
             libswscale-dev \
             libvulkan-dev \
             glslang-tools \
-            libomp-dev \
-            libspdlog-dev
+            libomp-dev
       - name: Build Video2X
         run: |
           mkdir -p /tmp/build /tmp/install
-          cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
+          cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF \
             -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/tmp/install \
             -DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \

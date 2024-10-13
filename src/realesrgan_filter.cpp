@@ -59,11 +59,11 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     // Check if the model files exist
     if (!std::filesystem::exists(model_param_full_path)) {
-        spdlog::error("RealESRGAN model param file not found: {}", model_param_full_path.c_str());
+        spdlog::error("RealESRGAN model param file not found: {}", model_param_full_path.string());
         return -1;
     }
     if (!std::filesystem::exists(model_bin_full_path)) {
-        spdlog::error("RealESRGAN model bin file not found: {}", model_bin_full_path.c_str());
+        spdlog::error("RealESRGAN model bin file not found: {}", model_bin_full_path.string());
         return -1;
     }
 
