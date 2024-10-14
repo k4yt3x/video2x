@@ -19,8 +19,7 @@ static:
 		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DBUILD_SHARED_LIBS=OFF \
-		-DUSE_SYSTEM_NCNN=OFF
+		-DBUILD_SHARED_LIBS=OFF
 	cmake --build $(BINDIR) --config Release --parallel
 	cp $(BINDIR)/compile_commands.json .
 
@@ -45,7 +44,8 @@ debian:
 		libswscale-dev \
 		libvulkan-dev \
 		glslang-tools \
-		libomp-dev
+		libomp-dev \
+		libspdlog-dev
 	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
 		-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
 		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \

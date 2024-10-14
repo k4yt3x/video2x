@@ -30,12 +30,31 @@ endif()
 
 # Build options
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
-option(BUILD_VIDEO2X "Build the video2x executable" ON)
+option(BUILD_VIDEO2X_CLI "Build the video2x executable" ON)
+option(USE_SYSTEM_SPDLOG "Use system spdlog library" ON)
 option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
 
+# Generate the version header file
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/libvideo2x/version.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h"
+  @ONLY
+)
+
+# Find the required packages
 set(ALL_INCLUDE_DIRS)
 set(ALL_LIBRARIES)
 
+# spdlog
+if (USE_SYSTEM_SPDLOG)
+    find_package(spdlog REQUIRED)
+    list(APPEND ALL_LIBRARIES spdlog::spdlog)
+else()
+    add_subdirectory(third_party/spdlog)
+    list(APPEND ALL_LIBRARIES spdlog::spdlog_header_only)
+endif()
+
+# Platform-specific dependencies
 if(WIN32)
     # Define base paths for FFmpeg and ncnn
     set(FFMPEG_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ffmpeg-shared)
@@ -223,7 +242,9 @@ add_dependencies(libvideo2x realesrgan)
 # Include directories for the shared library
 target_include_directories(libvideo2x PRIVATE
     ${ALL_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/include/libvideo2x
     ${PROJECT_SOURCE_DIR}/third_party/libreal_esrgan_ncnn_vulkan/src
 )
 
@@ -254,13 +275,14 @@ if(NOT WIN32)
 endif()
 
 # Create the executable 'video2x'
-if (BUILD_VIDEO2X)
+if (BUILD_VIDEO2X_CLI)
     add_executable(video2x src/video2x.c src/getopt.c)
     set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
 
     # Include directories for the executable
     target_include_directories(video2x PRIVATE
         ${ALL_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_BINARY_DIR}
         ${PROJECT_SOURCE_DIR}/include
     )
 
@@ -277,12 +299,12 @@ endif()
 # Define the default installation directories
 if(WIN32)
     set(BIN_DESTINATION_DEFAULT ".")
-    set(INCLUDE_DESTINATION_DEFAULT "include")
+    set(INCLUDE_DESTINATION_DEFAULT "include/libvideo2x")
     set(LIB_DESTINATION_DEFAULT ".")
     set(MODEL_DESTINATION_DEFAULT ".")
 else()
     set(BIN_DESTINATION_DEFAULT "bin")
-    set(INCLUDE_DESTINATION_DEFAULT "include")
+    set(INCLUDE_DESTINATION_DEFAULT "include/libvideo2x")
     set(LIB_DESTINATION_DEFAULT "lib")
     set(MODEL_DESTINATION_DEFAULT "share/video2x")
 endif()
@@ -306,13 +328,18 @@ install(TARGETS libvideo2x
 # Install model files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION ${INSTALL_MODEL_DESTINATION})
 
-# Install the executable if BUILD_VIDEO2X is enabled
-if(BUILD_VIDEO2X)
+# Install the executable if BUILD_VIDEO2X_CLI is enabled
+if(BUILD_VIDEO2X_CLI)
     install(TARGETS video2x RUNTIME DESTINATION ${INSTALL_BIN_DESTINATION})
 endif()
 
 # Install the header file
-install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x.h DESTINATION ${INSTALL_INCLUDE_DESTINATION})
+install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x/libvideo2x.h
+    DESTINATION ${INSTALL_INCLUDE_DESTINATION}
+)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
+    DESTINATION ${INSTALL_INCLUDE_DESTINATION}
+)
 
 # Platform-specific installation rules
 if(WIN32)

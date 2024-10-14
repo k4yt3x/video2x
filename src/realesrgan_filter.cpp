@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <string>
 
+#include <spdlog/spdlog.h>
+
 #include "conversions.h"
 #include "fsutils.h"
 
@@ -47,7 +49,7 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
         model_bin_path = custom_model_bin_path;
     } else {
         // Neither model name nor custom model paths provided
-        fprintf(stderr, "Model or model paths must be provided for RealESRGAN filter\n");
+        spdlog::error("Model or model paths must be provided for RealESRGAN filter");
         return -1;
     }
 
@@ -57,13 +59,11 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     // Check if the model files exist
     if (!std::filesystem::exists(model_param_full_path)) {
-        fprintf(
-            stderr, "RealESRGAN model param file not found: %s\n", model_param_full_path.c_str()
-        );
+        spdlog::error("RealESRGAN model param file not found: {}", model_param_full_path.string());
         return -1;
     }
     if (!std::filesystem::exists(model_bin_full_path)) {
-        fprintf(stderr, "RealESRGAN model bin file not found: %s\n", model_bin_full_path.c_str());
+        spdlog::error("RealESRGAN model bin file not found: {}", model_bin_full_path.string());
         return -1;
     }
 
@@ -77,7 +77,7 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     // Load the model
     if (realesrgan->load(model_param_full_path, model_bin_full_path) != 0) {
-        fprintf(stderr, "Failed to load RealESRGAN model\n");
+        spdlog::error("Failed to load RealESRGAN model");
         return -1;
     }
 
@@ -106,7 +106,7 @@ int RealesrganFilter::process_frame(AVFrame *input_frame, AVFrame **output_frame
     // Convert the input frame to RGB24
     ncnn::Mat input_mat = avframe_to_ncnn_mat(input_frame);
     if (input_mat.empty()) {
-        fprintf(stderr, "Failed to convert AVFrame to ncnn::Mat\n");
+        spdlog::error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
     }
 
@@ -117,7 +117,7 @@ int RealesrganFilter::process_frame(AVFrame *input_frame, AVFrame **output_frame
 
     ret = realesrgan->process(input_mat, output_mat);
     if (ret != 0) {
-        fprintf(stderr, "RealESRGAN processing failed\n");
+        spdlog::error("RealESRGAN processing failed");
         return ret;
     }
 

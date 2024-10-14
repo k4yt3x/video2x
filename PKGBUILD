@@ -1,12 +1,12 @@
 pkgname=video2x
-pkgver=r862.f590ead
+pkgver=r840.ecbc512
 pkgrel=1
-pkgdesc="A lossless video super resolution framework"
+pkgdesc="A machine learning-based lossless video super resolution framework"
 arch=('x86_64')
 url="https://github.com/k4yt3x/video2x"
 license=('AGPL3')
 depends=('ffmpeg' 'ncnn' 'vulkan-driver')
-makedepends=('git' 'cmake' 'make' 'clang' 'pkgconf' 'vulkan-headers' 'openmp')
+makedepends=('git' 'cmake' 'make' 'clang' 'pkgconf' 'vulkan-headers' 'openmp' 'spdlog')
 
 pkgver() {
     printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
