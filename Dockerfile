@@ -35,7 +35,7 @@ ENV VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json\
 
 COPY --from=builder /tmp/video2x.pkg.tar.zst /video2x.pkg.tar.zst
 RUN pacman -Sy --noconfirm ffmpeg ncnn \
-        nvidia-utils vulkan-radeon vulkan-intel vulkan-swrast \
+        nvidia-utils vulkan-radeon vulkan-intel vulkan-swrast spdlog \
     && pacman -U --noconfirm /video2x.pkg.tar.zst \
     && rm -rf /video2x.pkg.tar.zst /var/cache/pacman/pkg/*
 
