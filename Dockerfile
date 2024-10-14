@@ -1,14 +1,14 @@
 # Name: Video2X Dockerfile
 # Creator: K4YT3X
 # Date Created: February 3, 2022
-# Last Modified: October 7, 2024
+# Last Modified: October 14, 2024
 
 # stage 1: build the python components into wheels
 FROM docker.io/archlinux:latest AS builder
 
 # Install dependencies and create a non-root user
 RUN pacman -Syy --noconfirm \
-        base-devel ffmpeg ncnn git cmake make clang pkgconf vulkan-headers openmp sudo \
+        base-devel ffmpeg ncnn git cmake make clang pkgconf vulkan-headers openmp spdlog sudo \
         nvidia-utils vulkan-radeon vulkan-intel vulkan-swrast \
     && useradd -m builder \
     && echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
@@ -34,7 +34,7 @@ ENV VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json\
 :/usr/share/vulkan/icd.d/intel_icd.x86_64.json
 
 COPY --from=builder /tmp/video2x.pkg.tar.zst /video2x.pkg.tar.zst
-RUN pacman -Sy --noconfirm ffmpeg ncnn \
+RUN pacman -Sy --noconfirm ffmpeg ncnn spdlog \
         nvidia-utils vulkan-radeon vulkan-intel vulkan-swrast \
     && pacman -U --noconfirm /video2x.pkg.tar.zst \
     && rm -rf /video2x.pkg.tar.zst /var/cache/pacman/pkg/*
