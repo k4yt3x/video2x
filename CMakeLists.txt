@@ -337,6 +337,9 @@ endif()
 install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x/libvideo2x.h
     DESTINATION ${INSTALL_INCLUDE_DESTINATION}
 )
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
+    DESTINATION ${INSTALL_INCLUDE_DESTINATION}
+)
 
 # Platform-specific installation rules
 if(WIN32)
