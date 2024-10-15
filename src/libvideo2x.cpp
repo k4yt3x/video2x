@@ -7,6 +7,7 @@
 #include <thread>
 
 #include <spdlog/spdlog.h>
+#include <opencv2/videoio.hpp>
 
 #include "decoder.h"
 #include "encoder.h"
@@ -50,13 +51,33 @@ int process_frames(
     AVStream *video_stream = ifmt_ctx->streams[video_stream_index];
     proc_ctx->total_frames = video_stream->nb_frames;
 
-    // If nb_frames is not set, calculate total frames using duration and frame rate
+    // If nb_frames is not set, estimate total frames using duration and frame rate
     if (proc_ctx->total_frames == 0) {
+        spdlog::debug("`nb_frames` is not set; estimating total frames with duration*framerate");
         int64_t duration = video_stream->duration;
         AVRational frame_rate = video_stream->avg_frame_rate;
         if (duration != AV_NOPTS_VALUE && frame_rate.num != 0 && frame_rate.den != 0) {
             proc_ctx->total_frames = duration * frame_rate.num / frame_rate.den;
         }
+    }
+
+    // If total_frames is still 0, read the total number of frames with OpenCV
+    if (proc_ctx->total_frames == 0) {
+        spdlog::debug("Unable to estimate total number of frames; reading with OpenCV");
+        cv::VideoCapture cap(ifmt_ctx->url);
+        if (!cap.isOpened()) {
+            spdlog::error("Failed to open video file with OpenCV");
+            return -1;
+        }
+        proc_ctx->total_frames = cap.get(cv::CAP_PROP_FRAME_COUNT);
+        cap.release();
+    }
+
+    // Check if the total number of frames is still 0
+    if (proc_ctx->total_frames == 0) {
+        spdlog::warn("Unable to determine total number of frames");
+    } else {
+        spdlog::debug("{} frames to process", proc_ctx->total_frames);
     }
 
     // Get start time
@@ -75,7 +96,13 @@ int process_frames(
     while (!proc_ctx->abort) {
         ret = av_read_frame(ifmt_ctx, &packet);
         if (ret < 0) {
-            break;  // End of file or error
+            if (ret == AVERROR_EOF) {
+                spdlog::debug("Reached end of file");
+                break;
+            }
+            av_strerror(ret, errbuf, sizeof(errbuf));
+            spdlog::error("Error reading packet: {}", errbuf);
+            goto end;
         }
 
         if (packet.stream_index == video_stream_index) {
@@ -98,6 +125,7 @@ int process_frames(
 
                 ret = avcodec_receive_frame(dec_ctx, frame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                    spdlog::debug("Frame not ready");
                     break;
                 } else if (ret < 0) {
                     av_strerror(ret, errbuf, sizeof(errbuf));
@@ -333,6 +361,7 @@ extern "C" int process_video(
             output_width = dec_ctx->width * filter_config->config.realesrgan.scaling_factor;
             output_height = dec_ctx->height * filter_config->config.realesrgan.scaling_factor;
     }
+    spdlog::info("Output video dimensions: {}x{}", output_width, output_height);
 
     // Initialize output encoder
     encoder_config->output_width = output_width;

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(video2x VERSION 6.0.0 LANGUAGES CXX C)
+project(video2x VERSION 6.0.0 LANGUAGES C CXX)
 
 # Set the C standard
 set(CMAKE_C_STANDARD 11)
@@ -32,6 +32,7 @@ endif()
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
 option(BUILD_VIDEO2X_CLI "Build the video2x executable" ON)
 option(USE_SYSTEM_SPDLOG "Use system spdlog library" ON)
+option(USE_SYSTEM_OPENCV "Use system OpenCV library" ON)
 option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
 
 # Generate the version header file
@@ -48,6 +49,7 @@ set(ALL_LIBRARIES)
 # spdlog
 if (USE_SYSTEM_SPDLOG)
     find_package(spdlog REQUIRED)
+    list(APPEND ALL_INCLUDE_DIRS ${spdlog_INCLUDE_DIRS})
     list(APPEND ALL_LIBRARIES spdlog::spdlog)
 else()
     add_subdirectory(third_party/spdlog)
@@ -104,10 +106,6 @@ else()
         list(APPEND ALL_LIBRARIES ${${PKG}_LIBRARIES})
     endforeach()
 endif()
-
-# Remove duplicate entries
-list(REMOVE_DUPLICATES ALL_INCLUDE_DIRS)
-list(REMOVE_DUPLICATES ALL_LIBRARIES)
 
 # Find ncnn package
 if(USE_SYSTEM_NCNN)
@@ -208,6 +206,55 @@ else()
     add_subdirectory(third_party/ncnn)
 endif()
 
+# OpenCV
+if (USE_SYSTEM_OPENCV)
+    find_package(OpenCV REQUIRED)
+    list(APPEND ALL_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS}/opencv2)
+    list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
+else()
+    option(BUILD_opencv_calib3d "" OFF)
+    option(BUILD_opencv_core "" ON)
+    option(BUILD_opencv_dnn "" OFF)
+    option(BUILD_opencv_features2d "" OFF)
+    option(BUILD_opencv_flann "" OFF)
+    option(BUILD_opencv_gapi "" OFF)
+    option(BUILD_opencv_highgui "" OFF)
+    option(BUILD_opencv_imgcodecs "" OFF)
+    option(BUILD_opencv_imgproc "" OFF)
+    option(BUILD_opencv_java "" OFF)
+    option(BUILD_opencv_js "" OFF)
+    option(BUILD_opencv_ml "" OFF)
+    option(BUILD_opencv_objc "" OFF)
+    option(BUILD_opencv_objdetect "" OFF)
+    option(BUILD_opencv_photo "" OFF)
+    option(BUILD_opencv_python "" OFF)
+    option(BUILD_opencv_python2 "" OFF)
+    option(BUILD_opencv_python3 "" OFF)
+    option(BUILD_opencv_stitching "" OFF)
+    option(BUILD_opencv_ts "" OFF)
+    option(BUILD_opencv_video "" OFF)
+    option(BUILD_opencv_videoio "" ON)
+    option(BUILD_opencv_world "" OFF)
+
+    option(WITH_PNG "" OFF)
+    option(WITH_JPEG "" OFF)
+    option(WITH_TIFF "" OFF)
+    option(WITH_WEBP "" OFF)
+    option(WITH_OPENJPEG "" OFF)
+    option(WITH_JASPER "" OFF)
+    option(WITH_OPENEXR "" OFF)
+    option(WITH_IMGCODEC "" OFF)
+
+    add_subdirectory(third_party/opencv)
+    list(APPEND ALL_INCLUDE_DIRS
+        ${PROJECT_SOURCE_DIR}/third_party/opencv/include
+        ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/core/include
+        ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/videoio/include
+    )
+    list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
+endif()
+
+
 # Include ExternalProject module
 include(ExternalProject)
 
@@ -223,6 +270,10 @@ ExternalProject_Add(
     BUILD_ALWAYS ON
     INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
 )
+
+# Remove duplicate entries
+list(REMOVE_DUPLICATES ALL_INCLUDE_DIRS)
+list(REMOVE_DUPLICATES ALL_LIBRARIES)
 
 # Add all source files for libvideo2x
 file(GLOB LIBVIDEO2X_SOURCES src/*.cpp)
@@ -308,6 +359,10 @@ else()
     set(LIB_DESTINATION_DEFAULT "lib")
     set(MODEL_DESTINATION_DEFAULT "share/video2x")
 endif()
+
+# Explicitly set the output paths since OpenCV changes these variables
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 # Set the installation directories
 set(INSTALL_BIN_DESTINATION ${BIN_DESTINATION_DEFAULT} CACHE STRING "")
