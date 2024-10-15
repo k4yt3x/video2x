@@ -61,6 +61,7 @@ if(WIN32)
     # Define base paths for FFmpeg and ncnn
     set(FFMPEG_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ffmpeg-shared)
     set(NCNN_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ncnn-shared/x64)
+    set(OPENCV_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/opencv-shared)
 
     # FFmpeg
     list(APPEND ALL_LIBRARIES
@@ -87,8 +88,12 @@ if(WIN32)
         ${SPIRV_LIB}
     )
     list(APPEND ALL_INCLUDE_DIRS ${NCNN_BASE_PATH}/include/ncnn)
+
+    # OpenCV
+    list(APPEND ALL_LIBRARIES ${OPENCV_BASE_PATH}/build/x64/vc16/lib/opencv_world4100.lib)
+    list(APPEND ALL_INCLUDE_DIRS ${OPENCV_BASE_PATH}/build/include)
 else()
-    # Find the required packages using pkg-config
+    # FFmpeg
     find_package(PkgConfig REQUIRED)
     set(REQUIRED_PKGS
         libavcodec
@@ -105,7 +110,55 @@ else()
         list(APPEND ALL_INCLUDE_DIRS ${${PKG}_INCLUDE_DIRS})
         list(APPEND ALL_LIBRARIES ${${PKG}_LIBRARIES})
     endforeach()
-endif()
+
+    # OpenCV
+    if (USE_SYSTEM_OPENCV)
+        find_package(OpenCV REQUIRED)
+        list(APPEND ALL_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS}/opencv2)
+        list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
+    else()
+        option(BUILD_opencv_calib3d "" OFF)
+        option(BUILD_opencv_core "" ON)
+        option(BUILD_opencv_dnn "" OFF)
+        option(BUILD_opencv_features2d "" OFF)
+        option(BUILD_opencv_flann "" OFF)
+        option(BUILD_opencv_gapi "" OFF)
+        option(BUILD_opencv_highgui "" OFF)
+        option(BUILD_opencv_imgcodecs "" OFF)
+        option(BUILD_opencv_imgproc "" OFF)
+        option(BUILD_opencv_java "" OFF)
+        option(BUILD_opencv_js "" OFF)
+        option(BUILD_opencv_ml "" OFF)
+        option(BUILD_opencv_objc "" OFF)
+        option(BUILD_opencv_objdetect "" OFF)
+        option(BUILD_opencv_photo "" OFF)
+        option(BUILD_opencv_python "" OFF)
+        option(BUILD_opencv_python2 "" OFF)
+        option(BUILD_opencv_python3 "" OFF)
+        option(BUILD_opencv_stitching "" OFF)
+        option(BUILD_opencv_ts "" OFF)
+        option(BUILD_opencv_video "" OFF)
+        option(BUILD_opencv_videoio "" ON)
+        option(BUILD_opencv_world "" OFF)
+
+        option(WITH_PNG "" OFF)
+        option(WITH_JPEG "" OFF)
+        option(WITH_TIFF "" OFF)
+        option(WITH_WEBP "" OFF)
+        option(WITH_OPENJPEG "" OFF)
+        option(WITH_JASPER "" OFF)
+        option(WITH_OPENEXR "" OFF)
+        option(WITH_IMGCODEC "" OFF)
+
+        add_subdirectory(third_party/opencv)
+        list(APPEND ALL_INCLUDE_DIRS
+            ${PROJECT_SOURCE_DIR}/third_party/opencv/include
+            ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/core/include
+            ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/videoio/include
+        )
+        list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
+    endif() # USE_SYSTEM_OPENCV
+endif() # WIN32
 
 # Find ncnn package
 if(USE_SYSTEM_NCNN)
@@ -205,55 +258,6 @@ else()
 
     add_subdirectory(third_party/ncnn)
 endif()
-
-# OpenCV
-if (USE_SYSTEM_OPENCV)
-    find_package(OpenCV REQUIRED)
-    list(APPEND ALL_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS}/opencv2)
-    list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
-else()
-    option(BUILD_opencv_calib3d "" OFF)
-    option(BUILD_opencv_core "" ON)
-    option(BUILD_opencv_dnn "" OFF)
-    option(BUILD_opencv_features2d "" OFF)
-    option(BUILD_opencv_flann "" OFF)
-    option(BUILD_opencv_gapi "" OFF)
-    option(BUILD_opencv_highgui "" OFF)
-    option(BUILD_opencv_imgcodecs "" OFF)
-    option(BUILD_opencv_imgproc "" OFF)
-    option(BUILD_opencv_java "" OFF)
-    option(BUILD_opencv_js "" OFF)
-    option(BUILD_opencv_ml "" OFF)
-    option(BUILD_opencv_objc "" OFF)
-    option(BUILD_opencv_objdetect "" OFF)
-    option(BUILD_opencv_photo "" OFF)
-    option(BUILD_opencv_python "" OFF)
-    option(BUILD_opencv_python2 "" OFF)
-    option(BUILD_opencv_python3 "" OFF)
-    option(BUILD_opencv_stitching "" OFF)
-    option(BUILD_opencv_ts "" OFF)
-    option(BUILD_opencv_video "" OFF)
-    option(BUILD_opencv_videoio "" ON)
-    option(BUILD_opencv_world "" OFF)
-
-    option(WITH_PNG "" OFF)
-    option(WITH_JPEG "" OFF)
-    option(WITH_TIFF "" OFF)
-    option(WITH_WEBP "" OFF)
-    option(WITH_OPENJPEG "" OFF)
-    option(WITH_JASPER "" OFF)
-    option(WITH_OPENEXR "" OFF)
-    option(WITH_IMGCODEC "" OFF)
-
-    add_subdirectory(third_party/opencv)
-    list(APPEND ALL_INCLUDE_DIRS
-        ${PROJECT_SOURCE_DIR}/third_party/opencv/include
-        ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/core/include
-        ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/videoio/include
-    )
-    list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
-endif()
-
 
 # Include ExternalProject module
 include(ExternalProject)
