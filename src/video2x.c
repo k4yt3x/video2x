@@ -22,23 +22,6 @@
 
 #include "getopt.h"
 
-// Set UNIX terminal input to non-blocking mode
-#ifndef _WIN32
-void set_nonblocking_input(bool enable) {
-    static struct termios oldt, newt;
-    if (enable) {
-        tcgetattr(STDIN_FILENO, &oldt);
-        newt = oldt;
-        newt.c_lflag &= ~(ICANON | ECHO);
-        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-        fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
-    } else {
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-        fcntl(STDIN_FILENO, F_SETFL, 0);
-    }
-}
-#endif
-
 // Define command line options
 static struct option long_options[] = {
     {"loglevel", required_argument, NULL, 0},
@@ -72,6 +55,16 @@ static struct option long_options[] = {
     {"scale", required_argument, NULL, 'r'},
     {0, 0, 0, 0}
 };
+
+// List of valid RealESRGAN models
+const char *valid_realesrgan_models[] = {
+    "realesrgan-plus",
+    "realesrgan-plus-anime",
+    "realesr-animevideov3",
+};
+
+// Indicate if a newline needs to be printed before the next output
+bool newline_required = false;
 
 // Structure to hold parsed arguments
 struct arguments {
@@ -111,18 +104,38 @@ struct ProcessVideoThreadArguments {
     struct VideoProcessingContext *proc_ctx;
 };
 
-const char *valid_models[] = {
-    "realesrgan-plus",
-    "realesrgan-plus-anime",
-    "realesr-animevideov3",
-};
+// Set UNIX terminal input to non-blocking mode
+#ifndef _WIN32
+void set_nonblocking_input(bool enable) {
+    static struct termios oldt, newt;
+    if (enable) {
+        tcgetattr(STDIN_FILENO, &oldt);
+        newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+        fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+    } else {
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        fcntl(STDIN_FILENO, F_SETFL, 0);
+    }
+}
+#endif
+
+// Newline-safe log callback for FFmpeg
+void newline_safe_ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list vl) {
+    if (level <= av_log_get_level() && newline_required) {
+        putchar('\n');
+        newline_required = false;
+    }
+    av_log_default_callback(ptr, level, fmt, vl);
+}
 
 int is_valid_realesrgan_model(const char *model) {
     if (!model) {
         return 0;
     }
-    for (int i = 0; i < sizeof(valid_models) / sizeof(valid_models[0]); i++) {
-        if (strcmp(model, valid_models[i]) == 0) {
+    for (int i = 0; i < sizeof(valid_realesrgan_models) / sizeof(valid_realesrgan_models[0]); i++) {
+        if (strcmp(model, valid_realesrgan_models[i]) == 0) {
             return 1;
         }
     }
@@ -472,6 +485,10 @@ int main(int argc, char **argv) {
         .proc_ctx = &proc_ctx
     };
 
+    // Register a newline-safe log callback for FFmpeg
+    // This will ensure that log messages are printed on a new line after the progress bar
+    av_log_set_callback(newline_safe_ffmpeg_log_callback);
+
     // Create a thread for video processing
     thrd_t processing_thread;
     if (thrd_create(&processing_thread, process_video_thread, &thread_args) != thrd_success) {
@@ -509,8 +526,9 @@ int main(int argc, char **argv) {
             }
         } else if (ch == 'q' || ch == 'Q') {
             // Abort processing
-            printf("Aborting processing...\n");
+            printf("\nAborting processing...\n");
             proc_ctx.abort = true;
+            newline_required = false;
             break;
         }
 
@@ -526,10 +544,11 @@ int main(int argc, char **argv) {
                 time(NULL) - proc_ctx.start_time
             );
             fflush(stdout);
+            newline_required = true;
         }
 
         // Sleep for 50ms
-        thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 50000000}, NULL);
+        thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 100000000}, NULL);
     }
 
 // Restore terminal to blocking mode
@@ -542,18 +561,19 @@ int main(int argc, char **argv) {
     thrd_join(processing_thread, &process_result);
 
     // Print a newline if progress bar was displayed
-    if (!arguments.noprogress && process_result == 0) {
-        puts("");
+    if (newline_required) {
+        putchar('\n');
     }
 
+    // Print final message based on processing result
     if (proc_ctx.abort) {
         fprintf(stderr, "Video processing aborted\n");
         return 2;
-    }
-
-    if (process_result != 0) {
+    } else if (process_result != 0) {
         fprintf(stderr, "Video processing failed\n");
         return process_result;
+    } else {
+        printf("Video processing completed successfully\n");
     }
 
     // Calculate statistics
