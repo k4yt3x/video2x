@@ -17,10 +17,11 @@ class LibplaceboFilter : public Filter {
     AVFilterGraph *filter_graph;
     AVFilterContext *buffersrc_ctx;
     AVFilterContext *buffersink_ctx;
-    int output_width;
-    int output_height;
+    int out_width;
+    int out_height;
     const std::filesystem::path shader_path;
-    AVRational output_time_base;
+    AVRational in_time_base;
+    AVRational out_time_base;
 
    public:
     // Constructor
@@ -33,10 +34,10 @@ class LibplaceboFilter : public Filter {
     int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) override;
 
     // Processes an input frame and returns the processed frame
-    int process_frame(AVFrame *input_frame, AVFrame **output_frame) override;
+    int process_frame(AVFrame *in_frame, AVFrame **out_frame) override;
 
     // Flushes any remaining frames
-    int flush(std::vector<AVFrame *> &processed_frames) override;
+    int flush(std::vector<AVFrame *> &flushed_frames) override;
 };
 
 #endif  // LIBPLACEBO_FILTER_H

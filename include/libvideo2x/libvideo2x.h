@@ -41,8 +41,8 @@ enum Libvideo2xLogLevel {
 
 // Configuration for Libplacebo filter
 struct LibplaceboConfig {
-    int output_width;
-    int output_height;
+    int out_width;
+    int out_height;
     const char *shader_path;
 };
 
@@ -65,8 +65,8 @@ struct FilterConfig {
 
 // Encoder configuration
 struct EncoderConfig {
-    int output_width;
-    int output_height;
+    int out_width;
+    int out_height;
     bool copy_streams;
     enum AVCodecID codec;
     enum AVPixelFormat pix_fmt;
@@ -87,8 +87,8 @@ struct VideoProcessingContext {
 
 // C-compatible process_video function
 LIBVIDEO2X_API int process_video(
-    const char *input_filename,
-    const char *output_filename,
+    const char *in_fname,
+    const char *out_fname,
     enum Libvideo2xLogLevel log_level,
     bool benchmark,
     enum AVHWDeviceType hw_device_type,

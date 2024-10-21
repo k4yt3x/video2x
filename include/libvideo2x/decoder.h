@@ -9,10 +9,10 @@ extern "C" {
 int init_decoder(
     AVHWDeviceType hw_type,
     AVBufferRef *hw_ctx,
-    const char *input_filename,
+    const char *in_fname,
     AVFormatContext **fmt_ctx,
     AVCodecContext **dec_ctx,
-    int *video_stream_index
+    int *vstream_idx
 );
 
 #endif  // DECODER_H

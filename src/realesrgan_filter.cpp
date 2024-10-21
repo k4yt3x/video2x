@@ -71,9 +71,9 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     realesrgan = new RealESRGAN(gpuid, tta_mode);
 
     // Store the time bases
-    input_time_base = dec_ctx->time_base;
-    output_time_base = enc_ctx->time_base;
-    output_pix_fmt = enc_ctx->pix_fmt;
+    in_time_base = dec_ctx->time_base;
+    out_time_base = enc_ctx->time_base;
+    out_pix_fmt = enc_ctx->pix_fmt;
 
     // Load the model
     if (realesrgan->load(model_param_full_path, model_bin_full_path) != 0) {
@@ -100,38 +100,33 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     return 0;
 }
 
-int RealesrganFilter::process_frame(AVFrame *input_frame, AVFrame **output_frame) {
+int RealesrganFilter::process_frame(AVFrame *in_frame, AVFrame **out_frame) {
     int ret;
 
     // Convert the input frame to RGB24
-    ncnn::Mat input_mat = avframe_to_ncnn_mat(input_frame);
-    if (input_mat.empty()) {
+    ncnn::Mat in_mat = avframe_to_ncnn_mat(in_frame);
+    if (in_mat.empty()) {
         spdlog::error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
     }
 
     // Allocate space for ouptut ncnn::Mat
-    int output_width = input_mat.w * realesrgan->scale;
-    int output_height = input_mat.h * realesrgan->scale;
-    ncnn::Mat output_mat = ncnn::Mat(output_width, output_height, (size_t)3, 3);
+    int output_width = in_mat.w * realesrgan->scale;
+    int output_height = in_mat.h * realesrgan->scale;
+    ncnn::Mat out_mat = ncnn::Mat(output_width, output_height, (size_t)3, 3);
 
-    ret = realesrgan->process(input_mat, output_mat);
+    ret = realesrgan->process(in_mat, out_mat);
     if (ret != 0) {
         spdlog::error("RealESRGAN processing failed");
         return ret;
     }
 
     // Convert ncnn::Mat to AVFrame
-    *output_frame = ncnn_mat_to_avframe(output_mat, output_pix_fmt);
+    *out_frame = ncnn_mat_to_avframe(out_mat, out_pix_fmt);
 
     // Rescale PTS to encoder's time base
-    (*output_frame)->pts = av_rescale_q(input_frame->pts, input_time_base, output_time_base);
+    (*out_frame)->pts = av_rescale_q(in_frame->pts, in_time_base, out_time_base);
 
     // Return the processed frame to the caller
     return ret;
-}
-
-int RealesrganFilter::flush(std::vector<AVFrame *> &processed_frames) {
-    // No special flushing needed for RealESRGAN
-    return 0;
 }

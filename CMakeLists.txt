@@ -76,7 +76,9 @@ if(WIN32)
 
     # ncnn
     # TODO: Figure out why this file is not being copied to the install directory
-    set(SPIRV_BUILD_PATH ${CMAKE_BINARY_DIR}/realesrgan-prefix/src/realesrgan-build/ncnn/glslang/SPIRV)
+    set(SPIRV_BUILD_PATH
+        ${CMAKE_BINARY_DIR}/realesrgan-prefix/src/realesrgan-build/ncnn/glslang/SPIRV
+    )
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
         set(SPIRV_LIB ${SPIRV_BUILD_PATH}/Release/SPIRV.lib)
     else()
@@ -113,6 +115,7 @@ else()
 
     # OpenCV
     if (USE_SYSTEM_OPENCV)
+        cmake_policy(SET CMP0146 OLD)
         find_package(OpenCV REQUIRED)
         list(APPEND ALL_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS}/opencv2)
         list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)

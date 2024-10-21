@@ -11,21 +11,21 @@ extern "C" {
 
 int init_encoder(
     AVBufferRef *hw_ctx,
-    const char *output_filename,
+    const char *out_fname,
     AVFormatContext *ifmt_ctx,
     AVFormatContext **ofmt_ctx,
     AVCodecContext **enc_ctx,
     AVCodecContext *dec_ctx,
     EncoderConfig *encoder_config,
-    int video_stream_index,
-    int **stream_mapping
+    int vstream_idx,
+    int **stream_map
 );
 
 int encode_and_write_frame(
     AVFrame *frame,
     AVCodecContext *enc_ctx,
     AVFormatContext *ofmt_ctx,
-    int video_stream_index
+    int vstream_idx
 );
 
 int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx);

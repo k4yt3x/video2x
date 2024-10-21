@@ -14,8 +14,8 @@ int init_libplacebo(
     AVFilterContext **buffersrc_ctx,
     AVFilterContext **buffersink_ctx,
     AVCodecContext *dec_ctx,
-    int output_width,
-    int output_height,
+    int out_width,
+    int out_height,
     const std::filesystem::path &shader_path
 );
 
