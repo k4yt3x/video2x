@@ -22,23 +22,6 @@
 
 #include "getopt.h"
 
-// Set UNIX terminal input to non-blocking mode
-#ifndef _WIN32
-void set_nonblocking_input(bool enable) {
-    static struct termios oldt, newt;
-    if (enable) {
-        tcgetattr(STDIN_FILENO, &oldt);
-        newt = oldt;
-        newt.c_lflag &= ~(ICANON | ECHO);
-        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-        fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
-    } else {
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-        fcntl(STDIN_FILENO, F_SETFL, 0);
-    }
-}
-#endif
-
 // Define command line options
 static struct option long_options[] = {
     {"loglevel", required_argument, NULL, 0},
@@ -73,13 +56,23 @@ static struct option long_options[] = {
     {0, 0, 0, 0}
 };
 
+// List of valid RealESRGAN models
+const char *valid_realesrgan_models[] = {
+    "realesrgan-plus",
+    "realesrgan-plus-anime",
+    "realesr-animevideov3",
+};
+
+// Indicate if a newline needs to be printed before the next output
+bool newline_required = false;
+
 // Structure to hold parsed arguments
 struct arguments {
     // General options
     const char *loglevel;
     bool noprogress;
-    const char *input_filename;
-    const char *output_filename;
+    const char *in_fname;
+    const char *out_fname;
     const char *filter_type;
     const char *hwaccel;
     bool nocopystreams;
@@ -94,8 +87,8 @@ struct arguments {
 
     // libplacebo options
     const char *shader_path;
-    int output_width;
-    int output_height;
+    int out_width;
+    int out_height;
 
     // RealESRGAN options
     int gpuid;
@@ -111,18 +104,38 @@ struct ProcessVideoThreadArguments {
     struct VideoProcessingContext *proc_ctx;
 };
 
-const char *valid_models[] = {
-    "realesrgan-plus",
-    "realesrgan-plus-anime",
-    "realesr-animevideov3",
-};
+// Set UNIX terminal input to non-blocking mode
+#ifndef _WIN32
+void set_nonblocking_input(bool enable) {
+    static struct termios oldt, newt;
+    if (enable) {
+        tcgetattr(STDIN_FILENO, &oldt);
+        newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+        fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+    } else {
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        fcntl(STDIN_FILENO, F_SETFL, 0);
+    }
+}
+#endif
+
+// Newline-safe log callback for FFmpeg
+void newline_safe_ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list vl) {
+    if (level <= av_log_get_level() && newline_required) {
+        putchar('\n');
+        newline_required = false;
+    }
+    av_log_default_callback(ptr, level, fmt, vl);
+}
 
 int is_valid_realesrgan_model(const char *model) {
     if (!model) {
         return 0;
     }
-    for (int i = 0; i < sizeof(valid_models) / sizeof(valid_models[0]); i++) {
-        if (strcmp(model, valid_models[i]) == 0) {
+    for (int i = 0; i < sizeof(valid_realesrgan_models) / sizeof(valid_realesrgan_models[0]); i++) {
+        if (strcmp(model, valid_realesrgan_models[i]) == 0) {
             return 1;
         }
     }
@@ -175,8 +188,8 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     // Default argument values
     arguments->loglevel = "info";
     arguments->noprogress = false;
-    arguments->input_filename = NULL;
-    arguments->output_filename = NULL;
+    arguments->in_fname = NULL;
+    arguments->out_fname = NULL;
     arguments->filter_type = NULL;
     arguments->hwaccel = "none";
     arguments->nocopystreams = false;
@@ -191,8 +204,8 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
 
     // libplacebo options
     arguments->shader_path = NULL;
-    arguments->output_width = 0;
-    arguments->output_height = 0;
+    arguments->out_width = 0;
+    arguments->out_height = 0;
 
     // RealESRGAN options
     arguments->gpuid = 0;
@@ -204,10 +217,10 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
             )) != -1) {
         switch (c) {
             case 'i':
-                arguments->input_filename = optarg;
+                arguments->in_fname = optarg;
                 break;
             case 'o':
-                arguments->output_filename = optarg;
+                arguments->out_fname = optarg;
                 break;
             case 'f':
                 arguments->filter_type = optarg;
@@ -242,15 +255,15 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                 arguments->shader_path = optarg;
                 break;
             case 'w':
-                arguments->output_width = atoi(optarg);
-                if (arguments->output_width <= 0) {
+                arguments->out_width = atoi(optarg);
+                if (arguments->out_width <= 0) {
                     fprintf(stderr, "Error: Output width must be greater than 0.\n");
                     exit(1);
                 }
                 break;
             case 'h':
-                arguments->output_height = atoi(optarg);
-                if (arguments->output_height <= 0) {
+                arguments->out_height = atoi(optarg);
+                if (arguments->out_height <= 0) {
                     fprintf(stderr, "Error: Output height must be greater than 0.\n");
                     exit(1);
                 }
@@ -301,12 +314,12 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     }
 
     // Check for required arguments
-    if (!arguments->input_filename) {
+    if (!arguments->in_fname) {
         fprintf(stderr, "Error: Input file path is required.\n");
         exit(1);
     }
 
-    if (!arguments->output_filename && !arguments->benchmark) {
+    if (!arguments->out_fname && !arguments->benchmark) {
         fprintf(stderr, "Error: Output file path is required.\n");
         exit(1);
     }
@@ -317,8 +330,7 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     }
 
     if (strcmp(arguments->filter_type, "libplacebo") == 0) {
-        if (!arguments->shader_path || arguments->output_width == 0 ||
-            arguments->output_height == 0) {
+        if (!arguments->shader_path || arguments->out_width == 0 || arguments->out_height == 0) {
             fprintf(
                 stderr,
                 "Error: For libplacebo, shader name/path (-s), width (-w), "
@@ -371,8 +383,8 @@ int process_video_thread(void *arg) {
 
     // Call the process_video function
     int result = process_video(
-        arguments->input_filename,
-        arguments->output_filename,
+        arguments->in_fname,
+        arguments->out_fname,
         log_level,
         arguments->benchmark,
         hw_device_type,
@@ -400,8 +412,8 @@ int main(int argc, char **argv) {
     struct FilterConfig filter_config;
     if (strcmp(arguments.filter_type, "libplacebo") == 0) {
         filter_config.filter_type = FILTER_LIBPLACEBO;
-        filter_config.config.libplacebo.output_width = arguments.output_width;
-        filter_config.config.libplacebo.output_height = arguments.output_height;
+        filter_config.config.libplacebo.out_width = arguments.out_width;
+        filter_config.config.libplacebo.out_height = arguments.out_height;
         filter_config.config.libplacebo.shader_path = arguments.shader_path;
     } else if (strcmp(arguments.filter_type, "realesrgan") == 0) {
         filter_config.filter_type = FILTER_REALESRGAN;
@@ -433,8 +445,8 @@ int main(int argc, char **argv) {
 
     // Setup encoder configuration
     struct EncoderConfig encoder_config = {
-        .output_width = 0,   // To be filled by libvideo2x
-        .output_height = 0,  // To be filled by libvideo2x
+        .out_width = 0,   // To be filled by libvideo2x
+        .out_height = 0,  // To be filled by libvideo2x
         .copy_streams = !arguments.nocopystreams,
         .codec = codec->id,
         .pix_fmt = pix_fmt,
@@ -471,6 +483,10 @@ int main(int argc, char **argv) {
         .encoder_config = &encoder_config,
         .proc_ctx = &proc_ctx
     };
+
+    // Register a newline-safe log callback for FFmpeg
+    // This will ensure that log messages are printed on a new line after the progress bar
+    av_log_set_callback(newline_safe_ffmpeg_log_callback);
 
     // Create a thread for video processing
     thrd_t processing_thread;
@@ -509,8 +525,9 @@ int main(int argc, char **argv) {
             }
         } else if (ch == 'q' || ch == 'Q') {
             // Abort processing
-            printf("Aborting processing...\n");
+            printf("\nAborting processing...\n");
             proc_ctx.abort = true;
+            newline_required = false;
             break;
         }
 
@@ -526,10 +543,11 @@ int main(int argc, char **argv) {
                 time(NULL) - proc_ctx.start_time
             );
             fflush(stdout);
+            newline_required = true;
         }
 
         // Sleep for 50ms
-        thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 50000000}, NULL);
+        thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 100000000}, NULL);
     }
 
 // Restore terminal to blocking mode
@@ -542,18 +560,19 @@ int main(int argc, char **argv) {
     thrd_join(processing_thread, &process_result);
 
     // Print a newline if progress bar was displayed
-    if (!arguments.noprogress && process_result == 0) {
-        puts("");
+    if (newline_required) {
+        putchar('\n');
     }
 
+    // Print final message based on processing result
     if (proc_ctx.abort) {
         fprintf(stderr, "Video processing aborted\n");
         return 2;
-    }
-
-    if (process_result != 0) {
+    } else if (process_result != 0) {
         fprintf(stderr, "Video processing failed\n");
         return process_result;
+    } else {
+        printf("Video processing completed successfully\n");
     }
 
     // Calculate statistics
@@ -563,14 +582,14 @@ int main(int argc, char **argv) {
 
     // Print processing summary
     printf("====== Video2X %s summary ======\n", arguments.benchmark ? "Benchmark" : "Processing");
-    printf("Video file processed: %s\n", arguments.input_filename);
+    printf("Video file processed: %s\n", arguments.in_fname);
     printf("Total frames processed: %ld\n", proc_ctx.processed_frames);
     printf("Total time taken: %lds\n", time_elapsed);
     printf("Average processing speed: %.2f FPS\n", average_speed_fps);
 
     // Print additional information if not in benchmark mode
     if (!arguments.benchmark) {
-        printf("Output written to: %s\n", arguments.output_filename);
+        printf("Output written to: %s\n", arguments.out_fname);
     }
 
     return 0;

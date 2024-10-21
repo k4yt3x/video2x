@@ -7,6 +7,7 @@
 #include <thread>
 
 #include <spdlog/spdlog.h>
+#include <opencv2/videoio.hpp>
 
 #include "decoder.h"
 #include "encoder.h"
@@ -24,8 +25,8 @@
  * @param[in] dec_ctx Decoder context
  * @param[in] enc_ctx Encoder context
  * @param[in] filter Filter instance
- * @param[in] video_stream_index Index of the video stream in the input format context
- * @param[in] stream_mapping Array mapping input stream indexes to output stream indexes
+ * @param[in] vstream_idx Index of the video stream in the input format context
+ * @param[in] stream_map Array mapping input stream indexes to output stream indexes
  * @param[in] benchmark Flag to enable benchmarking mode
  * @return int 0 on success, negative value on error
  */
@@ -37,8 +38,8 @@ int process_frames(
     AVCodecContext *dec_ctx,
     AVCodecContext *enc_ctx,
     Filter *filter,
-    int video_stream_index,
-    int *stream_mapping,
+    int vstream_idx,
+    int *stream_map,
     bool benchmark = false
 ) {
     int ret;
@@ -47,16 +48,36 @@ int process_frames(
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
 
     // Get the total number of frames in the video
-    AVStream *video_stream = ifmt_ctx->streams[video_stream_index];
+    AVStream *video_stream = ifmt_ctx->streams[vstream_idx];
     proc_ctx->total_frames = video_stream->nb_frames;
 
-    // If nb_frames is not set, calculate total frames using duration and frame rate
+    // If nb_frames is not set, estimate total frames using duration and frame rate
     if (proc_ctx->total_frames == 0) {
+        spdlog::debug("`nb_frames` is not set; estimating total frames with duration*framerate");
         int64_t duration = video_stream->duration;
         AVRational frame_rate = video_stream->avg_frame_rate;
         if (duration != AV_NOPTS_VALUE && frame_rate.num != 0 && frame_rate.den != 0) {
             proc_ctx->total_frames = duration * frame_rate.num / frame_rate.den;
         }
+    }
+
+    // If total_frames is still 0, read the total number of frames with OpenCV
+    if (proc_ctx->total_frames == 0) {
+        spdlog::debug("Unable to estimate total number of frames; reading with OpenCV");
+        cv::VideoCapture cap(ifmt_ctx->url);
+        if (!cap.isOpened()) {
+            spdlog::error("Failed to open video file with OpenCV");
+            return -1;
+        }
+        proc_ctx->total_frames = cap.get(cv::CAP_PROP_FRAME_COUNT);
+        cap.release();
+    }
+
+    // Check if the total number of frames is still 0
+    if (proc_ctx->total_frames == 0) {
+        spdlog::warn("Unable to determine total number of frames");
+    } else {
+        spdlog::debug("{} frames to process", proc_ctx->total_frames);
     }
 
     // Get start time
@@ -75,10 +96,16 @@ int process_frames(
     while (!proc_ctx->abort) {
         ret = av_read_frame(ifmt_ctx, &packet);
         if (ret < 0) {
-            break;  // End of file or error
+            if (ret == AVERROR_EOF) {
+                spdlog::debug("Reached end of file");
+                break;
+            }
+            av_strerror(ret, errbuf, sizeof(errbuf));
+            spdlog::error("Error reading packet: {}", errbuf);
+            goto end;
         }
 
-        if (packet.stream_index == video_stream_index) {
+        if (packet.stream_index == vstream_idx) {
             // Send the packet to the decoder
             ret = avcodec_send_packet(dec_ctx, &packet);
             if (ret < 0) {
@@ -98,6 +125,7 @@ int process_frames(
 
                 ret = avcodec_receive_frame(dec_ctx, frame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                    spdlog::debug("Frame not ready");
                     break;
                 } else if (ret < 0) {
                     av_strerror(ret, errbuf, sizeof(errbuf));
@@ -111,9 +139,8 @@ int process_frames(
                 if (ret == 0 && processed_frame != nullptr) {
                     // Encode and write the processed frame
                     if (!benchmark) {
-                        ret = encode_and_write_frame(
-                            processed_frame, enc_ctx, ofmt_ctx, video_stream_index
-                        );
+                        ret =
+                            encode_and_write_frame(processed_frame, enc_ctx, ofmt_ctx, vstream_idx);
                         if (ret < 0) {
                             av_strerror(ret, errbuf, sizeof(errbuf));
                             spdlog::error("Error encoding/writing frame: {}", errbuf);
@@ -134,9 +161,9 @@ int process_frames(
                     "Processed frame {}/{}", proc_ctx->processed_frames, proc_ctx->total_frames
                 );
             }
-        } else if (encoder_config->copy_streams && stream_mapping[packet.stream_index] >= 0) {
+        } else if (encoder_config->copy_streams && stream_map[packet.stream_index] >= 0) {
             AVStream *in_stream = ifmt_ctx->streams[packet.stream_index];
-            int out_stream_index = stream_mapping[packet.stream_index];
+            int out_stream_index = stream_map[packet.stream_index];
             AVStream *out_stream = ofmt_ctx->streams[out_stream_index];
 
             // Rescale packet timestamps
@@ -165,7 +192,7 @@ int process_frames(
 
     // Encode and write all flushed frames
     for (AVFrame *&flushed_frame : flushed_frames) {
-        ret = encode_and_write_frame(flushed_frame, enc_ctx, ofmt_ctx, video_stream_index);
+        ret = encode_and_write_frame(flushed_frame, enc_ctx, ofmt_ctx, vstream_idx);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             spdlog::error("Error encoding/writing flushed frame: {}", errbuf);
@@ -203,7 +230,7 @@ void cleanup(
     AVCodecContext *dec_ctx,
     AVCodecContext *enc_ctx,
     AVBufferRef *hw_ctx,
-    int *stream_mapping,
+    int *stream_map,
     Filter *filter
 ) {
     if (ifmt_ctx) {
@@ -224,8 +251,8 @@ void cleanup(
     if (hw_ctx) {
         av_buffer_unref(&hw_ctx);
     }
-    if (stream_mapping) {
-        av_free(stream_mapping);
+    if (stream_map) {
+        av_free(stream_map);
     }
     if (filter) {
         delete filter;
@@ -235,8 +262,8 @@ void cleanup(
 /**
  * @brief Process a video file using the selected filter and encoder settings.
  *
- * @param[in] input_filename Path to the input video file
- * @param[in] output_filename Path to the output video file
+ * @param[in] in_fname Path to the input video file
+ * @param[in] out_fname Path to the output video file
  * @param[in] log_level Log level
  * @param[in] benchmark Flag to enable benchmarking mode
  * @param[in] hw_type Hardware device type
@@ -246,8 +273,8 @@ void cleanup(
  * @return int 0 on success, non-zero value on error
  */
 extern "C" int process_video(
-    const char *input_filename,
-    const char *output_filename,
+    const char *in_fname,
+    const char *out_fname,
     Libvideo2xLogLevel log_level,
     bool benchmark,
     AVHWDeviceType hw_type,
@@ -260,9 +287,9 @@ extern "C" int process_video(
     AVCodecContext *dec_ctx = nullptr;
     AVCodecContext *enc_ctx = nullptr;
     AVBufferRef *hw_ctx = nullptr;
-    int *stream_mapping = nullptr;
+    int *stream_map = nullptr;
     Filter *filter = nullptr;
-    int video_stream_index = -1;
+    int vstream_idx = -1;
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
@@ -313,11 +340,11 @@ extern "C" int process_video(
     }
 
     // Initialize input
-    ret = init_decoder(hw_type, hw_ctx, input_filename, &ifmt_ctx, &dec_ctx, &video_stream_index);
+    ret = init_decoder(hw_type, hw_ctx, in_fname, &ifmt_ctx, &dec_ctx, &vstream_idx);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::error("Failed to initialize decoder: {}", errbuf);
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
         return ret;
     }
 
@@ -325,33 +352,34 @@ extern "C" int process_video(
     int output_width = 0, output_height = 0;
     switch (filter_config->filter_type) {
         case FILTER_LIBPLACEBO:
-            output_width = filter_config->config.libplacebo.output_width;
-            output_height = filter_config->config.libplacebo.output_height;
+            output_width = filter_config->config.libplacebo.out_width;
+            output_height = filter_config->config.libplacebo.out_height;
             break;
         case FILTER_REALESRGAN:
             // Calculate the output dimensions based on the scaling factor
             output_width = dec_ctx->width * filter_config->config.realesrgan.scaling_factor;
             output_height = dec_ctx->height * filter_config->config.realesrgan.scaling_factor;
     }
+    spdlog::info("Output video dimensions: {}x{}", output_width, output_height);
 
     // Initialize output encoder
-    encoder_config->output_width = output_width;
-    encoder_config->output_height = output_height;
+    encoder_config->out_width = output_width;
+    encoder_config->out_height = output_height;
     ret = init_encoder(
         hw_ctx,
-        output_filename,
+        out_fname,
         ifmt_ctx,
         &ofmt_ctx,
         &enc_ctx,
         dec_ctx,
         encoder_config,
-        video_stream_index,
-        &stream_mapping
+        vstream_idx,
+        &stream_map
     );
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::error("Failed to initialize encoder: {}", errbuf);
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
         return ret;
     }
 
@@ -360,7 +388,7 @@ extern "C" int process_video(
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::error("Error occurred when opening output file: {}", errbuf);
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
         return ret;
     }
 
@@ -372,19 +400,19 @@ extern "C" int process_video(
             // Validate shader path
             if (!config.shader_path) {
                 spdlog::error("Shader path must be provided for the libplacebo filter");
-                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
                 return -1;
             }
 
             // Validate output dimensions
-            if (config.output_width <= 0 || config.output_height <= 0) {
+            if (config.out_width <= 0 || config.out_height <= 0) {
                 spdlog::error("Output dimensions must be provided for the libplacebo filter");
-                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
                 return -1;
             }
 
             filter = new LibplaceboFilter{
-                config.output_width, config.output_height, std::filesystem::path(config.shader_path)
+                config.out_width, config.out_height, std::filesystem::path(config.shader_path)
             };
             break;
         }
@@ -394,14 +422,14 @@ extern "C" int process_video(
             // Validate model name
             if (!config.model) {
                 spdlog::error("Model name must be provided for the RealESRGAN filter");
-                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
                 return -1;
             }
 
             // Validate scaling factor
             if (config.scaling_factor <= 0) {
                 spdlog::error("Scaling factor must be provided for the RealESRGAN filter");
-                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+                cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
                 return -1;
             }
 
@@ -412,7 +440,7 @@ extern "C" int process_video(
         }
         default:
             spdlog::error("Unknown filter type");
-            cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+            cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
             return -1;
     }
 
@@ -421,7 +449,7 @@ extern "C" int process_video(
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::error("Failed to initialize filter: {}", errbuf);
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
         return ret;
     }
 
@@ -434,14 +462,14 @@ extern "C" int process_video(
         dec_ctx,
         enc_ctx,
         filter,
-        video_stream_index,
-        stream_mapping,
+        vstream_idx,
+        stream_map,
         benchmark
     );
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::error("Error processing frames: {}", errbuf);
-        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+        cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
         return ret;
     }
 
@@ -449,7 +477,7 @@ extern "C" int process_video(
     av_write_trailer(ofmt_ctx);
 
     // Cleanup before returning
-    cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_mapping, filter);
+    cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
 
     if (ret < 0 && ret != AVERROR_EOF) {
         av_strerror(ret, errbuf, sizeof(errbuf));

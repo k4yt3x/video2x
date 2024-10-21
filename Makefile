@@ -45,7 +45,8 @@ debian:
 		libvulkan-dev \
 		glslang-tools \
 		libomp-dev \
-		libspdlog-dev
+		libspdlog-dev \
+		libopencv-dev
 	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
 		-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
 		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \

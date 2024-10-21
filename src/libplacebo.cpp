@@ -13,8 +13,8 @@ int init_libplacebo(
     AVFilterContext **buffersrc_ctx,
     AVFilterContext **buffersink_ctx,
     AVCodecContext *dec_ctx,
-    int output_width,
-    int output_height,
+    int out_width,
+    int out_height,
     const std::filesystem::path &shader_path
 ) {
     char args[512];
@@ -77,8 +77,8 @@ int init_libplacebo(
         filter_args,
         sizeof(filter_args),
         "w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s",
-        output_width,
-        output_height,
+        out_width,
+        out_height,
         shader_path_string.c_str()
     );
 
