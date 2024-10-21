@@ -183,18 +183,18 @@ int encode_and_write_frame(
     AVFormatContext *ofmt_ctx,
     int vstream_idx
 ) {
+    AVFrame *converted_frame = nullptr;
     int ret;
 
     // Convert the frame to the encoder's pixel format if needed
     if (frame->format != enc_ctx->pix_fmt) {
-        AVFrame *converted_frame = convert_avframe_pix_fmt(frame, enc_ctx->pix_fmt);
+        converted_frame = convert_avframe_pix_fmt(frame, enc_ctx->pix_fmt);
         if (!converted_frame) {
             spdlog::error("Error converting frame to encoder's pixel format");
             return AVERROR_EXTERNAL;
         }
 
         converted_frame->pts = frame->pts;
-        frame = converted_frame;
     }
 
     AVPacket *enc_pkt = av_packet_alloc();
@@ -203,7 +203,12 @@ int encode_and_write_frame(
         return AVERROR(ENOMEM);
     }
 
-    ret = avcodec_send_frame(enc_ctx, frame);
+    if (converted_frame != nullptr) {
+        ret = avcodec_send_frame(enc_ctx, converted_frame);
+        av_frame_free(&converted_frame);
+    } else {
+        ret = avcodec_send_frame(enc_ctx, frame);
+    }
     if (ret < 0) {
         spdlog::error("Error sending frame to encoder");
         av_packet_free(&enc_pkt);

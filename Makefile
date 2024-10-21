@@ -1,8 +1,14 @@
-.PHONY: build static debug windows test-realesrgan test-libplacebo leakcheck clean
+.PHONY: build static debug clean \
+	test-realesrgan test-libplacebo \
+	memcheck-realesrgan memcheck-libplacebo \
+	heaptrack-realesrgan heaptrack-libplacebo
 
 BINDIR=build
 CC=clang
 CXX=clang++
+
+TEST_VIDEO=data/standard-test.mp4
+TEST_OUTPUT=data/output.mp4
 
 build:
 	cmake -S . -B $(BINDIR) \
@@ -48,21 +54,24 @@ debian:
 		libspdlog-dev \
 		libopencv-dev
 	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
-		-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+		-DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \
 		-DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \
 		-DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
 	cmake --build /tmp/build --config Release --target install --parallel
 
+clean:
+	rm -rf $(BINDIR)
+
 test-realesrgan:
-	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i data/standard-test.mp4 -o data/output.mp4 \
-		-f realesrgan -r 4 --model realesr-animevideov3
+	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-f realesrgan -r 4 -m realesr-animevideov3
 
 test-libplacebo:
-	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i data/standard-test.mp4 -o data/output.mp4 \
+	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
 		-f libplacebo -w 1920 -h 1080 -s anime4k-mode-a
 
-leakcheck-realesrgan:
+memcheck-realesrgan:
 	LD_LIBRARY_PATH=$(BINDIR) valgrind \
 		--tool=memcheck \
 		--leak-check=full \
@@ -71,11 +80,11 @@ leakcheck-realesrgan:
 		--show-reachable=yes \
 		--verbose --log-file="valgrind.log" \
 		$(BINDIR)/video2x \
-		-i data/standard-test.mp4 -o data/output.mp4 \
-		-f realesrgan -r 2 --model realesr-animevideov3 \
+		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-f realesrgan -r 2 -m realesr-animevideov3 \
 		-p veryfast -b 1000000 -q 30
 
-leakcheck-libplacebo:
+memcheck-libplacebo:
 	LD_LIBRARY_PATH=$(BINDIR) valgrind \
 		--tool=memcheck \
 		--leak-check=full \
@@ -84,9 +93,20 @@ leakcheck-libplacebo:
 		--show-reachable=yes \
 		--verbose --log-file="valgrind.log" \
 		$(BINDIR)/video2x \
-		-i data/standard-test.mp4 -o data/output.mp4 \
+		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
 		-f libplacebo -w 1920 -h 1080 -s anime4k-mode-a \
 		-p veryfast -b 1000000 -q 30
 
-clean:
-	rm -rf $(BINDIR)
+heaptrack-realesrgan:
+	LD_LIBRARY_PATH=$(BINDIR) HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
+		$(BINDIR)/video2x \
+		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-f realesrgan -r 4 -m realesr-animevideov3 \
+		-p veryfast -b 1000000 -q 30
+
+heaptrack-libplacebo:
+	LD_LIBRARY_PATH=$(BINDIR) HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
+		$(BINDIR)/video2x \
+		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-f libplacebo -w 1920 -h 1080 -s anime4k-mode-a \
+		-p veryfast -b 1000000 -q 30
