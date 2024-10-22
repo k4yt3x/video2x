@@ -47,31 +47,15 @@ int process_frames(
     std::vector<AVFrame *> flushed_frames;
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
 
-    // Get the total number of frames in the video
-    AVStream *video_stream = ifmt_ctx->streams[vstream_idx];
-    proc_ctx->total_frames = video_stream->nb_frames;
-
-    // If nb_frames is not set, estimate total frames using duration and frame rate
-    if (proc_ctx->total_frames == 0) {
-        spdlog::debug("`nb_frames` is not set; estimating total frames with duration*framerate");
-        int64_t duration = video_stream->duration;
-        AVRational frame_rate = video_stream->avg_frame_rate;
-        if (duration != AV_NOPTS_VALUE && frame_rate.num != 0 && frame_rate.den != 0) {
-            proc_ctx->total_frames = duration * frame_rate.num / frame_rate.den;
-        }
+    // Get the total number of frames in the video with OpenCV
+    spdlog::debug("Unable to estimate total number of frames; reading with OpenCV");
+    cv::VideoCapture cap(ifmt_ctx->url);
+    if (!cap.isOpened()) {
+        spdlog::error("Failed to open video file with OpenCV");
+        return -1;
     }
-
-    // If total_frames is still 0, read the total number of frames with OpenCV
-    if (proc_ctx->total_frames == 0) {
-        spdlog::debug("Unable to estimate total number of frames; reading with OpenCV");
-        cv::VideoCapture cap(ifmt_ctx->url);
-        if (!cap.isOpened()) {
-            spdlog::error("Failed to open video file with OpenCV");
-            return -1;
-        }
-        proc_ctx->total_frames = cap.get(cv::CAP_PROP_FRAME_COUNT);
-        cap.release();
-    }
+    proc_ctx->total_frames = cap.get(cv::CAP_PROP_FRAME_COUNT);
+    cap.release();
 
     // Check if the total number of frames is still 0
     if (proc_ctx->total_frames == 0) {
