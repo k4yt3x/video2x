@@ -115,7 +115,6 @@ else()
 
     # OpenCV
     if (USE_SYSTEM_OPENCV)
-        cmake_policy(SET CMP0146 OLD)
         find_package(OpenCV REQUIRED)
         list(APPEND ALL_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS}/opencv2)
         list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
