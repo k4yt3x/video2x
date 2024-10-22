@@ -37,9 +37,9 @@ option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
 
 # Generate the version header file
 configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/libvideo2x/version.h.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h"
-  @ONLY
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/libvideo2x/version.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h"
+    @ONLY
 )
 
 # Find the required packages
@@ -412,14 +412,36 @@ if(WIN32)
                     GROUP_READ GROUP_EXECUTE
                     WORLD_READ WORLD_EXECUTE
     )
-    install(FILES ${NCNN_BASE_PATH}/bin/ncnn.dll DESTINATION ${INSTALL_BIN_DESTINATION}
+    install(FILES ${FFMPEG_BASE_PATH}/bin/swscale-8.dll
+                  ${FFMPEG_BASE_PATH}/bin/avcodec-61.dll
+                  ${FFMPEG_BASE_PATH}/bin/avdevice-61.dll
+                  ${FFMPEG_BASE_PATH}/bin/avfilter-10.dll
+                  ${FFMPEG_BASE_PATH}/bin/avformat-61.dll
+                  ${FFMPEG_BASE_PATH}/bin/avutil-59.dll
+                  ${FFMPEG_BASE_PATH}/bin/postproc-58.dll
+                  ${FFMPEG_BASE_PATH}/bin/swresample-5.dll
+        DESTINATION ${INSTALL_BIN_DESTINATION}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+    )
+    install(FILES ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_world4100.dll
+                  ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_videoio_msmf4100_64.dll
+        DESTINATION ${INSTALL_BIN_DESTINATION}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE
+    )
+    install(FILES ${NCNN_BASE_PATH}/bin/ncnn.dll
+        DESTINATION ${INSTALL_BIN_DESTINATION}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_EXECUTE
                     WORLD_READ WORLD_EXECUTE
     )
 else()
     # Install Unix-specific dependencies
-    install(FILES ${REALESRGAN_LIB} DESTINATION ${INSTALL_LIB_DESTINATION}
+    install(FILES ${REALESRGAN_LIB}
+        DESTINATION ${INSTALL_LIB_DESTINATION}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_EXECUTE
                     WORLD_READ WORLD_EXECUTE
