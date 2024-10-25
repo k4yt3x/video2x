@@ -28,6 +28,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     endif()
 endif()
 
+# Set global compile options for all targets
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options(/W4 /permissive-)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+endif()
+
 # Build options
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
 option(BUILD_VIDEO2X_CLI "Build the video2x executable" ON)
@@ -307,7 +314,6 @@ target_include_directories(libvideo2x PRIVATE
 
 # Compile options for the shared library
 target_compile_options(libvideo2x PRIVATE
-    -Wall
     -fPIC
     $<$<CONFIG:Release>:-Ofast>
     $<$<CONFIG:Debug>:-g -DDEBUG>
@@ -344,10 +350,7 @@ if (BUILD_VIDEO2X_CLI)
     )
 
     # Compile options for the executable
-    target_compile_options(video2x PRIVATE
-        -Wall
-        $<$<CONFIG:Debug>:-g -DDEBUG>
-    )
+    target_compile_options(video2x PRIVATE $<$<CONFIG:Debug>:-g -DDEBUG>)
 
     # Link the executable with the shared library
     target_link_libraries(video2x PRIVATE ${ALL_LIBRARIES} libvideo2x)

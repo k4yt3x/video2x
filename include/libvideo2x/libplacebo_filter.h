@@ -28,7 +28,7 @@ class LibplaceboFilter : public Filter {
     LibplaceboFilter(int width, int height, const std::filesystem::path &shader_path);
 
     // Destructor
-    virtual ~LibplaceboFilter();
+    virtual ~LibplaceboFilter() override;
 
     // Initializes the filter with decoder and encoder contexts
     int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) override;

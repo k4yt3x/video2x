@@ -9,7 +9,7 @@
 static enum AVPixelFormat hw_pix_fmt = AV_PIX_FMT_NONE;
 
 // Callback function to choose the hardware-accelerated pixel format
-static enum AVPixelFormat get_hw_format(AVCodecContext *ctx, const enum AVPixelFormat *pix_fmts) {
+static enum AVPixelFormat get_hw_format(AVCodecContext *_, const enum AVPixelFormat *pix_fmts) {
     for (const enum AVPixelFormat *p = pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
         if (*p == hw_pix_fmt) {
             return *p;
@@ -55,7 +55,8 @@ int init_decoder(
     const AVCodec *decoder = avcodec_find_decoder(video_stream->codecpar->codec_id);
     if (!decoder) {
         spdlog::error(
-            "Failed to find decoder for codec ID {}", (int)video_stream->codecpar->codec_id
+            "Failed to find decoder for codec ID {}",
+            static_cast<int>(video_stream->codecpar->codec_id)
         );
         return AVERROR_DECODER_NOT_FOUND;
     }

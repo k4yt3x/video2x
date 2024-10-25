@@ -134,7 +134,9 @@ int is_valid_realesrgan_model(const char *model) {
     if (!model) {
         return 0;
     }
-    for (int i = 0; i < sizeof(valid_realesrgan_models) / sizeof(valid_realesrgan_models[0]); i++) {
+    for (unsigned long i = 0;
+         i < sizeof(valid_realesrgan_models) / sizeof(valid_realesrgan_models[0]);
+         i++) {
         if (strcmp(model, valid_realesrgan_models[i]) == 0) {
             return 1;
         }
@@ -142,7 +144,7 @@ int is_valid_realesrgan_model(const char *model) {
     return 0;
 }
 
-void print_help() {
+void print_help(void) {
     printf("Usage: video2x [OPTIONS]\n");
     printf("\nOptions:\n");
     printf(
@@ -245,7 +247,7 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
                 }
                 break;
             case 'q':
-                arguments->crf = atof(optarg);
+                arguments->crf = (float)atof(optarg);
                 if (arguments->crf < 0.0 || arguments->crf > 51.0) {
                     fprintf(stderr, "Error: CRF must be between 0 and 51.\n");
                     exit(1);

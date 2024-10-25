@@ -93,7 +93,7 @@ int init_encoder(
 
     // Set the CRF and preset for any codecs that support it
     char crf_str[16];
-    snprintf(crf_str, sizeof(crf_str), "%.f", encoder_config->crf);
+    snprintf(crf_str, sizeof(crf_str), "%.f", static_cast<double>(encoder_config->crf));
     av_opt_set(codec_ctx->priv_data, "crf", crf_str, 0);
     av_opt_set(codec_ctx->priv_data, "preset", encoder_config->preset, 0);
 
@@ -116,7 +116,8 @@ int init_encoder(
 
     if (encoder_config->copy_streams) {
         // Allocate the stream map
-        *stream_map = (int *)av_malloc_array(ifmt_ctx->nb_streams, sizeof(**stream_map));
+        *stream_map =
+            reinterpret_cast<int *>(av_malloc_array(ifmt_ctx->nb_streams, sizeof(**stream_map)));
         if (!*stream_map) {
             spdlog::error("Could not allocate stream mapping");
             return AVERROR(ENOMEM);
@@ -126,7 +127,7 @@ int init_encoder(
         (*stream_map)[vstream_idx] = stream_index++;
 
         // Loop through each stream in the input file
-        for (int i = 0; i < ifmt_ctx->nb_streams; i++) {
+        for (int i = 0; i < static_cast<int>(ifmt_ctx->nb_streams); i++) {
             AVStream *in_stream = ifmt_ctx->streams[i];
             AVCodecParameters *in_codecpar = in_stream->codecpar;
 
@@ -142,21 +143,21 @@ int init_encoder(
             }
 
             // Create corresponding output stream
-            AVStream *out_stream = avformat_new_stream(fmt_ctx, NULL);
-            if (!out_stream) {
+            AVStream *out_copied_stream = avformat_new_stream(fmt_ctx, NULL);
+            if (!out_copied_stream) {
                 spdlog::error("Failed allocating output stream");
                 return AVERROR_UNKNOWN;
             }
 
-            ret = avcodec_parameters_copy(out_stream->codecpar, in_codecpar);
+            ret = avcodec_parameters_copy(out_copied_stream->codecpar, in_codecpar);
             if (ret < 0) {
                 spdlog::error("Failed to copy codec parameters");
                 return ret;
             }
-            out_stream->codecpar->codec_tag = 0;
+            out_copied_stream->codecpar->codec_tag = 0;
 
             // Copy time base
-            out_stream->time_base = in_stream->time_base;
+            out_copied_stream->time_base = in_stream->time_base;
 
             (*stream_map)[i] = stream_index++;
         }

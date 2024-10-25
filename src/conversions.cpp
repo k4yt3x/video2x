@@ -1,5 +1,6 @@
 #include "conversions.h"
 
+#include <cstddef>
 #include <cstdio>
 
 #include <spdlog/spdlog.h>
@@ -79,14 +80,16 @@ ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame) {
     // Allocate a new ncnn::Mat and copy the data
     int width = converted_frame->width;
     int height = converted_frame->height;
-    ncnn::Mat ncnn_image = ncnn::Mat(width, height, (size_t)3, 3);  // BGR has 3 channels
+    ncnn::Mat ncnn_image = ncnn::Mat(width, height, 3, 3);  // BGR has 3 channels
 
     // Manually copy the pixel data from AVFrame to the new ncnn::Mat
     const uint8_t *src_data = converted_frame->data[0];
     for (int y = 0; y < height; y++) {
         uint8_t *dst_row = ncnn_image.row<uint8_t>(y);
         const uint8_t *src_row = src_data + y * converted_frame->linesize[0];
-        memcpy(dst_row, src_row, width * 3);  // Copy 3 channels (BGR) per pixel
+
+        // Copy 3 channels (BGR) per pixel
+        memcpy(dst_row, src_row, static_cast<size_t>(width) * 3);
     }
 
     // If we allocated a converted frame, free it
@@ -143,7 +146,9 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
     for (int y = 0; y < mat.h; y++) {
         uint8_t *dst_row = bgr_frame->data[0] + y * bgr_frame->linesize[0];
         const uint8_t *src_row = mat.row<const uint8_t>(y);
-        memcpy(dst_row, src_row, mat.w * 3);  // Copy 3 channels (BGR) per pixel
+
+        // Copy 3 channels (BGR) per pixel
+        memcpy(dst_row, src_row, static_cast<size_t>(mat.w) * 3);
     }
 
     // Step 3: Convert the BGR frame to the desired pixel format

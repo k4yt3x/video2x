@@ -32,7 +32,7 @@ RealesrganFilter::~RealesrganFilter() {
     }
 }
 
-int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) {
+int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *_) {
     // Construct the model paths using std::filesystem
     std::filesystem::path model_param_path;
     std::filesystem::path model_bin_path;
@@ -113,7 +113,7 @@ int RealesrganFilter::process_frame(AVFrame *in_frame, AVFrame **out_frame) {
     // Allocate space for ouptut ncnn::Mat
     int output_width = in_mat.w * realesrgan->scale;
     int output_height = in_mat.h * realesrgan->scale;
-    ncnn::Mat out_mat = ncnn::Mat(output_width, output_height, (size_t)3, 3);
+    ncnn::Mat out_mat = ncnn::Mat(output_width, output_height, 3, 3);
 
     ret = realesrgan->process(in_mat, out_mat);
     if (ret != 0) {

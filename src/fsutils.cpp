@@ -11,7 +11,7 @@
 #include <spdlog/spdlog.h>
 
 #if _WIN32
-std::filesystem::path get_executable_directory() {
+static std::filesystem::path get_executable_directory() {
     std::vector<wchar_t> filepath(MAX_PATH);
 
     // Get the executable path, expanding the buffer if necessary
@@ -36,7 +36,7 @@ std::filesystem::path get_executable_directory() {
     return execpath.parent_path();
 }
 #else   // _WIN32
-std::filesystem::path get_executable_directory() {
+static std::filesystem::path get_executable_directory() {
     std::error_code ec;
     std::filesystem::path filepath = std::filesystem::read_symlink("/proc/self/exe", ec);
 

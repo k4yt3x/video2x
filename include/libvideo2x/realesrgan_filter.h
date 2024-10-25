@@ -36,7 +36,7 @@ class RealesrganFilter : public Filter {
     );
 
     // Destructor
-    virtual ~RealesrganFilter();
+    virtual ~RealesrganFilter() override;
 
     // Initializes the filter with decoder and encoder contexts
     int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) override;

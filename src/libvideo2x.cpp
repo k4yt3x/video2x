@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <cstdint>
 #include <thread>
 
 #include <spdlog/spdlog.h>
@@ -30,7 +29,7 @@
  * @param[in] benchmark Flag to enable benchmarking mode
  * @return int 0 on success, negative value on error
  */
-int process_frames(
+static int process_frames(
     EncoderConfig *encoder_config,
     VideoProcessingContext *proc_ctx,
     AVFormatContext *ifmt_ctx,
@@ -54,7 +53,7 @@ int process_frames(
         spdlog::error("Failed to open video file with OpenCV");
         return -1;
     }
-    proc_ctx->total_frames = cap.get(cv::CAP_PROP_FRAME_COUNT);
+    proc_ctx->total_frames = static_cast<int64_t>(cap.get(cv::CAP_PROP_FRAME_COUNT));
     cap.release();
 
     // Check if the total number of frames is still 0
@@ -208,7 +207,7 @@ end:
 }
 
 // Cleanup resources after processing the video
-void cleanup(
+static void cleanup(
     AVFormatContext *ifmt_ctx,
     AVFormatContext *ofmt_ctx,
     AVCodecContext *dec_ctx,
@@ -343,6 +342,11 @@ extern "C" int process_video(
             // Calculate the output dimensions based on the scaling factor
             output_width = dec_ctx->width * filter_config->config.realesrgan.scaling_factor;
             output_height = dec_ctx->height * filter_config->config.realesrgan.scaling_factor;
+            break;
+        default:
+            spdlog::error("Unknown filter type");
+            cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
+            return -1;
     }
     spdlog::info("Output video dimensions: {}x{}", output_width, output_height);
 
