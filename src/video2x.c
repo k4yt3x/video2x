@@ -169,7 +169,7 @@ void print_help(void) {
     printf("  -q, --crf		Constant Rate Factor (default: 20.0)\n");
 
     printf("\nlibplacebo Options:\n");
-    printf("  -s, --shader		Name or path to custom GLSL shader file\n");
+    printf("  -s, --shader		Name of or path to GLSL shader file\n");
     printf("  -w, --width		Output width\n");
     printf("  -h, --height		Output height\n");
 

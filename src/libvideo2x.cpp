@@ -218,27 +218,35 @@ static void cleanup(
 ) {
     if (ifmt_ctx) {
         avformat_close_input(&ifmt_ctx);
+        ifmt_ctx = nullptr;
     }
     if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE)) {
         avio_closep(&ofmt_ctx->pb);
+        ofmt_ctx->pb = nullptr;
     }
     if (ofmt_ctx) {
         avformat_free_context(ofmt_ctx);
+        ofmt_ctx = nullptr;
     }
     if (dec_ctx) {
         avcodec_free_context(&dec_ctx);
+        dec_ctx = nullptr;
     }
     if (enc_ctx) {
         avcodec_free_context(&enc_ctx);
+        enc_ctx = nullptr;
     }
     if (hw_ctx) {
         av_buffer_unref(&hw_ctx);
+        hw_ctx = nullptr;
     }
     if (stream_map) {
         av_free(stream_map);
+        stream_map = nullptr;
     }
     if (filter) {
         delete filter;
+        filter = nullptr;
     }
 }
 
@@ -435,8 +443,7 @@ extern "C" int process_video(
     // Initialize the filter
     ret = filter->init(dec_ctx, enc_ctx, hw_ctx);
     if (ret < 0) {
-        av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::error("Failed to initialize filter: {}", errbuf);
+        spdlog::error("Failed to initialize filter");
         cleanup(ifmt_ctx, ofmt_ctx, dec_ctx, enc_ctx, hw_ctx, stream_map, filter);
         return ret;
     }

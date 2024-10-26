@@ -57,7 +57,8 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     in_time_base = dec_ctx->time_base;
     out_time_base = enc_ctx->time_base;
 
-    return init_libplacebo(
+    // Initialize the libplacebo filter
+    int ret = init_libplacebo(
         hw_ctx,
         &filter_graph,
         &buffersrc_ctx,
@@ -67,6 +68,14 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
         out_height,
         shader_full_path
     );
+
+    // Set these resources to nullptr since they are already freed by `avfilter_graph_free`
+    if (ret < 0) {
+        buffersrc_ctx = nullptr;
+        buffersink_ctx = nullptr;
+        filter_graph = nullptr;
+    }
+    return ret;
 }
 
 int LibplaceboFilter::process_frame(AVFrame *in_frame, AVFrame **out_frame) {
