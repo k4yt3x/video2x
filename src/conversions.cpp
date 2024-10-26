@@ -80,7 +80,7 @@ ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame) {
     // Allocate a new ncnn::Mat and copy the data
     int width = converted_frame->width;
     int height = converted_frame->height;
-    ncnn::Mat ncnn_image = ncnn::Mat(width, height, 3, 3);  // BGR has 3 channels
+    ncnn::Mat ncnn_image = ncnn::Mat(width, height, static_cast<size_t>(3), 3);
 
     // Manually copy the pixel data from AVFrame to the new ncnn::Mat
     const uint8_t *src_data = converted_frame->data[0];

@@ -113,7 +113,7 @@ int RealesrganFilter::process_frame(AVFrame *in_frame, AVFrame **out_frame) {
     // Allocate space for ouptut ncnn::Mat
     int output_width = in_mat.w * realesrgan->scale;
     int output_height = in_mat.h * realesrgan->scale;
-    ncnn::Mat out_mat = ncnn::Mat(output_width, output_height, 3, 3);
+    ncnn::Mat out_mat = ncnn::Mat(output_width, output_height, static_cast<size_t>(3), 3);
 
     ret = realesrgan->process(in_mat, out_mat);
     if (ret != 0) {
