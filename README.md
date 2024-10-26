@@ -13,9 +13,9 @@
 
 ## 🌟 Version 6.0.0 Preview
 
-**[Direct download link for Windows (Installer)](https://github.com/k4yt3x/video2x/releases/download/6.0.0-beta.4/video2x-qt6-windows-amd64-installer.exe)**
+**[Direct download link for Windows (Installer)](https://github.com/k4yt3x/video2x/releases/download/6.0.0-beta.5/video2x-qt6-windows-amd64-installer.exe)**
 
-![6.0.0-beta-screenshot](https://github.com/user-attachments/assets/bd9e0b82-67ee-4b62-a830-a694db6f5de3)
+![6.0.0-beta-screenshot](https://github.com/user-attachments/assets/e4318eaf-f726-4193-885f-030593a5078a)
 
 Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 
