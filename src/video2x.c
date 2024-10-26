@@ -216,7 +216,7 @@ void parse_arguments(int argc, char **argv, struct arguments *arguments) {
     arguments->scaling_factor = 0;
 
     while ((c = getopt_long(
-                argc, argv, "i:o:f:a:c:x:p:b:q:s:w:h:r:m:g:v", long_options, &option_index
+                argc, argv, "i:o:f:a:c:x:p:b:q:s:w:h:g:m:r:v", long_options, &option_index
             )) != -1) {
         switch (c) {
             case 'i':
