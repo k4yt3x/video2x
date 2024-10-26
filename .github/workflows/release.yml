@@ -52,6 +52,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ needs.setup.outputs.version }}
-          release_name: Video2X ${{ needs.setup.outputs.version }}
+          name: ${{ needs.setup.outputs.version }}
           draft: true
           prerelease: false
