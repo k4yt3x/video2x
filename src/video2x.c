@@ -111,7 +111,7 @@ void set_nonblocking_input(bool enable) {
     if (enable) {
         tcgetattr(STDIN_FILENO, &oldt);
         newt = oldt;
-        newt.c_lflag &= ~(ICANON | ECHO);
+        newt.c_lflag &= ~(tcflag_t)(ICANON | ECHO);
         tcsetattr(STDIN_FILENO, TCSANOW, &newt);
         fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
     } else {
@@ -147,9 +147,8 @@ int is_valid_realesrgan_model(const char *model) {
 void print_help(void) {
     printf("Usage: video2x [OPTIONS]\n");
     printf("\nOptions:\n");
-    printf(
-        "  --loglevel		Set log level (trace, debug, info, warn, error, critical, none)\n"
-    );
+    printf("  --loglevel		Set log level \n");
+    printf("			(trace, debug, info, warn, error, critical, none)\n");
     printf("  --noprogress		Do not display the progress bar\n");
     printf("  -v, --version		Print program version\n");
     printf("  -?, --help		Display this help page\n");
@@ -169,7 +168,9 @@ void print_help(void) {
     printf("  -q, --crf		Constant Rate Factor (default: 20.0)\n");
 
     printf("\nlibplacebo Options:\n");
-    printf("  -s, --shader		Name of or path to GLSL shader file\n");
+    printf("  -s, --shader		Name or path of the GLSL shader file to use \n");
+    printf("			(built-in: 'anime4k-a', 'anime4k-b', 'anime4k-c',\n");
+    printf("			'anime4k-a+a', 'anime4k-b+b', 'anime4k-c+a')\n");
     printf("  -w, --width		Output width\n");
     printf("  -h, --height		Output height\n");
 
@@ -179,7 +180,7 @@ void print_help(void) {
     printf("  -r, --scale		Scaling factor (2, 3, or 4)\n");
 
     printf("\nExamples Usage:\n");
-    printf("  video2x -i in.mp4 -o out.mp4 -f libplacebo -s anime4k-mode-a -w 3840 -h 2160\n");
+    printf("  video2x -i in.mp4 -o out.mp4 -f libplacebo -s anime4k-a+a -w 3840 -h 2160\n");
     printf("  video2x -i in.mp4 -o out.mp4 -f realesrgan -m realesr-animevideov3 -r 4\n");
 }
 
@@ -540,7 +541,7 @@ int main(int argc, char **argv) {
                 proc_ctx.processed_frames,
                 proc_ctx.total_frames,
                 proc_ctx.total_frames > 0
-                    ? proc_ctx.processed_frames * 100.0 / proc_ctx.total_frames
+                    ? (double)proc_ctx.processed_frames * 100.0 / (double)proc_ctx.total_frames
                     : 0.0,
                 time(NULL) - proc_ctx.start_time
             );
@@ -580,7 +581,7 @@ int main(int argc, char **argv) {
     // Calculate statistics
     time_t time_elapsed = time(NULL) - proc_ctx.start_time;
     float average_speed_fps =
-        (float)proc_ctx.processed_frames / (time_elapsed > 0 ? time_elapsed : 1);
+        (float)proc_ctx.processed_frames / (time_elapsed > 0 ? (float)time_elapsed : 1);
 
     // Print processing summary
     printf("====== Video2X %s summary ======\n", arguments.benchmark ? "Benchmark" : "Processing");
