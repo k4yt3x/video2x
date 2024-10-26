@@ -42,8 +42,9 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
         shader_full_path = shader_path;
     } else {
         // Construct the fallback path using std::filesystem
-        shader_full_path =
-            find_resource_file(std::filesystem::path("models") / (shader_path.string() + ".glsl"));
+        shader_full_path = find_resource_file(
+            std::filesystem::path("models") / "libplacebo" / (shader_path.string() + ".glsl")
+        );
     }
 
     // Check if the shader file exists

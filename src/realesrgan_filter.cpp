@@ -39,9 +39,9 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     if (model) {
         // Find the model paths by model name if provided
-        model_param_path = std::filesystem::path("models") /
+        model_param_path = std::filesystem::path("models") / "realesrgan" /
                            (std::string(model) + "-x" + std::to_string(scaling_factor) + ".param");
-        model_bin_path = std::filesystem::path("models") /
+        model_bin_path = std::filesystem::path("models") / "realesrgan" /
                          (std::string(model) + "-x" + std::to_string(scaling_factor) + ".bin");
     } else if (!custom_model_param_path.empty() && !custom_model_bin_path.empty()) {
         // Use the custom model paths if provided
