@@ -78,7 +78,13 @@ def download_and_combine_files():
             response.raise_for_status()
             file_contents += response.text + "\n"
 
-        with (SHADERS_DIR / Path(f"anime4k-{mode}.glsl")).open("w") as output_file:
+        version = "v4"
+        if mode == "gan":
+            version = "v4.1"
+
+        with (SHADERS_DIR / Path(f"anime4k-{version}-{mode}.glsl")).open(
+            "w"
+        ) as output_file:
             output_file.write(file_contents)
 
 
