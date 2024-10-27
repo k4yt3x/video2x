@@ -63,6 +63,12 @@ def download_and_combine_files():
             f"{GITHUB_GLSL_ROOT}/Restore/Anime4K_Restore_CNN_M.glsl",
             f"{GITHUB_GLSL_ROOT}/Upscale/Anime4K_Upscale_CNN_x2_M.glsl",
         ],
+        "gan": [
+            f"{GITHUB_GLSL_ROOT}/Restore/Anime4K_Restore_GAN_UUL.glsl",
+            f"{GITHUB_GLSL_ROOT}/Upscale/Anime4K_Upscale_GAN_x4_UUL.glsl",
+            f"{GITHUB_GLSL_ROOT}/Restore/Anime4K_Restore_CNN_Soft_M.glsl",
+            f"{GITHUB_GLSL_ROOT}/Upscale/Anime4K_Upscale_CNN_x2_M.glsl",
+        ],
     }
 
     for mode in modes:
