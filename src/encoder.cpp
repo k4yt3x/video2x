@@ -85,10 +85,18 @@ int init_encoder(
         }
     }
 
-    // Set the time base
-    codec_ctx->time_base = av_inv_q(dec_ctx->framerate);
-    if (codec_ctx->time_base.num == 0 || codec_ctx->time_base.den == 0) {
+    // Set the output video's time base
+    if (dec_ctx->time_base.num > 0 && dec_ctx->time_base.den > 0) {
+        codec_ctx->time_base = dec_ctx->time_base;
+    } else {
         codec_ctx->time_base = av_inv_q(av_guess_frame_rate(ifmt_ctx, out_stream, NULL));
+    }
+
+    // Set the output video's frame rate
+    if (dec_ctx->framerate.num > 0 && dec_ctx->framerate.den > 0) {
+        codec_ctx->framerate = dec_ctx->framerate;
+    } else {
+        codec_ctx->framerate = av_guess_frame_rate(ifmt_ctx, out_stream, NULL);
     }
 
     // Set the CRF and preset for any codecs that support it
@@ -113,6 +121,8 @@ int init_encoder(
     }
 
     out_stream->time_base = codec_ctx->time_base;
+    out_stream->avg_frame_rate = codec_ctx->framerate;
+    out_stream->r_frame_rate = codec_ctx->framerate;
 
     if (encoder_config->copy_streams) {
         // Allocate the stream map
