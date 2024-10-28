@@ -72,15 +72,22 @@ int init_libplacebo(
 #endif
 
     // Prepare the filter arguments
-    char filter_args[512];
-    snprintf(
+    char filter_args[4096];
+    int filter_args_size = snprintf(
         filter_args,
         sizeof(filter_args),
-        "w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s",
+        "w=%d:h=%d:custom_shader_path='%s'",
         out_width,
         out_height,
         shader_path_string.c_str()
     );
+
+    // Check if the filter arguments are too long
+    if (filter_args_size < 0 || filter_args_size >= static_cast<int>(sizeof(filter_args))) {
+        spdlog::error("libplacebo filter arguments too long.");
+        avfilter_graph_free(&graph);
+        return AVERROR(EINVAL);
+    }
 
     AVFilterContext *libplacebo_ctx;
     ret = avfilter_graph_create_filter(
