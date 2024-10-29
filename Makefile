@@ -61,7 +61,7 @@ debian:
 	cmake --build /tmp/build --config Release --target install --parallel
 
 clean:
-	rm -rf $(BINDIR)
+	rm -vrf $(BINDIR) data/output*.* heaptrack*.zst valgrind.log
 
 test-realesrgan:
 	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
@@ -69,7 +69,7 @@ test-realesrgan:
 
 test-libplacebo:
 	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
-		-f libplacebo -w 1920 -h 1080 -s anime4k-mode-a
+		-f libplacebo -w 1920 -h 1080 -s anime4k-v4-a
 
 memcheck-realesrgan:
 	LD_LIBRARY_PATH=$(BINDIR) valgrind \
@@ -94,7 +94,7 @@ memcheck-libplacebo:
 		--verbose --log-file="valgrind.log" \
 		$(BINDIR)/video2x \
 		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
-		-f libplacebo -w 1920 -h 1080 -s anime4k-mode-a \
+		-f libplacebo -w 1920 -h 1080 -s anime4k-v4-a \
 		-p veryfast -b 1000000 -q 30
 
 heaptrack-realesrgan:
@@ -108,5 +108,5 @@ heaptrack-libplacebo:
 	LD_LIBRARY_PATH=$(BINDIR) HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
 		$(BINDIR)/video2x \
 		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
-		-f libplacebo -w 1920 -h 1080 -s anime4k-mode-a \
+		-f libplacebo -w 1920 -h 1080 -s anime4k-v4-a \
 		-p veryfast -b 1000000 -q 30

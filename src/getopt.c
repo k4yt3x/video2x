@@ -185,7 +185,7 @@ int getopt_long(
             return (-1);
         }
         if ((has_equal = strchr(current_argv, '=')) != NULL) {
-            current_argv_len = has_equal - current_argv;
+            current_argv_len = (size_t)(has_equal - current_argv);
             has_equal++;
         } else {
             current_argv_len = strlen(current_argv);

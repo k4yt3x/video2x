@@ -92,6 +92,7 @@ int LibplaceboFilter::process_frame(AVFrame *in_frame, AVFrame **out_frame) {
     ret = av_buffersrc_add_frame(buffersrc_ctx, in_frame);
     if (ret < 0) {
         spdlog::error("Error while feeding the filter graph");
+        av_frame_free(out_frame);
         return ret;
     }
 

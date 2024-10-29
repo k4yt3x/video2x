@@ -15,7 +15,7 @@ class Filter {
     virtual ~Filter() = default;
     virtual int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) = 0;
     virtual int process_frame(AVFrame *in_frame, AVFrame **out_frame) = 0;
-    virtual int flush(std::vector<AVFrame *> &flushed_frames) { return 0; }
+    virtual int flush(std::vector<AVFrame *> &_) { return 0; }
 };
 
 #endif  // FILTER_H

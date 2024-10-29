@@ -21,7 +21,7 @@ int init_encoder(
     int **stream_map
 );
 
-int encode_and_write_frame(
+int write_frame(
     AVFrame *frame,
     AVCodecContext *enc_ctx,
     AVFormatContext *ofmt_ctx,
