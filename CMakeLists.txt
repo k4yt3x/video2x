@@ -271,10 +271,10 @@ endif()
 # Include ExternalProject module
 include(ExternalProject)
 
-# Add libreal-esrgan-ncnn-vulkan as an external project
+# Add librealesrgan-ncnn-vulkan as an external project
 ExternalProject_Add(
     realesrgan
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/libreal_esrgan_ncnn_vulkan/src
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/librealesrgan_ncnn_vulkan/src
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realesrgan_install
@@ -309,7 +309,7 @@ target_include_directories(libvideo2x PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/include/libvideo2x
-    ${PROJECT_SOURCE_DIR}/third_party/libreal_esrgan_ncnn_vulkan/src
+    ${PROJECT_SOURCE_DIR}/third_party/librealesrgan_ncnn_vulkan/src
 )
 
 # Compile options for the shared library
