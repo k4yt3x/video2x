@@ -1,0 +1,8 @@
+Package: video2x
+Version: 6.0.0
+Section: video
+Priority: optional
+Architecture: amd64
+Maintainer: K4YT3X <i@k4yt3x.com>
+Depends: ffmpeg, libopencv-videoio406t64
+Description: A machine learning-based lossless video super resolution framework.

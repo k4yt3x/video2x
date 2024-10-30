@@ -33,7 +33,7 @@ jobs:
           registry: ghcr.io
           username: ${{ secrets.GHCR_USER }}
           password: ${{ secrets.GHCR_TOKEN }}
-          dockerfile: Dockerfile
+          dockerfile: packaging/docker/Dockerfile
           image: video2x
           tags: latest, ${{ needs.setup.outputs.version }}
 

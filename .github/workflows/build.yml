@@ -91,3 +91,17 @@ jobs:
         with:
           name: video2x-nightly-windows-amd64
           path: build/video2x_install
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: Build the Docker image
+        with:
+          registry: ghcr.io
+          dockerfile: packaging/docker/Dockerfile
+          image: video2x
+          tags: latest
+          pushImage: false

@@ -1,7 +1,7 @@
 # Name: Video2X Dockerfile
 # Creator: K4YT3X
 # Date Created: February 3, 2022
-# Last Modified: October 21, 2024
+# Last Modified: October 30, 2024
 
 # stage 1: build the python components into wheels
 FROM docker.io/archlinux:latest AS builder
@@ -20,7 +20,8 @@ COPY --chown=builder:builder . /video2x
 WORKDIR /video2x
 
 # Build the package
-RUN makepkg -s --noconfirm \
+RUN cp packaging/arch/PKGBUILD . \
+    && makepkg -s --noconfirm \
     && find /video2x -maxdepth 1 -name 'video2x-*.pkg.tar.zst' ! -name '*-debug-*' | head -n 1 | \
         xargs -I {} cp {} /tmp/video2x.pkg.tar.zst
 

@@ -104,7 +104,7 @@ if(WIN32)
 else()
     # FFmpeg
     find_package(PkgConfig REQUIRED)
-    set(REQUIRED_PKGS
+    set(FFMPEG_REQUIRED_PKGS REQUIRED
         libavcodec
         libavdevice
         libavfilter
@@ -114,7 +114,7 @@ else()
     )
 
     # Loop through each package to find and collect include dirs and libraries
-    foreach(PKG ${REQUIRED_PKGS})
+    foreach(PKG ${FFMPEG_REQUIRED_PKGS})
         pkg_check_modules(${PKG} REQUIRED ${PKG})
         list(APPEND ALL_INCLUDE_DIRS ${${PKG}_INCLUDE_DIRS})
         list(APPEND ALL_LIBRARIES ${${PKG}_LIBRARIES})
