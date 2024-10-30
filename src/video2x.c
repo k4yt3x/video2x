@@ -180,7 +180,7 @@ void print_help(void) {
     printf("  -r, --scale		Scaling factor (2, 3, or 4)\n");
 
     printf("\nExamples Usage:\n");
-    printf("  video2x -i in.mp4 -o out.mp4 -f libplacebo -s anime4k-a+a -w 3840 -h 2160\n");
+    printf("  video2x -i in.mp4 -o out.mp4 -f libplacebo -s anime4k-v4-a+a -w 3840 -h 2160\n");
     printf("  video2x -i in.mp4 -o out.mp4 -f realesrgan -m realesr-animevideov3 -r 4\n");
 }
 
