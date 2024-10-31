@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+extern "C" {
+#include <libavutil/opt.h>
+}
+
 #include <spdlog/spdlog.h>
 
 #include "fsutils.h"
@@ -17,7 +21,6 @@ int init_libplacebo(
     int out_height,
     const std::filesystem::path &shader_path
 ) {
-    char args[512];
     int ret;
 
     AVFilterGraph *graph = avfilter_graph_alloc();
@@ -28,25 +31,43 @@ int init_libplacebo(
 
     // Create buffer source
     const AVFilter *buffersrc = avfilter_get_by_name("buffer");
-    snprintf(
-        args,
-        sizeof(args),
-        "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:frame_rate=%d/%d:"
-        "pixel_aspect=%d/%d:colorspace=%d:range=%d",
-        dec_ctx->width,
-        dec_ctx->height,
-        dec_ctx->pix_fmt,
-        dec_ctx->time_base.num,
-        dec_ctx->time_base.den,
-        dec_ctx->framerate.num,
-        dec_ctx->framerate.den,
-        dec_ctx->sample_aspect_ratio.num,
-        dec_ctx->sample_aspect_ratio.den,
-        dec_ctx->colorspace,
-        dec_ctx->color_range
-    );
+    if (!buffersrc) {
+        spdlog::error("Filter 'buffer' not found.");
+        avfilter_graph_free(&graph);
+        return AVERROR_FILTER_NOT_FOUND;
+    }
 
-    ret = avfilter_graph_create_filter(buffersrc_ctx, buffersrc, "in", args, NULL, graph);
+    // Start building the arguments string
+    std::string args = "video_size=" + std::to_string(dec_ctx->width) + "x" +
+                       std::to_string(dec_ctx->height) +
+                       ":pix_fmt=" + std::to_string(dec_ctx->pix_fmt) +
+                       ":time_base=" + std::to_string(dec_ctx->time_base.num) + "/" +
+                       std::to_string(dec_ctx->time_base.den) +
+                       ":frame_rate=" + std::to_string(dec_ctx->framerate.num) + "/" +
+                       std::to_string(dec_ctx->framerate.den) +
+                       ":pixel_aspect=" + std::to_string(dec_ctx->sample_aspect_ratio.num) + "/" +
+                       std::to_string(dec_ctx->sample_aspect_ratio.den);
+
+    // Make a copy of the AVClass on the stack
+    AVClass priv_class_copy = *buffersrc->priv_class;
+    AVClass *priv_class_copy_ptr = &priv_class_copy;
+
+    // Check if the colorspace option is supported
+    if (av_opt_find(&priv_class_copy_ptr, "colorspace", NULL, 0, AV_OPT_SEARCH_FAKE_OBJ)) {
+        args += ":colorspace=" + std::to_string(dec_ctx->colorspace);
+    } else {
+        spdlog::warn("Option 'colorspace' is not supported by the buffer filter.");
+    }
+
+    // Check if the range option is supported
+    if (av_opt_find(&priv_class_copy_ptr, "range", NULL, 0, AV_OPT_SEARCH_FAKE_OBJ)) {
+        args += ":range=" + std::to_string(dec_ctx->color_range);
+    } else {
+        spdlog::warn("Option 'range' is not supported by the buffer filter.");
+    }
+
+    spdlog::debug("Buffer source args: {}", args);
+    ret = avfilter_graph_create_filter(buffersrc_ctx, buffersrc, "in", args.c_str(), NULL, graph);
     if (ret < 0) {
         spdlog::error("Cannot create buffer source.");
         avfilter_graph_free(&graph);
@@ -72,26 +93,13 @@ int init_libplacebo(
 #endif
 
     // Prepare the filter arguments
-    char filter_args[4096];
-    int filter_args_size = snprintf(
-        filter_args,
-        sizeof(filter_args),
-        "w=%d:h=%d:custom_shader_path='%s'",
-        out_width,
-        out_height,
-        shader_path_string.c_str()
-    );
-
-    // Check if the filter arguments are too long
-    if (filter_args_size < 0 || filter_args_size >= static_cast<int>(sizeof(filter_args))) {
-        spdlog::error("libplacebo filter arguments too long.");
-        avfilter_graph_free(&graph);
-        return AVERROR(EINVAL);
-    }
+    std::string filter_args = "w=" + std::to_string(out_width) +
+                              ":h=" + std::to_string(out_height) + ":custom_shader_path='" +
+                              shader_path_string + "'";
 
     AVFilterContext *libplacebo_ctx;
     ret = avfilter_graph_create_filter(
-        &libplacebo_ctx, libplacebo_filter, "libplacebo", filter_args, NULL, graph
+        &libplacebo_ctx, libplacebo_filter, "libplacebo", filter_args.c_str(), NULL, graph
     );
     if (ret < 0) {
         spdlog::error("Cannot create libplacebo filter.");

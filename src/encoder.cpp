@@ -100,9 +100,8 @@ int init_encoder(
     }
 
     // Set the CRF and preset for any codecs that support it
-    char crf_str[16];
-    snprintf(crf_str, sizeof(crf_str), "%.f", static_cast<double>(encoder_config->crf));
-    av_opt_set(codec_ctx->priv_data, "crf", crf_str, 0);
+    std::string crf_str = std::to_string(encoder_config->crf);
+    av_opt_set(codec_ctx->priv_data, "crf", crf_str.c_str(), 0);
     av_opt_set(codec_ctx->priv_data, "preset", encoder_config->preset, 0);
 
     if (fmt_ctx->oformat->flags & AVFMT_GLOBALHEADER) {
