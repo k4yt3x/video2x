@@ -1,4 +1,4 @@
-.PHONY: build static debug clean \
+.PHONY: build static debug debian ubuntu clean \
 	test-realesrgan test-libplacebo \
 	memcheck-realesrgan memcheck-libplacebo \
 	heaptrack-realesrgan heaptrack-libplacebo
@@ -59,6 +59,29 @@ debian:
 		-DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \
 		-DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
 	cmake --build /tmp/build --config Release --target install --parallel
+
+ubuntu:
+	export DEBIAN_FRONTEND=noninteractive
+	apt-get update
+	apt-get install -y --no-install-recommends \
+		build-essential cmake pkg-config \
+		libavcodec-dev \
+		libavdevice-dev \
+		libavfilter-dev \
+		libavformat-dev \
+		libavutil-dev \
+		libswscale-dev \
+		libvulkan-dev \
+		glslang-tools \
+		libomp-dev \
+		libopencv-dev
+	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
+		-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
+		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x_package/usr
+	cmake --build build --config Release --target install --parallel
+	mkdir -p build/video2x_package/DEBIAN
+	cp packaging/debian/control build/video2x_package/DEBIAN/control
+	dpkg-deb --build build/video2x_package
 
 clean:
 	rm -vrf $(BINDIR) data/output*.* heaptrack*.zst valgrind.log
