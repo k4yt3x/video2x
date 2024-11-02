@@ -19,7 +19,7 @@ static enum AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder) {
 
 int init_encoder(
     AVBufferRef *hw_ctx,
-    const char *out_fname,
+    std::filesystem::path out_fpath,
     AVFormatContext *ifmt_ctx,
     AVFormatContext **ofmt_ctx,
     AVCodecContext **enc_ctx,
@@ -33,7 +33,7 @@ int init_encoder(
     int stream_index = 0;
     int ret;
 
-    avformat_alloc_output_context2(&fmt_ctx, NULL, NULL, out_fname);
+    avformat_alloc_output_context2(&fmt_ctx, NULL, NULL, out_fpath.u8string().c_str());
     if (!fmt_ctx) {
         spdlog::error("Could not create output context");
         return AVERROR_UNKNOWN;
@@ -174,9 +174,9 @@ int init_encoder(
 
     // Open the output file
     if (!(fmt_ctx->oformat->flags & AVFMT_NOFILE)) {
-        ret = avio_open(&fmt_ctx->pb, out_fname, AVIO_FLAG_WRITE);
+        ret = avio_open(&fmt_ctx->pb, out_fpath.u8string().c_str(), AVIO_FLAG_WRITE);
         if (ret < 0) {
-            spdlog::error("Could not open output file '{}'", out_fname);
+            spdlog::error("Could not open output file '{}'", out_fpath.u8string().c_str());
             return ret;
         }
     }

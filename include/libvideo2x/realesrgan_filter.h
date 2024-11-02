@@ -17,7 +17,7 @@ class RealesrganFilter : public Filter {
     int gpuid;
     bool tta_mode;
     int scaling_factor;
-    const char *model;
+    const std::filesystem::path model_path;
     const std::filesystem::path custom_model_param_path;
     const std::filesystem::path custom_model_bin_path;
     AVRational in_time_base;
@@ -30,7 +30,7 @@ class RealesrganFilter : public Filter {
         int gpuid = 0,
         bool tta_mode = false,
         int scaling_factor = 4,
-        const char *model = "realesr-animevideov3",
+        const std::filesystem::path model = std::filesystem::path("realesr-animevideov3"),
         const std::filesystem::path custom_model_param_path = std::filesystem::path(),
         const std::filesystem::path custom_model_bin_path = std::filesystem::path()
     );

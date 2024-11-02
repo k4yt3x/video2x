@@ -1,6 +1,8 @@
 #ifndef DECODER_H
 #define DECODER_H
 
+#include <filesystem>
+
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -9,7 +11,7 @@ extern "C" {
 int init_decoder(
     AVHWDeviceType hw_type,
     AVBufferRef *hw_ctx,
-    const char *in_fname,
+    std::filesystem::path in_fpath,
     AVFormatContext **fmt_ctx,
     AVCodecContext **dec_ctx,
     int *vstream_idx
