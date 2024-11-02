@@ -13,7 +13,7 @@ RealesrganFilter::RealesrganFilter(
     int gpuid,
     bool tta_mode,
     int scaling_factor,
-    const char *model,
+    const std::filesystem::path model_path,
     const std::filesystem::path custom_model_param_path,
     const std::filesystem::path custom_model_bin_path
 )
@@ -21,7 +21,7 @@ RealesrganFilter::RealesrganFilter(
       gpuid(gpuid),
       tta_mode(tta_mode),
       scaling_factor(scaling_factor),
-      model(model),
+      model_path(std::move(model_path)),
       custom_model_param_path(std::move(custom_model_param_path)),
       custom_model_bin_path(std::move(custom_model_bin_path)) {}
 
@@ -37,12 +37,13 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     std::filesystem::path model_param_path;
     std::filesystem::path model_bin_path;
 
-    if (model) {
+    if (!model_path.empty()) {
         // Find the model paths by model name if provided
+        // TODO: ensure this works with wide strings on Windows
         model_param_path = std::filesystem::path("models") / "realesrgan" /
-                           (std::string(model) + "-x" + std::to_string(scaling_factor) + ".param");
+                           (model_path.string() + "-x" + std::to_string(scaling_factor) + ".param");
         model_bin_path = std::filesystem::path("models") / "realesrgan" /
-                         (std::string(model) + "-x" + std::to_string(scaling_factor) + ".bin");
+                         (model_path.string() + "-x" + std::to_string(scaling_factor) + ".bin");
     } else if (!custom_model_param_path.empty() && !custom_model_bin_path.empty()) {
         // Use the custom model paths if provided
         model_param_path = custom_model_param_path;

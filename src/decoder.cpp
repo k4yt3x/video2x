@@ -22,7 +22,7 @@ static enum AVPixelFormat get_hw_format(AVCodecContext *_, const enum AVPixelFor
 int init_decoder(
     AVHWDeviceType hw_type,
     AVBufferRef *hw_ctx,
-    const char *in_fname,
+    std::filesystem::path in_fpath,
     AVFormatContext **fmt_ctx,
     AVCodecContext **dec_ctx,
     int *vstream_idx
@@ -31,8 +31,8 @@ int init_decoder(
     AVCodecContext *codec_ctx = NULL;
     int ret;
 
-    if ((ret = avformat_open_input(&ifmt_ctx, in_fname, NULL, NULL)) < 0) {
-        spdlog::error("Could not open input file '{}'", in_fname);
+    if ((ret = avformat_open_input(&ifmt_ctx, in_fpath.u8string().c_str(), NULL, NULL)) < 0) {
+        spdlog::error("Could not open input file '{}'", in_fpath.u8string().c_str());
         return ret;
     }
 

@@ -43,7 +43,11 @@ enum Libvideo2xLogLevel {
 struct LibplaceboConfig {
     int out_width;
     int out_height;
+#ifdef _WIN32
+    const wchar_t *shader_path;
+#else
     const char *shader_path;
+#endif
 };
 
 // Configuration for RealESRGAN filter
@@ -51,7 +55,11 @@ struct RealESRGANConfig {
     int gpuid;
     bool tta_mode;
     int scaling_factor;
-    const char *model;
+#ifdef _WIN32
+    const wchar_t *model_path;
+#else
+    const char *model_path;
+#endif
 };
 
 // Unified filter configuration
@@ -87,8 +95,13 @@ struct VideoProcessingContext {
 
 // C-compatible process_video function
 LIBVIDEO2X_API int process_video(
+#ifdef _WIN32
+    const wchar_t *in_fname,
+    const wchar_t *out_fname,
+#else
     const char *in_fname,
     const char *out_fname,
+#endif
     enum Libvideo2xLogLevel log_level,
     bool benchmark,
     enum AVHWDeviceType hw_device_type,

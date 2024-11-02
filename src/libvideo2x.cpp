@@ -5,8 +5,11 @@
 #include <string.h>
 #include <thread>
 
+extern "C" {
+#include <libavutil/avutil.h>
+}
+
 #include <spdlog/spdlog.h>
-#include <opencv2/videoio.hpp>
 
 #include "decoder.h"
 #include "encoder.h"
@@ -46,26 +49,44 @@ static int process_frames(
     std::vector<AVFrame *> flushed_frames;
 
     // Get the total number of frames in the video with OpenCV
-    spdlog::debug("Reading total number of frames with OpenCV");
-    cv::VideoCapture cap(ifmt_ctx->url);
-    if (!cap.isOpened()) {
-        spdlog::error("Failed to open video file with OpenCV");
-        return -1;
+    spdlog::debug("Reading total number of frames");
+    proc_ctx->total_frames = ifmt_ctx->streams[vstream_idx]->nb_frames;
+    if (proc_ctx->total_frames > 0) {
+        spdlog::debug("Read total number of frames from 'nb_frames': {}", proc_ctx->total_frames);
+    } else {
+        spdlog::warn("Estimating the total number of frames from duration * fps");
+        // Calculate duration in seconds
+        double duration_secs = static_cast<double>(ifmt_ctx->streams[vstream_idx]->duration) *
+                               av_q2d(ifmt_ctx->streams[vstream_idx]->time_base);
+        spdlog::debug("Video duration: {}s", duration_secs);
+
+        // Calculate average FPS
+        double fps = av_q2d(ifmt_ctx->streams[vstream_idx]->avg_frame_rate);
+        if (fps <= 0) {
+            spdlog::debug("Unable to read the average frame rate from 'avg_frame_rate'");
+            fps = av_q2d(ifmt_ctx->streams[vstream_idx]->r_frame_rate);
+        }
+        if (fps <= 0) {
+            spdlog::debug("Unable to read the average frame rate from 'r_frame_rate'");
+            fps = av_q2d(av_guess_frame_rate(ifmt_ctx, ifmt_ctx->streams[vstream_idx], nullptr));
+        }
+        if (fps <= 0) {
+            spdlog::debug("Unable to estimate the average frame rate with 'av_guess_frame_rate'");
+            fps = av_q2d(ifmt_ctx->streams[vstream_idx]->time_base);
+        }
+        if (fps <= 0) {
+            spdlog::debug("Unable to estimate the video's average frame rate");
+        } else {
+            // Calculate total frames
+            proc_ctx->total_frames = static_cast<int64_t>(duration_secs * fps);
+        }
     }
-    proc_ctx->total_frames = static_cast<int64_t>(cap.get(cv::CAP_PROP_FRAME_COUNT));
-    cap.release();
 
     // Check if the total number of frames is still 0
     if (proc_ctx->total_frames == 0) {
-        spdlog::warn("Unable to determine total number of frames");
+        spdlog::warn("Unable to determine the total number of frames");
     } else {
         spdlog::debug("{} frames to process", proc_ctx->total_frames);
-    }
-
-    // Get start time
-    proc_ctx->start_time = time(NULL);
-    if (proc_ctx->start_time == -1) {
-        perror("time");
     }
 
     AVFrame *frame = av_frame_alloc();
@@ -236,8 +257,13 @@ static int process_frames(
  * @return int 0 on success, non-zero value on error
  */
 extern "C" int process_video(
+#ifdef _WIN32
+    const wchar_t *in_fname,
+    const wchar_t *out_fname,
+#else
     const char *in_fname,
     const char *out_fname,
+#endif
     Libvideo2xLogLevel log_level,
     bool benchmark,
     AVHWDeviceType hw_type,
@@ -328,6 +354,10 @@ extern "C" int process_video(
             break;
     }
 
+    // Convert the file names to std::filesystem::path
+    std::filesystem::path in_fpath(in_fname);
+    std::filesystem::path out_fpath(out_fname);
+
     // Initialize hardware device context
     if (hw_type != AV_HWDEVICE_TYPE_NONE) {
         ret = av_hwdevice_ctx_create(&hw_ctx, hw_type, NULL, NULL, 0);
@@ -340,7 +370,7 @@ extern "C" int process_video(
     }
 
     // Initialize input
-    ret = init_decoder(hw_type, hw_ctx, in_fname, &ifmt_ctx, &dec_ctx, &vstream_idx);
+    ret = init_decoder(hw_type, hw_ctx, in_fpath, &ifmt_ctx, &dec_ctx, &vstream_idx);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::error("Failed to initialize decoder: {}", errbuf);
@@ -371,7 +401,7 @@ extern "C" int process_video(
     encoder_config->out_height = output_height;
     ret = init_encoder(
         hw_ctx,
-        out_fname,
+        out_fpath,
         ifmt_ctx,
         &ofmt_ctx,
         &enc_ctx,
@@ -409,13 +439,13 @@ extern "C" int process_video(
         };
     } else if (filter_config->filter_type == FILTER_REALESRGAN) {
         const auto &config = filter_config->config.realesrgan;
-        if (!config.model) {
+        if (!config.model_path) {
             spdlog::error("Model name must be provided for the RealESRGAN filter");
             cleanup();
             return -1;
         }
         filter = new RealesrganFilter{
-            config.gpuid, config.tta_mode, config.scaling_factor, config.model
+            config.gpuid, config.tta_mode, config.scaling_factor, config.model_path
         };
     } else {
         spdlog::error("Unknown filter type");
