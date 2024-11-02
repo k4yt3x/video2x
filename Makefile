@@ -52,7 +52,8 @@ debian:
 		glslang-tools \
 		libomp-dev \
 		libspdlog-dev \
-		libopencv-dev
+		libopencv-dev \
+		libboost-program-options-dev
 	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
 		-DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \
@@ -74,7 +75,8 @@ ubuntu:
 		libvulkan-dev \
 		glslang-tools \
 		libomp-dev \
-		libopencv-dev
+		libopencv-dev \
+		libboost-program-options-dev
 	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
 		-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
 		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x_package/usr
