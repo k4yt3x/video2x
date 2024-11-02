@@ -278,7 +278,7 @@ else()
 
     add_subdirectory(third_party/boost)
     include_directories(${PROJECT_SOURCE_DIR}/third_party/boost/libs/program_options/include)
-    set(BOOST_BASE_PATH ${CMAKE_BINARY_DIR}/third_party/boost/libs/program_options/Release)
+    set(BOOST_BASE_PATH ${CMAKE_BINARY_DIR}/third_party/boost/libs/program_options/${CMAKE_BUILD_TYPE})
 endif()
 set(BOOST_LIB Boost::program_options)
 
@@ -428,9 +428,14 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
 # Platform-specific installation rules
 if(WIN32)
     # Install Windows-specific dependencies
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(BOOST_DLL_PATH ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-x64-1_86.dll)
+    else()
+        set(BOOST_DLL_PATH ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-gd-x64-1_86.dll)
+    endif()
+
     install(FILES
         ${CMAKE_BINARY_DIR}/realesrgan_install/bin/librealesrgan-ncnn-vulkan.dll
-        ${CMAKE_BINARY_DIR}/rife_install/bin/librife-ncnn-vulkan.dll
         ${FFMPEG_BASE_PATH}/bin/swscale-8.dll
         ${FFMPEG_BASE_PATH}/bin/avcodec-61.dll
         ${FFMPEG_BASE_PATH}/bin/avdevice-61.dll
@@ -442,7 +447,7 @@ if(WIN32)
         # ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_world4100.dll
         # ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_videoio_msmf4100_64.dll
         ${NCNN_BASE_PATH}/bin/ncnn.dll
-        ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-x64-1_86.dll
+        ${BOOST_DLL_PATH}
         DESTINATION ${INSTALL_BIN_DESTINATION}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_EXECUTE
