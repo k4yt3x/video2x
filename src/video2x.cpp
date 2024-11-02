@@ -252,7 +252,7 @@ int main(int argc, char **argv) {
 
             // RealESRGAN options
             ("gpuid,g", po::value<int>(&arguments.gpuid)->default_value(0), "Vulkan GPU ID (default: 0)")
-            ("model,m", po::wvalue<std::wstring>(), "Name of the model to use")
+            ("model,m", po::wvalue<std::wstring>(&arguments.model_name), "Name of the model to use")
             ("scale,r", po::value<int>(&arguments.scaling_factor), "Scaling factor (2, 3, or 4)")
         ;
 #else
@@ -284,7 +284,7 @@ int main(int argc, char **argv) {
 
             // RealESRGAN options
             ("gpuid,g", po::value<int>(&arguments.gpuid)->default_value(0), "Vulkan GPU ID (default: 0)")
-            ("model,m", po::value<std::string>(), "Name of the model to use")
+            ("model,m", po::value<std::string>(&arguments.model_name), "Name of the model to use")
             ("scale,r", po::value<int>(&arguments.scaling_factor), "Scaling factor (2, 3, or 4)")
         ;
 #endif
@@ -366,11 +366,12 @@ int main(int argc, char **argv) {
 
         if (vm.count("model")) {
 #ifdef _WIN32
-            arguments.model_name = std::filesystem::path(vm["model"].as<std::wstring>());
+            bool is_valid_model =
+                is_valid_realesrgan_model(wstring_to_utf8(vm["model"].as<std::wstring>()));
 #else
-            arguments.model_name = vm["model"].as<std::string>();
+            bool is_valid_model = is_valid_realesrgan_model(vm["model"].as<std::string>());
 #endif
-            if (!is_valid_realesrgan_model(vm["model"].as<std::string>())) {
+            if (!is_valid_model) {
                 spdlog::error(
                     "Error: Invalid model specified. Must be 'realesrgan-plus', "
                     "'realesrgan-plus-anime', or 'realesr-animevideov3'."
@@ -382,7 +383,7 @@ int main(int argc, char **argv) {
         spdlog::error("Error parsing options: {}", e.what());
         return 1;
     } catch (const std::exception &e) {
-        spdlog::error("Exception caught: {}", e.what());
+        spdlog::error("Unexpected exception caught while parsing options: {}", e.what());
         return 1;
     }
 
@@ -507,7 +508,6 @@ int main(int argc, char **argv) {
         filter_config.config.realesrgan.model_name = arguments.model_name.c_str();
 #else
         filter_config.config.realesrgan.model_name = arguments.model_name.c_str();
-        filter_config.config.realesrgan.model_name = "realesr-animevideov4";
 #endif
     }
 
