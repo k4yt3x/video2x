@@ -56,7 +56,7 @@ struct RealESRGANConfig {
     bool tta_mode;
     int scaling_factor;
 #ifdef _WIN32
-    const wchar_t *model_path;
+    const wchar_t *model_name;
 #else
     const char *model_name;
 #endif

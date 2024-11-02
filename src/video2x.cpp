@@ -80,8 +80,12 @@ struct Arguments {
     int out_height = 0;
 
     // RealESRGAN options
+#ifdef _WIN32
+    std::wstring model_name;
+#else
+    std::string model_name;
+#endif
     int gpuid = 0;
-    std::filesystem::path model_path;
     int scaling_factor = 0;
 };
 
@@ -362,9 +366,9 @@ int main(int argc, char **argv) {
 
         if (vm.count("model")) {
 #ifdef _WIN32
-            arguments.model_path = std::filesystem::path(vm["model"].as<std::wstring>());
+            arguments.model_name = std::filesystem::path(vm["model"].as<std::wstring>());
 #else
-            arguments.model_path = vm["model"].as<std::string>();
+            arguments.model_name = vm["model"].as<std::string>();
 #endif
             if (!is_valid_realesrgan_model(vm["model"].as<std::string>())) {
                 spdlog::error(
@@ -401,7 +405,7 @@ int main(int argc, char **argv) {
 #else
     } else if (arguments.filter_type == "realesrgan") {
 #endif
-        if (arguments.scaling_factor == 0 || arguments.model_path.empty()) {
+        if (arguments.scaling_factor == 0 || arguments.model_name.empty()) {
             spdlog::error("Error: For realesrgan, scaling factor (-r) and model (-m) are required."
             );
             return 1;
@@ -500,9 +504,9 @@ int main(int argc, char **argv) {
         filter_config.config.realesrgan.tta_mode = false;
         filter_config.config.realesrgan.scaling_factor = arguments.scaling_factor;
 #ifdef _WIN32
-        filter_config.config.realesrgan.model_name = arguments.model_path.c_str();
+        filter_config.config.realesrgan.model_name = arguments.model_name.c_str();
 #else
-        filter_config.config.realesrgan.model_name = arguments.model_path.c_str();
+        filter_config.config.realesrgan.model_name = arguments.model_name.c_str();
         filter_config.config.realesrgan.model_name = "realesr-animevideov4";
 #endif
     }
