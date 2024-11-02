@@ -49,7 +49,7 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     // Check if the shader file exists
     if (!std::filesystem::exists(shader_full_path)) {
-        spdlog::error("libplacebo shader file not found: {}", shader_full_path.string());
+        spdlog::error("libplacebo shader file not found: '{}'", shader_path.string());
         return -1;
     }
 

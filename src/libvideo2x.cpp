@@ -439,13 +439,13 @@ extern "C" int process_video(
         };
     } else if (filter_config->filter_type == FILTER_REALESRGAN) {
         const auto &config = filter_config->config.realesrgan;
-        if (!config.model_path) {
+        if (!config.model_name) {
             spdlog::error("Model name must be provided for the RealESRGAN filter");
             cleanup();
             return -1;
         }
         filter = new RealesrganFilter{
-            config.gpuid, config.tta_mode, config.scaling_factor, config.model_path
+            config.gpuid, config.tta_mode, config.scaling_factor, config.model_name
         };
     } else {
         spdlog::error("Unknown filter type");

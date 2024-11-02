@@ -58,7 +58,7 @@ struct RealESRGANConfig {
 #ifdef _WIN32
     const wchar_t *model_path;
 #else
-    const char *model_path;
+    const char *model_name;
 #endif
 };
 

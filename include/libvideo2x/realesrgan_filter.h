@@ -1,8 +1,6 @@
 #ifndef REALSRGAN_FILTER_H
 #define REALSRGAN_FILTER_H
 
-#include <filesystem>
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 }
@@ -17,9 +15,11 @@ class RealesrganFilter : public Filter {
     int gpuid;
     bool tta_mode;
     int scaling_factor;
-    const std::filesystem::path model_path;
-    const std::filesystem::path custom_model_param_path;
-    const std::filesystem::path custom_model_bin_path;
+#ifdef _WIN32
+    const std::wstring model_name;
+#else
+    const std::string model_name;
+#endif
     AVRational in_time_base;
     AVRational out_time_base;
     AVPixelFormat out_pix_fmt;
@@ -30,9 +30,11 @@ class RealesrganFilter : public Filter {
         int gpuid = 0,
         bool tta_mode = false,
         int scaling_factor = 4,
-        const std::filesystem::path model = std::filesystem::path("realesr-animevideov3"),
-        const std::filesystem::path custom_model_param_path = std::filesystem::path(),
-        const std::filesystem::path custom_model_bin_path = std::filesystem::path()
+#ifdef _WIN32
+        const std::wstring model_name = L"realesr-animevideov3"
+#else
+        const std::string model_name = "realesr-animevideov3"
+#endif
     );
 
     // Destructor
