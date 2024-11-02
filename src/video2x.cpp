@@ -1,6 +1,5 @@
 #include <atomic>
 #include <chrono>
-#include <condition_variable>
 #include <csignal>
 #include <cstdarg>
 #include <cstdio>
@@ -11,7 +10,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
-#include <vector>
+#include <unordered_set>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -40,13 +39,6 @@ extern "C" {
 #endif
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
-
-// List of valid RealESRGAN models
-const std::vector<std::string> valid_realesrgan_models = {
-    "realesrgan-plus",
-    "realesrgan-plus-anime",
-    "realesr-animevideov3"
-};
 
 // Indicate if a newline needs to be printed before the next output
 std::atomic<bool> newline_required = false;
@@ -119,18 +111,22 @@ std::string wstring_to_utf8(const std::wstring &wstr) {
     int size_needed = WideCharToMultiByte(
         CP_UTF8, 0, wstr.data(), static_cast<int>(wstr.size()), nullptr, 0, nullptr, nullptr
     );
-    std::string strTo(size_needed, 0);
+    std::string converted_str(size_needed, 0);
     WideCharToMultiByte(
         CP_UTF8,
         0,
         wstr.data(),
         static_cast<int>(wstr.size()),
-        &strTo[0],
+        &converted_str[0],
         size_needed,
         nullptr,
         nullptr
     );
-    return strTo;
+    return converted_str;
+}
+#else
+std::string wstring_to_utf8(const std::string &str) {
+    return str;
 }
 #endif
 
@@ -144,8 +140,10 @@ void newline_safe_ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_
 }
 
 bool is_valid_realesrgan_model(const std::string &model) {
-    return std::find(valid_realesrgan_models.begin(), valid_realesrgan_models.end(), model) !=
-           valid_realesrgan_models.end();
+    static const std::unordered_set<std::string> valid_realesrgan_models = {
+        "realesrgan-plus", "realesrgan-plus-anime", "realesr-animevideov3"
+    };
+    return valid_realesrgan_models.count(model) > 0;
 }
 
 enum Libvideo2xLogLevel parse_log_level(const std::string &level_name) {
@@ -247,7 +245,7 @@ int main(int argc, char **argv) {
             ("crf,q", po::value<float>(&arguments.crf)->default_value(20.0f), "Constant Rate Factor (default: 20.0)")
 
             // libplacebo options
-            ("shader,s", po::wvalue<std::wstring>(), "Name or path of the GLSL shader file to use (built-in: 'anime4k-a', 'anime4k-b', 'anime4k-c', 'anime4k-a+a', 'anime4k-b+b', 'anime4k-c+a')")
+            ("shader,s", po::wvalue<std::wstring>(), "Name or path of the GLSL shader file to use")
             ("width,w", po::value<int>(&arguments.out_width), "Output width")
             ("height,h", po::value<int>(&arguments.out_height), "Output height")
 
@@ -369,7 +367,7 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
             arguments.model_path = std::filesystem::path(vm["model"].as<std::wstring>());
 #else
-            arguments.model = vm["model"].as<std::string>();
+            arguments.model_path = vm["model"].as<std::string>();
 #endif
             if (!is_valid_realesrgan_model(vm["model"].as<std::string>())) {
                 spdlog::error(
@@ -512,11 +510,7 @@ int main(int argc, char **argv) {
     }
 
     // Convert arguments to UTF-8 encoded strings
-#ifdef _WIN32
     std::string preset_str = wstring_to_utf8(arguments.preset);
-#else
-    std::string preset_str = arguments.preset;
-#endif
 
     // Setup encoder configuration
     EncoderConfig encoder_config;
@@ -560,7 +554,9 @@ int main(int argc, char **argv) {
     std::thread processing_thread(
         process_video_thread, &arguments, hw_device_type, &filter_config, &encoder_config, &proc_ctx
     );
-    spdlog::info("Video processing started; press SPACE to pause/resume, 'q' to abort.");
+    spdlog::info("Press SPACE to pause/resume, 'q' to abort.");
+
+    // Setup variables to track processing time
     auto start_time = std::chrono::steady_clock::now();
     auto paused_start = std::chrono::steady_clock::time_point();
     std::chrono::seconds total_paused_duration(0);
@@ -674,13 +670,13 @@ int main(int argc, char **argv) {
         completed = proc_ctx.completed;
     }
     if (aborted) {
-        spdlog::error("Video processing aborted");
+        spdlog::warn("Video processing aborted");
         return 2;
     } else if (!completed) {
         spdlog::error("Video processing failed");
         return 1;
     } else {
-        spdlog::info("Video processing completed successfully");
+        spdlog::info("Video processed successfully");
     }
 
     // Calculate statistics
@@ -696,7 +692,7 @@ int main(int argc, char **argv) {
     printf("====== Video2X %s summary ======\n", arguments.benchmark ? "Benchmark" : "Processing");
     printf("Video file processed: %s\n", arguments.in_fname.u8string().c_str());
     printf("Total frames processed: %ld\n", proc_ctx.processed_frames);
-    printf("Total time taken: %lds\n", time_elapsed);
+    printf("Total time taken: %llds\n", time_elapsed);
     printf("Average processing speed: %.2f FPS\n", average_speed_fps);
 
     // Print additional information if not in benchmark mode
