@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(video2x VERSION 6.0.0 LANGUAGES C CXX)
-
-# Set the C standard
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
+project(video2x VERSION 6.0.0 LANGUAGES CXX)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -18,10 +14,8 @@ endif()
 # Set the default optimization flags for Release builds
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Ox /GL /LTCG /MD /DNDEBUG")
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /GL /LTCG /MD /DNDEBUG")
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -flto")
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto")
         set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -s")
         set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -s")
@@ -38,9 +32,10 @@ endif()
 # Build options
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
 option(BUILD_VIDEO2X_CLI "Build the video2x executable" ON)
-option(USE_SYSTEM_SPDLOG "Use system spdlog library" ON)
 option(USE_SYSTEM_OPENCV "Use system OpenCV library" ON)
 option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
+option(USE_SYSTEM_SPDLOG "Use system spdlog library" ON)
+option(USE_SYSTEM_BOOST "Use system Boost library" ON)
 
 # Generate the version header file
 configure_file(
@@ -53,16 +48,6 @@ configure_file(
 set(ALL_INCLUDE_DIRS)
 set(ALL_LIBRARIES)
 
-# spdlog
-if (USE_SYSTEM_SPDLOG)
-    find_package(spdlog REQUIRED)
-    list(APPEND ALL_INCLUDE_DIRS ${spdlog_INCLUDE_DIRS})
-    list(APPEND ALL_LIBRARIES spdlog::spdlog)
-else()
-    add_subdirectory(third_party/spdlog)
-    list(APPEND ALL_LIBRARIES spdlog::spdlog_header_only)
-endif()
-
 # Platform-specific dependencies
 if(WIN32)
     # Define base paths for FFmpeg and ncnn
@@ -71,7 +56,7 @@ if(WIN32)
     set(OPENCV_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/opencv-shared)
 
     # FFmpeg
-    list(APPEND ALL_LIBRARIES
+    set(FFMPEG_LIB
         ${FFMPEG_BASE_PATH}/lib/avcodec.lib
         ${FFMPEG_BASE_PATH}/lib/avdevice.lib
         ${FFMPEG_BASE_PATH}/lib/avfilter.lib
@@ -79,6 +64,7 @@ if(WIN32)
         ${FFMPEG_BASE_PATH}/lib/avutil.lib
         ${FFMPEG_BASE_PATH}/lib/swscale.lib
     )
+    list(APPEND ALL_LIBRARIES ${FFMPEG_LIB})
     list(APPEND ALL_INCLUDE_DIRS ${FFMPEG_BASE_PATH}/include)
 
     # ncnn
@@ -99,7 +85,7 @@ if(WIN32)
     list(APPEND ALL_INCLUDE_DIRS ${NCNN_BASE_PATH}/include/ncnn)
 
     # OpenCV
-    list(APPEND ALL_LIBRARIES ${OPENCV_BASE_PATH}/build/x64/vc16/lib/opencv_world4100.lib)
+    # list(APPEND ALL_LIBRARIES ${OPENCV_BASE_PATH}/build/x64/vc16/lib/opencv_world4100.lib)
     list(APPEND ALL_INCLUDE_DIRS ${OPENCV_BASE_PATH}/build/include)
 else()
     # FFmpeg
@@ -114,11 +100,13 @@ else()
     )
 
     # Loop through each package to find and collect include dirs and libraries
+    set(FFMPEG_LIB)
     foreach(PKG ${FFMPEG_REQUIRED_PKGS})
         pkg_check_modules(${PKG} REQUIRED ${PKG})
         list(APPEND ALL_INCLUDE_DIRS ${${PKG}_INCLUDE_DIRS})
-        list(APPEND ALL_LIBRARIES ${${PKG}_LIBRARIES})
+        list(APPEND FFMPEG_LIB ${${PKG}_LIBRARIES})
     endforeach()
+    list(APPEND ALL_LIBRARIES ${FFMPEG_LIB})
 
     # OpenCV
     if (USE_SYSTEM_OPENCV)
@@ -165,7 +153,7 @@ else()
             ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/core/include
             ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/videoio/include
         )
-        list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
+        # list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
     endif() # USE_SYSTEM_OPENCV
 endif() # WIN32
 
@@ -268,6 +256,31 @@ else()
     add_subdirectory(third_party/ncnn)
 endif()
 
+# spdlog
+if (USE_SYSTEM_SPDLOG)
+    find_package(spdlog REQUIRED)
+    list(APPEND ALL_INCLUDE_DIRS ${spdlog_INCLUDE_DIRS})
+    set(SPDLOG_LIB spdlog::spdlog)
+else()
+    add_subdirectory(third_party/spdlog)
+    set(SPDLOG_LIB spdlog::spdlog_header_only)
+endif()
+list(APPEND ALL_LIBRARIES ${SPDLOG_LIB})
+
+# Boost
+if (USE_SYSTEM_BOOST)
+    find_package(Boost REQUIRED COMPONENTS program_options)
+    list(APPEND ALL_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+else()
+    option(Boost_USE_STATIC_LIBS "" ON)
+    option(Boost_USE_STATIC_RUNTIME "" ON)
+    option(Boost_COMPONENTS "program_options")
+
+    add_subdirectory(third_party/boost)
+    include_directories(${PROJECT_SOURCE_DIR}/third_party/boost/libs/program_options/include)
+endif()
+set(BOOST_LIB Boost::program_options)
+
 # Include ExternalProject module
 include(ExternalProject)
 
@@ -288,11 +301,17 @@ ExternalProject_Add(
 list(REMOVE_DUPLICATES ALL_INCLUDE_DIRS)
 list(REMOVE_DUPLICATES ALL_LIBRARIES)
 
-# Add all source files for libvideo2x
-file(GLOB LIBVIDEO2X_SOURCES src/*.cpp)
-
 # Create the shared library 'libvideo2x'
-add_library(libvideo2x ${LIBVIDEO2X_SOURCES})
+add_library(libvideo2x
+    src/conversions.cpp
+    src/decoder.cpp
+    src/encoder.cpp
+    src/fsutils.cpp
+    src/libplacebo_filter.cpp
+    src/libplacebo.cpp
+    src/libvideo2x.cpp
+    src/realesrgan_filter.cpp
+)
 target_compile_definitions(libvideo2x PRIVATE LIBVIDEO2X_EXPORTS)
 if(WIN32)
     set_target_properties(libvideo2x PROPERTIES OUTPUT_NAME libvideo2x)
@@ -321,13 +340,13 @@ target_compile_options(libvideo2x PRIVATE
 
 # Define the path to the built libresrgan-ncnn-vulkan library
 if(WIN32)
-    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.lib)
+    list(APPEND ALL_LIBRARIES ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.lib)
 else()
-    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
+    list(APPEND ALL_LIBRARIES ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
 endif()
 
 # Link the shared library with the dependencies
-target_link_libraries(libvideo2x PRIVATE ${ALL_LIBRARIES} ${REALESRGAN_LIB})
+target_link_libraries(libvideo2x PRIVATE ${ALL_LIBRARIES})
 
 if(NOT WIN32)
     if (USE_SYSTEM_NCNN)
@@ -339,7 +358,7 @@ endif()
 
 # Create the executable 'video2x'
 if (BUILD_VIDEO2X_CLI)
-    add_executable(video2x src/video2x.c src/getopt.c)
+    add_executable(video2x src/video2x.cpp)
     set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
 
     # Include directories for the executable
@@ -353,7 +372,7 @@ if (BUILD_VIDEO2X_CLI)
     target_compile_options(video2x PRIVATE $<$<CONFIG:Debug>:-g -DDEBUG>)
 
     # Link the executable with the shared library
-    target_link_libraries(video2x PRIVATE ${ALL_LIBRARIES} libvideo2x)
+    target_link_libraries(video2x PRIVATE libvideo2x ${FFMPEG_LIB} ${SPDLOG_LIB} ${BOOST_LIB})
 endif()
 
 # Define the default installation directories
@@ -427,14 +446,21 @@ if(WIN32)
                     GROUP_READ GROUP_EXECUTE
                     WORLD_READ WORLD_EXECUTE
     )
-    install(FILES ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_world4100.dll
-                  ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_videoio_msmf4100_64.dll
+    # install(FILES ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_world4100.dll
+    #               ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_videoio_msmf4100_64.dll
+    #     DESTINATION ${INSTALL_BIN_DESTINATION}
+    #     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    #                 GROUP_READ GROUP_EXECUTE
+    #                 WORLD_READ WORLD_EXECUTE
+    # )
+    install(FILES ${NCNN_BASE_PATH}/bin/ncnn.dll
         DESTINATION ${INSTALL_BIN_DESTINATION}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_EXECUTE
                     WORLD_READ WORLD_EXECUTE
     )
-    install(FILES ${NCNN_BASE_PATH}/bin/ncnn.dll
+    set(BOOST_PROGRAM_OPTIONS_PATH ${CMAKE_BINARY_DIR}/third_party/boost/libs/program_options/${CMAKE_BUILD_TYPE})
+    install(FILES ${BOOST_PROGRAM_OPTIONS_PATH}/boost_program_options-vc143-mt-x64-1_86.dll
         DESTINATION ${INSTALL_BIN_DESTINATION}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_EXECUTE
