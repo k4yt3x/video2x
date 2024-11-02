@@ -278,6 +278,7 @@ else()
 
     add_subdirectory(third_party/boost)
     include_directories(${PROJECT_SOURCE_DIR}/third_party/boost/libs/program_options/include)
+    set(BOOST_BASE_PATH ${CMAKE_BINARY_DIR}/third_party/boost/libs/program_options/Release)
 endif()
 set(BOOST_LIB Boost::program_options)
 
@@ -427,40 +428,21 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
 # Platform-specific installation rules
 if(WIN32)
     # Install Windows-specific dependencies
-    install(FILES ${CMAKE_BINARY_DIR}/realesrgan_install/bin/librealesrgan-ncnn-vulkan.dll
-        DESTINATION ${INSTALL_BIN_DESTINATION}
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
-    )
-    install(FILES ${FFMPEG_BASE_PATH}/bin/swscale-8.dll
-                  ${FFMPEG_BASE_PATH}/bin/avcodec-61.dll
-                  ${FFMPEG_BASE_PATH}/bin/avdevice-61.dll
-                  ${FFMPEG_BASE_PATH}/bin/avfilter-10.dll
-                  ${FFMPEG_BASE_PATH}/bin/avformat-61.dll
-                  ${FFMPEG_BASE_PATH}/bin/avutil-59.dll
-                  ${FFMPEG_BASE_PATH}/bin/postproc-58.dll
-                  ${FFMPEG_BASE_PATH}/bin/swresample-5.dll
-        DESTINATION ${INSTALL_BIN_DESTINATION}
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
-    )
-    # install(FILES ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_world4100.dll
-    #               ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_videoio_msmf4100_64.dll
-    #     DESTINATION ${INSTALL_BIN_DESTINATION}
-    #     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    #                 GROUP_READ GROUP_EXECUTE
-    #                 WORLD_READ WORLD_EXECUTE
-    # )
-    install(FILES ${NCNN_BASE_PATH}/bin/ncnn.dll
-        DESTINATION ${INSTALL_BIN_DESTINATION}
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
-    )
-    set(BOOST_PROGRAM_OPTIONS_PATH ${CMAKE_BINARY_DIR}/third_party/boost/libs/program_options/${CMAKE_BUILD_TYPE})
-    install(FILES ${BOOST_PROGRAM_OPTIONS_PATH}/boost_program_options-vc143-mt-x64-1_86.dll
+    install(FILES
+        ${CMAKE_BINARY_DIR}/realesrgan_install/bin/librealesrgan-ncnn-vulkan.dll
+        ${CMAKE_BINARY_DIR}/rife_install/bin/librife-ncnn-vulkan.dll
+        ${FFMPEG_BASE_PATH}/bin/swscale-8.dll
+        ${FFMPEG_BASE_PATH}/bin/avcodec-61.dll
+        ${FFMPEG_BASE_PATH}/bin/avdevice-61.dll
+        ${FFMPEG_BASE_PATH}/bin/avfilter-10.dll
+        ${FFMPEG_BASE_PATH}/bin/avformat-61.dll
+        ${FFMPEG_BASE_PATH}/bin/avutil-59.dll
+        ${FFMPEG_BASE_PATH}/bin/postproc-58.dll
+        ${FFMPEG_BASE_PATH}/bin/swresample-5.dll
+        # ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_world4100.dll
+        # ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_videoio_msmf4100_64.dll
+        ${NCNN_BASE_PATH}/bin/ncnn.dll
+        ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-x64-1_86.dll
         DESTINATION ${INSTALL_BIN_DESTINATION}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_EXECUTE
