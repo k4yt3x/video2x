@@ -31,7 +31,8 @@ jobs:
             libvulkan-dev \
             glslang-tools \
             libomp-dev \
-            libopencv-dev
+            libopencv-dev \
+            libboost-program-options-dev
       - name: Build Video2X
         run: |
           mkdir -p /tmp/build /tmp/install
@@ -83,7 +84,7 @@ jobs:
         shell: pwsh
         run: |
           cmake -S . -B build `
-            -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DUSE_SYSTEM_OPENCV=OFF `
+            -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DUSE_SYSTEM_OPENCV=OFF -DUSE_SYSTEM_BOOST=OFF `
             -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=build/video2x_install
           cmake --build build --config Debug --parallel --target install
       - name: Upload artifacts
