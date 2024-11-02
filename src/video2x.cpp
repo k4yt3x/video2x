@@ -173,6 +173,7 @@ std::mutex proc_ctx_mutex;
 // Wrapper function for video processing thread
 void process_video_thread(
     Arguments *arguments,
+    int *proc_ret,
     AVHWDeviceType hw_device_type,
     FilterConfig *filter_config,
     EncoderConfig *encoder_config,
@@ -188,7 +189,7 @@ void process_video_thread(
     const char *out_fname = arguments->out_fname.c_str();
 #endif
 
-    int result = process_video(
+    *proc_ret = process_video(
         in_fname,
         out_fname,
         log_level,
@@ -202,10 +203,6 @@ void process_video_thread(
     {
         std::lock_guard<std::mutex> lock(proc_ctx_mutex);
         proc_ctx->completed = true;
-    }
-
-    if (result != 0) {
-        spdlog::error("Video processing failed with error code: {}", result);
     }
 }
 
@@ -503,9 +500,10 @@ int main(int argc, char **argv) {
         filter_config.config.realesrgan.tta_mode = false;
         filter_config.config.realesrgan.scaling_factor = arguments.scaling_factor;
 #ifdef _WIN32
-        filter_config.config.realesrgan.model_path = arguments.model_path.c_str();
+        filter_config.config.realesrgan.model_name = arguments.model_path.c_str();
 #else
-        filter_config.config.realesrgan.model_path = arguments.model_path.c_str();
+        filter_config.config.realesrgan.model_name = arguments.model_path.c_str();
+        filter_config.config.realesrgan.model_name = "realesr-animevideov4";
 #endif
     }
 
@@ -551,8 +549,15 @@ int main(int argc, char **argv) {
     av_log_set_callback(newline_safe_ffmpeg_log_callback);
 
     // Create a thread for video processing
+    int proc_ret = 0;
     std::thread processing_thread(
-        process_video_thread, &arguments, hw_device_type, &filter_config, &encoder_config, &proc_ctx
+        process_video_thread,
+        &arguments,
+        &proc_ret,
+        hw_device_type,
+        &filter_config,
+        &encoder_config,
+        &proc_ctx
     );
     spdlog::info("Press SPACE to pause/resume, 'q' to abort.");
 
@@ -663,17 +668,16 @@ int main(int argc, char **argv) {
     }
 
     // Print final message based on processing result
-    bool aborted, completed;
+    bool aborted;
     {
         std::lock_guard<std::mutex> lock(proc_ctx_mutex);
         aborted = proc_ctx.abort;
-        completed = proc_ctx.completed;
     }
     if (aborted) {
         spdlog::warn("Video processing aborted");
         return 2;
-    } else if (!completed) {
-        spdlog::error("Video processing failed");
+    } else if (proc_ret != 0) {
+        spdlog::error("Video processing failed with error code {}", proc_ret);
         return 1;
     } else {
         spdlog::info("Video processed successfully");
