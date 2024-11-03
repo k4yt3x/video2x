@@ -359,7 +359,7 @@ endif()
 
 # Create the executable 'video2x'
 if (BUILD_VIDEO2X_CLI)
-    add_executable(video2x src/video2x.cpp)
+    add_executable(video2x src/video2x.cpp src/timer.cpp)
     set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
 
     # Include directories for the executable
@@ -367,6 +367,7 @@ if (BUILD_VIDEO2X_CLI)
         ${ALL_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
         ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/include/libvideo2x
     )
 
     # Compile options for the executable

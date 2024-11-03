@@ -40,6 +40,8 @@ extern "C" {
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+#include "libvideo2x/timer.h"
+
 // Indicate if a newline needs to be printed before the next output
 std::atomic<bool> newline_required = false;
 
@@ -565,11 +567,9 @@ int main(int argc, char **argv) {
     );
     spdlog::info("Press SPACE to pause/resume, 'q' to abort.");
 
-    // Setup variables to track processing time
-    auto start_time = std::chrono::steady_clock::now();
-    auto paused_start = std::chrono::steady_clock::time_point();
-    std::chrono::seconds total_paused_duration(0);
-    long long time_elapsed = 0;
+    // Setup timer
+    Timer timer;
+    timer.start();
 
     // Enable non-blocking input
 #ifndef _WIN32
@@ -607,12 +607,10 @@ int main(int argc, char **argv) {
                 if (proc_ctx.pause) {
                     putchar('\n');
                     spdlog::info("Processing paused. Press SPACE to resume, 'q' to abort.");
-                    paused_start = std::chrono::steady_clock::now();
+                    timer.pause();
                 } else {
                     spdlog::info("Resuming processing...");
-                    total_paused_duration += std::chrono::duration_cast<std::chrono::seconds>(
-                        std::chrono::steady_clock::now() - paused_start
-                    );
+                    timer.resume();
                 }
             }
         } else if (ch == 'q' || ch == 'Q') {
@@ -641,12 +639,7 @@ int main(int argc, char **argv) {
                 double percentage = total_frames > 0 ? static_cast<double>(processed_frames) *
                                                            100.0 / static_cast<double>(total_frames)
                                                      : 0.0;
-                auto now = std::chrono::steady_clock::now();
-                time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-                                   now - start_time - total_paused_duration
-                )
-                                   .count();
-
+                int64_t time_elapsed = timer.get_elapsed_time() / 1000;
                 std::cout << "\rProcessing frame " << processed_frames << "/" << total_frames
                           << " (" << percentage << "%); time elapsed: " << time_elapsed << "s";
                 std::cout.flush();
@@ -693,6 +686,7 @@ int main(int argc, char **argv) {
         std::lock_guard<std::mutex> lock(proc_ctx_mutex);
         processed_frames = proc_ctx.processed_frames;
     }
+    int64_t time_elapsed = timer.get_elapsed_time() / 1000;
     float average_speed_fps = static_cast<float>(processed_frames) /
                               (time_elapsed > 0 ? static_cast<float>(time_elapsed) : 1);
 
@@ -700,7 +694,7 @@ int main(int argc, char **argv) {
     printf("====== Video2X %s summary ======\n", arguments.benchmark ? "Benchmark" : "Processing");
     printf("Video file processed: %s\n", arguments.in_fname.u8string().c_str());
     printf("Total frames processed: %ld\n", proc_ctx.processed_frames);
-    printf("Total time taken: %llds\n", time_elapsed);
+    printf("Total time taken: %ld s\n", time_elapsed);
     printf("Average processing speed: %.2f FPS\n", average_speed_fps);
 
     // Print additional information if not in benchmark mode
