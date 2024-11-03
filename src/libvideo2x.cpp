@@ -55,9 +55,18 @@ static int process_frames(
         spdlog::debug("Read total number of frames from 'nb_frames': {}", proc_ctx->total_frames);
     } else {
         spdlog::warn("Estimating the total number of frames from duration * fps");
-        // Calculate duration in seconds
-        double duration_secs = static_cast<double>(ifmt_ctx->streams[vstream_idx]->duration) *
-                               av_q2d(ifmt_ctx->streams[vstream_idx]->time_base);
+
+        // Get the duration of the video
+        double duration_secs = 0.0;
+        if (ifmt_ctx->duration != AV_NOPTS_VALUE) {
+            duration_secs =
+                static_cast<double>(ifmt_ctx->duration) / static_cast<double>(AV_TIME_BASE);
+        } else if (ifmt_ctx->streams[vstream_idx]->duration != AV_NOPTS_VALUE) {
+            duration_secs = static_cast<double>(ifmt_ctx->streams[vstream_idx]->duration) *
+                            av_q2d(ifmt_ctx->streams[vstream_idx]->time_base);
+        } else {
+            spdlog::warn("Unable to determine video duration");
+        }
         spdlog::debug("Video duration: {}s", duration_secs);
 
         // Calculate average FPS
@@ -74,8 +83,8 @@ static int process_frames(
             spdlog::debug("Unable to estimate the average frame rate with 'av_guess_frame_rate'");
             fps = av_q2d(ifmt_ctx->streams[vstream_idx]->time_base);
         }
-        if (fps <= 0) {
-            spdlog::debug("Unable to estimate the video's average frame rate");
+        if (fps <= 0 || duration_secs <= 0) {
+            spdlog::warn("Unable to estimate the video's average frame rate");
         } else {
             // Calculate total frames
             proc_ctx->total_frames = static_cast<int64_t>(duration_secs * fps);
@@ -83,7 +92,7 @@ static int process_frames(
     }
 
     // Check if the total number of frames is still 0
-    if (proc_ctx->total_frames == 0) {
+    if (proc_ctx->total_frames <= 0) {
         spdlog::warn("Unable to determine the total number of frames");
     } else {
         spdlog::debug("{} frames to process", proc_ctx->total_frames);
