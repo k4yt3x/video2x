@@ -1,4 +1,4 @@
-.PHONY: build static debug debian ubuntu clean \
+.PHONY: build static debug windows windows-debug debian ubuntu clean \
 	test-realesrgan test-libplacebo \
 	memcheck-realesrgan memcheck-libplacebo \
 	heaptrack-realesrgan heaptrack-libplacebo
@@ -37,6 +37,26 @@ debug:
 		-DCMAKE_BUILD_TYPE=Debug
 	cmake --build $(BINDIR) --config Debug --parallel
 	cp $(BINDIR)/compile_commands.json .
+
+windows:
+	cmake -S . -B $(BINDIR) \
+		-DUSE_SYSTEM_NCNN=OFF \
+		-DUSE_SYSTEM_OPENCV=OFF \
+		-DUSE_SYSTEM_SPDLOG=OFF \
+		-DUSE_SYSTEM_BOOST=OFF \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX=build/libvideo2x-shared
+	cmake --build $(BINDIR) --config Release --parallel --target install
+
+windows-debug:
+	cmake -S . -B $(BINDIR) \
+		-DUSE_SYSTEM_NCNN=OFF \
+		-DUSE_SYSTEM_OPENCV=OFF \
+		-DUSE_SYSTEM_SPDLOG=OFF \
+		-DUSE_SYSTEM_BOOST=OFF \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_INSTALL_PREFIX=build/libvideo2x-shared
+	cmake --build $(BINDIR) --config Debug --parallel --target install
 
 debian:
 	apt-get update
