@@ -4,6 +4,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include "char_defs.h"
 #include "fsutils.h"
 #include "libplacebo.h"
 
@@ -43,17 +44,14 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     } else {
         // Construct the fallback path using std::filesystem
         shader_full_path = find_resource_file(
-#ifdef _WIN32
-            std::filesystem::path("models") / L"libplacebo" / (shader_path.wstring() + L".glsl")
-#else
-            std::filesystem::path("models") / "libplacebo" / (shader_path.string() + ".glsl")
-#endif
+            std::filesystem::path(STR("models")) / STR("libplacebo") /
+            (path_to_string_type(shader_path) + STR(".glsl"))
         );
     }
 
     // Check if the shader file exists
     if (!std::filesystem::exists(shader_full_path)) {
-        spdlog::error("libplacebo shader file not found: '{}'", shader_path.string());
+        spdlog::error("libplacebo shader file not found: '{}'", shader_path.u8string());
         return -1;
     }
 

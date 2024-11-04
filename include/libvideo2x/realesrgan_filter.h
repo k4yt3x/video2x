@@ -5,6 +5,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 }
 
+#include "char_defs.h"
 #include "filter.h"
 #include "realesrgan.h"
 
@@ -15,11 +16,7 @@ class RealesrganFilter : public Filter {
     int gpuid;
     bool tta_mode;
     int scaling_factor;
-#ifdef _WIN32
-    const std::wstring model_name;
-#else
-    const std::string model_name;
-#endif
+    const StringType model_name;
     AVRational in_time_base;
     AVRational out_time_base;
     AVPixelFormat out_pix_fmt;
@@ -30,11 +27,7 @@ class RealesrganFilter : public Filter {
         int gpuid = 0,
         bool tta_mode = false,
         int scaling_factor = 4,
-#ifdef _WIN32
-        const std::wstring model_name = L"realesr-animevideov3"
-#else
-        const std::string model_name = "realesr-animevideov3"
-#endif
+        const StringType model_name = STR("realesr-animevideov3")
     );
 
     // Destructor

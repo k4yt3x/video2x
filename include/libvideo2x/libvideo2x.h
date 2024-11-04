@@ -5,6 +5,17 @@
 #include <stdint.h>
 #include <time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#ifdef __cplusplus
+}
+#endif
+
+#include "char_defs.h"
+
 #ifdef _WIN32
 #ifdef LIBVIDEO2X_EXPORTS
 #define LIBVIDEO2X_API __declspec(dllexport)
@@ -18,9 +29,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
 
 // Enum to specify filter type
 enum FilterType {
@@ -43,11 +51,7 @@ enum Libvideo2xLogLevel {
 struct LibplaceboConfig {
     int out_width;
     int out_height;
-#ifdef _WIN32
-    const wchar_t *shader_path;
-#else
-    const char *shader_path;
-#endif
+    const CharType *shader_path;
 };
 
 // Configuration for RealESRGAN filter
@@ -55,11 +59,7 @@ struct RealESRGANConfig {
     int gpuid;
     bool tta_mode;
     int scaling_factor;
-#ifdef _WIN32
-    const wchar_t *model_name;
-#else
-    const char *model_name;
-#endif
+    const CharType *model_name;
 };
 
 // Unified filter configuration
@@ -93,15 +93,22 @@ struct VideoProcessingContext {
     bool completed;
 };
 
-// C-compatible process_video function
+/**
+ * @brief Process a video file using the selected filter and encoder settings.
+ *
+ * @param[in] in_fname Path to the input video file
+ * @param[in] out_fname Path to the output video file
+ * @param[in] log_level Log level
+ * @param[in] benchmark Flag to enable benchmarking mode
+ * @param[in] hw_type Hardware device type
+ * @param[in] filter_config Filter configurations
+ * @param[in] encoder_config Encoder configurations
+ * @param[in,out] proc_ctx Video processing context
+ * @return int 0 on success, non-zero value on error
+ */
 LIBVIDEO2X_API int process_video(
-#ifdef _WIN32
-    const wchar_t *in_fname,
-    const wchar_t *out_fname,
-#else
-    const char *in_fname,
-    const char *out_fname,
-#endif
+    const CharType *in_fname,
+    const CharType *out_fname,
     enum Libvideo2xLogLevel log_level,
     bool benchmark,
     enum AVHWDeviceType hw_device_type,

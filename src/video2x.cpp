@@ -36,10 +36,14 @@ extern "C" {
 
 #ifdef _WIN32
 #define BOOST_PROGRAM_OPTIONS_WCHAR_T
+#define PO_STR_VALUE po::wvalue
+#else
+#define PO_STR_VALUE po::value
 #endif
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+#include "libvideo2x/char_defs.h"
 #include "libvideo2x/timer.h"
 
 // Indicate if a newline needs to be printed before the next output
@@ -48,31 +52,19 @@ std::atomic<bool> newline_required = false;
 // Structure to hold parsed arguments
 struct Arguments {
     // General options
-#ifdef _WIN32
-    std::wstring loglevel = L"info";
-    std::wstring filter_type;
-    std::wstring hwaccel = L"none";
-#else
-    std::string loglevel = "info";
-    std::string filter_type;
-    std::string hwaccel = "none";
-#endif
-    bool noprogress = false;
     std::filesystem::path in_fname;
     std::filesystem::path out_fname;
+    StringType filter_type;
+    StringType hwaccel = STR("none");
     bool nocopystreams = false;
     bool benchmark = false;
+    StringType loglevel = STR("info");
+    bool noprogress = false;
 
     // Encoder options
-#ifdef _WIN32
-    std::wstring codec = L"libx264";
-    std::wstring pix_fmt;
-    std::wstring preset = L"slow";
-#else
-    std::string codec = "libx264";
-    std::string pix_fmt;
-    std::string preset = "slow";
-#endif
+    StringType codec = STR("libx264");
+    StringType preset = STR("slow");
+    StringType pix_fmt;
     int64_t bitrate = 0;
     float crf = 20.0f;
 
@@ -82,12 +74,8 @@ struct Arguments {
     int out_height = 0;
 
     // RealESRGAN options
-#ifdef _WIN32
-    std::wstring model_name;
-#else
-    std::string model_name;
-#endif
     int gpuid = 0;
+    StringType model_name;
     int scaling_factor = 0;
 };
 
@@ -145,27 +133,27 @@ void newline_safe_ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_
     av_log_default_callback(ptr, level, fmt, vl);
 }
 
-bool is_valid_realesrgan_model(const std::string &model) {
-    static const std::unordered_set<std::string> valid_realesrgan_models = {
-        "realesrgan-plus", "realesrgan-plus-anime", "realesr-animevideov3"
+bool is_valid_realesrgan_model(const StringType &model) {
+    static const std::unordered_set<StringType> valid_realesrgan_models = {
+        STR("realesrgan-plus"), STR("realesrgan-plus-anime"), STR("realesr-animevideov3")
     };
     return valid_realesrgan_models.count(model) > 0;
 }
 
-enum Libvideo2xLogLevel parse_log_level(const std::string &level_name) {
-    if (level_name == "trace") {
+enum Libvideo2xLogLevel parse_log_level(const StringType &level_name) {
+    if (level_name == STR("trace")) {
         return LIBVIDEO2X_LOG_LEVEL_TRACE;
-    } else if (level_name == "debug") {
+    } else if (level_name == STR("debug")) {
         return LIBVIDEO2X_LOG_LEVEL_DEBUG;
-    } else if (level_name == "info") {
+    } else if (level_name == STR("info")) {
         return LIBVIDEO2X_LOG_LEVEL_INFO;
-    } else if (level_name == "warning" || level_name == "warn") {
+    } else if (level_name == STR("warning") || level_name == STR("warn")) {
         return LIBVIDEO2X_LOG_LEVEL_WARNING;
-    } else if (level_name == "error") {
+    } else if (level_name == STR("error")) {
         return LIBVIDEO2X_LOG_LEVEL_ERROR;
-    } else if (level_name == "critical") {
+    } else if (level_name == STR("critical")) {
         return LIBVIDEO2X_LOG_LEVEL_CRITICAL;
-    } else if (level_name == "off" || level_name == "none") {
+    } else if (level_name == STR("off") || level_name == STR("none")) {
         return LIBVIDEO2X_LOG_LEVEL_OFF;
     } else {
         spdlog::warn("Invalid log level specified. Defaulting to 'info'.");
@@ -185,15 +173,21 @@ void process_video_thread(
     EncoderConfig *encoder_config,
     VideoProcessingContext *proc_ctx
 ) {
-    enum Libvideo2xLogLevel log_level = parse_log_level(wstring_to_utf8(arguments->loglevel));
+    enum Libvideo2xLogLevel log_level = parse_log_level(arguments->loglevel);
+
+    StringType in_fname_string;
+    StringType out_fname_string;
 
 #ifdef _WIN32
-    const wchar_t *in_fname = arguments->in_fname.c_str();
-    const wchar_t *out_fname = arguments->out_fname.c_str();
+    in_fname_string = StringType(arguments->in_fname.wstring());
+    out_fname_string = StringType(arguments->out_fname.wstring());
 #else
-    const char *in_fname = arguments->in_fname.c_str();
-    const char *out_fname = arguments->out_fname.c_str();
+    in_fname_string = StringType(arguments->in_fname.string());
+    out_fname_string = StringType(arguments->out_fname.string());
 #endif
+
+    const CharType *in_fname = in_fname_string.c_str();
+    const CharType *out_fname = out_fname_string.c_str();
 
     *proc_ret = process_video(
         in_fname,
@@ -225,71 +219,37 @@ int main(int argc, char **argv) {
     try {
         po::options_description desc("Allowed options");
 
-#ifdef _WIN32
         desc.add_options()
             ("help", "Display this help page")
             ("version,v", "Print program version")
-            ("loglevel", po::wvalue<std::wstring>(&arguments.loglevel), "Set log level (trace, debug, info, warn, error, critical, none)")
+            ("loglevel", PO_STR_VALUE<StringType>(&arguments.loglevel)->default_value(STR("info"), "info"), "Set log level (trace, debug, info, warn, error, critical, none)")
             ("noprogress", po::bool_switch(&arguments.noprogress), "Do not display the progress bar")
 
             // General Processing Options
-            ("input,i", po::wvalue<std::wstring>(), "Input video file path")
-            ("output,o", po::wvalue<std::wstring>(), "Output video file path")
-            ("filter,f", po::wvalue<std::wstring>(&arguments.filter_type), "Filter to use: 'libplacebo' or 'realesrgan'")
-            ("hwaccel,a", po::wvalue<std::wstring>(&arguments.hwaccel), "Hardware acceleration method (default: none)")
+            ("input,i", PO_STR_VALUE<StringType>(), "Input video file path")
+            ("output,o", PO_STR_VALUE<StringType>(), "Output video file path")
+            ("filter,f", PO_STR_VALUE<StringType>(&arguments.filter_type), "Filter to use: 'libplacebo' or 'realesrgan'")
+            ("hwaccel,a", PO_STR_VALUE<StringType>(&arguments.hwaccel)->default_value(STR("none"), "none"), "Hardware acceleration method (default: none)")
             ("nocopystreams", po::bool_switch(&arguments.nocopystreams), "Do not copy audio and subtitle streams")
             ("benchmark", po::bool_switch(&arguments.benchmark), "Discard processed frames and calculate average FPS")
 
             // Encoder options
-            ("codec,c", po::wvalue<std::wstring>(&arguments.codec), "Output codec (default: libx264)")
-            ("preset,p", po::wvalue<std::wstring>(&arguments.preset), "Encoder preset (default: slow)")
-            ("pixfmt,x", po::wvalue<std::wstring>(&arguments.pix_fmt), "Output pixel format (default: auto)")
+            ("codec,c", PO_STR_VALUE<StringType>(&arguments.codec)->default_value(STR("libx264"), "libx264"), "Output codec (default: libx264)")
+            ("preset,p", PO_STR_VALUE<StringType>(&arguments.preset)->default_value(STR("slow"), "slow"), "Encoder preset (default: slow)")
+            ("pixfmt,x", PO_STR_VALUE<StringType>(&arguments.pix_fmt), "Output pixel format (default: auto)")
             ("bitrate,b", po::value<int64_t>(&arguments.bitrate)->default_value(0), "Bitrate in bits per second (default: 0 (VBR))")
             ("crf,q", po::value<float>(&arguments.crf)->default_value(20.0f), "Constant Rate Factor (default: 20.0)")
 
             // libplacebo options
-            ("shader,s", po::wvalue<std::wstring>(), "Name or path of the GLSL shader file to use")
+            ("shader,s", PO_STR_VALUE<StringType>(), "Name or path of the GLSL shader file to use")
             ("width,w", po::value<int>(&arguments.out_width), "Output width")
             ("height,h", po::value<int>(&arguments.out_height), "Output height")
 
             // RealESRGAN options
             ("gpuid,g", po::value<int>(&arguments.gpuid)->default_value(0), "Vulkan GPU ID (default: 0)")
-            ("model,m", po::wvalue<std::wstring>(&arguments.model_name), "Name of the model to use")
+            ("model,m", PO_STR_VALUE<StringType>(&arguments.model_name), "Name of the model to use")
             ("scale,r", po::value<int>(&arguments.scaling_factor), "Scaling factor (2, 3, or 4)")
         ;
-#else
-        desc.add_options()
-            ("help", "Display this help page")
-            ("version,v", "Print program version")
-            ("loglevel", po::value<std::string>(&arguments.loglevel)->default_value("info"), "Set log level (trace, debug, info, warn, error, critical, none)")
-            ("noprogress", po::bool_switch(&arguments.noprogress), "Do not display the progress bar")
-
-            // General Processing Options
-            ("input,i", po::value<std::string>(), "Input video file path")
-            ("output,o", po::value<std::string>(), "Output video file path")
-            ("filter,f", po::value<std::string>(&arguments.filter_type), "Filter to use: 'libplacebo' or 'realesrgan'")
-            ("hwaccel,a", po::value<std::string>(&arguments.hwaccel)->default_value("none"), "Hardware acceleration method (default: none)")
-            ("nocopystreams", po::bool_switch(&arguments.nocopystreams), "Do not copy audio and subtitle streams")
-            ("benchmark", po::bool_switch(&arguments.benchmark), "Discard processed frames and calculate average FPS")
-
-            // Encoder options
-            ("codec,c", po::value<std::string>(&arguments.codec)->default_value("libx264"), "Output codec (default: libx264)")
-            ("preset,p", po::value<std::string>(&arguments.preset)->default_value("slow"), "Encoder preset (default: slow)")
-            ("pixfmt,x", po::value<std::string>(&arguments.pix_fmt), "Output pixel format (default: auto)")
-            ("bitrate,b", po::value<int64_t>(&arguments.bitrate)->default_value(0), "Bitrate in bits per second (default: 0 (VBR))")
-            ("crf,q", po::value<float>(&arguments.crf)->default_value(20.0f), "Constant Rate Factor (default: 20.0)")
-
-            // libplacebo options
-            ("shader,s", po::value<std::string>(), "Name or path of the GLSL shader file to use (built-in: 'anime4k-a', 'anime4k-b', 'anime4k-c', 'anime4k-a+a', 'anime4k-b+b', 'anime4k-c+a')")
-            ("width,w", po::value<int>(&arguments.out_width), "Output width")
-            ("height,h", po::value<int>(&arguments.out_height), "Output height")
-
-            // RealESRGAN options
-            ("gpuid,g", po::value<int>(&arguments.gpuid)->default_value(0), "Vulkan GPU ID (default: 0)")
-            ("model,m", po::value<std::string>(&arguments.model_name), "Name of the model to use")
-            ("scale,r", po::value<int>(&arguments.scaling_factor), "Scaling factor (2, 3, or 4)")
-        ;
-#endif
 
         // Positional arguments
         po::positional_options_description p;
@@ -304,22 +264,6 @@ int main(int argc, char **argv) {
 #endif
         po::notify(vm);
 
-        // Set default values for optional arguments
-#ifdef _WIN32
-        if (!vm.count("loglevel")) {
-            arguments.loglevel = L"info";
-        }
-        if (!vm.count("hwaccel")) {
-            arguments.hwaccel = L"none";
-        }
-        if (!vm.count("codec")) {
-            arguments.codec = L"libx264";
-        }
-        if (!vm.count("preset")) {
-            arguments.preset = L"slow";
-        }
-#endif
-
         if (vm.count("help")) {
             std::cout << desc << std::endl;
             return 0;
@@ -332,22 +276,14 @@ int main(int argc, char **argv) {
 
         // Assign positional arguments
         if (vm.count("input")) {
-#ifdef _WIN32
-            arguments.in_fname = std::filesystem::path(vm["input"].as<std::wstring>());
-#else
-            arguments.in_fname = std::filesystem::path(vm["input"].as<std::string>());
-#endif
+            arguments.in_fname = std::filesystem::path(vm["input"].as<StringType>());
         } else {
             spdlog::error("Error: Input file path is required.");
             return 1;
         }
 
         if (vm.count("output")) {
-#ifdef _WIN32
-            arguments.out_fname = std::filesystem::path(vm["output"].as<std::wstring>());
-#else
-            arguments.out_fname = std::filesystem::path(vm["output"].as<std::string>());
-#endif
+            arguments.out_fname = std::filesystem::path(vm["output"].as<StringType>());
         } else if (!arguments.benchmark) {
             spdlog::error("Error: Output file path is required.");
             return 1;
@@ -359,21 +295,11 @@ int main(int argc, char **argv) {
         }
 
         if (vm.count("shader")) {
-#ifdef _WIN32
-            arguments.shader_path = std::filesystem::path(vm["shader"].as<std::wstring>());
-#else
-            arguments.shader_path = std::filesystem::path(vm["shader"].as<std::string>());
-#endif
+            arguments.shader_path = std::filesystem::path(vm["shader"].as<StringType>());
         }
 
         if (vm.count("model")) {
-#ifdef _WIN32
-            bool is_valid_model =
-                is_valid_realesrgan_model(wstring_to_utf8(vm["model"].as<std::wstring>()));
-#else
-            bool is_valid_model = is_valid_realesrgan_model(vm["model"].as<std::string>());
-#endif
-            if (!is_valid_model) {
+            if (!is_valid_realesrgan_model(vm["model"].as<StringType>())) {
                 spdlog::error(
                     "Error: Invalid model specified. Must be 'realesrgan-plus', "
                     "'realesrgan-plus-anime', or 'realesr-animevideov3'."
@@ -389,12 +315,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-// Additional validations
-#ifdef _WIN32
-    if (arguments.filter_type == L"libplacebo") {
-#else
-    if (arguments.filter_type == "libplacebo") {
-#endif
+    // Additional validations
+    if (arguments.filter_type == STR("libplacebo")) {
         if (arguments.shader_path.empty() || arguments.out_width == 0 ||
             arguments.out_height == 0) {
             spdlog::error(
@@ -403,11 +325,7 @@ int main(int argc, char **argv) {
             );
             return 1;
         }
-#ifdef _WIN32
-    } else if (arguments.filter_type == L"realesrgan") {
-#else
-    } else if (arguments.filter_type == "realesrgan") {
-#endif
+    } else if (arguments.filter_type == STR("realesrgan")) {
         if (arguments.scaling_factor == 0 || arguments.model_name.empty()) {
             spdlog::error("Error: For realesrgan, scaling factor (-r) and model (-m) are required."
             );
@@ -454,7 +372,7 @@ int main(int argc, char **argv) {
     }
 
     // Set spdlog log level
-    auto log_level = parse_log_level(wstring_to_utf8(arguments.loglevel));
+    auto log_level = parse_log_level(arguments.loglevel);
     switch (log_level) {
         case LIBVIDEO2X_LOG_LEVEL_TRACE:
             spdlog::set_level(spdlog::level::trace);
@@ -482,38 +400,27 @@ int main(int argc, char **argv) {
             break;
     }
 
+#ifdef _WIN32
+    std::wstring shader_path_str = arguments.shader_path.wstring();
+#else
+    std::string shader_path_str = arguments.shader_path.string();
+#endif
+
     // Setup filter configurations based on the parsed arguments
     FilterConfig filter_config;
-#ifdef _WIN32
-    if (arguments.filter_type == L"libplacebo") {
-#else
-    if (arguments.filter_type == "libplacebo") {
-#endif
+    if (arguments.filter_type == STR("libplacebo")) {
         filter_config.filter_type = FILTER_LIBPLACEBO;
         filter_config.config.libplacebo.out_width = arguments.out_width;
         filter_config.config.libplacebo.out_height = arguments.out_height;
-#ifdef _WIN32
-        filter_config.config.libplacebo.shader_path = arguments.shader_path.c_str();
-#else
-        filter_config.config.libplacebo.shader_path = arguments.shader_path.c_str();
-#endif
-#ifdef _WIN32
-    } else if (arguments.filter_type == L"realesrgan") {
-#else
-    } else if (arguments.filter_type == "realesrgan") {
-#endif
+        filter_config.config.libplacebo.shader_path = shader_path_str.c_str();
+    } else if (arguments.filter_type == STR("realesrgan")) {
         filter_config.filter_type = FILTER_REALESRGAN;
         filter_config.config.realesrgan.gpuid = arguments.gpuid;
         filter_config.config.realesrgan.tta_mode = false;
         filter_config.config.realesrgan.scaling_factor = arguments.scaling_factor;
-#ifdef _WIN32
         filter_config.config.realesrgan.model_name = arguments.model_name.c_str();
-#else
-        filter_config.config.realesrgan.model_name = arguments.model_name.c_str();
-#endif
     }
 
-    // Convert arguments to UTF-8 encoded strings
     std::string preset_str = wstring_to_utf8(arguments.preset);
 
     // Setup encoder configuration
@@ -529,11 +436,7 @@ int main(int argc, char **argv) {
 
     // Parse hardware acceleration method
     enum AVHWDeviceType hw_device_type = AV_HWDEVICE_TYPE_NONE;
-#ifdef _WIN32
-    if (arguments.hwaccel != L"none") {
-#else
-    if (arguments.hwaccel != "none") {
-#endif
+    if (arguments.hwaccel != STR("none")) {
         hw_device_type = av_hwdevice_find_type_by_name(wstring_to_utf8(arguments.hwaccel).c_str());
         if (hw_device_type == AV_HWDEVICE_TYPE_NONE) {
             spdlog::error(

@@ -75,7 +75,7 @@ std::filesystem::path find_resource_file(const std::filesystem::path &path) {
     return get_executable_directory() / path;
 }
 
-std::string path_to_string(const std::filesystem::path &path) {
+std::string path_to_u8string(const std::filesystem::path &path) {
 #if _WIN32
     std::wstring wide_path = path.wstring();
     int buffer_size =
@@ -90,5 +90,21 @@ std::string path_to_string(const std::filesystem::path &path) {
     return std::string(buffer.data());
 #else
     return path.string();
+#endif
+}
+
+StringType path_to_string_type(const std::filesystem::path &path) {
+#if _WIN32
+    return path.wstring();
+#else
+    return path.string();
+#endif
+}
+
+StringType to_string_type(int value) {
+#if _WIN32
+    return std::to_wstring(value);
+#else
+    return std::to_string(value);
 #endif
 }
