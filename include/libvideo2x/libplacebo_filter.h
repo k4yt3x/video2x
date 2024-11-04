@@ -17,15 +17,21 @@ class LibplaceboFilter : public Filter {
     AVFilterGraph *filter_graph;
     AVFilterContext *buffersrc_ctx;
     AVFilterContext *buffersink_ctx;
+    uint32_t vk_device_index;
+    const std::filesystem::path shader_path;
     int out_width;
     int out_height;
-    const std::filesystem::path shader_path;
     AVRational in_time_base;
     AVRational out_time_base;
 
    public:
     // Constructor
-    LibplaceboFilter(int width, int height, const std::filesystem::path &shader_path);
+    LibplaceboFilter(
+        uint32_t vk_device_index,
+        const std::filesystem::path &shader_path,
+        int width,
+        int height
+    );
 
     // Destructor
     virtual ~LibplaceboFilter() override;

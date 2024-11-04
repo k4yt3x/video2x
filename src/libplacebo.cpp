@@ -2,24 +2,36 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 
 extern "C" {
+#include <libavutil/dict.h>
 #include <libavutil/opt.h>
 }
 
 #include <spdlog/spdlog.h>
 
 int init_libplacebo(
-    AVBufferRef *hw_ctx,
     AVFilterGraph **filter_graph,
     AVFilterContext **buffersrc_ctx,
     AVFilterContext **buffersink_ctx,
     AVCodecContext *dec_ctx,
     int out_width,
     int out_height,
+    uint32_t vk_device_index,
     const std::filesystem::path &shader_path
 ) {
     int ret;
+
+    // Create the Vulkan hardware device context
+    AVBufferRef *vk_hw_device_ctx = nullptr;
+    ret = av_hwdevice_ctx_create(
+        &vk_hw_device_ctx, AV_HWDEVICE_TYPE_VULKAN, std::to_string(vk_device_index).c_str(), NULL, 0
+    );
+    if (ret < 0) {
+        spdlog::error("Failed to create Vulkan hardware device context.");
+        return ret;
+    }
 
     AVFilterGraph *graph = avfilter_graph_alloc();
     if (!graph) {
@@ -106,9 +118,8 @@ int init_libplacebo(
     }
 
     // Set the hardware device context to Vulkan
-    if (hw_ctx != nullptr) {
-        libplacebo_ctx->hw_device_ctx = av_buffer_ref(hw_ctx);
-    }
+    libplacebo_ctx->hw_device_ctx = av_buffer_ref(vk_hw_device_ctx);
+    av_buffer_unref(&vk_hw_device_ctx);
 
     // Link buffersrc to libplacebo
     ret = avfilter_link(last_filter, 0, libplacebo_ctx, 0);

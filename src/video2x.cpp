@@ -702,7 +702,7 @@ int main(int argc, char **argv) {
         spdlog::warn("Video processing aborted");
         return 2;
     } else if (proc_ret != 0) {
-        spdlog::error("Video processing failed with error code {}", proc_ret);
+        spdlog::critical("Video processing failed with error code {}", proc_ret);
         return 1;
     } else {
         spdlog::info("Video processed successfully");

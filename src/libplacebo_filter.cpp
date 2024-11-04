@@ -9,16 +9,18 @@
 #include "libplacebo.h"
 
 LibplaceboFilter::LibplaceboFilter(
+    uint32_t vk_device_index,
+    const std::filesystem::path &shader_path,
     int out_width,
-    int out_height,
-    const std::filesystem::path &shader_path
+    int out_height
 )
     : filter_graph(nullptr),
       buffersrc_ctx(nullptr),
       buffersink_ctx(nullptr),
+      vk_device_index(vk_device_index),
+      shader_path(std::move(shader_path)),
       out_width(out_width),
-      out_height(out_height),
-      shader_path(std::move(shader_path)) {}
+      out_height(out_height) {}
 
 LibplaceboFilter::~LibplaceboFilter() {
     if (buffersrc_ctx) {
@@ -35,7 +37,7 @@ LibplaceboFilter::~LibplaceboFilter() {
     }
 }
 
-int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) {
+int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *_) {
     // Construct the shader path
     std::filesystem::path shader_full_path;
     if (filepath_is_readable(shader_path)) {
@@ -61,13 +63,13 @@ int LibplaceboFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     // Initialize the libplacebo filter
     int ret = init_libplacebo(
-        hw_ctx,
         &filter_graph,
         &buffersrc_ctx,
         &buffersink_ctx,
         dec_ctx,
         out_width,
         out_height,
+        vk_device_index,
         shader_full_path
     );
 

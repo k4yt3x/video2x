@@ -413,7 +413,10 @@ extern "C" int process_video(
             return -1;
         }
         filter = new LibplaceboFilter{
-            config.out_width, config.out_height, std::filesystem::path(config.shader_path)
+            vk_device_index,
+            std::filesystem::path(config.shader_path),
+            config.out_width,
+            config.out_height
         };
     } else if (filter_config->filter_type == FILTER_REALESRGAN) {
         const auto &config = filter_config->config.realesrgan;
