@@ -346,9 +346,11 @@ target_compile_options(libvideo2x PRIVATE
 
 # Define the path to the built libresrgan-ncnn-vulkan library
 if(WIN32)
-    list(APPEND ALL_LIBRARIES ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.lib)
+    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.lib)
+    list(APPEND ALL_LIBRARIES ${REALESRGAN_LIB})
 else()
-    list(APPEND ALL_LIBRARIES ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
+    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
+    list(APPEND ALL_LIBRARIES ${REALESRGAN_LIB})
 endif()
 
 # Link the shared library with the dependencies
