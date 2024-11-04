@@ -418,11 +418,11 @@ if(BUILD_VIDEO2X_CLI)
     install(TARGETS video2x RUNTIME DESTINATION ${INSTALL_BIN_DESTINATION})
 endif()
 
-# Install the header file
-install(FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x/libvideo2x.h
-    DESTINATION ${INSTALL_INCLUDE_DESTINATION}
-)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
+# Install the header files
+install(FILES
+    ${PROJECT_SOURCE_DIR}/include/libvideo2x/libvideo2x.h
+    ${PROJECT_SOURCE_DIR}/include/libvideo2x/char_defs.h
+    ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
     DESTINATION ${INSTALL_INCLUDE_DESTINATION}
 )
 
