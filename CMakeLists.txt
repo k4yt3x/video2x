@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(video2x VERSION 6.0.0 LANGUAGES CXX)
+project(video2x VERSION 6.1.0 LANGUAGES CXX)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)

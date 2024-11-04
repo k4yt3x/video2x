@@ -9,8 +9,8 @@ permissions:
 
 jobs:
   setup:
-    if: github.event.base_ref == 'refs/heads/master'
     name: Setup
+    if: github.event.base_ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_version.outputs.version }}
@@ -18,6 +18,98 @@ jobs:
       - name: Get version
         id: get_version
         run: echo version=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
+
+  ubuntu-2404:
+    name: Build Ubuntu 24.04 release
+    needs:
+      - setup
+    runs-on: ubuntu-24.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build Video2X
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+              libavcodec-dev \
+              libavdevice-dev \
+              libavfilter-dev \
+              libavformat-dev \
+              libavutil-dev \
+              libswscale-dev \
+              libvulkan-dev \
+              glslang-tools \
+              libomp-dev \
+              libopencv-dev \
+              libboost-program-options-dev
+          cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
+              -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
+              -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x-linux-ubuntu-2404-amd64/usr
+          cmake --build build --config Release --target install --parallel
+          mkdir -p build/video2x-linux-ubuntu-2404-amd64/DEBIAN
+          cp packaging/debian/control build/video2x-linux-ubuntu-2404-amd64/DEBIAN/control
+          dpkg-deb --build build/video2x-linux-ubuntu-2404-amd64
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: video2x-linux-ubuntu-2404-amd64
+          path: build/video2x-linux-ubuntu-2404-amd64.deb
+
+  windows:
+    name: Build Windows release
+    needs:
+      - setup
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Vulkan SDK
+        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        with:
+          vulkan-query-version: 1.3.204.0
+          vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang, SPIRV-Tools, SPIRV-Headers
+          vulkan-use-cache: true
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          $ffmpegVersion = "7.1"
+          $ncnnVersion = "20240820"
+          $opencvVersion = "4.10.0"
+
+          git submodule update --init --recursive
+
+          curl -Lo ffmpeg-shared.zip "https://github.com/GyanD/codexffmpeg/releases/download/$ffmpegVersion/ffmpeg-$ffmpegVersion-full_build-shared.zip"
+          Expand-Archive -Path ffmpeg-shared.zip -DestinationPath third_party
+          Rename-Item -Path "third_party/ffmpeg-$ffmpegVersion-full_build-shared" -NewName ffmpeg-shared
+
+          curl -Lo ncnn-shared.zip "https://github.com/Tencent/ncnn/releases/download/$ncnnVersion/ncnn-$ncnnVersion-windows-vs2022-shared.zip"
+          Expand-Archive -Path ncnn-shared.zip -DestinationPath third_party
+          Rename-Item -Path "third_party/ncnn-$ncnnVersion-windows-vs2022-shared" -NewName ncnn-shared
+
+          curl -Lo opencv-shared.exe "https://github.com/opencv/opencv/releases/download/$opencvVersion/opencv-$opencvVersion-windows.exe"
+          7z x opencv-shared.exe -y
+          Move-Item -Path opencv -Destination third_party\opencv-shared
+      - name: Build Video2X
+        shell: pwsh
+        run: |
+          cmake -S . -B build `
+            -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DUSE_SYSTEM_OPENCV=OFF -DUSE_SYSTEM_BOOST=OFF `
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x_install
+          cmake --build build --config Release --parallel --target install
+      - name: Compress artifacts
+        run: |
+          Compress-Archive -Path build/video2x_install/* -DestinationPath build/video2x-windows-amd64.zip
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: video2x-windows-amd64
+          path: build/video2x-windows-amd64.zip
 
   container:
     name: Build and upload container
@@ -41,11 +133,15 @@ jobs:
     name: Create release
     needs:
       - setup
+      - ubuntu-2404
+      - windows
       - container
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
       - name: Create release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -55,3 +151,6 @@ jobs:
           name: ${{ needs.setup.outputs.version }}
           draft: true
           prerelease: false
+          files: |
+            video2x-linux-ubuntu-2404-amd64.deb
+            video2x-windows-amd64.zip
