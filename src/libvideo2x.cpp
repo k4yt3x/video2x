@@ -14,24 +14,11 @@ extern "C" {
 #include "decoder.h"
 #include "encoder.h"
 #include "filter.h"
+#include "fsutils.h"
 #include "libplacebo_filter.h"
 #include "realesrgan_filter.h"
 
-/**
- * @brief Process frames using the selected filter.
- *
- * @param[in] encoder_config Encoder configurations
- * @param[in,out] proc_ctx Struct containing the processing context
- * @param[in] ifmt_ctx Input format context
- * @param[in] ofmt_ctx Output format context
- * @param[in] dec_ctx Decoder context
- * @param[in] enc_ctx Encoder context
- * @param[in] filter Filter instance
- * @param[in] vstream_idx Index of the video stream in the input format context
- * @param[in] stream_map Array mapping input stream indexes to output stream indexes
- * @param[in] benchmark Flag to enable benchmarking mode
- * @return int 0 on success, negative value on error
- */
+// Process frames using the selected filter.
 static int process_frames(
     EncoderConfig *encoder_config,
     VideoProcessingContext *proc_ctx,
@@ -252,27 +239,9 @@ static int process_frames(
     return ret;
 }
 
-/**
- * @brief Process a video file using the selected filter and encoder settings.
- *
- * @param[in] in_fname Path to the input video file
- * @param[in] out_fname Path to the output video file
- * @param[in] log_level Log level
- * @param[in] benchmark Flag to enable benchmarking mode
- * @param[in] hw_type Hardware device type
- * @param[in] filter_config Filter configurations
- * @param[in] encoder_config Encoder configurations
- * @param[in,out] proc_ctx Video processing context
- * @return int 0 on success, non-zero value on error
- */
 extern "C" int process_video(
-#ifdef _WIN32
-    const wchar_t *in_fname,
-    const wchar_t *out_fname,
-#else
-    const char *in_fname,
-    const char *out_fname,
-#endif
+    const CharType *in_fname,
+    const CharType *out_fname,
     Libvideo2xLogLevel log_level,
     bool benchmark,
     AVHWDeviceType hw_type,

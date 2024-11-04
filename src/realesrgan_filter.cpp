@@ -14,18 +14,13 @@ RealesrganFilter::RealesrganFilter(
     int gpuid,
     bool tta_mode,
     int scaling_factor,
-#ifdef _WIN32
-    const std::wstring model_name
-#else
-    const std::string model_name
-#endif
+    const StringType model_name
 )
     : realesrgan(nullptr),
       gpuid(gpuid),
       tta_mode(tta_mode),
       scaling_factor(scaling_factor),
-      model_name(std::move(model_name)) {
-}
+      model_name(std::move(model_name)) {}
 
 RealesrganFilter::~RealesrganFilter() {
     if (realesrgan) {
@@ -39,17 +34,14 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     std::filesystem::path model_param_path;
     std::filesystem::path model_bin_path;
 
-#ifdef _WIN32
-    std::wstring param_file_name = model_name + L"-x" + std::to_wstring(scaling_factor) + L".param";
-    std::wstring bin_file_name = model_name + L"-x" + std::to_wstring(scaling_factor) + L".bin";
-#else
-    std::string param_file_name = model_name + "-x" + std::to_string(scaling_factor) + ".param";
-    std::string bin_file_name = model_name + "-x" + std::to_string(scaling_factor) + ".bin";
-#endif
+    StringType param_file_name =
+        model_name + STR("-x") + to_string_type(scaling_factor) + STR(".param");
+    StringType bin_file_name =
+        model_name + STR("-x") + to_string_type(scaling_factor) + STR(".bin");
 
     // Find the model paths by model name if provided
-    model_param_path = std::filesystem::path("models") / "realesrgan" / param_file_name;
-    model_bin_path = std::filesystem::path("models") / "realesrgan" / bin_file_name;
+    model_param_path = std::filesystem::path(STR("models")) / STR("realesrgan") / param_file_name;
+    model_bin_path = std::filesystem::path(STR("models")) / STR("realesrgan") / bin_file_name;
 
     // Get the full paths using a function that possibly modifies or validates the path
     std::filesystem::path model_param_full_path = find_resource_file(model_param_path);
@@ -57,11 +49,11 @@ int RealesrganFilter::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     // Check if the model files exist
     if (!std::filesystem::exists(model_param_full_path)) {
-        spdlog::error("RealESRGAN model param file not found: {}", model_param_path.string());
+        spdlog::error("RealESRGAN model param file not found: {}", model_param_path.u8string());
         return -1;
     }
     if (!std::filesystem::exists(model_bin_full_path)) {
-        spdlog::error("RealESRGAN model bin file not found: {}", model_bin_path.string());
+        spdlog::error("RealESRGAN model bin file not found: {}", model_bin_path.u8string());
         return -1;
     }
 

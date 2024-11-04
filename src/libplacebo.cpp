@@ -9,8 +9,6 @@ extern "C" {
 
 #include <spdlog/spdlog.h>
 
-#include "fsutils.h"
-
 int init_libplacebo(
     AVBufferRef *hw_ctx,
     AVFilterGraph **filter_graph,
@@ -85,7 +83,7 @@ int init_libplacebo(
     }
 
     // Convert the shader path to a string since filter args is const char *
-    std::string shader_path_string = path_to_string(shader_path);
+    std::string shader_path_string = shader_path.u8string();
 
 #ifdef _WIN32
     // libplacebo does not recognize the Windows '\\' path separator
