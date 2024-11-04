@@ -92,7 +92,7 @@ static int process_frames(
 
     AVPacket *packet = av_packet_alloc();
     if (packet == nullptr) {
-        spdlog::error("Could not allocate AVPacket");
+        spdlog::critical("Could not allocate AVPacket");
         av_frame_free(&frame);
         return AVERROR(ENOMEM);
     }
@@ -118,7 +118,7 @@ static int process_frames(
                 break;
             }
             av_strerror(ret, errbuf, sizeof(errbuf));
-            spdlog::error("Error reading packet: {}", errbuf);
+            spdlog::critical("Error reading packet: {}", errbuf);
             cleanup();
             return ret;
         }
@@ -127,7 +127,7 @@ static int process_frames(
             ret = avcodec_send_packet(dec_ctx, packet);
             if (ret < 0) {
                 av_strerror(ret, errbuf, sizeof(errbuf));
-                spdlog::error("Error sending packet to decoder: {}", errbuf);
+                spdlog::critical("Error sending packet to decoder: {}", errbuf);
                 av_packet_unref(packet);
                 cleanup();
                 return ret;
@@ -145,7 +145,7 @@ static int process_frames(
                     break;
                 } else if (ret < 0) {
                     av_strerror(ret, errbuf, sizeof(errbuf));
-                    spdlog::error("Error decoding video frame: {}", errbuf);
+                    spdlog::critical("Error decoding video frame: {}", errbuf);
                     av_packet_unref(packet);
                     cleanup();
                     return ret;
@@ -164,7 +164,7 @@ static int process_frames(
                         ret = write_frame(processed_frame, enc_ctx, ofmt_ctx, vstream_idx);
                         if (ret < 0) {
                             av_strerror(ret, errbuf, sizeof(errbuf));
-                            spdlog::error("Error encoding/writing frame: {}", errbuf);
+                            spdlog::critical("Error encoding/writing frame: {}", errbuf);
                             av_frame_free(&processed_frame);
                             av_packet_unref(packet);
                             cleanup();
@@ -204,7 +204,7 @@ static int process_frames(
     ret = filter->flush(flushed_frames);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::error("Error flushing filter: {}", errbuf);
+        spdlog::critical("Error flushing filter: {}", errbuf);
         cleanup();
         return ret;
     }
@@ -214,7 +214,7 @@ static int process_frames(
         ret = write_frame(flushed_frame, enc_ctx, ofmt_ctx, vstream_idx);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
-            spdlog::error("Error encoding/writing flushed frame: {}", errbuf);
+            spdlog::critical("Error encoding/writing flushed frame: {}", errbuf);
             av_frame_free(&flushed_frame);
             flushed_frame = nullptr;
             cleanup();
@@ -229,7 +229,7 @@ static int process_frames(
     ret = flush_encoder(enc_ctx, ofmt_ctx);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::error("Error flushing encoder: {}", errbuf);
+        spdlog::critical("Error flushing encoder: {}", errbuf);
         cleanup();
         return ret;
     }
@@ -243,6 +243,7 @@ extern "C" int process_video(
     const CharType *out_fname,
     Libvideo2xLogLevel log_level,
     bool benchmark,
+    uint32_t vk_device_index,
     AVHWDeviceType hw_type,
     const FilterConfig *filter_config,
     EncoderConfig *encoder_config,
@@ -340,7 +341,7 @@ extern "C" int process_video(
         ret = av_hwdevice_ctx_create(&hw_ctx, hw_type, NULL, NULL, 0);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
-            spdlog::error("Error initializing hardware device context: {}", errbuf);
+            spdlog::critical("Error initializing hardware device context: {}", errbuf);
             cleanup();
             return ret;
         }
@@ -350,7 +351,7 @@ extern "C" int process_video(
     ret = init_decoder(hw_type, hw_ctx, in_fpath, &ifmt_ctx, &dec_ctx, &vstream_idx);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::error("Failed to initialize decoder: {}", errbuf);
+        spdlog::critical("Failed to initialize decoder: {}", errbuf);
         cleanup();
         return ret;
     }
@@ -367,7 +368,7 @@ extern "C" int process_video(
             output_height = dec_ctx->height * filter_config->config.realesrgan.scaling_factor;
             break;
         default:
-            spdlog::error("Unknown filter type");
+            spdlog::critical("Unknown filter type");
             cleanup();
             return -1;
     }
@@ -389,7 +390,7 @@ extern "C" int process_video(
     );
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::error("Failed to initialize encoder: {}", errbuf);
+        spdlog::critical("Failed to initialize encoder: {}", errbuf);
         cleanup();
         return ret;
     }
@@ -398,7 +399,7 @@ extern "C" int process_video(
     ret = avformat_write_header(ofmt_ctx, NULL);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::error("Error occurred when opening output file: {}", errbuf);
+        spdlog::critical("Error occurred when opening output file: {}", errbuf);
         cleanup();
         return ret;
     }
@@ -407,7 +408,7 @@ extern "C" int process_video(
     if (filter_config->filter_type == FILTER_LIBPLACEBO) {
         const auto &config = filter_config->config.libplacebo;
         if (!config.shader_path) {
-            spdlog::error("Shader path must be provided for the libplacebo filter");
+            spdlog::critical("Shader path must be provided for the libplacebo filter");
             cleanup();
             return -1;
         }
@@ -417,22 +418,25 @@ extern "C" int process_video(
     } else if (filter_config->filter_type == FILTER_REALESRGAN) {
         const auto &config = filter_config->config.realesrgan;
         if (!config.model_name) {
-            spdlog::error("Model name must be provided for the RealESRGAN filter");
+            spdlog::critical("Model name must be provided for the RealESRGAN filter");
             cleanup();
             return -1;
         }
         filter = new RealesrganFilter{
-            config.gpuid, config.tta_mode, config.scaling_factor, config.model_name
+            static_cast<int>(vk_device_index),
+            config.tta_mode,
+            config.scaling_factor,
+            config.model_name
         };
     } else {
-        spdlog::error("Unknown filter type");
+        spdlog::critical("Unknown filter type");
         cleanup();
         return -1;
     }
 
     // Check if the filter instance was created successfully
     if (filter == nullptr) {
-        spdlog::error("Failed to create filter instance");
+        spdlog::critical("Failed to create filter instance");
         cleanup();
         return -1;
     }
@@ -440,7 +444,7 @@ extern "C" int process_video(
     // Initialize the filter
     ret = filter->init(dec_ctx, enc_ctx, hw_ctx);
     if (ret < 0) {
-        spdlog::error("Failed to initialize filter");
+        spdlog::critical("Failed to initialize filter");
         cleanup();
         return ret;
     }
@@ -460,7 +464,7 @@ extern "C" int process_video(
     );
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::error("Error processing frames: {}", errbuf);
+        spdlog::critical("Error processing frames: {}", errbuf);
         cleanup();
         return ret;
     }
@@ -473,7 +477,7 @@ extern "C" int process_video(
 
     if (ret < 0 && ret != AVERROR_EOF) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::error("Error occurred: {}", errbuf);
+        spdlog::critical("Error occurred: {}", errbuf);
         return ret;
     }
     return 0;

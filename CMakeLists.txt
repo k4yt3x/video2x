@@ -282,6 +282,11 @@ else()
 endif()
 set(BOOST_LIB Boost::program_options)
 
+if (BUILD_VIDEO2X_CLI)
+    find_package(Vulkan REQUIRED)
+    set(VULKAN_LIB Vulkan::Vulkan)
+endif()
+
 # Include ExternalProject module
 include(ExternalProject)
 
@@ -374,7 +379,13 @@ if (BUILD_VIDEO2X_CLI)
     target_compile_options(video2x PRIVATE $<$<CONFIG:Debug>:-g -DDEBUG>)
 
     # Link the executable with the shared library
-    target_link_libraries(video2x PRIVATE libvideo2x ${FFMPEG_LIB} ${SPDLOG_LIB} ${BOOST_LIB})
+    target_link_libraries(video2x PRIVATE
+        libvideo2x
+        ${FFMPEG_LIB}
+        ${SPDLOG_LIB}
+        ${BOOST_LIB}
+        ${VULKAN_LIB}
+    )
 endif()
 
 # Define the default installation directories

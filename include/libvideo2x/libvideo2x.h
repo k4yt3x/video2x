@@ -56,7 +56,6 @@ struct LibplaceboConfig {
 
 // Configuration for RealESRGAN filter
 struct RealESRGANConfig {
-    int gpuid;
     bool tta_mode;
     int scaling_factor;
     const CharType *model_name;
@@ -100,6 +99,7 @@ struct VideoProcessingContext {
  * @param[in] out_fname Path to the output video file
  * @param[in] log_level Log level
  * @param[in] benchmark Flag to enable benchmarking mode
+ * @param[in] vk_device_index Vulkan device index
  * @param[in] hw_type Hardware device type
  * @param[in] filter_config Filter configurations
  * @param[in] encoder_config Encoder configurations
@@ -111,6 +111,7 @@ LIBVIDEO2X_API int process_video(
     const CharType *out_fname,
     enum Libvideo2xLogLevel log_level,
     bool benchmark,
+    uint32_t vk_device_index,
     enum AVHWDeviceType hw_device_type,
     const struct FilterConfig *filter_config,
     struct EncoderConfig *encoder_config,
