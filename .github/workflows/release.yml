@@ -20,6 +20,8 @@ jobs:
         run: echo version=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
 
   ubuntu-2404:
+    # GitHub Actions' ubuntu-24.04 runner does not have enough RAM
+    if: false
     name: Build Ubuntu 24.04 release
     needs:
       - setup
@@ -31,8 +33,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Build Video2X
+      - name: Install dependencies
         run: |
+          git submodule update --init --recursive
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
               libavcodec-dev \
@@ -46,6 +49,8 @@ jobs:
               libomp-dev \
               libopencv-dev \
               libboost-program-options-dev
+      - name: Build Video2X
+        run: |
           cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
               -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
               -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x-linux-ubuntu-2404-amd64/usr
@@ -133,7 +138,7 @@ jobs:
     name: Create release
     needs:
       - setup
-      - ubuntu-2404
+      # - ubuntu-2404
       - windows
       - container
     runs-on: ubuntu-latest
@@ -152,5 +157,4 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            video2x-linux-ubuntu-2404-amd64.deb
             video2x-windows-amd64.zip
