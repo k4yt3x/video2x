@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Stream mapping for cases where the video stream is not the first stream in the input file (#1217).
+
 ## [6.1.0] - 2024-11-04
 
 ### Added
@@ -17,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Wide character string paths support on Windows systems without UTF-8 suppoprt enabled.
+- Wide character string paths support on Windows systems without UTF-8 suppoprt enabled (#1201).
 
 ### Changed
 

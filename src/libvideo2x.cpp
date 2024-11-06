@@ -26,7 +26,8 @@ static int process_frames(
     AVCodecContext *dec_ctx,
     AVCodecContext *enc_ctx,
     Filter *filter,
-    int vstream_idx,
+    int in_vstream_idx,
+    int out_vstream_idx,
     int *stream_map,
     bool benchmark = false
 ) {
@@ -36,7 +37,7 @@ static int process_frames(
 
     // Get the total number of frames in the video with OpenCV
     spdlog::debug("Reading total number of frames");
-    proc_ctx->total_frames = ifmt_ctx->streams[vstream_idx]->nb_frames;
+    proc_ctx->total_frames = ifmt_ctx->streams[in_vstream_idx]->nb_frames;
     if (proc_ctx->total_frames > 0) {
         spdlog::debug("Read total number of frames from 'nb_frames': {}", proc_ctx->total_frames);
     } else {
@@ -47,27 +48,27 @@ static int process_frames(
         if (ifmt_ctx->duration != AV_NOPTS_VALUE) {
             duration_secs =
                 static_cast<double>(ifmt_ctx->duration) / static_cast<double>(AV_TIME_BASE);
-        } else if (ifmt_ctx->streams[vstream_idx]->duration != AV_NOPTS_VALUE) {
-            duration_secs = static_cast<double>(ifmt_ctx->streams[vstream_idx]->duration) *
-                            av_q2d(ifmt_ctx->streams[vstream_idx]->time_base);
+        } else if (ifmt_ctx->streams[in_vstream_idx]->duration != AV_NOPTS_VALUE) {
+            duration_secs = static_cast<double>(ifmt_ctx->streams[in_vstream_idx]->duration) *
+                            av_q2d(ifmt_ctx->streams[in_vstream_idx]->time_base);
         } else {
             spdlog::warn("Unable to determine video duration");
         }
         spdlog::debug("Video duration: {}s", duration_secs);
 
         // Calculate average FPS
-        double fps = av_q2d(ifmt_ctx->streams[vstream_idx]->avg_frame_rate);
+        double fps = av_q2d(ifmt_ctx->streams[in_vstream_idx]->avg_frame_rate);
         if (fps <= 0) {
             spdlog::debug("Unable to read the average frame rate from 'avg_frame_rate'");
-            fps = av_q2d(ifmt_ctx->streams[vstream_idx]->r_frame_rate);
+            fps = av_q2d(ifmt_ctx->streams[in_vstream_idx]->r_frame_rate);
         }
         if (fps <= 0) {
             spdlog::debug("Unable to read the average frame rate from 'r_frame_rate'");
-            fps = av_q2d(av_guess_frame_rate(ifmt_ctx, ifmt_ctx->streams[vstream_idx], nullptr));
+            fps = av_q2d(av_guess_frame_rate(ifmt_ctx, ifmt_ctx->streams[in_vstream_idx], nullptr));
         }
         if (fps <= 0) {
             spdlog::debug("Unable to estimate the average frame rate with 'av_guess_frame_rate'");
-            fps = av_q2d(ifmt_ctx->streams[vstream_idx]->time_base);
+            fps = av_q2d(ifmt_ctx->streams[in_vstream_idx]->time_base);
         }
         if (fps <= 0 || duration_secs <= 0) {
             spdlog::warn("Unable to estimate the video's average frame rate");
@@ -123,7 +124,7 @@ static int process_frames(
             return ret;
         }
 
-        if (packet->stream_index == vstream_idx) {
+        if (packet->stream_index == in_vstream_idx) {
             ret = avcodec_send_packet(dec_ctx, packet);
             if (ret < 0) {
                 av_strerror(ret, errbuf, sizeof(errbuf));
@@ -161,7 +162,7 @@ static int process_frames(
                     return ret;
                 } else if (ret == 0 && processed_frame != nullptr) {
                     if (!benchmark) {
-                        ret = write_frame(processed_frame, enc_ctx, ofmt_ctx, vstream_idx);
+                        ret = write_frame(processed_frame, enc_ctx, ofmt_ctx, out_vstream_idx);
                         if (ret < 0) {
                             av_strerror(ret, errbuf, sizeof(errbuf));
                             spdlog::critical("Error encoding/writing frame: {}", errbuf);
@@ -191,7 +192,7 @@ static int process_frames(
             ret = av_interleaved_write_frame(ofmt_ctx, packet);
             if (ret < 0) {
                 av_strerror(ret, errbuf, sizeof(errbuf));
-                spdlog::error("Error muxing packet: {}", errbuf);
+                spdlog::critical("Error muxing audio/subtitle packet: {}", errbuf);
                 av_packet_unref(packet);
                 cleanup();
                 return ret;
@@ -211,7 +212,7 @@ static int process_frames(
 
     // Encode and write all flushed frames
     for (AVFrame *&flushed_frame : flushed_frames) {
-        ret = write_frame(flushed_frame, enc_ctx, ofmt_ctx, vstream_idx);
+        ret = write_frame(flushed_frame, enc_ctx, ofmt_ctx, out_vstream_idx);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             spdlog::critical("Error encoding/writing flushed frame: {}", errbuf);
@@ -226,7 +227,7 @@ static int process_frames(
     }
 
     // Flush the encoder
-    ret = flush_encoder(enc_ctx, ofmt_ctx);
+    ret = flush_encoder(enc_ctx, ofmt_ctx, out_vstream_idx);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Error flushing encoder: {}", errbuf);
@@ -256,7 +257,8 @@ extern "C" int process_video(
     AVBufferRef *hw_ctx = nullptr;
     int *stream_map = nullptr;
     Filter *filter = nullptr;
-    int vstream_idx = -1;
+    int in_vstream_idx = -1;
+    int out_vstream_idx = -1;
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
@@ -348,7 +350,7 @@ extern "C" int process_video(
     }
 
     // Initialize input
-    ret = init_decoder(hw_type, hw_ctx, in_fpath, &ifmt_ctx, &dec_ctx, &vstream_idx);
+    ret = init_decoder(hw_type, hw_ctx, in_fpath, &ifmt_ctx, &dec_ctx, &in_vstream_idx);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Failed to initialize decoder: {}", errbuf);
@@ -385,7 +387,8 @@ extern "C" int process_video(
         &enc_ctx,
         dec_ctx,
         encoder_config,
-        vstream_idx,
+        in_vstream_idx,
+        &out_vstream_idx,
         &stream_map
     );
     if (ret < 0) {
@@ -461,7 +464,8 @@ extern "C" int process_video(
         dec_ctx,
         enc_ctx,
         filter,
-        vstream_idx,
+        in_vstream_idx,
+        out_vstream_idx,
         stream_map,
         benchmark
     );

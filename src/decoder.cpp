@@ -25,7 +25,7 @@ int init_decoder(
     std::filesystem::path in_fpath,
     AVFormatContext **fmt_ctx,
     AVCodecContext **dec_ctx,
-    int *vstream_idx
+    int *in_vstream_idx
 ) {
     AVFormatContext *ifmt_ctx = NULL;
     AVCodecContext *codec_ctx = NULL;
@@ -110,7 +110,7 @@ int init_decoder(
 
     *fmt_ctx = ifmt_ctx;
     *dec_ctx = codec_ctx;
-    *vstream_idx = stream_index;
+    *in_vstream_idx = stream_index;
 
     return 0;
 }

@@ -25,12 +25,12 @@ int init_encoder(
     AVCodecContext **enc_ctx,
     AVCodecContext *dec_ctx,
     EncoderConfig *encoder_config,
-    int vstream_idx,
+    int in_vstream_idx,
+    int *out_vstream_idx,
     int **stream_map
 ) {
     AVFormatContext *fmt_ctx = NULL;
     AVCodecContext *codec_ctx = NULL;
-    int stream_index = 0;
     int ret;
 
     avformat_alloc_output_context2(&fmt_ctx, NULL, NULL, out_fpath.u8string().c_str());
@@ -49,11 +49,12 @@ int init_encoder(
     }
 
     // Create a new video stream in the output file
-    AVStream *out_stream = avformat_new_stream(fmt_ctx, NULL);
-    if (!out_stream) {
+    AVStream *out_vstream = avformat_new_stream(fmt_ctx, NULL);
+    if (!out_vstream) {
         spdlog::error("Failed to allocate the output video stream");
         return AVERROR_UNKNOWN;
     }
+    *out_vstream_idx = out_vstream->index;
 
     codec_ctx = avcodec_alloc_context3(encoder);
     if (!codec_ctx) {
@@ -89,14 +90,14 @@ int init_encoder(
     if (dec_ctx->time_base.num > 0 && dec_ctx->time_base.den > 0) {
         codec_ctx->time_base = dec_ctx->time_base;
     } else {
-        codec_ctx->time_base = av_inv_q(av_guess_frame_rate(ifmt_ctx, out_stream, NULL));
+        codec_ctx->time_base = av_inv_q(av_guess_frame_rate(ifmt_ctx, out_vstream, NULL));
     }
 
     // Set the output video's frame rate
     if (dec_ctx->framerate.num > 0 && dec_ctx->framerate.den > 0) {
         codec_ctx->framerate = dec_ctx->framerate;
     } else {
-        codec_ctx->framerate = av_guess_frame_rate(ifmt_ctx, out_stream, NULL);
+        codec_ctx->framerate = av_guess_frame_rate(ifmt_ctx, out_vstream, NULL);
     }
 
     // Set the CRF and preset for any codecs that support it
@@ -113,15 +114,15 @@ int init_encoder(
         return ret;
     }
 
-    ret = avcodec_parameters_from_context(out_stream->codecpar, codec_ctx);
+    ret = avcodec_parameters_from_context(out_vstream->codecpar, codec_ctx);
     if (ret < 0) {
         spdlog::error("Failed to copy encoder parameters to output video stream");
         return ret;
     }
 
-    out_stream->time_base = codec_ctx->time_base;
-    out_stream->avg_frame_rate = codec_ctx->framerate;
-    out_stream->r_frame_rate = codec_ctx->framerate;
+    out_vstream->time_base = codec_ctx->time_base;
+    out_vstream->avg_frame_rate = codec_ctx->framerate;
+    out_vstream->r_frame_rate = codec_ctx->framerate;
 
     if (encoder_config->copy_streams) {
         // Allocate the stream map
@@ -132,43 +133,46 @@ int init_encoder(
             return AVERROR(ENOMEM);
         }
 
-        // Map the video stream
-        (*stream_map)[vstream_idx] = stream_index++;
-
-        // Loop through each stream in the input file
+        // Map each input stream to an output stream
         for (int i = 0; i < static_cast<int>(ifmt_ctx->nb_streams); i++) {
             AVStream *in_stream = ifmt_ctx->streams[i];
             AVCodecParameters *in_codecpar = in_stream->codecpar;
 
-            if (i == vstream_idx) {
-                // Video stream is already handled
+            // Skip the input video stream as it's already processed
+            if (i == in_vstream_idx) {
+                (*stream_map)[i] = *out_vstream_idx;
                 continue;
             }
 
+            // Map only audio and subtitle streams (skip other types)
             if (in_codecpar->codec_type != AVMEDIA_TYPE_AUDIO &&
                 in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE) {
-                (*stream_map)[i] = -1;
+                (*stream_map)[i] = -1;  // Stream not mapped
+                spdlog::warn("Skipping unsupported stream type at index: {}", i);
                 continue;
             }
 
-            // Create corresponding output stream
-            AVStream *out_copied_stream = avformat_new_stream(fmt_ctx, NULL);
-            if (!out_copied_stream) {
+            // Create corresponding output stream for audio and subtitle streams
+            AVStream *out_stream = avformat_new_stream(fmt_ctx, NULL);
+            if (!out_stream) {
                 spdlog::error("Failed allocating output stream");
                 return AVERROR_UNKNOWN;
             }
 
-            ret = avcodec_parameters_copy(out_copied_stream->codecpar, in_codecpar);
+            // Copy codec parameters from input to output
+            ret = avcodec_parameters_copy(out_stream->codecpar, in_codecpar);
             if (ret < 0) {
                 spdlog::error("Failed to copy codec parameters");
                 return ret;
             }
-            out_copied_stream->codecpar->codec_tag = 0;
+            out_stream->codecpar->codec_tag = 0;
 
             // Copy time base
-            out_copied_stream->time_base = in_stream->time_base;
+            out_stream->time_base = in_stream->time_base;
 
-            (*stream_map)[i] = stream_index++;
+            // Map input stream index to output stream index
+            spdlog::debug("Stream mapping: {} (in) -> {} (out)", i, out_stream->index);
+            (*stream_map)[i] = out_stream->index;
         }
     }
 
@@ -191,7 +195,7 @@ int write_frame(
     AVFrame *frame,
     AVCodecContext *enc_ctx,
     AVFormatContext *ofmt_ctx,
-    int vstream_idx
+    int out_vstream_idx
 ) {
     AVFrame *converted_frame = nullptr;
     int ret;
@@ -238,9 +242,9 @@ int write_frame(
 
         // Rescale packet timestamps
         av_packet_rescale_ts(
-            enc_pkt, enc_ctx->time_base, ofmt_ctx->streams[vstream_idx]->time_base
+            enc_pkt, enc_ctx->time_base, ofmt_ctx->streams[out_vstream_idx]->time_base
         );
-        enc_pkt->stream_index = vstream_idx;
+        enc_pkt->stream_index = out_vstream_idx;
 
         // Write the packet
         ret = av_interleaved_write_frame(ofmt_ctx, enc_pkt);
@@ -256,7 +260,7 @@ int write_frame(
     return 0;
 }
 
-int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) {
+int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx, int out_vstream_idx) {
     int ret;
     AVPacket *enc_pkt = av_packet_alloc();
     if (!enc_pkt) {
@@ -265,26 +269,35 @@ int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx) {
     }
 
     ret = avcodec_send_frame(enc_ctx, NULL);
-    while (ret >= 0) {
+    if (ret < 0) {
+        spdlog::error("Error sending NULL frame to encoder during flush");
+        av_packet_free(&enc_pkt);
+        return ret;
+    }
+
+    // Write the packets to the output file
+    while (true) {
         ret = avcodec_receive_packet(enc_ctx, enc_pkt);
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             av_packet_unref(enc_pkt);
             break;
         } else if (ret < 0) {
-            spdlog::error("Error encoding frame");
+            spdlog::error("Error encoding packet during flush");
             av_packet_free(&enc_pkt);
             return ret;
         }
 
         // Rescale packet timestamps
-        av_packet_rescale_ts(enc_pkt, enc_ctx->time_base, ofmt_ctx->streams[0]->time_base);
-        enc_pkt->stream_index = ofmt_ctx->streams[0]->index;
+        av_packet_rescale_ts(
+            enc_pkt, enc_ctx->time_base, ofmt_ctx->streams[out_vstream_idx]->time_base
+        );
+        enc_pkt->stream_index = out_vstream_idx;
 
         // Write the packet
         ret = av_interleaved_write_frame(ofmt_ctx, enc_pkt);
         av_packet_unref(enc_pkt);
         if (ret < 0) {
-            spdlog::error("Error muxing packet");
+            spdlog::error("Error muxing packet during flush");
             av_packet_free(&enc_pkt);
             return ret;
         }

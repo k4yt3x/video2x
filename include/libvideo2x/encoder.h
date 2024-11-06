@@ -19,7 +19,8 @@ int init_encoder(
     AVCodecContext **enc_ctx,
     AVCodecContext *dec_ctx,
     EncoderConfig *encoder_config,
-    int vstream_idx,
+    int in_vstream_idx,
+    int *out_vstream_idx,
     int **stream_map
 );
 
@@ -27,9 +28,9 @@ int write_frame(
     AVFrame *frame,
     AVCodecContext *enc_ctx,
     AVFormatContext *ofmt_ctx,
-    int vstream_idx
+    int out_vstream_idx
 );
 
-int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx);
+int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx, int out_vstream_idx);
 
 #endif  // ENCODER_H

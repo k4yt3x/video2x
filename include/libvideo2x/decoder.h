@@ -14,7 +14,7 @@ int init_decoder(
     std::filesystem::path in_fpath,
     AVFormatContext **fmt_ctx,
     AVCodecContext **dec_ctx,
-    int *vstream_idx
+    int *in_vstream_idx
 );
 
 #endif  // DECODER_H
