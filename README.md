@@ -5,8 +5,8 @@
    <img src="https://img.shields.io/github/actions/workflow/status/k4yt3x/video2x/build.yml?label=Build&style=flat-square"/>
    <img src="https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square"/>
    <img src="https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square"/>
-   <img src="https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square"/>
    <img src="https://img.shields.io/github/sponsors/k4yt3x?style=flat-square&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fk4yt3x"/>
+   <img src="https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square"/>
 </p>
 
 > [!IMPORTANT]
@@ -44,7 +44,7 @@ You can download the latest Windows release from the [releases page](https://git
 
 ## [🐧 Install on Linux](https://aur.archlinux.org/packages/video2x-git)
 
-You can install Video2X on Arch Linux using the [video2x-git](https://aur.archlinux.org/packages/video2x-git) package or download pre-compiled binaries from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). If you'd like to build from source, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required packages and commands. If you'd prefer not to compile the program from source, consider using the container image below.
+You can install Video2X on Arch Linux using the [video2x-git](https://aur.archlinux.org/packages/video2x-git) AUR package or on Ubuntu/Debian using the `.deb` package from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). If you'd like to build from source, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required packages and commands. If you'd prefer not to compile the program from source, consider using the container image below.
 
 ## [📦 Container Image](https://github.com/k4yt3x/video2x/pkgs/container/video2x)
 
