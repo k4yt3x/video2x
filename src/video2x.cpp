@@ -318,7 +318,15 @@ void process_video_thread(
 
 #ifdef _WIN32
 int wmain(int argc, wchar_t *argv[]) {
+    // Set console output code page to UTF-8
     SetConsoleOutputCP(CP_UTF8);
+
+    // Enable ANSI escape codes
+    HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD console_mode = 0;
+    GetConsoleMode(console_handle, &console_mode);
+    console_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(console_handle, console_mode);
 #else
 int main(int argc, char **argv) {
 #endif
@@ -593,7 +601,7 @@ int main(int argc, char **argv) {
         &encoder_config,
         &proc_ctx
     );
-    spdlog::info("Press SPACE to pause/resume, 'q' to abort.");
+    spdlog::info("Press [space] to pause/resume, [q] to abort.");
 
     // Setup timer
     Timer timer;
@@ -633,18 +641,23 @@ int main(int argc, char **argv) {
                 std::lock_guard<std::mutex> lock(proc_ctx_mutex);
                 proc_ctx.pause = !proc_ctx.pause;
                 if (proc_ctx.pause) {
-                    putchar('\n');
-                    spdlog::info("Processing paused. Press SPACE to resume, 'q' to abort.");
+                    std::cout
+                        << "\r\033[KProcessing paused; press [space] to resume, [q] to abort.";
+                    std::cout.flush();
                     timer.pause();
                 } else {
-                    spdlog::info("Resuming processing...");
+                    std::cout << "\r\033[KProcessing resumed.";
+                    std::cout.flush();
                     timer.resume();
                 }
+                newline_required = true;
             }
         } else if (ch == 'q' || ch == 'Q') {
             // Abort processing
-            putchar('\n');
-            spdlog::info("Aborting processing...");
+            if (newline_required) {
+                putchar('\n');
+            }
+            spdlog::warn("Aborting gracefully; press Ctrl+C to terminate forcefully.");
             {
                 std::lock_guard<std::mutex> lock(proc_ctx_mutex);
                 proc_ctx.abort = true;
@@ -667,9 +680,35 @@ int main(int argc, char **argv) {
                 double percentage = total_frames > 0 ? static_cast<double>(processed_frames) *
                                                            100.0 / static_cast<double>(total_frames)
                                                      : 0.0;
-                int64_t time_elapsed = timer.get_elapsed_time() / 1000;
-                std::cout << "\rProcessing frame " << processed_frames << "/" << total_frames
-                          << " (" << percentage << "%); time elapsed: " << time_elapsed << "s";
+                int time_elapsed = static_cast<int>(timer.get_elapsed_time() / 1000);
+
+                // Calculate hours, minutes, and seconds elapsed
+                int hours_elapsed = time_elapsed / 3600;
+                int minutes_elapsed = (time_elapsed % 3600) / 60;
+                int seconds_elapsed = time_elapsed % 60;
+
+                // Calculate estimated time remaining
+                int64_t frames_remaining = total_frames - processed_frames;
+                double processing_rate = static_cast<double>(processed_frames) / time_elapsed;
+                int time_remaining =
+                    static_cast<int>(static_cast<double>(frames_remaining) / processing_rate);
+                time_remaining = std::max<int>(time_remaining, 0);
+
+                // Calculate hours, minutes, and seconds remaining
+                int hours_remaining = time_remaining / 3600;
+                int minutes_remaining = (time_remaining % 3600) / 60;
+                int seconds_remaining = time_remaining % 60;
+
+                // Print the progress bar
+                std::cout << "\r\033[Kframe=" << processed_frames << "/" << total_frames << " ("
+                          << std::fixed << std::setprecision(2) << percentage
+                          << "%); fps=" << std::fixed << std::setprecision(2) << processing_rate
+                          << "; elapsed=" << std::setw(2) << std::setfill('0') << hours_elapsed
+                          << ":" << std::setw(2) << std::setfill('0') << minutes_elapsed << ":"
+                          << std::setw(2) << std::setfill('0') << seconds_elapsed
+                          << "; remaining=" << std::setw(2) << std::setfill('0') << hours_remaining
+                          << ":" << std::setw(2) << std::setfill('0') << minutes_remaining << ":"
+                          << std::setw(2) << std::setfill('0') << seconds_remaining;
                 std::cout.flush();
                 newline_required = true;
             }

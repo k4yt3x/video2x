@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Time remaining, and processing speed to the status bar.
+
 ### Fixed
 
 - Stream mapping for cases where the video stream is not the first stream in the input file (#1217).
@@ -23,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Wide character string paths support on Windows systems without UTF-8 suppoprt enabled (#1201).
+- Wide character string paths support on Windows systems without UTF-8 support enabled (#1201).
 
 ### Changed
 
