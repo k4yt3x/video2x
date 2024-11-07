@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Stream mapping for cases where the video stream is not the first stream in the input file (#1217).
+- The encoder using the wrong color space for the output video.
 
 ## [6.1.0] - 2024-11-04
 

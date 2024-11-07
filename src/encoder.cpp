@@ -73,6 +73,13 @@ int init_encoder(
     codec_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
     codec_ctx->bit_rate = encoder_config->bit_rate;
 
+    // Set the color properties
+    codec_ctx->color_range = dec_ctx->color_range;
+    codec_ctx->color_primaries = dec_ctx->color_primaries;
+    codec_ctx->color_trc = dec_ctx->color_trc;
+    codec_ctx->colorspace = dec_ctx->colorspace;
+    codec_ctx->chroma_sample_location = dec_ctx->chroma_sample_location;
+
     // Set the pixel format
     if (encoder_config->pix_fmt != AV_PIX_FMT_NONE) {
         // Use the specified pixel format
