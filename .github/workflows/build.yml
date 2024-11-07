@@ -1,10 +1,17 @@
 name: Build
 on:
   push:
-    branches:
-      - master
-      - dev
-  pull_request: {}
+    paths:
+      - "include/**"
+      - "src/**"
+      - "third_party/**"
+      - "CMakeLists.txt"
+  pull_request:
+    paths:
+      - "include/**"
+      - "src/**"
+      - "third_party/**"
+      - "CMakeLists.txt"
   workflow_dispatch: {}
 
 jobs:
