@@ -1,0 +1,52 @@
+name: Issues
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - closed
+
+jobs:
+  label_issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove all 'state:' labels
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          REPO=${{ github.repository }}
+          EXISTING_LABELS=$(gh issue view $ISSUE_NUMBER --repo $REPO --json labels --jq '.labels[].name')
+
+          for label in $EXISTING_LABELS; do
+            if [[ $label == state:* ]]; then
+              gh issue edit $ISSUE_NUMBER --remove-label "$label" --repo $REPO
+            fi
+          done
+
+      - name: Add 'state:Backlog' label on issue opened or reopened
+        if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LABEL_NAME="state:Backlog"
+          REPO=${{ github.repository }}
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+
+          if gh label list --repo $REPO | grep -q "$LABEL_NAME"; then
+            gh issue edit $ISSUE_NUMBER --add-label "$LABEL_NAME" --repo $REPO
+          fi
+
+      - name: Add 'state:Done' label on issue closed
+        if: ${{ github.event.action == 'closed' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LABEL_NAME="state:Done"
+          REPO=${{ github.repository }}
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+
+          if gh label list --repo $REPO | grep -q "$LABEL_NAME"; then
+            gh issue edit $ISSUE_NUMBER --add-label "$LABEL_NAME" --repo $REPO
+          fi
