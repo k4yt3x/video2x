@@ -14,7 +14,7 @@
 
 ## 🌟 Version 6.0.0
 
-**[Download Windows Installer](https://github.com/k4yt3x/video2x/releases/download/6.1.0/video2x-qt6-windows-amd64-installer.exe)**
+**[Download Windows Installer](https://github.com/k4yt3x/video2x/releases/download/6.1.1/video2x-qt6-windows-amd64-installer.exe)**
 
 **TL;DR: Version 6.0.0 is a complete rewrite of the Video2X project in C/C++, featuring a faster, more efficient architecture, cross-platform support, vastly improved output quality, and a new GUI and installer for easy setup on Windows.**
 
