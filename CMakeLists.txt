@@ -309,12 +309,13 @@ list(REMOVE_DUPLICATES ALL_LIBRARIES)
 
 # Create the shared library 'libvideo2x'
 add_library(libvideo2x
+    src/avutils.cpp
     src/conversions.cpp
     src/decoder.cpp
     src/encoder.cpp
     src/fsutils.cpp
-    src/libplacebo_filter.cpp
     src/libplacebo.cpp
+    src/libplacebo_filter.cpp
     src/libvideo2x.cpp
     src/realesrgan_filter.cpp
 )

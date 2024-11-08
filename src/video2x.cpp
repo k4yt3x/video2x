@@ -676,7 +676,7 @@ int main(int argc, char **argv) {
                 total_frames = proc_ctx.total_frames;
                 pause = proc_ctx.pause;
             }
-            if (!pause && total_frames > 0) {
+            if (!pause && (total_frames > 0 || processed_frames > 0)) {
                 double percentage = total_frames > 0 ? static_cast<double>(processed_frames) *
                                                            100.0 / static_cast<double>(total_frames)
                                                      : 0.0;

@@ -11,6 +11,7 @@ extern "C" {
 
 #include <spdlog/spdlog.h>
 
+#include "avutils.h"
 #include "decoder.h"
 #include "encoder.h"
 #include "filter.h"
@@ -37,46 +38,7 @@ static int process_frames(
 
     // Get the total number of frames in the video with OpenCV
     spdlog::debug("Reading total number of frames");
-    proc_ctx->total_frames = ifmt_ctx->streams[in_vstream_idx]->nb_frames;
-    if (proc_ctx->total_frames > 0) {
-        spdlog::debug("Read total number of frames from 'nb_frames': {}", proc_ctx->total_frames);
-    } else {
-        spdlog::warn("Estimating the total number of frames from duration * fps");
-
-        // Get the duration of the video
-        double duration_secs = 0.0;
-        if (ifmt_ctx->duration != AV_NOPTS_VALUE) {
-            duration_secs =
-                static_cast<double>(ifmt_ctx->duration) / static_cast<double>(AV_TIME_BASE);
-        } else if (ifmt_ctx->streams[in_vstream_idx]->duration != AV_NOPTS_VALUE) {
-            duration_secs = static_cast<double>(ifmt_ctx->streams[in_vstream_idx]->duration) *
-                            av_q2d(ifmt_ctx->streams[in_vstream_idx]->time_base);
-        } else {
-            spdlog::warn("Unable to determine video duration");
-        }
-        spdlog::debug("Video duration: {}s", duration_secs);
-
-        // Calculate average FPS
-        double fps = av_q2d(ifmt_ctx->streams[in_vstream_idx]->avg_frame_rate);
-        if (fps <= 0) {
-            spdlog::debug("Unable to read the average frame rate from 'avg_frame_rate'");
-            fps = av_q2d(ifmt_ctx->streams[in_vstream_idx]->r_frame_rate);
-        }
-        if (fps <= 0) {
-            spdlog::debug("Unable to read the average frame rate from 'r_frame_rate'");
-            fps = av_q2d(av_guess_frame_rate(ifmt_ctx, ifmt_ctx->streams[in_vstream_idx], nullptr));
-        }
-        if (fps <= 0) {
-            spdlog::debug("Unable to estimate the average frame rate with 'av_guess_frame_rate'");
-            fps = av_q2d(ifmt_ctx->streams[in_vstream_idx]->time_base);
-        }
-        if (fps <= 0 || duration_secs <= 0) {
-            spdlog::warn("Unable to estimate the video's average frame rate");
-        } else {
-            // Calculate total frames
-            proc_ctx->total_frames = static_cast<int64_t>(duration_secs * fps);
-        }
-    }
+    proc_ctx->total_frames = get_video_frame_count(ifmt_ctx, in_vstream_idx);
 
     // Check if the total number of frames is still 0
     if (proc_ctx->total_frames <= 0) {
