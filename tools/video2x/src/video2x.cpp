@@ -45,7 +45,7 @@ extern "C" {
 namespace po = boost::program_options;
 
 #include "libvideo2x/char_defs.h"
-#include "libvideo2x/timer.h"
+#include "timer.h"
 
 // Indicate if a newline needs to be printed before the next output
 std::atomic<bool> newline_required = false;

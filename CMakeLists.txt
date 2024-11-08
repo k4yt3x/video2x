@@ -308,17 +308,8 @@ list(REMOVE_DUPLICATES ALL_INCLUDE_DIRS)
 list(REMOVE_DUPLICATES ALL_LIBRARIES)
 
 # Create the shared library 'libvideo2x'
-add_library(libvideo2x
-    src/avutils.cpp
-    src/conversions.cpp
-    src/decoder.cpp
-    src/encoder.cpp
-    src/fsutils.cpp
-    src/libplacebo.cpp
-    src/libplacebo_filter.cpp
-    src/libvideo2x.cpp
-    src/realesrgan_filter.cpp
-)
+file(GLOB LIBVIDEO2X_SOURCES src/*.cpp)
+add_library(libvideo2x ${LIBVIDEO2X_SOURCES})
 target_compile_definitions(libvideo2x PRIVATE LIBVIDEO2X_EXPORTS)
 if(WIN32)
     set_target_properties(libvideo2x PROPERTIES OUTPUT_NAME libvideo2x)
@@ -367,7 +358,8 @@ endif()
 
 # Create the executable 'video2x'
 if (BUILD_VIDEO2X_CLI)
-    add_executable(video2x src/video2x.cpp src/timer.cpp)
+    file(GLOB VIDEO2X_SOURCES tools/video2x/src/*.cpp)
+    add_executable(video2x ${VIDEO2X_SOURCES})
     set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
 
     # Include directories for the executable
@@ -376,6 +368,7 @@ if (BUILD_VIDEO2X_CLI)
         ${CMAKE_CURRENT_BINARY_DIR}
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/include/libvideo2x
+        ${PROJECT_SOURCE_DIR}/tools/video2x/include
     )
 
     # Compile options for the executable
@@ -442,23 +435,18 @@ install(FILES
 
 # Platform-specific installation rules
 if(WIN32)
-    # Install Windows-specific dependencies
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         set(BOOST_DLL_PATH ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-x64-1_86.dll)
     else()
         set(BOOST_DLL_PATH ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-gd-x64-1_86.dll)
     endif()
 
+    # Find all FFmpeg DLLs
+    file(GLOB FFMPEG_DLLS "${FFMPEG_BASE_PATH}/bin/*.dll")
+
     install(FILES
         ${CMAKE_BINARY_DIR}/realesrgan_install/bin/librealesrgan-ncnn-vulkan.dll
-        ${FFMPEG_BASE_PATH}/bin/swscale-8.dll
-        ${FFMPEG_BASE_PATH}/bin/avcodec-61.dll
-        ${FFMPEG_BASE_PATH}/bin/avdevice-61.dll
-        ${FFMPEG_BASE_PATH}/bin/avfilter-10.dll
-        ${FFMPEG_BASE_PATH}/bin/avformat-61.dll
-        ${FFMPEG_BASE_PATH}/bin/avutil-59.dll
-        ${FFMPEG_BASE_PATH}/bin/postproc-58.dll
-        ${FFMPEG_BASE_PATH}/bin/swresample-5.dll
+        ${FFMPEG_DLLS}
         # ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_world4100.dll
         # ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_videoio_msmf4100_64.dll
         ${NCNN_BASE_PATH}/bin/ncnn.dll
@@ -469,7 +457,6 @@ if(WIN32)
                     WORLD_READ WORLD_EXECUTE
     )
 else()
-    # Install Unix-specific dependencies
     install(FILES ${REALESRGAN_LIB}
         DESTINATION ${INSTALL_LIB_DESTINATION}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
