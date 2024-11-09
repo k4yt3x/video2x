@@ -1,0 +1,8 @@
+Package: video2x
+Version: 6.1.1
+Section: video
+Priority: optional
+Architecture: amd64
+Maintainer: K4YT3X <i@k4yt3x.com>
+Depends: ffmpeg (>=6.0), libvulkan1 (>=1.3.0.0), libboost-program-options1.74.0 (>=1.74.0)
+Description: A machine learning-based lossless video super resolution framework.

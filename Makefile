@@ -81,10 +81,9 @@ debian:
 		-DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
 	cmake --build /tmp/build --config Release --target install --parallel
 
-ubuntu:
-	export DEBIAN_FRONTEND=noninteractive
+ubuntu2404:
 	apt-get update
-	apt-get install -y --no-install-recommends \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 		build-essential cmake pkg-config \
 		libavcodec-dev \
 		libavdevice-dev \
@@ -99,11 +98,37 @@ ubuntu:
 		libboost-program-options-dev
 	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
 		-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
-		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x_package/usr
+		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=video2x-linux-ubuntu-amd64/usr
 	cmake --build build --config Release --target install --parallel
-	mkdir -p build/video2x_package/DEBIAN
-	cp packaging/debian/control build/video2x_package/DEBIAN/control
-	dpkg-deb --build build/video2x_package
+	mkdir -p video2x-linux-ubuntu-amd64/DEBIAN
+	cp packaging/debian/control.ubuntu2404 video2x-linux-ubuntu-amd64/DEBIAN/control
+	dpkg-deb --build video2x-linux-ubuntu-amd64
+
+ubuntu2204:
+	apt-get update
+	DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
+	add-apt-repository -y ppa:ubuntuhandbook1/ffmpeg7
+	apt-get update
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+		build-essential cmake \
+		libavcodec-dev \
+		libavdevice-dev \
+		libavfilter-dev \
+		libavformat-dev \
+		libavutil-dev \
+		libswscale-dev \
+		libvulkan-dev \
+		glslang-tools \
+		libomp-dev \
+		libopencv-dev \
+		libboost-program-options-dev
+	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
+		-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
+		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=video2x-linux-ubuntu-amd64/usr
+	cmake --build build --config Release --target install --parallel
+	mkdir -p video2x-linux-ubuntu-amd64/DEBIAN
+	cp packaging/debian/control.ubuntu2204 video2x-linux-ubuntu-amd64/DEBIAN/control
+	dpkg-deb --build video2x-linux-ubuntu-amd64
 
 clean:
 	rm -vrf $(BINDIR) data/output*.* heaptrack*.zst valgrind.log
