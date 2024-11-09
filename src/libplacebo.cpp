@@ -29,8 +29,8 @@ int init_libplacebo(
         &vk_hw_device_ctx, AV_HWDEVICE_TYPE_VULKAN, std::to_string(vk_device_index).c_str(), NULL, 0
     );
     if (ret < 0) {
-        spdlog::error("Failed to create Vulkan hardware device context.");
-        return ret;
+        spdlog::error("Failed to create Vulkan hardware device context for libplacebo.");
+        vk_hw_device_ctx = nullptr;
     }
 
     AVFilterGraph *graph = avfilter_graph_alloc();
@@ -118,8 +118,10 @@ int init_libplacebo(
     }
 
     // Set the hardware device context to Vulkan
-    libplacebo_ctx->hw_device_ctx = av_buffer_ref(vk_hw_device_ctx);
-    av_buffer_unref(&vk_hw_device_ctx);
+    if (vk_hw_device_ctx != nullptr) {
+        libplacebo_ctx->hw_device_ctx = av_buffer_ref(vk_hw_device_ctx);
+        av_buffer_unref(&vk_hw_device_ctx);
+    }
 
     // Link buffersrc to libplacebo
     ret = avfilter_link(last_filter, 0, libplacebo_ctx, 0);
