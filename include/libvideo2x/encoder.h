@@ -28,7 +28,8 @@ int write_frame(
     AVFrame *frame,
     AVCodecContext *enc_ctx,
     AVFormatContext *ofmt_ctx,
-    int out_vstream_idx
+    int out_vstream_idx,
+    int64_t frame_idx
 );
 
 int flush_encoder(AVCodecContext *enc_ctx, AVFormatContext *ofmt_ctx, int out_vstream_idx);

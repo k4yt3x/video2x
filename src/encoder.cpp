@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cstdint>
 
 #include <spdlog/spdlog.h>
 
@@ -202,10 +203,16 @@ int write_frame(
     AVFrame *frame,
     AVCodecContext *enc_ctx,
     AVFormatContext *ofmt_ctx,
-    int out_vstream_idx
+    int out_vstream_idx,
+    int64_t frame_idx
 ) {
     AVFrame *converted_frame = nullptr;
     int ret;
+
+    // Set the frame's presentation timestamp if not set
+    if (frame->pts <= 0) {
+        frame->pts = frame_idx;
+    }
 
     // Convert the frame to the encoder's pixel format if needed
     if (frame->format != enc_ctx->pix_fmt) {

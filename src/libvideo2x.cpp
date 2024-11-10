@@ -124,7 +124,13 @@ static int process_frames(
                     return ret;
                 } else if (ret == 0 && processed_frame != nullptr) {
                     if (!benchmark) {
-                        ret = write_frame(processed_frame, enc_ctx, ofmt_ctx, out_vstream_idx);
+                        ret = write_frame(
+                            processed_frame,
+                            enc_ctx,
+                            ofmt_ctx,
+                            out_vstream_idx,
+                            proc_ctx->processed_frames
+                        );
                         if (ret < 0) {
                             av_strerror(ret, errbuf, sizeof(errbuf));
                             spdlog::critical("Error encoding/writing frame: {}", errbuf);
@@ -174,7 +180,9 @@ static int process_frames(
 
     // Encode and write all flushed frames
     for (AVFrame *&flushed_frame : flushed_frames) {
-        ret = write_frame(flushed_frame, enc_ctx, ofmt_ctx, out_vstream_idx);
+        ret = write_frame(
+            flushed_frame, enc_ctx, ofmt_ctx, out_vstream_idx, proc_ctx->processed_frames
+        );
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             spdlog::critical("Error encoding/writing flushed frame: {}", errbuf);
