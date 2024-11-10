@@ -344,7 +344,7 @@ extern "C" int process_video(
             cleanup();
             return -1;
     }
-    spdlog::info("Output video dimensions: {}x{}", output_width, output_height);
+    spdlog::debug("Output video dimensions: {}x{}", output_width, output_height);
 
     // Initialize output encoder
     encoder_config->out_width = output_width;

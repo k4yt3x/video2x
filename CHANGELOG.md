@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Automatic selection of the most suitable pixel format for the output video.
+
 ### Fixed
 
 - Timestamp errors processing frames with PTS equal to 0 (#1222).

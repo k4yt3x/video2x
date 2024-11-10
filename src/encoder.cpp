@@ -5,18 +5,14 @@
 #include <string.h>
 #include <cstdint>
 
+extern "C" {
+#include <libavutil/pixdesc.h>
+}
+
 #include <spdlog/spdlog.h>
 
+#include "avutils.h"
 #include "conversions.h"
-
-static enum AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder) {
-    const enum AVPixelFormat *p = encoder->pix_fmts;
-    if (!p) {
-        spdlog::error("No pixel formats supported by encoder");
-        return AV_PIX_FMT_NONE;
-    }
-    return *p;
-}
 
 int init_encoder(
     AVBufferRef *hw_ctx,
@@ -86,12 +82,12 @@ int init_encoder(
         // Use the specified pixel format
         codec_ctx->pix_fmt = encoder_config->pix_fmt;
     } else {
-        // Fall back to the default pixel format
-        codec_ctx->pix_fmt = get_encoder_default_pix_fmt(encoder);
+        codec_ctx->pix_fmt = get_encoder_default_pix_fmt(encoder, dec_ctx->pix_fmt);
         if (codec_ctx->pix_fmt == AV_PIX_FMT_NONE) {
             spdlog::error("Could not get the default pixel format for the encoder");
             return AVERROR(EINVAL);
         }
+        spdlog::debug("Auto-selected pixel format: {}", av_get_pix_fmt_name(codec_ctx->pix_fmt));
     }
 
     // Set the output video's time base
