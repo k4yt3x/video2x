@@ -5,6 +5,8 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+#define CALC_FFMPEG_VERSION(a, b, c) (a << 16 | b << 8 | c)
+
 int64_t get_video_frame_count(AVFormatContext *ifmt_ctx, int in_vstream_idx);
 
 enum AVPixelFormat

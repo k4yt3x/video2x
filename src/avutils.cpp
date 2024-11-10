@@ -60,6 +60,7 @@ get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat target_pix_fmt
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
 
     // Retrieve the list of supported pixel formats
+#if LIBAVCODEC_BUILD >= CALC_FFMPEG_VERSION(61, 13, 100)
     const enum AVPixelFormat *supported_pix_fmts = nullptr;
     ret = avcodec_get_supported_config(
         nullptr, encoder, AV_CODEC_CONFIG_PIX_FORMAT, 0, (const void **)&supported_pix_fmts, nullptr
@@ -79,6 +80,9 @@ get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat target_pix_fmt
             return target_pix_fmt;
         }
     }
+#else
+    const enum AVPixelFormat *supported_pix_fmts = encoder->pix_fmts;
+#endif
 
     // Determine if the target pixel format has an alpha channel
     const AVPixFmtDescriptor *desc = nullptr;
