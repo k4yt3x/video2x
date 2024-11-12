@@ -90,7 +90,7 @@ if(WIN32)
 else()
     # FFmpeg
     find_package(PkgConfig REQUIRED)
-    set(FFMPEG_REQUIRED_PKGS REQUIRED
+    set(FFMPEG_REQUIRED_PKGS
         libavcodec
         libavdevice
         libavfilter
