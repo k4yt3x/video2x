@@ -62,8 +62,14 @@ static int process_frames(
 
     // Lambda function for cleaning up resources
     auto cleanup = [&]() {
-        av_frame_free(&frame);
-        av_packet_free(&packet);
+        if (frame) {
+            av_frame_free(&frame);
+            frame = nullptr;
+        }
+        if (packet) {
+            av_packet_free(&packet);
+            packet = nullptr;
+        }
         for (AVFrame *&flushed_frame : flushed_frames) {
             if (flushed_frame) {
                 av_frame_free(&flushed_frame);
