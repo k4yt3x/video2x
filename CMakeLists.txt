@@ -32,7 +32,6 @@ endif()
 # Build options
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
 option(BUILD_VIDEO2X_CLI "Build the video2x executable" ON)
-option(USE_SYSTEM_OPENCV "Use system OpenCV library" ON)
 option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
 option(USE_SYSTEM_SPDLOG "Use system spdlog library" ON)
 option(USE_SYSTEM_BOOST "Use system Boost library" ON)
@@ -53,7 +52,6 @@ if(WIN32)
     # Define base paths for FFmpeg and ncnn
     set(FFMPEG_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ffmpeg-shared)
     set(NCNN_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/ncnn-shared/x64)
-    set(OPENCV_BASE_PATH ${PROJECT_SOURCE_DIR}/third_party/opencv-shared)
 
     # FFmpeg
     set(FFMPEG_LIB
@@ -83,10 +81,6 @@ if(WIN32)
         ${SPIRV_LIB}
     )
     list(APPEND ALL_INCLUDE_DIRS ${NCNN_BASE_PATH}/include/ncnn)
-
-    # OpenCV
-    # list(APPEND ALL_LIBRARIES ${OPENCV_BASE_PATH}/build/x64/vc16/lib/opencv_world4100.lib)
-    list(APPEND ALL_INCLUDE_DIRS ${OPENCV_BASE_PATH}/build/include)
 else()
     # FFmpeg
     find_package(PkgConfig REQUIRED)
@@ -107,54 +101,6 @@ else()
         list(APPEND FFMPEG_LIB ${${PKG}_LIBRARIES})
     endforeach()
     list(APPEND ALL_LIBRARIES ${FFMPEG_LIB})
-
-    # OpenCV
-    if (USE_SYSTEM_OPENCV)
-        find_package(OpenCV REQUIRED)
-        list(APPEND ALL_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS}/opencv2)
-        # list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
-    else()
-        option(BUILD_opencv_calib3d "" OFF)
-        option(BUILD_opencv_core "" ON)
-        option(BUILD_opencv_dnn "" OFF)
-        option(BUILD_opencv_features2d "" OFF)
-        option(BUILD_opencv_flann "" OFF)
-        option(BUILD_opencv_gapi "" OFF)
-        option(BUILD_opencv_highgui "" OFF)
-        option(BUILD_opencv_imgcodecs "" OFF)
-        option(BUILD_opencv_imgproc "" OFF)
-        option(BUILD_opencv_java "" OFF)
-        option(BUILD_opencv_js "" OFF)
-        option(BUILD_opencv_ml "" OFF)
-        option(BUILD_opencv_objc "" OFF)
-        option(BUILD_opencv_objdetect "" OFF)
-        option(BUILD_opencv_photo "" OFF)
-        option(BUILD_opencv_python "" OFF)
-        option(BUILD_opencv_python2 "" OFF)
-        option(BUILD_opencv_python3 "" OFF)
-        option(BUILD_opencv_stitching "" OFF)
-        option(BUILD_opencv_ts "" OFF)
-        option(BUILD_opencv_video "" OFF)
-        option(BUILD_opencv_videoio "" ON)
-        option(BUILD_opencv_world "" OFF)
-
-        option(WITH_PNG "" OFF)
-        option(WITH_JPEG "" OFF)
-        option(WITH_TIFF "" OFF)
-        option(WITH_WEBP "" OFF)
-        option(WITH_OPENJPEG "" OFF)
-        option(WITH_JASPER "" OFF)
-        option(WITH_OPENEXR "" OFF)
-        option(WITH_IMGCODEC "" OFF)
-
-        add_subdirectory(third_party/opencv)
-        list(APPEND ALL_INCLUDE_DIRS
-            ${PROJECT_SOURCE_DIR}/third_party/opencv/include
-            ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/core/include
-            ${PROJECT_SOURCE_DIR}/third_party/opencv/modules/videoio/include
-        )
-        # list(APPEND ALL_LIBRARIES opencv_core opencv_videoio)
-    endif() # USE_SYSTEM_OPENCV
 endif() # WIN32
 
 # Find ncnn package
@@ -397,10 +343,6 @@ else()
     set(MODEL_DESTINATION_DEFAULT "share/video2x")
 endif()
 
-# Explicitly set the output paths since OpenCV changes these variables
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-
 # Set the installation directories
 set(INSTALL_BIN_DESTINATION ${BIN_DESTINATION_DEFAULT} CACHE STRING "")
 set(INSTALL_INCLUDE_DESTINATION ${INCLUDE_DESTINATION_DEFAULT} CACHE STRING "")
@@ -447,8 +389,6 @@ if(WIN32)
     install(FILES
         ${CMAKE_BINARY_DIR}/realesrgan_install/bin/librealesrgan-ncnn-vulkan.dll
         ${FFMPEG_DLLS}
-        # ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_world4100.dll
-        # ${OPENCV_BASE_PATH}/build/x64/vc16/bin/opencv_videoio_msmf4100_64.dll
         ${NCNN_BASE_PATH}/bin/ncnn.dll
         ${BOOST_DLL_PATH}
         DESTINATION ${INSTALL_BIN_DESTINATION}

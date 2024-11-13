@@ -41,7 +41,6 @@ debug:
 windows:
 	cmake -S . -B $(BINDIR) \
 		-DUSE_SYSTEM_NCNN=OFF \
-		-DUSE_SYSTEM_OPENCV=OFF \
 		-DUSE_SYSTEM_SPDLOG=OFF \
 		-DUSE_SYSTEM_BOOST=OFF \
 		-DCMAKE_BUILD_TYPE=Release \
@@ -51,7 +50,6 @@ windows:
 windows-debug:
 	cmake -S . -B $(BINDIR) \
 		-DUSE_SYSTEM_NCNN=OFF \
-		-DUSE_SYSTEM_OPENCV=OFF \
 		-DUSE_SYSTEM_SPDLOG=OFF \
 		-DUSE_SYSTEM_BOOST=OFF \
 		-DCMAKE_BUILD_TYPE=Debug \
@@ -72,7 +70,6 @@ debian:
 		glslang-tools \
 		libomp-dev \
 		libspdlog-dev \
-		libopencv-dev \
 		libboost-program-options-dev
 	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
 		-DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX) \
@@ -94,7 +91,6 @@ ubuntu2404:
 		libvulkan-dev \
 		glslang-tools \
 		libomp-dev \
-		libopencv-dev \
 		libboost-program-options-dev
 	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
 		-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
@@ -120,7 +116,6 @@ ubuntu2204:
 		libvulkan-dev \
 		glslang-tools \
 		libomp-dev \
-		libopencv-dev \
 		libboost-program-options-dev
 	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
 		-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \

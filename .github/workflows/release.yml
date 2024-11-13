@@ -47,7 +47,6 @@ jobs:
               libvulkan-dev \
               glslang-tools \
               libomp-dev \
-              libopencv-dev \
               libboost-program-options-dev
       - name: Build Video2X
         run: |
@@ -85,7 +84,6 @@ jobs:
         run: |
           $ffmpegVersion = "7.1"
           $ncnnVersion = "20240820"
-          $opencvVersion = "4.10.0"
 
           git submodule update --init --recursive
 
@@ -96,15 +94,11 @@ jobs:
           curl -Lo ncnn-shared.zip "https://github.com/Tencent/ncnn/releases/download/$ncnnVersion/ncnn-$ncnnVersion-windows-vs2022-shared.zip"
           Expand-Archive -Path ncnn-shared.zip -DestinationPath third_party
           Rename-Item -Path "third_party/ncnn-$ncnnVersion-windows-vs2022-shared" -NewName ncnn-shared
-
-          curl -Lo opencv-shared.exe "https://github.com/opencv/opencv/releases/download/$opencvVersion/opencv-$opencvVersion-windows.exe"
-          7z x opencv-shared.exe -y
-          Move-Item -Path opencv -Destination third_party\opencv-shared
       - name: Build Video2X
         shell: pwsh
         run: |
           cmake -S . -B build `
-            -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DUSE_SYSTEM_OPENCV=OFF -DUSE_SYSTEM_BOOST=OFF `
+            -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DUSE_SYSTEM_BOOST=OFF `
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x_install
           cmake --build build --config Release --parallel --target install
       - name: Compress artifacts

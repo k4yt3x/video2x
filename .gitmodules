@@ -7,9 +7,6 @@
 [submodule "third_party/spdlog"]
 	path = third_party/spdlog
 	url = https://github.com/gabime/spdlog.git
-[submodule "third_party/opencv"]
-	path = third_party/opencv
-	url = https://github.com/opencv/opencv.git
 [submodule "third_party/boost"]
 	path = third_party/boost
 	url = https://github.com/boostorg/boost.git

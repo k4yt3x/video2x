@@ -9,7 +9,7 @@ FROM docker.io/archlinux:latest AS builder
 # Install dependencies and create a non-root user
 RUN pacman -Syy --noconfirm \
         base-devel git cmake make clang pkgconf sudo \
-        ffmpeg ncnn vulkan-headers openmp spdlog opencv boost \
+        ffmpeg ncnn vulkan-headers openmp spdlog boost \
         nvidia-utils vulkan-radeon vulkan-intel vulkan-swrast \
     && useradd -m builder \
     && echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
@@ -38,7 +38,7 @@ ENV VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json\
 
 COPY --from=builder /tmp/video2x.pkg.tar.zst /video2x.pkg.tar.zst
 RUN pacman -Sy --noconfirm nvidia-utils vulkan-radeon vulkan-intel vulkan-swrast \
-        ffmpeg ncnn spdlog opencv boost-libs \
+        ffmpeg ncnn spdlog boost-libs \
     && pacman -U --noconfirm /video2x.pkg.tar.zst \
     && rm -rf /video2x.pkg.tar.zst /var/cache/pacman/pkg/*
 
