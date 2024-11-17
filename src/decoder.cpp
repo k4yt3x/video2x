@@ -1,17 +1,25 @@
 #include "decoder.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include <spdlog/spdlog.h>
 
-static enum AVPixelFormat hw_pix_fmt = AV_PIX_FMT_NONE;
+enum AVPixelFormat Decoder::hw_pix_fmt_ = AV_PIX_FMT_NONE;
 
-// Callback function to choose the hardware-accelerated pixel format
-static enum AVPixelFormat get_hw_format(AVCodecContext *_, const enum AVPixelFormat *pix_fmts) {
+Decoder::Decoder() : fmt_ctx_(nullptr), dec_ctx_(nullptr), in_vstream_idx_(-1) {}
+
+Decoder::~Decoder() {
+    if (dec_ctx_) {
+        avcodec_free_context(&dec_ctx_);
+        dec_ctx_ = nullptr;
+    }
+    if (fmt_ctx_) {
+        avformat_close_input(&fmt_ctx_);
+        fmt_ctx_ = nullptr;
+    }
+}
+
+enum AVPixelFormat Decoder::get_hw_format(AVCodecContext *_, const enum AVPixelFormat *pix_fmts) {
     for (const enum AVPixelFormat *p = pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
-        if (*p == hw_pix_fmt) {
+        if (*p == hw_pix_fmt_) {
             return *p;
         }
     }
@@ -19,39 +27,36 @@ static enum AVPixelFormat get_hw_format(AVCodecContext *_, const enum AVPixelFor
     return AV_PIX_FMT_NONE;
 }
 
-int init_decoder(
+int Decoder::init(
     AVHWDeviceType hw_type,
     AVBufferRef *hw_ctx,
-    std::filesystem::path in_fpath,
-    AVFormatContext **fmt_ctx,
-    AVCodecContext **dec_ctx,
-    int *in_vstream_idx
+    const std::filesystem::path &in_fpath
 ) {
-    AVFormatContext *ifmt_ctx = NULL;
-    AVCodecContext *codec_ctx = NULL;
     int ret;
 
-    if ((ret = avformat_open_input(&ifmt_ctx, in_fpath.u8string().c_str(), NULL, NULL)) < 0) {
-        spdlog::error("Could not open input file '{}'", in_fpath.u8string().c_str());
+    // Open the input file
+    if ((ret = avformat_open_input(&fmt_ctx_, in_fpath.u8string().c_str(), nullptr, nullptr)) < 0) {
+        spdlog::error("Could not open input file '{}'", in_fpath.u8string());
         return ret;
     }
 
-    if ((ret = avformat_find_stream_info(ifmt_ctx, NULL)) < 0) {
+    // Retrieve stream information
+    if ((ret = avformat_find_stream_info(fmt_ctx_, nullptr)) < 0) {
         spdlog::error("Failed to retrieve input stream information");
         return ret;
     }
 
     // Find the first video stream
-    ret = av_find_best_stream(ifmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+    ret = av_find_best_stream(fmt_ctx_, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
     if (ret < 0) {
         spdlog::error("Could not find video stream in the input file");
         return ret;
     }
 
     int stream_index = ret;
-    AVStream *video_stream = ifmt_ctx->streams[stream_index];
+    AVStream *video_stream = fmt_ctx_->streams[stream_index];
 
-    // Set up the decoder
+    // Find the decoder for the video stream
     const AVCodec *decoder = avcodec_find_decoder(video_stream->codecpar->codec_id);
     if (!decoder) {
         spdlog::error(
@@ -61,16 +66,28 @@ int init_decoder(
         return AVERROR_DECODER_NOT_FOUND;
     }
 
-    codec_ctx = avcodec_alloc_context3(decoder);
-    if (!codec_ctx) {
+    // Allocate the decoder context
+    dec_ctx_ = avcodec_alloc_context3(decoder);
+    if (!dec_ctx_) {
         spdlog::error("Failed to allocate the decoder context");
         return AVERROR(ENOMEM);
     }
 
+    // Copy codec parameters from input stream to decoder context
+    if ((ret = avcodec_parameters_to_context(dec_ctx_, video_stream->codecpar)) < 0) {
+        spdlog::error("Failed to copy decoder parameters to input decoder context");
+        return ret;
+    }
+
+    // Set the time base and frame rate
+    dec_ctx_->time_base = video_stream->time_base;
+    dec_ctx_->pkt_timebase = video_stream->time_base;
+    dec_ctx_->framerate = av_guess_frame_rate(fmt_ctx_, video_stream, nullptr);
+
     // Set hardware device context
     if (hw_ctx != nullptr) {
-        codec_ctx->hw_device_ctx = av_buffer_ref(hw_ctx);
-        codec_ctx->get_format = get_hw_format;
+        dec_ctx_->hw_device_ctx = av_buffer_ref(hw_ctx);
+        dec_ctx_->get_format = get_hw_format;
 
         // Automatically determine the hardware pixel format
         for (int i = 0;; i++) {
@@ -81,36 +98,35 @@ int init_decoder(
                     decoder->name,
                     av_hwdevice_get_type_name(hw_type)
                 );
-                avcodec_free_context(&codec_ctx);
-                avformat_close_input(&ifmt_ctx);
                 return AVERROR(ENOSYS);
             }
             if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
                 config->device_type == hw_type) {
-                hw_pix_fmt = config->pix_fmt;
+                hw_pix_fmt_ = config->pix_fmt;
                 break;
             }
         }
     }
 
-    if ((ret = avcodec_parameters_to_context(codec_ctx, video_stream->codecpar)) < 0) {
-        spdlog::error("Failed to copy decoder parameters to input decoder context");
-        return ret;
-    }
-
-    // Set decoder time base and frame rate
-    codec_ctx->time_base = video_stream->time_base;
-    codec_ctx->pkt_timebase = video_stream->time_base;
-    codec_ctx->framerate = av_guess_frame_rate(ifmt_ctx, video_stream, NULL);
-
-    if ((ret = avcodec_open2(codec_ctx, decoder, NULL)) < 0) {
+    // Open the decoder
+    if ((ret = avcodec_open2(dec_ctx_, decoder, nullptr)) < 0) {
         spdlog::error("Failed to open decoder for stream #{}", stream_index);
         return ret;
     }
 
-    *fmt_ctx = ifmt_ctx;
-    *dec_ctx = codec_ctx;
-    *in_vstream_idx = stream_index;
+    in_vstream_idx_ = stream_index;
 
     return 0;
+}
+
+AVFormatContext *Decoder::get_format_context() const {
+    return fmt_ctx_;
+}
+
+AVCodecContext *Decoder::get_codec_context() const {
+    return dec_ctx_;
+}
+
+int Decoder::get_video_stream_index() const {
+    return in_vstream_idx_;
 }

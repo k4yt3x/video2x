@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(video2x VERSION 6.1.1 LANGUAGES CXX)
 
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,9 +17,9 @@ endif()
 
 # Set the default optimization flags for Release builds
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /GL /LTCG /MD /DNDEBUG")
-    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto")
         set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -s")
         set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -s")
@@ -23,9 +27,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # Set global compile options for all targets
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/W4 /permissive-)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Wpedantic -Wconversion -Wshadow)
 endif()
 
@@ -70,7 +74,7 @@ if(WIN32)
     set(SPIRV_BUILD_PATH
         ${CMAKE_BINARY_DIR}/realesrgan-prefix/src/realesrgan-build/ncnn/glslang/SPIRV
     )
-    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
         set(SPIRV_LIB ${SPIRV_BUILD_PATH}/Release/SPIRV.lib)
     else()
         set(SPIRV_LIB ${SPIRV_BUILD_PATH}/Debug/SPIRVd.lib)
@@ -203,7 +207,7 @@ else()
 endif()
 
 # spdlog
-if (USE_SYSTEM_SPDLOG)
+if(USE_SYSTEM_SPDLOG)
     find_package(spdlog REQUIRED)
     list(APPEND ALL_INCLUDE_DIRS ${spdlog_INCLUDE_DIRS})
     set(SPDLOG_LIB spdlog::spdlog)
@@ -214,7 +218,7 @@ endif()
 list(APPEND ALL_LIBRARIES ${SPDLOG_LIB})
 
 # Boost
-if (USE_SYSTEM_BOOST)
+if(USE_SYSTEM_BOOST)
     find_package(Boost REQUIRED COMPONENTS program_options)
     list(APPEND ALL_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 else()
@@ -228,7 +232,7 @@ else()
 endif()
 set(BOOST_LIB Boost::program_options)
 
-if (BUILD_VIDEO2X_CLI)
+if(BUILD_VIDEO2X_CLI)
     find_package(Vulkan REQUIRED)
     set(VULKAN_LIB Vulkan::Vulkan)
 endif()
@@ -295,7 +299,7 @@ endif()
 target_link_libraries(libvideo2x PRIVATE ${ALL_LIBRARIES})
 
 if(NOT WIN32)
-    if (USE_SYSTEM_NCNN)
+    if(USE_SYSTEM_NCNN)
         target_link_libraries(libvideo2x PUBLIC ncnn)
     else()
         target_link_libraries(libvideo2x PRIVATE ncnn)
@@ -303,7 +307,7 @@ if(NOT WIN32)
 endif()
 
 # Create the executable 'video2x'
-if (BUILD_VIDEO2X_CLI)
+if(BUILD_VIDEO2X_CLI)
     file(GLOB VIDEO2X_SOURCES tools/video2x/src/*.cpp)
     add_executable(video2x ${VIDEO2X_SOURCES})
     set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)

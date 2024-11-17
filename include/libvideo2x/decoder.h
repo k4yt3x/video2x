@@ -8,13 +8,25 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
-int init_decoder(
-    AVHWDeviceType hw_type,
-    AVBufferRef *hw_ctx,
-    std::filesystem::path in_fpath,
-    AVFormatContext **fmt_ctx,
-    AVCodecContext **dec_ctx,
-    int *in_vstream_idx
-);
+class Decoder {
+   public:
+    Decoder();
+    ~Decoder();
+
+    int init(AVHWDeviceType hw_type, AVBufferRef *hw_ctx, const std::filesystem::path &in_fpath);
+
+    AVFormatContext *get_format_context() const;
+    AVCodecContext *get_codec_context() const;
+    int get_video_stream_index() const;
+
+   private:
+    static enum AVPixelFormat hw_pix_fmt_;
+    static enum AVPixelFormat
+    get_hw_format(AVCodecContext *ctx, const enum AVPixelFormat *pix_fmts);
+
+    AVFormatContext *fmt_ctx_;
+    AVCodecContext *dec_ctx_;
+    int in_vstream_idx_;
+};
 
 #endif  // DECODER_H
