@@ -118,6 +118,8 @@ int Encoder::init(
     std::string crf_str = std::to_string(encoder_config->crf);
     av_opt_set(enc_ctx_->priv_data, "crf", crf_str.c_str(), 0);
     av_opt_set(enc_ctx_->priv_data, "preset", encoder_config->preset, 0);
+    // lossless checkbox
+    av_opt_set(enc_ctx_->priv_data, "x265-params", "lossless=1:scenecut=40:open-gop=0", 0);
 
     // Use global headers if necessary
     if (ofmt_ctx_->oformat->flags & AVFMT_GLOBALHEADER) {
