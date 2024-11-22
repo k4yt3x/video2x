@@ -2,14 +2,18 @@ name: Build
 on:
   push:
     paths:
+      - ".github/workflows/build.yml"
       - "include/**"
       - "src/**"
+      - "tools/**"
       - "third_party/**"
       - "CMakeLists.txt"
   pull_request:
     paths:
+      - ".github/workflows/build.yml"
       - "include/**"
       - "src/**"
+      - "tools/**"
       - "third_party/**"
       - "CMakeLists.txt"
   workflow_dispatch: {}
