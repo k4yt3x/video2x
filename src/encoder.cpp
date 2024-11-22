@@ -73,18 +73,39 @@ int Encoder::init(
         enc_ctx_->hw_device_ctx = av_buffer_ref(hw_ctx);
     }
 
-    // Set encoding parameters
-    enc_ctx_->height = encoder_config->out_height;
-    enc_ctx_->width = encoder_config->out_width;
-    enc_ctx_->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
-    enc_ctx_->bit_rate = encoder_config->bit_rate;
-
-    // Set the color properties
+    // Copy the color properties from the decoder context
     enc_ctx_->color_range = dec_ctx->color_range;
     enc_ctx_->color_primaries = dec_ctx->color_primaries;
     enc_ctx_->color_trc = dec_ctx->color_trc;
     enc_ctx_->colorspace = dec_ctx->colorspace;
     enc_ctx_->chroma_sample_location = dec_ctx->chroma_sample_location;
+
+    // Extra options copied from the decoder context
+    enc_ctx_->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
+
+    // Set basic video options
+    enc_ctx_->width = encoder_config->width;
+    enc_ctx_->height = encoder_config->height;
+
+    // Set rate control and compression options
+    enc_ctx_->bit_rate = encoder_config->bit_rate;
+    enc_ctx_->rc_buffer_size = encoder_config->rc_buffer_size;
+    enc_ctx_->rc_min_rate = encoder_config->rc_min_rate;
+    enc_ctx_->rc_max_rate = encoder_config->rc_max_rate;
+    enc_ctx_->qmin = encoder_config->qmin;
+    enc_ctx_->qmax = encoder_config->qmax;
+
+    // Set GOP and frame structure options
+    enc_ctx_->gop_size = encoder_config->gop_size;
+    enc_ctx_->max_b_frames = encoder_config->max_b_frames;
+    enc_ctx_->keyint_min = encoder_config->keyint_min;
+    enc_ctx_->refs = encoder_config->refs;
+
+    // Set performance and threading options
+    enc_ctx_->thread_count = encoder_config->thread_count;
+
+    // Set latency and buffering options
+    enc_ctx_->delay = encoder_config->delay;
 
     // Set the pixel format
     if (encoder_config->pix_fmt != AV_PIX_FMT_NONE) {
@@ -114,10 +135,16 @@ int Encoder::init(
         enc_ctx_->framerate = av_guess_frame_rate(ifmt_ctx, out_vstream, nullptr);
     }
 
-    // Set the CRF and preset for any codecs that support it
-    std::string crf_str = std::to_string(encoder_config->crf);
-    av_opt_set(enc_ctx_->priv_data, "crf", crf_str.c_str(), 0);
-    av_opt_set(enc_ctx_->priv_data, "preset", encoder_config->preset, 0);
+    // Set extra AVOptions
+    for (size_t i = 0; i < encoder_config->nb_extra_options; i++) {
+        const char *key = encoder_config->extra_options[i].key;
+        const char *value = encoder_config->extra_options[i].value;
+        spdlog::debug("Setting encoder option '{}' to '{}'", key, value);
+
+        if (av_opt_set(enc_ctx_->priv_data, key, value, 0) < 0) {
+            spdlog::warn("Failed to set encoder option '{}' to '{}'", key, value);
+        }
+    }
 
     // Use global headers if necessary
     if (ofmt_ctx_->oformat->flags & AVFMT_GLOBALHEADER) {

@@ -293,8 +293,8 @@ extern "C" int process_video(
     spdlog::debug("Output video dimensions: {}x{}", output_width, output_height);
 
     // Update encoder configuration with output dimensions
-    encoder_config->out_width = output_width;
-    encoder_config->out_height = output_height;
+    encoder_config->width = output_width;
+    encoder_config->height = output_height;
 
     // Initialize the encoder
     Encoder encoder;

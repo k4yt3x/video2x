@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Automatic selection of the most suitable pixel format for the output video.
+- Support for specifying arbitrary `AVOptions` for the encoder.
+- More `AVCodecContext` options.
 
 ### Fixed
 

@@ -70,16 +70,43 @@ struct FilterConfig {
     } config;
 };
 
-// Encoder configuration
+// Encoder configurations
 struct EncoderConfig {
-    int out_width;
-    int out_height;
-    bool copy_streams;
+    // Non-AVCodecContext options
     enum AVCodecID codec;
+    bool copy_streams;
+
+    // Basic video options
+    int width;
+    int height;
     enum AVPixelFormat pix_fmt;
-    const char *preset;
+
+    // Rate control and compression
     int64_t bit_rate;
-    float crf;
+    int rc_buffer_size;
+    int rc_min_rate;
+    int rc_max_rate;
+    int qmin;
+    int qmax;
+
+    // GOP and frame structure
+    int gop_size;
+    int max_b_frames;
+    int keyint_min;
+    int refs;
+
+    // Performance and threading
+    int thread_count;
+
+    // Latency and buffering
+    int delay;
+
+    // Extra AVOptions
+    struct {
+        const char *key;
+        const char *value;
+    } *extra_options;
+    size_t nb_extra_options;
 };
 
 // Video processing context

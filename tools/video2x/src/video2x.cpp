@@ -7,6 +7,7 @@
 #include <cstring>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -64,20 +65,30 @@ struct Arguments {
     StringType filter_type;
     uint32_t gpuid = 0;
     StringType hwaccel = STR("none");
-    bool nocopystreams = false;
+    bool no_copy_streams = false;
     bool benchmark = false;
 
     // Encoder options
     StringType codec = STR("libx264");
-    StringType preset = STR("slow");
     StringType pix_fmt;
-    int64_t bitrate = 0;
-    float crf = 20.0f;
+    int64_t bit_rate = 0;
+    int rc_buffer_size = 0;
+    int rc_min_rate = 0;
+    int rc_max_rate = 0;
+    int qmin = -1;
+    int qmax = -1;
+    int gop_size = -1;
+    int max_b_frames = -1;
+    int keyint_min = -1;
+    int refs = -1;
+    int thread_count = 0;
+    int delay = 0;
+    std::vector<std::pair<StringType, StringType>> extra_options;
 
     // libplacebo options
     std::filesystem::path shader_path;
-    int out_width = 0;
-    int out_height = 0;
+    int width = 0;
+    int height = 0;
 
     // RealESRGAN options
     StringType model_name;
@@ -340,30 +351,60 @@ int main(int argc, char **argv) {
         desc.add_options()
             ("help", "Display this help page")
             ("version,v", "Print program version")
-            ("loglevel", PO_STR_VALUE<StringType>(&arguments.loglevel)->default_value(STR("info"), "info"), "Set log level (trace, debug, info, warn, error, critical, none)")
-            ("noprogress", po::bool_switch(&arguments.noprogress), "Do not display the progress bar")
+            ("loglevel", PO_STR_VALUE<StringType>(&arguments.loglevel)->default_value(STR("info"),
+                "info"), "Set log level (trace, debug, info, warn, error, critical, none)")
+            ("noprogress", po::bool_switch(&arguments.noprogress),
+                "Do not display the progress bar")
             ("listgpus", "List the available GPUs")
 
             // General Processing Options
             ("input,i", PO_STR_VALUE<StringType>(), "Input video file path")
             ("output,o", PO_STR_VALUE<StringType>(), "Output video file path")
-            ("filter,f", PO_STR_VALUE<StringType>(&arguments.filter_type), "Filter to use: 'libplacebo' or 'realesrgan'")
-            ("gpuid,g", po::value<uint32_t>(&arguments.gpuid)->default_value(0), "Vulkan GPU ID (default: 0)")
-            ("hwaccel,a", PO_STR_VALUE<StringType>(&arguments.hwaccel)->default_value(STR("none"), "none"), "Hardware acceleration method (default: none)")
-            ("nocopystreams", po::bool_switch(&arguments.nocopystreams), "Do not copy audio and subtitle streams")
-            ("benchmark", po::bool_switch(&arguments.benchmark), "Discard processed frames and calculate average FPS")
+            ("filter,f", PO_STR_VALUE<StringType>(&arguments.filter_type),
+                "Filter to use: 'libplacebo' or 'realesrgan'")
+            ("gpuid,g", po::value<uint32_t>(&arguments.gpuid)->default_value(0), "Vulkan GPU ID")
+            ("hwaccel,a", PO_STR_VALUE<StringType>(&arguments.hwaccel)->default_value(STR("none"),
+                "none"), "Hardware acceleration method")
+            ("benchmark", po::bool_switch(&arguments.benchmark),
+                "Discard processed frames and calculate average FPS")
 
             // Encoder options
-            ("codec,c", PO_STR_VALUE<StringType>(&arguments.codec)->default_value(STR("libx264"), "libx264"), "Output codec (default: libx264)")
-            ("preset,p", PO_STR_VALUE<StringType>(&arguments.preset)->default_value(STR("slow"), "slow"), "Encoder preset (default: slow)")
-            ("pixfmt,x", PO_STR_VALUE<StringType>(&arguments.pix_fmt), "Output pixel format (default: auto)")
-            ("bitrate,b", po::value<int64_t>(&arguments.bitrate)->default_value(0), "Bitrate in bits per second (default: 0 (VBR))")
-            ("crf,q", po::value<float>(&arguments.crf)->default_value(20.0f), "Constant Rate Factor (default: 20.0)")
+            ("codec,c", PO_STR_VALUE<StringType>(&arguments.codec)->default_value(STR("libx264"),
+                "libx264"), "Output codec")
+            ("no_copy_streams", po::bool_switch(&arguments.no_copy_streams),
+                "Do not copy audio and subtitle streams")
+            ("pix_fmt", PO_STR_VALUE<StringType>(&arguments.pix_fmt), "Output pixel format")
+            ("bit_rate", po::value<int64_t>(&arguments.bit_rate)->default_value(0),
+                "Bitrate in bits per second")
+            ("rc_buffer_size", po::value<int>(&arguments.rc_buffer_size)->default_value(0),
+                "Rate control buffer size in bits")
+            ("rc_min_rate", po::value<int>(&arguments.rc_min_rate)->default_value(0),
+                "Minimum rate control")
+            ("rc_max_rate", po::value<int>(&arguments.rc_max_rate)->default_value(0),
+                "Maximum rate control")
+            ("qmin", po::value<int>(&arguments.qmin)->default_value(-1), "Minimum quantizer")
+            ("qmax", po::value<int>(&arguments.qmax)->default_value(-1), "Maximum quantizer")
+            ("gop_size", po::value<int>(&arguments.gop_size)->default_value(-1),
+                "Group of pictures structure size")
+            ("max_b_frames", po::value<int>(&arguments.max_b_frames)->default_value(-1),
+                "Maximum number of B-frames")
+            ("keyint_min", po::value<int>(&arguments.keyint_min)->default_value(-1),
+                "Minimum interval between keyframes")
+            ("refs", po::value<int>(&arguments.refs)->default_value(-1),
+                "Number of reference frames")
+            ("thread_count", po::value<int>(&arguments.thread_count)->default_value(0),
+                "Number of threads for encoding")
+            ("delay", po::value<int>(&arguments.delay)->default_value(0),
+                "Delay in milliseconds for encoder")
+
+            // Extra encoder options (key-value pairs)
+            ("extra_option,e", PO_STR_VALUE<std::vector<StringType>>()->multitoken(),
+                "Additional AVOption(s) for codec settings (-e key=value)")
 
             // libplacebo options
             ("shader,s", PO_STR_VALUE<StringType>(), "Name or path of the GLSL shader file to use")
-            ("width,w", po::value<int>(&arguments.out_width), "Output width")
-            ("height,h", po::value<int>(&arguments.out_height), "Output height")
+            ("width,w", po::value<int>(&arguments.width), "Output width")
+            ("height,h", po::value<int>(&arguments.height), "Output height")
 
             // RealESRGAN options
             ("model,m", PO_STR_VALUE<StringType>(&arguments.model_name), "Name of the model to use")
@@ -417,6 +458,21 @@ int main(int argc, char **argv) {
             return 1;
         }
 
+        // Parse avoptions
+        if (vm.count("extra_option")) {
+            for (const auto &opt : vm["extra_option"].as<std::vector<StringType>>()) {
+                size_t eq_pos = opt.find('=');
+                if (eq_pos != StringType::npos) {
+                    StringType key = opt.substr(0, eq_pos);
+                    StringType value = opt.substr(eq_pos + 1);
+                    arguments.extra_options.push_back(std::make_pair(key, value));
+                } else {
+                    spdlog::critical("Invalid extra AVOption format: {}", wstring_to_utf8(opt));
+                    return 1;
+                }
+            }
+        }
+
         if (vm.count("shader")) {
             arguments.shader_path = std::filesystem::path(vm["shader"].as<StringType>());
         }
@@ -440,8 +496,7 @@ int main(int argc, char **argv) {
 
     // Additional validations
     if (arguments.filter_type == STR("libplacebo")) {
-        if (arguments.shader_path.empty() || arguments.out_width == 0 ||
-            arguments.out_height == 0) {
+        if (arguments.shader_path.empty() || arguments.width == 0 || arguments.height == 0) {
             spdlog::critical(
                 "For libplacebo, shader name/path (-s), width (-w), "
                 "and height (-h) are required."
@@ -473,14 +528,8 @@ int main(int argc, char **argv) {
     }
 
     // Validate bitrate
-    if (arguments.bitrate < 0) {
+    if (arguments.bit_rate < 0) {
         spdlog::critical("Invalid bitrate specified.");
-        return 1;
-    }
-
-    // Validate CRF
-    if (arguments.crf < 0.0f || arguments.crf > 51.0f) {
-        spdlog::critical("CRF must be between 0 and 51.");
         return 1;
     }
 
@@ -544,8 +593,8 @@ int main(int argc, char **argv) {
     FilterConfig filter_config;
     if (arguments.filter_type == STR("libplacebo")) {
         filter_config.filter_type = FILTER_LIBPLACEBO;
-        filter_config.config.libplacebo.out_width = arguments.out_width;
-        filter_config.config.libplacebo.out_height = arguments.out_height;
+        filter_config.config.libplacebo.out_width = arguments.width;
+        filter_config.config.libplacebo.out_height = arguments.height;
         filter_config.config.libplacebo.shader_path = shader_path_str.c_str();
     } else if (arguments.filter_type == STR("realesrgan")) {
         filter_config.filter_type = FILTER_REALESRGAN;
@@ -554,18 +603,59 @@ int main(int argc, char **argv) {
         filter_config.config.realesrgan.model_name = arguments.model_name.c_str();
     }
 
-    std::string preset_str = wstring_to_utf8(arguments.preset);
-
     // Setup encoder configuration
     EncoderConfig encoder_config;
-    encoder_config.out_width = 0;
-    encoder_config.out_height = 0;
-    encoder_config.copy_streams = !arguments.nocopystreams;
     encoder_config.codec = codec->id;
+    encoder_config.copy_streams = !arguments.no_copy_streams;
+    encoder_config.width = arguments.width;
+    encoder_config.height = arguments.height;
     encoder_config.pix_fmt = pix_fmt;
-    encoder_config.preset = preset_str.c_str();
-    encoder_config.bit_rate = arguments.bitrate;
-    encoder_config.crf = arguments.crf;
+    encoder_config.bit_rate = arguments.bit_rate;
+    encoder_config.rc_buffer_size = arguments.rc_buffer_size;
+    encoder_config.rc_max_rate = arguments.rc_max_rate;
+    encoder_config.rc_min_rate = arguments.rc_min_rate;
+    encoder_config.qmin = arguments.qmin;
+    encoder_config.qmax = arguments.qmax;
+    encoder_config.gop_size = arguments.gop_size;
+    encoder_config.max_b_frames = arguments.max_b_frames;
+    encoder_config.keyint_min = arguments.keyint_min;
+    encoder_config.refs = arguments.refs;
+    encoder_config.thread_count = arguments.thread_count;
+    encoder_config.delay = arguments.delay;
+
+    // Handle extra AVOptions
+    encoder_config.nb_extra_options = arguments.extra_options.size();
+    encoder_config.extra_options = static_cast<decltype(encoder_config.extra_options)>(malloc(
+        static_cast<unsigned long>(encoder_config.nb_extra_options + 1) *
+        sizeof(encoder_config.extra_options[0])
+    ));
+    if (encoder_config.extra_options == nullptr) {
+        spdlog::critical("Failed to allocate memory for extra AVOptions.");
+        return 1;
+    }
+
+    // Copy extra AVOptions to the encoder configuration
+    for (size_t i = 0; i < encoder_config.nb_extra_options; i++) {
+        const std::string key = wstring_to_utf8(arguments.extra_options[i].first);
+        const std::string value = wstring_to_utf8(arguments.extra_options[i].second);
+        encoder_config.extra_options[i].key = strdup(key.c_str());
+        encoder_config.extra_options[i].value = strdup(value.c_str());
+    }
+
+    // Custom deleter for extra AVOptions
+    auto extra_options_deleter = [&](decltype(encoder_config.extra_options) *extra_options_ptr) {
+        auto extra_options = *extra_options_ptr;
+        for (size_t i = 0; i < encoder_config.nb_extra_options; i++) {
+            free(const_cast<char *>(extra_options[i].key));
+            free(const_cast<char *>(extra_options[i].value));
+        }
+        free(extra_options);
+        *extra_options_ptr = nullptr;
+    };
+
+    // Define a unique_ptr to automatically free extra_options
+    std::unique_ptr<decltype(encoder_config.extra_options), decltype(extra_options_deleter)>
+        extra_options_guard(&encoder_config.extra_options, extra_options_deleter);
 
     // Parse hardware acceleration method
     enum AVHWDeviceType hw_device_type = AV_HWDEVICE_TYPE_NONE;
@@ -753,20 +843,27 @@ int main(int argc, char **argv) {
         std::lock_guard<std::mutex> lock(proc_ctx_mutex);
         processed_frames = proc_ctx.processed_frames;
     }
-    int64_t time_elapsed = timer.get_elapsed_time() / 1000;
+    int time_elapsed = static_cast<int>(timer.get_elapsed_time() / 1000);
+    int hours_elapsed = time_elapsed / 3600;
+    int minutes_elapsed = (time_elapsed % 3600) / 60;
+    int seconds_elapsed = time_elapsed % 60;
     float average_speed_fps = static_cast<float>(processed_frames) /
                               (time_elapsed > 0 ? static_cast<float>(time_elapsed) : 1);
 
     // Print processing summary
-    printf("====== Video2X %s summary ======\n", arguments.benchmark ? "Benchmark" : "Processing");
-    printf("Video file processed: %s\n", arguments.in_fname.u8string().c_str());
-    printf("Total frames processed: %ld\n", proc_ctx.processed_frames);
-    printf("Total time taken: %ld s\n", time_elapsed);
-    printf("Average processing speed: %.2f FPS\n", average_speed_fps);
+    std::cout << "====== Video2X " << (arguments.benchmark ? "Benchmark" : "Processing")
+              << " summary ======" << std::endl;
+    std::cout << "Video file processed: " << arguments.in_fname.u8string() << std::endl;
+    std::cout << "Total frames processed: " << processed_frames << std::endl;
+    std::cout << "Total time taken: " << std::setw(2) << std::setfill('0') << hours_elapsed << ":"
+              << std::setw(2) << std::setfill('0') << minutes_elapsed << ":" << std::setw(2)
+              << std::setfill('0') << seconds_elapsed << std::endl;
+    std::cout << "Average processing speed: " << std::fixed << std::setprecision(2)
+              << average_speed_fps << " FPS" << std::endl;
 
     // Print additional information if not in benchmark mode
     if (!arguments.benchmark) {
-        printf("Output written to: %s\n", arguments.out_fname.u8string().c_str());
+        std::cout << "Output written to: " << arguments.out_fname.u8string() << std::endl;
     }
 
     return 0;
