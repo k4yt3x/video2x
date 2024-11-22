@@ -10,8 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Automatic selection of the most suitable pixel format for the output video.
-- Support for specifying arbitrary `AVOptions` for the encoder.
+- Support for specifying arbitrary `AVOptions` for the encoder (#1232).
 - More `AVCodecContext` options.
+
+### Changed
+
+- Improve the CLI help message structure and clarity.
 
 ### Fixed
 
@@ -38,15 +42,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Vulkan device selection for libplacebo.
 - Status bar and processing statistics. (Video2X Qt6)
 
-### Fixed
-
-- Wide character string paths support on Windows systems without UTF-8 support enabled (#1201).
-
 ### Changed
 
 - Automatically detect if options `colorspace` and `range` are supported by the buffer filter.
 - Resource file missing error messages.
 - Rewritten the CLI with C++.
+
+### Fixed
+
+- Wide character string paths support on Windows systems without UTF-8 support enabled (#1201).
 
 ## [6.0.0] - 2024-10-29
 

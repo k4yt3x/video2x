@@ -56,14 +56,14 @@ std::mutex proc_ctx_mutex;
 
 // Structure to hold parsed arguments
 struct Arguments {
-    StringType loglevel = STR("info");
-    bool noprogress = false;
+    StringType log_level = STR("info");
+    bool no_progress = false;
 
     // General options
     std::filesystem::path in_fname;
     std::filesystem::path out_fname;
     StringType filter_type;
-    uint32_t gpuid = 0;
+    uint32_t gpu_id = 0;
     StringType hwaccel = STR("none");
     bool no_copy_streams = false;
     bool benchmark = false;
@@ -293,7 +293,7 @@ void process_video_thread(
     EncoderConfig *encoder_config,
     VideoProcessingContext *proc_ctx
 ) {
-    enum Libvideo2xLogLevel log_level = parse_log_level(arguments->loglevel);
+    enum Libvideo2xLogLevel log_level = parse_log_level(arguments->log_level);
 
     StringType in_fname_string;
     StringType out_fname_string;
@@ -314,7 +314,7 @@ void process_video_thread(
         out_fname,
         log_level,
         arguments->benchmark,
-        arguments->gpuid,
+        arguments->gpu_id,
         hw_device_type,
         filter_config,
         encoder_config,
@@ -346,70 +346,84 @@ int main(int argc, char **argv) {
 
     // Parse command line arguments using Boost.Program_options
     try {
-        po::options_description desc("Allowed options");
-
-        desc.add_options()
+        // clang-format off
+        po::options_description all_opts("General options");
+        all_opts.add_options()
             ("help", "Display this help page")
-            ("version,v", "Print program version")
-            ("loglevel", PO_STR_VALUE<StringType>(&arguments.loglevel)->default_value(STR("info"),
-                "info"), "Set log level (trace, debug, info, warn, error, critical, none)")
-            ("noprogress", po::bool_switch(&arguments.noprogress),
+            ("version,V", "Print program version and exit")
+            ("verbose,v", PO_STR_VALUE<StringType>(&arguments.log_level)->default_value(STR("info"),
+                "info"), "Set verbosity level (trace, debug, info, warn, error, critical, none)")
+            ("no-progress", po::bool_switch(&arguments.no_progress),
                 "Do not display the progress bar")
-            ("listgpus", "List the available GPUs")
+            ("list-gpus,l", "List the available GPUs")
 
             // General Processing Options
             ("input,i", PO_STR_VALUE<StringType>(), "Input video file path")
             ("output,o", PO_STR_VALUE<StringType>(), "Output video file path")
             ("filter,f", PO_STR_VALUE<StringType>(&arguments.filter_type),
                 "Filter to use: 'libplacebo' or 'realesrgan'")
-            ("gpuid,g", po::value<uint32_t>(&arguments.gpuid)->default_value(0), "Vulkan GPU ID")
+            ("gpu,g", po::value<uint32_t>(&arguments.gpu_id)->default_value(0),
+                "GPU ID (Vulkan device index)")
             ("hwaccel,a", PO_STR_VALUE<StringType>(&arguments.hwaccel)->default_value(STR("none"),
-                "none"), "Hardware acceleration method")
-            ("benchmark", po::bool_switch(&arguments.benchmark),
-                "Discard processed frames and calculate average FPS")
+                "none"), "Hardware acceleration method (mostly for decoding)")
+            ("benchmark,b", po::bool_switch(&arguments.benchmark),
+                "Discard processed frames and calculate average FPS; "
+                "useful for detecting encoder bottlenecks")
+        ;
 
+        po::options_description encoder_opts("Encoder options");
+        encoder_opts.add_options()
             // Encoder options
             ("codec,c", PO_STR_VALUE<StringType>(&arguments.codec)->default_value(STR("libx264"),
                 "libx264"), "Output codec")
-            ("no_copy_streams", po::bool_switch(&arguments.no_copy_streams),
+            ("no-copy-streams", po::bool_switch(&arguments.no_copy_streams),
                 "Do not copy audio and subtitle streams")
-            ("pix_fmt", PO_STR_VALUE<StringType>(&arguments.pix_fmt), "Output pixel format")
-            ("bit_rate", po::value<int64_t>(&arguments.bit_rate)->default_value(0),
+            ("pix-fmt", PO_STR_VALUE<StringType>(&arguments.pix_fmt), "Output pixel format")
+            ("bit-rate", po::value<int64_t>(&arguments.bit_rate)->default_value(0),
                 "Bitrate in bits per second")
-            ("rc_buffer_size", po::value<int>(&arguments.rc_buffer_size)->default_value(0),
+            ("rc-buffer-size", po::value<int>(&arguments.rc_buffer_size)->default_value(0),
                 "Rate control buffer size in bits")
-            ("rc_min_rate", po::value<int>(&arguments.rc_min_rate)->default_value(0),
+            ("rc-min-rate", po::value<int>(&arguments.rc_min_rate)->default_value(0),
                 "Minimum rate control")
-            ("rc_max_rate", po::value<int>(&arguments.rc_max_rate)->default_value(0),
+            ("rc-max-rate", po::value<int>(&arguments.rc_max_rate)->default_value(0),
                 "Maximum rate control")
             ("qmin", po::value<int>(&arguments.qmin)->default_value(-1), "Minimum quantizer")
             ("qmax", po::value<int>(&arguments.qmax)->default_value(-1), "Maximum quantizer")
-            ("gop_size", po::value<int>(&arguments.gop_size)->default_value(-1),
+            ("gop-size", po::value<int>(&arguments.gop_size)->default_value(-1),
                 "Group of pictures structure size")
-            ("max_b_frames", po::value<int>(&arguments.max_b_frames)->default_value(-1),
+            ("max-b-frames", po::value<int>(&arguments.max_b_frames)->default_value(-1),
                 "Maximum number of B-frames")
-            ("keyint_min", po::value<int>(&arguments.keyint_min)->default_value(-1),
+            ("keyint-min", po::value<int>(&arguments.keyint_min)->default_value(-1),
                 "Minimum interval between keyframes")
             ("refs", po::value<int>(&arguments.refs)->default_value(-1),
                 "Number of reference frames")
-            ("thread_count", po::value<int>(&arguments.thread_count)->default_value(0),
+            ("thread-count", po::value<int>(&arguments.thread_count)->default_value(0),
                 "Number of threads for encoding")
             ("delay", po::value<int>(&arguments.delay)->default_value(0),
                 "Delay in milliseconds for encoder")
 
             // Extra encoder options (key-value pairs)
-            ("extra_option,e", PO_STR_VALUE<std::vector<StringType>>()->multitoken(),
-                "Additional AVOption(s) for codec settings (-e key=value)")
+            ("extra-encoder-option,e", PO_STR_VALUE<std::vector<StringType>>()->multitoken(),
+                "Additional AVOption(s) for the encoder (format: -e key=value)")
+            ;
 
-            // libplacebo options
-            ("shader,s", PO_STR_VALUE<StringType>(), "Name or path of the GLSL shader file to use")
+        po::options_description libplacebo_opts("libplacebo options");
+        libplacebo_opts.add_options()
+            ("shader,s", PO_STR_VALUE<StringType>(), "Name/path of the GLSL shader file to use")
             ("width,w", po::value<int>(&arguments.width), "Output width")
             ("height,h", po::value<int>(&arguments.height), "Output height")
+        ;
 
-            // RealESRGAN options
+        // RealESRGAN options
+        po::options_description realesrgan_opts("RealESRGAN options");
+        realesrgan_opts.add_options()
             ("model,m", PO_STR_VALUE<StringType>(&arguments.model_name), "Name of the model to use")
             ("scale,r", po::value<int>(&arguments.scaling_factor), "Scaling factor (2, 3, or 4)")
         ;
+        // clang-format on
+
+        // Combine all options
+        all_opts.add(encoder_opts).add(libplacebo_opts).add(realesrgan_opts);
 
         // Positional arguments
         po::positional_options_description p;
@@ -417,15 +431,27 @@ int main(int argc, char **argv) {
 
 #ifdef _WIN32
         po::variables_map vm;
-        po::store(po::wcommand_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+        po::store(po::wcommand_line_parser(argc, argv).options(all_opts).positional(p).run(), vm);
 #else
         po::variables_map vm;
-        po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+        po::store(po::command_line_parser(argc, argv).options(all_opts).positional(p).run(), vm);
 #endif
         po::notify(vm);
 
         if (vm.count("help")) {
-            std::cout << desc << std::endl;
+            std::cout << all_opts << std::endl;
+            std::cout
+                << "Examples:" << std::endl
+                << "  Upscale an anime video to 4K using libplacebo:" << std::endl
+                << "    video2x -i input.mp4 -o output.mp4 -f libplacebo -s anime4k-v4-a+a "
+                   "-w 3840 -h 2160"
+                << std::endl
+                << std::endl
+                << "  Upscale a film video by 4x using RealESRGAN with custom encoder options"
+                << std::endl
+                << "    video2x -i input.mkv -o output.mkv -f realesrgan -m realesrgan-plus -r 4 \\"
+                << std::endl
+                << "      -c libx264rgb -e crf=17 -e preset=veryslow -e tune=film" << std::endl;
             return 0;
         }
 
@@ -434,7 +460,7 @@ int main(int argc, char **argv) {
             return 0;
         }
 
-        if (vm.count("listgpus")) {
+        if (vm.count("list-gpus")) {
             return list_gpus();
         }
 
@@ -459,8 +485,8 @@ int main(int argc, char **argv) {
         }
 
         // Parse avoptions
-        if (vm.count("extra_option")) {
-            for (const auto &opt : vm["extra_option"].as<std::vector<StringType>>()) {
+        if (vm.count("extra-encoder-option")) {
+            for (const auto &opt : vm["extra-encoder-option"].as<std::vector<StringType>>()) {
                 size_t eq_pos = opt.find('=');
                 if (eq_pos != StringType::npos) {
                     StringType key = opt.substr(0, eq_pos);
@@ -519,10 +545,10 @@ int main(int argc, char **argv) {
     }
 
     // Validate GPU ID
-    int gpu_status = is_valid_gpu_id(arguments.gpuid);
+    int gpu_status = is_valid_gpu_id(arguments.gpu_id);
     if (gpu_status < 0) {
         spdlog::warn("Unable to validate GPU ID.");
-    } else if (arguments.gpuid > 0 && gpu_status == 0) {
+    } else if (arguments.gpu_id > 0 && gpu_status == 0) {
         spdlog::critical("Invalid GPU ID specified.");
         return 1;
     }
@@ -551,7 +577,7 @@ int main(int argc, char **argv) {
     }
 
     // Set spdlog log level
-    auto log_level = parse_log_level(arguments.loglevel);
+    auto log_level = parse_log_level(arguments.log_level);
     switch (log_level) {
         case LIBVIDEO2X_LOG_LEVEL_TRACE:
             spdlog::set_level(spdlog::level::trace);
@@ -757,7 +783,7 @@ int main(int argc, char **argv) {
         }
 
         // Display progress
-        if (!arguments.noprogress) {
+        if (!arguments.no_progress) {
             int64_t processed_frames, total_frames;
             bool pause;
             {
