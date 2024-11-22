@@ -2,7 +2,10 @@ name: Docs
 
 on:
   push:
-    branches: ["master"]
+    branches:
+      - master
+    paths:
+      - "docs/book/**"
   workflow_dispatch:
 
 permissions:
