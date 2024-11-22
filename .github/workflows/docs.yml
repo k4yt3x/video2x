@@ -1,0 +1,46 @@
+name: Docs
+
+on:
+  push:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install mdBook
+        run: |
+          version="$(curl https://api.github.com/repos/rust-lang/mdBook/releases/latest | jq -r '.tag_name')"
+          curl -sSL "https://github.com/rust-lang/mdBook/releases/download/$version/mdbook-$version-x86_64-unknown-linux-musl.tar.gz" | tar -xz
+          sudo mv mdbook /usr/local/bin/
+
+      - name: Build Docs with mdBook
+        run: mdbook build -d "$PWD/build/docs/book" docs/book
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "build/docs/book"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
