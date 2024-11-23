@@ -2,23 +2,24 @@
    <img src="https://github.com/user-attachments/assets/5cd63373-e806-474f-94ec-6e04963bf90f"/>
    </br>
    <img src="https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square"/>
-   <img src="https://img.shields.io/github/actions/workflow/status/k4yt3x/video2x/build.yml?label=Build&style=flat-square"/>
    <img src="https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square"/>
    <img src="https://img.shields.io/github/license/k4yt3x/video2x?style=flat-square"/>
    <img src="https://img.shields.io/github/sponsors/k4yt3x?style=flat-square&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fk4yt3x"/>
    <img src="https://img.shields.io/badge/dynamic/json?color=%23e85b46&label=Patreon&query=data.attributes.patron_count&suffix=%20patrons&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F4507807&style=flat-square"/>
 </p>
 
-> [!IMPORTANT]
-> Versions 4 and 5 have reached end-of-life (EOL) status. Due to limited development resources, issues related to any version earlier than 6 will no longer be addressed.
-
 ## 🌟 Version 6.0.0
 
-**[Download Windows Installer](https://github.com/k4yt3x/video2x/releases/download/6.1.1/video2x-qt6-windows-amd64-installer.exe)**
+Video2X 6.0.0 highlights:
 
-**TL;DR: Version 6.0.0 is a complete rewrite of the Video2X project in C/C++, featuring a faster, more efficient architecture, cross-platform support, vastly improved output quality, and a new GUI and installer for easy setup on Windows.**
+- Complete rewrite of the Video2X project in C/C++.
+- Faster and more efficient architecture.
+- Cross-platform support for Windows and Linux.
+- Vastly improved output quality.
+- New GUI and installer for easy setup on Windows.
 
-![6.1.0-screenshot](https://github.com/user-attachments/assets/57aa11d0-dd01-49e9-b6b0-2d2f21a363ac)
+<details>
+<summary>Click to see more details</summary>
 
 Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 
@@ -29,13 +30,19 @@ Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 - supports Anime4K v4 and all custom MPV-compatible GLSL shaders;
 - includes support for RealESRGAN (all three models) via ncnn and Vulkan;
 - requires zero additional disk space during processing, just space for the final output; and
-- exports a standard C function for easy integration into other projects! (documentations are on the way)
+- exports a standard C function for easy integration into other projects! (documentation is on the way)
 
 Support for RealCUGAN and frame interpolation with RIFE are coming soon.
 
+</details>
+
+![6.1.0-screenshot](https://github.com/user-attachments/assets/57aa11d0-dd01-49e9-b6b0-2d2f21a363ac)
+
 ## [🪟 Download for Windows](https://github.com/k4yt3x/video2x/releases/latest)
 
-You can download the latest Windows release from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). For basic GUI usage, refer to the [GUI wiki page](https://github.com/k4yt3x/video2x/wiki/GUI). If you're unable to download directly from GitHub, try the [mirror](https://files.k4yt3x.com/Projects/Video2X/latest). The GUI currently supports the following languages:
+**[Download Latest Windows Installer Executable (6.1.1)](https://github.com/k4yt3x/video2x/releases/download/6.1.1/video2x-qt6-windows-amd64-installer.exe)**
+
+You can download the latest Windows release from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). For basic GUI usage, refer to the [documentation](https://docs.video2x.org/running/desktop.html). If you're unable to download directly from GitHub, try the [mirror](https://files.k4yt3x.com/Projects/Video2X/latest). The GUI currently supports the following languages:
 
 - English (United States)
 - 简体中文（中国）
@@ -48,7 +55,7 @@ You can install Video2X on Arch Linux using the [video2x-git](https://aur.archli
 
 ## [📦 Container Image](https://github.com/k4yt3x/video2x/pkgs/container/video2x)
 
-Video2X container images are available on the GitHub Container Registry for easy deployment on Linux and macOS. If you already have Docker/Podman installed, only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentations](https://github.com/K4YT3X/video2x/wiki/Container).
+Video2X container images are available on the GitHub Container Registry for easy deployment on Linux and macOS. If you already have Docker/Podman installed, only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentation](https://docs.video2x.org/running/container.html).
 
 ## [📔 Google Colab](https://colab.research.google.com/drive/1gWEwcA9y57EsxwOjmLNmNMXPsafw0kGo)
 
@@ -58,9 +65,9 @@ You can use Video2X on [Google Colab](https://colab.research.google.com/) **for 
 
 Join our Telegram discussion group to ask any questions you have about Video2X, chat directly with the developers, or discuss about super resolution technologies and the future of Video2X in general.
 
-## [📖 Documentations](https://github.com/k4yt3x/video2x/wiki)
+## [📖 Documentation](https://docs.video2x.org/)
 
-Video2X's documentations are hosted on this repository's [Wiki page](https://github.com/k4yt3x/video2x/wiki). It includes comprehensive explanations for how to use the [GUI](https://github.com/k4yt3x/video2x/wiki/GUI), the [CLI](https://github.com/k4yt3x/video2x/wiki/CLI), the [container image](https://github.com/K4YT3X/video2x/wiki/Container), the [library](https://github.com/k4yt3x/video2x/wiki/Library), and more. The Wiki is open to edits by the community, so you, yes you, can also correct errors or add new contents to the documentations.
+Comprehensive documentation for Video2X is available at [https://docs.video2x.org/](https://docs.video2x.org/). It offers detailed instructions on how to [build](https://docs.video2x.org/building/index.html), [install](https://docs.video2x.org/installing/index.html), [use](https://docs.video2x.org/running/index.html), and [develop](https://docs.video2x.org/developing/index.html) with this program.
 
 ## Introduction
 

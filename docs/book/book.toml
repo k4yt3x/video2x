@@ -2,7 +2,7 @@
 authors = ["k4yt3x"]
 language = "en"
 multilingual = false
-title = "Video2X Documentations"
+title = "Video2X Documentation"
 
 [output.html]
 default-theme = "ayu"
