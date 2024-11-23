@@ -38,24 +38,24 @@ Support for RealCUGAN and frame interpolation with RIFE are coming soon.
 
 ![6.1.0-screenshot](https://github.com/user-attachments/assets/57aa11d0-dd01-49e9-b6b0-2d2f21a363ac)
 
-## [🪟 Download for Windows](https://github.com/k4yt3x/video2x/releases/latest)
+## [🪟 Install on Windows](https://docs.video2x.org/installing/windows-qt6.html)
 
-**[Download Latest Windows Installer Executable (6.1.1)](https://github.com/k4yt3x/video2x/releases/download/6.1.1/video2x-qt6-windows-amd64-installer.exe)**
+**[Download the Latest Windows Installer Executable (6.1.1)](https://github.com/k4yt3x/video2x/releases/download/6.1.1/video2x-qt6-windows-amd64-installer.exe)**
 
-You can download the latest Windows release from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). For basic GUI usage, refer to the [documentation](https://docs.video2x.org/running/desktop.html). If you're unable to download directly from GitHub, try the [mirror](https://files.k4yt3x.com/Projects/Video2X/latest). The GUI currently supports the following languages:
+You can download the latest Windows release on the [releases page](https://github.com/k4yt3x/video2x/releases/latest). For basic GUI usage, refer to the [documentation](https://docs.video2x.org/running/desktop.html). If you're unable to download directly from GitHub, try the [mirror site](https://files.k4yt3x.com/Projects/Video2X). The GUI currently supports the following languages:
 
 - English (United States)
 - 简体中文（中国）
 - 日本語（日本）
 - Português (Portugal)
 
-## [🐧 Install on Linux](https://aur.archlinux.org/packages/video2x-git)
+## [🐧 Install on Linux](https://docs.video2x.org/installing/linux.html)
 
 You can install Video2X on Arch Linux using the [video2x-git](https://aur.archlinux.org/packages/video2x-git) AUR package or on Ubuntu/Debian using the `.deb` package from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). If you'd like to build from source, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required packages and commands. If you'd prefer not to compile the program from source, consider using the container image below.
 
-## [📦 Container Image](https://github.com/k4yt3x/video2x/pkgs/container/video2x)
+## [📦 Container Image](https://docs.video2x.org/running/container.html)
 
-Video2X container images are available on the GitHub Container Registry for easy deployment on Linux and macOS. If you already have Docker/Podman installed, only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentation](https://docs.video2x.org/running/container.html).
+Video2X [container images](https://github.com/k4yt3x/video2x/pkgs/container/video2x) are available on the GitHub Container Registry for easy deployment on Linux and macOS. If you already have Docker/Podman installed, only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentation](https://docs.video2x.org/running/container.html).
 
 ## [📔 Google Colab](https://colab.research.google.com/drive/1gWEwcA9y57EsxwOjmLNmNMXPsafw0kGo)
 
@@ -63,13 +63,13 @@ You can use Video2X on [Google Colab](https://colab.research.google.com/) **for 
 
 ## [💬 Telegram Discussion Group](https://t.me/video2x)
 
-Join our Telegram discussion group to ask any questions you have about Video2X, chat directly with the developers, or discuss about super resolution technologies and the future of Video2X in general.
+Join our Telegram discussion group to ask any questions you have about Video2X, chat directly with the developers, or discuss super resolution, frame interpolation technologies, or the future of Video2X in general.
 
 ## [📖 Documentation](https://docs.video2x.org/)
 
 Comprehensive documentation for Video2X is available at [https://docs.video2x.org/](https://docs.video2x.org/). It offers detailed instructions on how to [build](https://docs.video2x.org/building/index.html), [install](https://docs.video2x.org/installing/index.html), [use](https://docs.video2x.org/running/index.html), and [develop](https://docs.video2x.org/developing/index.html) with this program.
 
-## Introduction
+## 🔰 Introduction
 
 Video2X is a machine-learning-powered framework for video upscaling and frame interpolation, built around three main components:
 
@@ -103,7 +103,7 @@ The following clip can be used to test if your setup works properly. This is als
 The original clip came from the anime "さくら荘のペットな彼女."\
 Copyright of this clip belongs to 株式会社アニプレックス.
 
-## License
+## ⚖️ License
 
 This project is licensed under [GNU AGPL version 3](https://www.gnu.org/licenses/agpl-3.0.txt).\
 Copyright (C) 2018-2024 K4YT3X and [contributors](https://github.com/k4yt3x/video2x/graphs/contributors).
@@ -121,7 +121,7 @@ This project includes or depends on these following projects:
 
 More licensing information can be found in the [NOTICE](NOTICE) file.
 
-## Special Thanks
+## 🌺 Special Thanks
 
 Special thanks to the following individuals for their significant contributions to the project, listed in alphabetical order.
 
