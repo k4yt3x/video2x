@@ -438,7 +438,7 @@ int main(int argc, char **argv) {
 #endif
         po::notify(vm);
 
-        if (vm.count("help")) {
+        if (vm.count("help") || argc == 1) {
             std::cout << all_opts << std::endl;
             std::cout
                 << "Examples:" << std::endl
