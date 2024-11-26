@@ -1,0 +1,119 @@
+7767517
+117 135
+Input                    input0                   0 1 input0
+Input                    input1                   0 1 input1
+Concat                   input.1                  2 1 input0 input1 input.1
+Split                    splitncnn_input0         1 7 input.1 input.1_splitncnn_0 input.1_splitncnn_1 input.1_splitncnn_2 input.1_splitncnn_3 input.1_splitncnn_4 input.1_splitncnn_5 input.1_splitncnn_6
+Interp                   Resize_1                 1 1 input.1_splitncnn_6 114 0=2 1=1.250000e-01 2=1.250000e-01
+Convolution              Conv_2                   1 1 114 115 0=192 1=3 3=2 4=1 5=1 6=10368
+PReLU                    PRelu_3                  1 1 115 117 0=192
+Convolution              Conv_4                   1 1 117 118 0=384 1=3 3=2 4=1 5=1 6=663552
+PReLU                    PRelu_5                  1 1 118 120 0=384
+Convolution              Conv_6                   1 1 120 121 0=384 1=3 4=1 5=1 6=1327104
+PReLU                    PRelu_7                  1 1 121 123 0=384
+Convolution              Conv_8                   1 1 123 124 0=384 1=3 4=1 5=1 6=1327104
+PReLU                    PRelu_9                  1 1 124 126 0=384
+Convolution              Conv_10                  1 1 126 127 0=384 1=3 4=1 5=1 6=1327104
+PReLU                    PRelu_11                 1 1 127 129 0=384
+Convolution              Conv_12                  1 1 129 130 0=384 1=3 4=1 5=1 6=1327104
+PReLU                    PRelu_13                 1 1 130 132 0=384
+Convolution              Conv_14                  1 1 132 133 0=384 1=3 4=1 5=1 6=1327104
+PReLU                    PRelu_15                 1 1 133 135 0=384
+Convolution              Conv_16                  1 1 135 136 0=384 1=3 4=1 5=1 6=1327104
+PReLU                    PRelu_17                 1 1 136 138 0=384
+Deconvolution            ConvTranspose_18         1 1 138 139 0=4 1=4 3=2 4=1 5=1 6=24576
+Interp                   Resize_20                1 1 139 149 0=2 1=8.000000e+00 2=8.000000e+00
+Split                    splitncnn_0              1 4 149 149_splitncnn_0 149_splitncnn_1 149_splitncnn_2 149_splitncnn_3
+Interp                   Resize_22                1 1 149_splitncnn_3 159 0=2 1=2.000000e+00 2=2.000000e+00
+BinaryOp                 Mul_24                   1 1 159 161 0=2 1=1 2=2.000000e+00
+Split                    splitncnn_1              1 3 161 161_splitncnn_0 161_splitncnn_1 161_splitncnn_2
+Crop                     Slice_29                 1 1 input.1_splitncnn_5 166 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     Slice_34                 1 1 161_splitncnn_2 171 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                Warp_40                  2 1 166 171 177
+Crop                     Slice_45                 1 1 input.1_splitncnn_4 182 -23309=1,3 -23310=1,2147483647 -23311=1,0
+Crop                     Slice_50                 1 1 161_splitncnn_1 187 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                Warp_56                  2 1 182 187 193
+Concat                   Concat_57                3 1 177 193 161_splitncnn_0 194
+Interp                   Resize_59                1 1 194 204 0=2 1=2.500000e-01 2=2.500000e-01
+Convolution              Conv_60                  1 1 204 205 0=128 1=3 3=2 4=1 5=1 6=11520
+PReLU                    PRelu_61                 1 1 205 207 0=128
+Convolution              Conv_62                  1 1 207 208 0=256 1=3 3=2 4=1 5=1 6=294912
+PReLU                    PRelu_63                 1 1 208 210 0=256
+Convolution              Conv_64                  1 1 210 211 0=256 1=3 4=1 5=1 6=589824
+PReLU                    PRelu_65                 1 1 211 213 0=256
+Convolution              Conv_66                  1 1 213 214 0=256 1=3 4=1 5=1 6=589824
+PReLU                    PRelu_67                 1 1 214 216 0=256
+Convolution              Conv_68                  1 1 216 217 0=256 1=3 4=1 5=1 6=589824
+PReLU                    PRelu_69                 1 1 217 219 0=256
+Convolution              Conv_70                  1 1 219 220 0=256 1=3 4=1 5=1 6=589824
+PReLU                    PRelu_71                 1 1 220 222 0=256
+Convolution              Conv_72                  1 1 222 223 0=256 1=3 4=1 5=1 6=589824
+PReLU                    PRelu_73                 1 1 223 225 0=256
+Convolution              Conv_74                  1 1 225 226 0=256 1=3 4=1 5=1 6=589824
+PReLU                    PRelu_75                 1 1 226 228 0=256
+Deconvolution            ConvTranspose_76         1 1 228 229 0=4 1=4 3=2 4=1 5=1 6=16384
+Interp                   Resize_78                1 1 229 239 0=2 1=4.000000e+00 2=4.000000e+00
+Split                    splitncnn_2              1 3 239 239_splitncnn_0 239_splitncnn_1 239_splitncnn_2
+BinaryOp                 Add_79                   2 1 149_splitncnn_2 239_splitncnn_2 240
+Interp                   Resize_81                1 1 240 250 0=2 1=2.000000e+00 2=2.000000e+00
+BinaryOp                 Mul_83                   1 1 250 252 0=2 1=1 2=2.000000e+00
+Split                    splitncnn_3              1 3 252 252_splitncnn_0 252_splitncnn_1 252_splitncnn_2
+Crop                     Slice_88                 1 1 input.1_splitncnn_3 257 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     Slice_93                 1 1 252_splitncnn_2 262 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                Warp_99                  2 1 257 262 268
+Crop                     Slice_104                1 1 input.1_splitncnn_2 273 -23309=1,3 -23310=1,2147483647 -23311=1,0
+Crop                     Slice_109                1 1 252_splitncnn_1 278 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                Warp_115                 2 1 273 278 284
+Concat                   Concat_116               3 1 268 284 252_splitncnn_0 285
+Interp                   Resize_118               1 1 285 295 0=2 1=5.000000e-01 2=5.000000e-01
+Convolution              Conv_119                 1 1 295 296 0=96 1=3 3=2 4=1 5=1 6=8640
+PReLU                    PRelu_120                1 1 296 298 0=96
+Convolution              Conv_121                 1 1 298 299 0=192 1=3 3=2 4=1 5=1 6=165888
+PReLU                    PRelu_122                1 1 299 301 0=192
+Convolution              Conv_123                 1 1 301 302 0=192 1=3 4=1 5=1 6=331776
+PReLU                    PRelu_124                1 1 302 304 0=192
+Convolution              Conv_125                 1 1 304 305 0=192 1=3 4=1 5=1 6=331776
+PReLU                    PRelu_126                1 1 305 307 0=192
+Convolution              Conv_127                 1 1 307 308 0=192 1=3 4=1 5=1 6=331776
+PReLU                    PRelu_128                1 1 308 310 0=192
+Convolution              Conv_129                 1 1 310 311 0=192 1=3 4=1 5=1 6=331776
+PReLU                    PRelu_130                1 1 311 313 0=192
+Convolution              Conv_131                 1 1 313 314 0=192 1=3 4=1 5=1 6=331776
+PReLU                    PRelu_132                1 1 314 316 0=192
+Convolution              Conv_133                 1 1 316 317 0=192 1=3 4=1 5=1 6=331776
+PReLU                    PRelu_134                1 1 317 319 0=192
+Deconvolution            ConvTranspose_135        1 1 319 320 0=4 1=4 3=2 4=1 5=1 6=12288
+Interp                   Resize_137               1 1 320 330 0=2 1=2.000000e+00 2=2.000000e+00
+Split                    splitncnn_4              1 2 330 330_splitncnn_0 330_splitncnn_1
+BinaryOp                 Add_138                  2 1 149_splitncnn_1 239_splitncnn_1 331
+BinaryOp                 Add_139                  2 1 331 330_splitncnn_1 332
+Interp                   Resize_141               1 1 332 342 0=2 1=2.000000e+00 2=2.000000e+00
+BinaryOp                 Mul_143                  1 1 342 344 0=2 1=1 2=2.000000e+00
+Split                    splitncnn_5              1 3 344 344_splitncnn_0 344_splitncnn_1 344_splitncnn_2
+Crop                     Slice_148                1 1 input.1_splitncnn_1 349 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     Slice_153                1 1 344_splitncnn_2 354 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                Warp_159                 2 1 349 354 360
+Crop                     Slice_164                1 1 input.1_splitncnn_0 365 -23309=1,3 -23310=1,2147483647 -23311=1,0
+Crop                     Slice_169                1 1 344_splitncnn_1 370 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                Warp_175                 2 1 365 370 376
+Concat                   Concat_176               3 1 360 376 344_splitncnn_0 377
+Convolution              Conv_177                 1 1 377 378 0=48 1=3 3=2 4=1 5=1 6=4320
+PReLU                    PRelu_178                1 1 378 380 0=48
+Convolution              Conv_179                 1 1 380 381 0=96 1=3 3=2 4=1 5=1 6=41472
+PReLU                    PRelu_180                1 1 381 383 0=96
+Convolution              Conv_181                 1 1 383 384 0=96 1=3 4=1 5=1 6=82944
+PReLU                    PRelu_182                1 1 384 386 0=96
+Convolution              Conv_183                 1 1 386 387 0=96 1=3 4=1 5=1 6=82944
+PReLU                    PRelu_184                1 1 387 389 0=96
+Convolution              Conv_185                 1 1 389 390 0=96 1=3 4=1 5=1 6=82944
+PReLU                    PRelu_186                1 1 390 392 0=96
+Convolution              Conv_187                 1 1 392 393 0=96 1=3 4=1 5=1 6=82944
+PReLU                    PRelu_188                1 1 393 395 0=96
+Convolution              Conv_189                 1 1 395 396 0=96 1=3 4=1 5=1 6=82944
+PReLU                    PRelu_190                1 1 396 398 0=96
+Convolution              Conv_191                 1 1 398 399 0=96 1=3 4=1 5=1 6=82944
+PReLU                    PRelu_192                1 1 399 401 0=96
+Deconvolution            ConvTranspose_193        1 1 401 402 0=4 1=4 3=2 4=1 5=1 6=6144
+BinaryOp                 Add_194                  2 1 149_splitncnn_0 239_splitncnn_0 403
+BinaryOp                 Add_195                  2 1 403 330_splitncnn_0 404
+BinaryOp                 Add_196                  2 1 404 402 flow

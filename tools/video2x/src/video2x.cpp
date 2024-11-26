@@ -619,8 +619,8 @@ int main(int argc, char **argv) {
     FilterConfig filter_config;
     if (arguments.filter_type == STR("libplacebo")) {
         filter_config.filter_type = FILTER_LIBPLACEBO;
-        filter_config.config.libplacebo.out_width = arguments.width;
-        filter_config.config.libplacebo.out_height = arguments.height;
+        filter_config.config.libplacebo.width = arguments.width;
+        filter_config.config.libplacebo.height = arguments.height;
         filter_config.config.libplacebo.shader_path = shader_path_str.c_str();
     } else if (arguments.filter_type == STR("realesrgan")) {
         filter_config.filter_type = FILTER_REALESRGAN;

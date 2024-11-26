@@ -14,9 +14,9 @@ extern "C" {
 #include "avutils.h"
 #include "decoder.h"
 #include "encoder.h"
-#include "filter.h"
-#include "libplacebo_filter.h"
-#include "realesrgan_filter.h"
+#include "filter_libplacebo.h"
+#include "filter_realesrgan.h"
+#include "processor.h"
 
 // Process frames using the selected filter.
 static int process_frames(
@@ -24,7 +24,7 @@ static int process_frames(
     VideoProcessingContext *proc_ctx,
     Decoder &decoder,
     Encoder &encoder,
-    Filter *filter,
+    Processor *processor,
     bool benchmark = false
 ) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
@@ -104,7 +104,19 @@ static int process_frames(
                 }
 
                 AVFrame *raw_processed_frame = nullptr;
-                ret = filter->process_frame(frame.get(), &raw_processed_frame);
+
+                switch (processor->get_processing_mode()) {
+                    case PROCESSING_MODE_FILTER: {
+                        Filter *filter = dynamic_cast<Filter *>(processor);
+                        ret = filter->filter(frame.get(), &raw_processed_frame);
+                        break;
+                    }
+                    case PROCESSING_MODE_INTERPOLATE: {
+                        Interpolator *interpolator = dynamic_cast<Interpolator *>(processor);
+                        ret = interpolator->interpolate(frame.get(), nullptr, &raw_processed_frame);
+                        break;
+                    }
+                }
 
                 if (ret < 0 && ret != AVERROR(EAGAIN)) {
                     av_strerror(ret, errbuf, sizeof(errbuf));
@@ -154,7 +166,7 @@ static int process_frames(
 
     // Flush the filter
     std::vector<AVFrame *> raw_flushed_frames;
-    ret = filter->flush(raw_flushed_frames);
+    ret = processor->flush(raw_flushed_frames);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Error flushing filter: {}", errbuf);
@@ -279,8 +291,8 @@ extern "C" int process_video(
     int output_width = 0, output_height = 0;
     switch (filter_config->filter_type) {
         case FILTER_LIBPLACEBO:
-            output_width = filter_config->config.libplacebo.out_width;
-            output_height = filter_config->config.libplacebo.out_height;
+            output_width = filter_config->config.libplacebo.width;
+            output_height = filter_config->config.libplacebo.height;
             break;
         case FILTER_REALESRGAN:
             output_width = dec_ctx->width * filter_config->config.realesrgan.scaling_factor;
@@ -321,11 +333,8 @@ extern "C" int process_video(
             spdlog::critical("Shader path must be provided for the libplacebo filter");
             return -1;
         }
-        filter = std::make_unique<LibplaceboFilter>(
-            vk_device_index,
-            std::filesystem::path(config.shader_path),
-            config.out_width,
-            config.out_height
+        filter = std::make_unique<FilterLibplacebo>(
+            vk_device_index, std::filesystem::path(config.shader_path), config.width, config.height
         );
     } else if (filter_config->filter_type == FILTER_REALESRGAN) {
         const auto &config = filter_config->config.realesrgan;
@@ -333,7 +342,7 @@ extern "C" int process_video(
             spdlog::critical("Model name must be provided for the RealESRGAN filter");
             return -1;
         }
-        filter = std::make_unique<RealesrganFilter>(
+        filter = std::make_unique<FilterRealesrgan>(
             static_cast<int>(vk_device_index),
             config.tta_mode,
             config.scaling_factor,

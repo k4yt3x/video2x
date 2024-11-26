@@ -30,13 +30,20 @@ extern "C" {
 extern "C" {
 #endif
 
-// Enum to specify filter type
+enum ProcessingMode {
+    PROCESSING_MODE_FILTER,
+    PROCESSING_MODE_INTERPOLATE,
+};
+
 enum FilterType {
     FILTER_LIBPLACEBO,
     FILTER_REALESRGAN
 };
 
-// Enum to specify log level
+enum InterpolatorType {
+    INTERPOLATOR_RIFE,
+};
+
 enum Libvideo2xLogLevel {
     LIBVIDEO2X_LOG_LEVEL_TRACE,
     LIBVIDEO2X_LOG_LEVEL_DEBUG,
@@ -47,18 +54,27 @@ enum Libvideo2xLogLevel {
     LIBVIDEO2X_LOG_LEVEL_OFF
 };
 
-// Configuration for Libplacebo filter
 struct LibplaceboConfig {
-    int out_width;
-    int out_height;
+    int width;
+    int height;
     const CharType *shader_path;
 };
 
-// Configuration for RealESRGAN filter
 struct RealESRGANConfig {
     bool tta_mode;
     int scaling_factor;
     const CharType *model_name;
+};
+
+struct RIFEConfig {
+    bool tta_mode;
+    bool tta_temporal_mode;
+    bool uhd_mode;
+    int num_threads;
+    bool rife_v2;
+    bool rife_v4;
+    const CharType *model_name;
+    float time_step;
 };
 
 // Unified filter configuration
@@ -67,6 +83,7 @@ struct FilterConfig {
     union {
         struct LibplaceboConfig libplacebo;
         struct RealESRGANConfig realesrgan;
+        struct RIFEConfig rife;
     } config;
 };
 

@@ -10,3 +10,6 @@
 [submodule "third_party/boost"]
 	path = third_party/boost
 	url = https://github.com/boostorg/boost.git
+[submodule "third_party/librife_ncnn_vulkan"]
+	path = third_party/librife_ncnn_vulkan
+	url = https://github.com/k4yt3x/librife-ncnn-vulkan.git
