@@ -7,6 +7,23 @@ extern "C" {
 
 #include <spdlog/spdlog.h>
 
+AVRational get_video_frame_rate(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
+    AVRational frame_rate = ifmt_ctx->streams[in_vstream_idx]->avg_frame_rate;
+    if (frame_rate.num == 0 && frame_rate.den == 0) {
+        frame_rate = ifmt_ctx->streams[in_vstream_idx]->r_frame_rate;
+    }
+    if (frame_rate.num == 0 && frame_rate.den == 0) {
+        frame_rate = av_guess_frame_rate(ifmt_ctx, ifmt_ctx->streams[in_vstream_idx], nullptr);
+    }
+    if (frame_rate.num == 0 && frame_rate.den == 0) {
+        frame_rate = ifmt_ctx->streams[in_vstream_idx]->time_base;
+    }
+    if (frame_rate.num == 0 && frame_rate.den == 0) {
+        spdlog::warn("Unable to determine the video's frame rate");
+    }
+    return frame_rate;
+}
+
 int64_t get_video_frame_count(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
     // Use the 'nb_frames' field if it is available
     int64_t nb_frames = ifmt_ctx->streams[in_vstream_idx]->nb_frames;
@@ -31,19 +48,7 @@ int64_t get_video_frame_count(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
     spdlog::debug("Video duration: {}s", duration_secs);
 
     // Calculate average FPS
-    double fps = av_q2d(ifmt_ctx->streams[in_vstream_idx]->avg_frame_rate);
-    if (fps <= 0) {
-        spdlog::debug("Unable to read the average frame rate from 'avg_frame_rate'");
-        fps = av_q2d(ifmt_ctx->streams[in_vstream_idx]->r_frame_rate);
-    }
-    if (fps <= 0) {
-        spdlog::debug("Unable to read the average frame rate from 'r_frame_rate'");
-        fps = av_q2d(av_guess_frame_rate(ifmt_ctx, ifmt_ctx->streams[in_vstream_idx], nullptr));
-    }
-    if (fps <= 0) {
-        spdlog::debug("Unable to estimate the average frame rate with 'av_guess_frame_rate'");
-        fps = av_q2d(ifmt_ctx->streams[in_vstream_idx]->time_base);
-    }
+    double fps = av_q2d(get_video_frame_rate(ifmt_ctx, in_vstream_idx));
     if (fps <= 0) {
         spdlog::warn("Unable to estimate the video's average frame rate");
         return -1;

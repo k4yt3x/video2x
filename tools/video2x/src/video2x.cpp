@@ -2,6 +2,7 @@
 #include <chrono>
 #include <csignal>
 #include <cstdarg>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -85,14 +86,21 @@ struct Arguments {
     int delay = 0;
     std::vector<std::pair<StringType, StringType>> extra_options;
 
-    // libplacebo options
-    std::filesystem::path shader_path;
+    // General processing options
     int width = 0;
     int height = 0;
+    int scaling_factor = 0;
+    int frame_rate_multiplier = 2;
+
+    // libplacebo options
+    std::filesystem::path libplacebo_shader_path;
 
     // RealESRGAN options
-    StringType model_name;
-    int scaling_factor = 0;
+    StringType realesrgan_model_name = STR("realesr-animevideov3");
+
+    // RIFE options
+    StringType rife_model_name = STR("rife-v4.6");
+    bool rife_uhd_mode = false;
 };
 
 // Set UNIX terminal input to non-blocking mode
@@ -152,6 +160,23 @@ void newline_safe_ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_
 bool is_valid_realesrgan_model(const StringType &model) {
     static const std::unordered_set<StringType> valid_realesrgan_models = {
         STR("realesrgan-plus"), STR("realesrgan-plus-anime"), STR("realesr-animevideov3")
+    };
+    return valid_realesrgan_models.count(model) > 0;
+}
+
+bool is_valid_rife_model(const StringType &model) {
+    static const std::unordered_set<StringType> valid_realesrgan_models = {
+        STR("rife"),
+        STR("rife-HD"),
+        STR("rife-UHD"),
+        STR("rife-anime"),
+        STR("rife-v2"),
+        STR("rife-v2.3"),
+        STR("rife-v2.4"),
+        STR("rife-v3.0"),
+        STR("rife-v3.1"),
+        STR("rife-v4"),
+        STR("rife-v4.6"),
     };
     return valid_realesrgan_models.count(model) > 0;
 }
@@ -407,27 +432,49 @@ int main(int argc, char **argv) {
                 "Additional AVOption(s) for the encoder (format: -e key=value)")
             ;
 
-        po::options_description libplacebo_opts("libplacebo options");
-        libplacebo_opts.add_options()
-            ("shader,s", PO_STR_VALUE<StringType>(), "Name/path of the GLSL shader file to use")
+        po::options_description common_opts("Common aprocessing options");
+        common_opts.add_options()
             ("width,w", po::value<int>(&arguments.width), "Output width")
             ("height,h", po::value<int>(&arguments.height), "Output height")
+            ("scaling-factor,s", po::value<int>(&arguments.scaling_factor), "Scaling factor")
+            ("frame-rate-multiplier,r",
+                po::value<int>(&arguments.frame_rate_multiplier)->default_value(0),
+                "Output frame rate")
+        ;
+
+        po::options_description libplacebo_opts("libplacebo options");
+        libplacebo_opts.add_options()
+            ("libplacebo-shader", PO_STR_VALUE<StringType>(),
+                "Name/path of the GLSL shader file to use")
         ;
 
         // RealESRGAN options
         po::options_description realesrgan_opts("RealESRGAN options");
         realesrgan_opts.add_options()
-            ("model,m", PO_STR_VALUE<StringType>(&arguments.model_name), "Name of the model to use")
-            ("scale,r", po::value<int>(&arguments.scaling_factor), "Scaling factor (2, 3, or 4)")
+            ("realesrgan-model", PO_STR_VALUE<StringType>(&arguments.realesrgan_model_name),
+                "Name of the RealESRGAN model to use")
+        ;
+
+        // RIFE options
+        po::options_description rife_opts("RIFE options");
+        rife_opts.add_options()
+            ("rife-model,m", PO_STR_VALUE<StringType>(&arguments.rife_model_name),
+                "Name of the RIFE model to use")
+            ("rife-uhd", po::bool_switch(&arguments.rife_uhd_mode),
+                "Enable Ultra HD mode")
         ;
         // clang-format on
 
         // Combine all options
-        all_opts.add(encoder_opts).add(libplacebo_opts).add(realesrgan_opts);
+        all_opts.add(encoder_opts)
+            .add(common_opts)
+            .add(libplacebo_opts)
+            .add(realesrgan_opts)
+            .add(rife_opts);
 
         // Positional arguments
         po::positional_options_description p;
-        p.add("input", 1).add("output", 1).add("filter", 1);
+        p.add("input", 1).add("output", 1).add("processor", 1);
 
 #ifdef _WIN32
         po::variables_map vm;
@@ -484,7 +531,7 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        // Parse avoptions
+        // Parse extra AVOptions
         if (vm.count("extra-encoder-option")) {
             for (const auto &opt : vm["extra-encoder-option"].as<std::vector<StringType>>()) {
                 size_t eq_pos = opt.find('=');
@@ -499,16 +546,21 @@ int main(int argc, char **argv) {
             }
         }
 
-        if (vm.count("shader")) {
-            arguments.shader_path = std::filesystem::path(vm["shader"].as<StringType>());
+        if (vm.count("libplacebo-shader")) {
+            arguments.libplacebo_shader_path =
+                std::filesystem::path(vm["libplacebo-shader"].as<StringType>());
         }
 
-        if (vm.count("model")) {
-            if (!is_valid_realesrgan_model(vm["model"].as<StringType>())) {
-                spdlog::critical(
-                    "Invalid model specified. Must be 'realesrgan-plus', "
-                    "'realesrgan-plus-anime', or 'realesr-animevideov3'."
-                );
+        if (vm.count("libplacebo-model")) {
+            if (!is_valid_realesrgan_model(vm["realesrgan-model"].as<StringType>())) {
+                spdlog::critical("Invalid model specified.");
+                return 1;
+            }
+        }
+
+        if (vm.count("rife-model")) {
+            if (!is_valid_rife_model(vm["rife-model"].as<StringType>())) {
+                spdlog::critical("Invalid RIFE model specified.");
                 return 1;
             }
         }
@@ -521,30 +573,34 @@ int main(int argc, char **argv) {
     }
 
     // Additional validations
+    if (arguments.width < 0 || arguments.height < 0) {
+        spdlog::critical("Invalid output resolution specified.");
+        return 1;
+    }
+    if (arguments.scaling_factor < 0) {
+        spdlog::critical("Invalid scaling factor specified.");
+        return 1;
+    }
+    if (arguments.frame_rate_multiplier < 0) {
+        spdlog::critical("Invalid target frame rate specified.");
+        return 1;
+    }
+
     if (arguments.processor_type == STR("libplacebo")) {
-        if (arguments.shader_path.empty() || arguments.width == 0 || arguments.height == 0) {
-            spdlog::critical(
-                "For libplacebo, shader name/path (-s), width (-w), "
-                "and height (-h) are required."
-            );
+        if (arguments.libplacebo_shader_path.empty() || arguments.width == 0 ||
+            arguments.height == 0) {
+            spdlog::critical("Shader name/path, width, and height are required for libplacebo.");
             return 1;
         }
     } else if (arguments.processor_type == STR("realesrgan")) {
-        if (arguments.scaling_factor == 0 || arguments.model_name.empty()) {
-            spdlog::critical("For realesrgan, scaling factor (-r) and model (-m) are required.");
-            return 1;
-        }
         if (arguments.scaling_factor != 2 && arguments.scaling_factor != 3 &&
             arguments.scaling_factor != 4) {
-            spdlog::critical("Scaling factor must be 2, 3, or 4.");
+            spdlog::critical("Scaling factor must be 2, 3, or 4 for RealESRGAN.");
             return 1;
         }
-    } else if (arguments.processor_type == STR("rife")) {
-        // TODO: Complete RIFE validation
-        ;
-    } else {
+    } else if (arguments.processor_type != STR("rife")) {
         spdlog::critical(
-            "Invalid processor type specified. Must be 'libplacebo', 'realesrgan', or 'rife'."
+            "Invalid processor specified. Must be 'libplacebo', 'realesrgan', or 'rife'."
         );
         return 1;
     }
@@ -617,38 +673,55 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
     std::wstring shader_path_str = arguments.shader_path.wstring();
 #else
-    std::string shader_path_str = arguments.shader_path.string();
+    std::string shader_path_str = arguments.libplacebo_shader_path.string();
 #endif
 
     // Setup filter configurations based on the parsed arguments
     ProcessorConfig processor_config;
+    processor_config.width = arguments.width;
+    processor_config.height = arguments.height;
+    processor_config.scaling_factor = arguments.scaling_factor;
+    processor_config.frame_rate_multiplier = arguments.frame_rate_multiplier;
+
     if (arguments.processor_type == STR("libplacebo")) {
         processor_config.processor_type = PROCESSOR_LIBPLACEBO;
-        processor_config.config.libplacebo.width = arguments.width;
-        processor_config.config.libplacebo.height = arguments.height;
         processor_config.config.libplacebo.shader_path = shader_path_str.c_str();
     } else if (arguments.processor_type == STR("realesrgan")) {
         processor_config.processor_type = PROCESSOR_REALESRGAN;
         processor_config.config.realesrgan.tta_mode = false;
-        processor_config.config.realesrgan.scaling_factor = arguments.scaling_factor;
-        processor_config.config.realesrgan.model_name = arguments.model_name.c_str();
+        processor_config.config.realesrgan.model_name = arguments.realesrgan_model_name.c_str();
     } else if (arguments.processor_type == STR("rife")) {
         processor_config.processor_type = PROCESSOR_RIFE;
         processor_config.config.rife.tta_mode = false;
         processor_config.config.rife.tta_temporal_mode = false;
-        processor_config.config.rife.uhd_mode = false;
+        processor_config.config.rife.uhd_mode = arguments.rife_uhd_mode;
         processor_config.config.rife.num_threads = 0;
-        processor_config.config.rife.rife_v2 = false;
-        processor_config.config.rife.rife_v4 = true;
-        processor_config.config.rife.model_name = STR("rife-v4.6");
+        processor_config.config.rife.model_name = arguments.rife_model_name.c_str();
+
+        bool rife_v2 = false;
+        bool rife_v4 = false;
+
+        if (arguments.rife_model_name.find(STR("rife-v2")) != StringType::npos) {
+            rife_v2 = true;
+        } else if (arguments.rife_model_name.find(STR("rife-v3")) != StringType::npos) {
+            rife_v2 = true;
+        } else if (arguments.rife_model_name.find(STR("rife-v4")) != StringType::npos) {
+            rife_v4 = true;
+        } else if (arguments.rife_model_name.find(STR("rife")) == StringType::npos) {
+            spdlog::critical("Unknown RIFE model generation.");
+            return 1;
+        }
+
+        processor_config.config.rife.rife_v2 = rife_v2;
+        processor_config.config.rife.rife_v4 = rife_v4;
     }
 
     // Setup encoder configuration
     EncoderConfig encoder_config;
     encoder_config.codec = codec->id;
     encoder_config.copy_streams = !arguments.no_copy_streams;
-    encoder_config.width = arguments.width;
-    encoder_config.height = arguments.height;
+    encoder_config.width = 0;
+    encoder_config.height = 0;
     encoder_config.pix_fmt = pix_fmt;
     encoder_config.bit_rate = arguments.bit_rate;
     encoder_config.rc_buffer_size = arguments.rc_buffer_size;

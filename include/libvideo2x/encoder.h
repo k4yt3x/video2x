@@ -22,6 +22,7 @@ class Encoder {
         AVFormatContext *ifmt_ctx,
         AVCodecContext *dec_ctx,
         EncoderConfig *encoder_config,
+        const ProcessorConfig *processor_config,
         int in_vstream_idx
     );
 

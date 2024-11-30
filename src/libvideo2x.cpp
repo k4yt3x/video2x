@@ -1,5 +1,6 @@
 #include "libvideo2x.h"
 
+#include <libavutil/frame.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +22,8 @@ extern "C" {
 
 // Process frames using the selected filter.
 static int process_frames(
-    EncoderConfig *encoder_config,
+    const EncoderConfig *encoder_config,
+    const ProcessorConfig *processor_config,
     VideoProcessingContext *proc_ctx,
     Decoder &decoder,
     Encoder &encoder,
@@ -48,7 +50,7 @@ static int process_frames(
         spdlog::debug("{} frames to process", proc_ctx->total_frames);
     }
 
-    // Allocate frame and packet
+    // Allocate AVFrame for the current processed frame
     auto av_frame_deleter = [](AVFrame *frame) { av_frame_free(&frame); };
     std::unique_ptr<AVFrame, decltype(av_frame_deleter)> frame(av_frame_alloc(), av_frame_deleter);
     if (!frame) {
@@ -56,7 +58,22 @@ static int process_frames(
         return ret;
     }
 
-    auto av_packet_deleter = [](AVPacket *packet) { av_packet_free(&packet); };
+    // Allocate AVFrame for the previous processed frame
+    auto av_frame_deleter_prev = [](AVFrame *prev_frame) {
+        if (prev_frame != nullptr) {
+            av_frame_unref(prev_frame);
+            prev_frame = nullptr;
+        }
+    };
+    std::unique_ptr<AVFrame, decltype(av_frame_deleter_prev)> prev_frame(
+        nullptr, av_frame_deleter_prev
+    );
+
+    // Allocate AVPacket for reading frames
+    auto av_packet_deleter = [](AVPacket *packet) {
+        av_packet_unref(packet);
+        av_packet_free(&packet);
+    };
     std::unique_ptr<AVPacket, decltype(av_packet_deleter)> packet(
         av_packet_alloc(), av_packet_deleter
     );
@@ -66,8 +83,6 @@ static int process_frames(
     }
 
     // Read frames from the input file
-    // TODO: Delete this line
-    bool delete_this = true;
     while (!proc_ctx->abort) {
         ret = av_read_frame(ifmt_ctx, packet.get());
         if (ret < 0) {
@@ -85,7 +100,6 @@ static int process_frames(
             if (ret < 0) {
                 av_strerror(ret, errbuf, sizeof(errbuf));
                 spdlog::critical("Error sending packet to decoder: {}", errbuf);
-                av_packet_unref(packet.get());
                 return ret;
             }
 
@@ -102,13 +116,7 @@ static int process_frames(
                 } else if (ret < 0) {
                     av_strerror(ret, errbuf, sizeof(errbuf));
                     spdlog::critical("Error decoding video frame: {}", errbuf);
-                    av_packet_unref(packet.get());
                     return ret;
-                }
-
-                if (delete_this) {
-                    delete_this = false;
-                    continue;
                 }
 
                 AVFrame *raw_processed_frame = nullptr;
@@ -117,41 +125,86 @@ static int process_frames(
                     case PROCESSING_MODE_FILTER: {
                         Filter *filter = dynamic_cast<Filter *>(processor);
                         ret = filter->filter(frame.get(), &raw_processed_frame);
+                        if (ret < 0 && ret != AVERROR(EAGAIN)) {
+                            av_strerror(ret, errbuf, sizeof(errbuf));
+                            return ret;
+                        } else if (ret == 0 && raw_processed_frame != nullptr) {
+                            auto processed_frame =
+                                std::unique_ptr<AVFrame, decltype(av_frame_deleter)>(
+                                    raw_processed_frame, av_frame_deleter
+                                );
+
+                            if (!benchmark) {
+                                ret = encoder.write_frame(
+                                    processed_frame.get(), proc_ctx->processed_frames
+                                );
+                                if (ret < 0) {
+                                    av_strerror(ret, errbuf, sizeof(errbuf));
+                                    spdlog::critical("Error encoding/writing frame: {}", errbuf);
+                                    return ret;
+                                }
+                            }
+                        }
                         break;
                     }
                     case PROCESSING_MODE_INTERPOLATE: {
                         Interpolator *interpolator = dynamic_cast<Interpolator *>(processor);
-                        // TODO: replace the nullptr
-                        ret = interpolator->interpolate(
-                            nullptr, frame.get(), &raw_processed_frame, 0.5
-                        );
+
+                        float time_step =
+                            1.0f / static_cast<float>(processor_config->frame_rate_multiplier);
+                        float current_time_step = time_step;
+
+                        while (current_time_step < 1.0f) {
+                            ret = interpolator->interpolate(
+                                prev_frame.get(),
+                                frame.get(),
+                                &raw_processed_frame,
+                                current_time_step
+                            );
+                            if (ret < 0 && ret != AVERROR(EAGAIN)) {
+                                av_strerror(ret, errbuf, sizeof(errbuf));
+                                return ret;
+                            } else if (ret == 0 && raw_processed_frame != nullptr) {
+                                auto processed_frame =
+                                    std::unique_ptr<AVFrame, decltype(av_frame_deleter)>(
+                                        raw_processed_frame, av_frame_deleter
+                                    );
+
+                                if (!benchmark) {
+                                    processed_frame->pts = proc_ctx->processed_frames;
+                                    ret = encoder.write_frame(
+                                        processed_frame.get(), proc_ctx->processed_frames
+                                    );
+                                    if (ret < 0) {
+                                        av_strerror(ret, errbuf, sizeof(errbuf));
+                                        spdlog::critical(
+                                            "Error encoding/writing frame: {}", errbuf
+                                        );
+                                        return ret;
+                                    }
+                                }
+                            }
+                            proc_ctx->processed_frames++;
+                            current_time_step += time_step;
+                        }
+
+                        if (!benchmark) {
+                            frame->pts = proc_ctx->processed_frames;
+                            ret = encoder.write_frame(frame.get(), proc_ctx->processed_frames);
+                            if (ret < 0) {
+                                av_strerror(ret, errbuf, sizeof(errbuf));
+                                spdlog::critical("Error encoding/writing frame: {}", errbuf);
+                                return ret;
+                            }
+                        }
                         break;
                     }
+                    default:
+                        spdlog::critical("Unknown processing mode");
+                        return -1;
                 }
-
-                if (ret < 0 && ret != AVERROR(EAGAIN)) {
-                    av_strerror(ret, errbuf, sizeof(errbuf));
-                    av_packet_unref(packet.get());
-                    return ret;
-                } else if (ret == 0 && raw_processed_frame != nullptr) {
-                    auto processed_frame = std::unique_ptr<AVFrame, decltype(av_frame_deleter)>(
-                        raw_processed_frame, av_frame_deleter
-                    );
-
-                    if (!benchmark) {
-                        ret =
-                            encoder.write_frame(processed_frame.get(), proc_ctx->processed_frames);
-                        if (ret < 0) {
-                            av_strerror(ret, errbuf, sizeof(errbuf));
-                            spdlog::critical("Error encoding/writing frame: {}", errbuf);
-                            av_packet_unref(packet.get());
-                            return ret;
-                        }
-                    }
-                    proc_ctx->processed_frames++;
-                }
-
                 av_frame_unref(frame.get());
+                proc_ctx->processed_frames++;
                 spdlog::debug(
                     "Processed frame {}/{}", proc_ctx->processed_frames, proc_ctx->total_frames
                 );
@@ -168,11 +221,9 @@ static int process_frames(
             if (ret < 0) {
                 av_strerror(ret, errbuf, sizeof(errbuf));
                 spdlog::critical("Error muxing audio/subtitle packet: {}", errbuf);
-                av_packet_unref(packet.get());
                 return ret;
             }
         }
-        av_packet_unref(packet.get());
     }
 
     // Flush the filter
@@ -302,12 +353,12 @@ extern "C" int process_video(
     int output_width = 0, output_height = 0;
     switch (processor_config->processor_type) {
         case PROCESSOR_LIBPLACEBO:
-            output_width = processor_config->config.libplacebo.width;
-            output_height = processor_config->config.libplacebo.height;
+            output_width = processor_config->width;
+            output_height = processor_config->height;
             break;
         case PROCESSOR_REALESRGAN:
-            output_width = dec_ctx->width * processor_config->config.realesrgan.scaling_factor;
-            output_height = dec_ctx->height * processor_config->config.realesrgan.scaling_factor;
+            output_width = dec_ctx->width * processor_config->scaling_factor;
+            output_height = dec_ctx->height * processor_config->scaling_factor;
             break;
         case PROCESSOR_RIFE:
             output_width = dec_ctx->width;
@@ -325,7 +376,9 @@ extern "C" int process_video(
 
     // Initialize the encoder
     Encoder encoder;
-    ret = encoder.init(hw_ctx.get(), out_fpath, ifmt_ctx, dec_ctx, encoder_config, in_vstream_idx);
+    ret = encoder.init(
+        hw_ctx.get(), out_fpath, ifmt_ctx, dec_ctx, encoder_config, processor_config, in_vstream_idx
+    );
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Failed to initialize encoder: {}", errbuf);
@@ -352,8 +405,8 @@ extern "C" int process_video(
             processor = std::make_unique<FilterLibplacebo>(
                 vk_device_index,
                 std::filesystem::path(config.shader_path),
-                config.width,
-                config.height
+                processor_config->width,
+                processor_config->height
             );
             break;
         }
@@ -366,7 +419,7 @@ extern "C" int process_video(
             processor = std::make_unique<FilterRealesrgan>(
                 static_cast<int>(vk_device_index),
                 config.tta_mode,
-                config.scaling_factor,
+                processor_config->scaling_factor,
                 config.model_name
             );
             break;
@@ -408,7 +461,9 @@ extern "C" int process_video(
     }
 
     // Process frames using the encoder and decoder
-    ret = process_frames(encoder_config, proc_ctx, decoder, encoder, processor.get(), benchmark);
+    ret = process_frames(
+        encoder_config, processor_config, proc_ctx, decoder, encoder, processor.get(), benchmark
+    );
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Error processing frames: {}", errbuf);

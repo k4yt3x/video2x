@@ -52,14 +52,11 @@ enum Libvideo2xLogLevel {
 };
 
 struct LibplaceboConfig {
-    int width;
-    int height;
     const CharType *shader_path;
 };
 
 struct RealESRGANConfig {
     bool tta_mode;
-    int scaling_factor;
     const CharType *model_name;
 };
 
@@ -71,12 +68,15 @@ struct RIFEConfig {
     bool rife_v2;
     bool rife_v4;
     const CharType *model_name;
-    float time_step;
 };
 
 // Unified filter configuration
 struct ProcessorConfig {
     enum ProcessorType processor_type;
+    int width;
+    int height;
+    int scaling_factor;
+    int frame_rate_multiplier;
     union {
         struct LibplaceboConfig libplacebo;
         struct RealESRGANConfig realesrgan;
