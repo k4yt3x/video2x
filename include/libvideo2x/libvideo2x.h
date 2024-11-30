@@ -76,7 +76,8 @@ struct ProcessorConfig {
     int width;
     int height;
     int scaling_factor;
-    int frame_rate_multiplier;
+    int frm_rate_mul;
+    float scn_det_thresh;
     union {
         struct LibplaceboConfig libplacebo;
         struct RealESRGANConfig realesrgan;

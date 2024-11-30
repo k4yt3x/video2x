@@ -1,11 +1,15 @@
 #include "avutils.h"
 
+#include <cstdint>
+
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavutil/pixdesc.h>
 }
 
 #include <spdlog/spdlog.h>
+
+#include "conversions.h"
 
 AVRational get_video_frame_rate(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
     AVRational frame_rate = ifmt_ctx->streams[in_vstream_idx]->avg_frame_rate;
@@ -126,4 +130,59 @@ get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat target_pix_fmt
     }
 
     return best_pix_fmt;
+}
+
+float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
+    if (!frame1 || !frame2) {
+        spdlog::error("Invalid frame(s) provided for comparison");
+        return -1.0f;
+    }
+
+    if (frame1->width != frame2->width || frame1->height != frame2->height) {
+        spdlog::error("Frame dimensions do not match");
+        return -1.0f;
+    }
+
+    int width = frame1->width;
+    int height = frame1->height;
+
+    // Convert both frames to the target pixel format using the provided function
+    AVPixelFormat target_pix_fmt = AV_PIX_FMT_RGB24;
+    AVFrame *rgb_frame1 = convert_avframe_pix_fmt(frame1, target_pix_fmt);
+    AVFrame *rgb_frame2 = convert_avframe_pix_fmt(frame2, target_pix_fmt);
+
+    if (!rgb_frame1 || !rgb_frame2) {
+        spdlog::error("Failed to convert frames to target pixel format");
+        if (rgb_frame1) {
+            av_frame_free(&rgb_frame1);
+        }
+        if (rgb_frame2) {
+            av_frame_free(&rgb_frame2);
+        }
+        return -1.0f;
+    }
+
+    uint64_t sum_diff = 0;
+    uint64_t max_diff = 0;
+
+    // Calculate difference pixel by pixel
+    for (int y = 0; y < height; y++) {
+        uint8_t *ptr1 = rgb_frame1->data[0] + y * rgb_frame1->linesize[0];
+        uint8_t *ptr2 = rgb_frame2->data[0] + y * rgb_frame2->linesize[0];
+        for (int x = 0; x < width * 3; x++) {
+            sum_diff += static_cast<uint64_t>(
+                std::abs(static_cast<int>(ptr1[x]) - static_cast<int>(ptr2[x]))
+            );
+            max_diff += 255;
+        }
+    }
+
+    // Clean up
+    av_frame_free(&rgb_frame1);
+    av_frame_free(&rgb_frame2);
+
+    // Calculate percentage difference
+    float percent_diff = (static_cast<float>(sum_diff) / static_cast<float>(max_diff)) * 100.0f;
+
+    return percent_diff;
 }

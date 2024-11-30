@@ -150,17 +150,35 @@ static int process_frames(
                     case PROCESSING_MODE_INTERPOLATE: {
                         Interpolator *interpolator = dynamic_cast<Interpolator *>(processor);
 
-                        float time_step =
-                            1.0f / static_cast<float>(processor_config->frame_rate_multiplier);
+                        float time_step = 1.0f / static_cast<float>(processor_config->frm_rate_mul);
                         float current_time_step = time_step;
 
-                        while (current_time_step < 1.0f) {
-                            ret = interpolator->interpolate(
-                                prev_frame.get(),
-                                frame.get(),
-                                &raw_processed_frame,
-                                current_time_step
-                            );
+                        bool skip_frame = false;
+                        if (prev_frame != nullptr) {
+                            float frame_diff = get_frame_diff(prev_frame.get(), frame.get());
+                            if (frame_diff > processor_config->scn_det_thresh) {
+                                spdlog::debug(
+                                    "Scene change detected ({:.2f}%), skipping frame {}",
+                                    frame_diff,
+                                    proc_ctx->processed_frames
+                                );
+                                skip_frame = true;
+                            }
+                        }
+
+                        while (prev_frame != nullptr && current_time_step < 1.0f) {
+                            if (!skip_frame) {
+                                ret = interpolator->interpolate(
+                                    prev_frame.get(),
+                                    frame.get(),
+                                    &raw_processed_frame,
+                                    current_time_step
+                                );
+                            } else {
+                                ret = 0;
+                                raw_processed_frame = av_frame_clone(prev_frame.get());
+                            }
+
                             if (ret < 0 && ret != AVERROR(EAGAIN)) {
                                 av_strerror(ret, errbuf, sizeof(errbuf));
                                 return ret;
@@ -197,6 +215,7 @@ static int process_frames(
                                 return ret;
                             }
                         }
+                        prev_frame.reset(av_frame_clone(frame.get()));
                         break;
                     }
                     default:

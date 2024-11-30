@@ -122,10 +122,10 @@ int Encoder::init(
         spdlog::debug("Auto-selected pixel format: {}", av_get_pix_fmt_name(enc_ctx_->pix_fmt));
     }
 
-    if (processor_config->frame_rate_multiplier > 0) {
+    if (processor_config->frm_rate_mul > 0) {
         AVRational in_frame_rate = get_video_frame_rate(ifmt_ctx, in_vstream_idx);
         enc_ctx_->framerate = {
-            in_frame_rate.num * processor_config->frame_rate_multiplier, in_frame_rate.den
+            in_frame_rate.num * processor_config->frm_rate_mul, in_frame_rate.den
         };
         enc_ctx_->time_base = av_inv_q(enc_ctx_->framerate);
     } else {

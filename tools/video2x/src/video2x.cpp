@@ -8,7 +8,6 @@
 #include <cstring>
 #include <filesystem>
 #include <iostream>
-#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -64,8 +63,8 @@ struct Arguments {
     std::filesystem::path in_fname;
     std::filesystem::path out_fname;
     StringType processor_type;
-    uint32_t gpu_id = 0;
     StringType hwaccel = STR("none");
+    uint32_t gpu_id = 0;
     bool no_copy_streams = false;
     bool benchmark = false;
 
@@ -90,7 +89,8 @@ struct Arguments {
     int width = 0;
     int height = 0;
     int scaling_factor = 0;
-    int frame_rate_multiplier = 2;
+    int frm_rate_mul = 2;
+    float scn_det_thresh = 0.0f;
 
     // libplacebo options
     std::filesystem::path libplacebo_shader_path;
@@ -387,10 +387,10 @@ int main(int argc, char **argv) {
             ("output,o", PO_STR_VALUE<StringType>(), "Output video file path")
             ("processor,p", PO_STR_VALUE<StringType>(&arguments.processor_type),
                 "Processor to use: 'libplacebo', 'realesrgan', or 'rife'")
-            ("gpu,g", po::value<uint32_t>(&arguments.gpu_id)->default_value(0),
-                "GPU ID (Vulkan device index)")
             ("hwaccel,a", PO_STR_VALUE<StringType>(&arguments.hwaccel)->default_value(STR("none"),
                 "none"), "Hardware acceleration method (mostly for decoding)")
+            ("gpu,g", po::value<uint32_t>(&arguments.gpu_id)->default_value(0),
+                "GPU ID (Vulkan device index)")
             ("benchmark,b", po::bool_switch(&arguments.benchmark),
                 "Discard processed frames and calculate average FPS; "
                 "useful for detecting encoder bottlenecks")
@@ -432,14 +432,20 @@ int main(int argc, char **argv) {
                 "Additional AVOption(s) for the encoder (format: -e key=value)")
             ;
 
-        po::options_description common_opts("Common aprocessing options");
-        common_opts.add_options()
+        po::options_description upscale_opts("Upscaling options");
+        upscale_opts.add_options()
             ("width,w", po::value<int>(&arguments.width), "Output width")
             ("height,h", po::value<int>(&arguments.height), "Output height")
             ("scaling-factor,s", po::value<int>(&arguments.scaling_factor), "Scaling factor")
-            ("frame-rate-multiplier,r",
-                po::value<int>(&arguments.frame_rate_multiplier)->default_value(0),
-                "Output frame rate")
+        ;
+
+        po::options_description interp_opts("Frame interpolation options");
+        interp_opts.add_options()
+            ("frame-rate-mul,f",
+                po::value<int>(&arguments.frm_rate_mul)->default_value(0),
+                "Frame rate multiplier")
+            ("scene-thresh,d", po::value<float>(&arguments.scn_det_thresh)->default_value(10.0f),
+                "Scene detection threshold")
         ;
 
         po::options_description libplacebo_opts("libplacebo options");
@@ -467,7 +473,8 @@ int main(int argc, char **argv) {
 
         // Combine all options
         all_opts.add(encoder_opts)
-            .add(common_opts)
+            .add(upscale_opts)
+            .add(interp_opts)
             .add(libplacebo_opts)
             .add(realesrgan_opts)
             .add(rife_opts);
@@ -581,8 +588,12 @@ int main(int argc, char **argv) {
         spdlog::critical("Invalid scaling factor specified.");
         return 1;
     }
-    if (arguments.frame_rate_multiplier < 0) {
+    if (arguments.frm_rate_mul < 0) {
         spdlog::critical("Invalid target frame rate specified.");
+        return 1;
+    }
+    if (arguments.scn_det_thresh < 0.0f || arguments.scn_det_thresh > 100.0f) {
+        spdlog::critical("Invalid scene detection threshold specified.");
         return 1;
     }
 
@@ -681,7 +692,8 @@ int main(int argc, char **argv) {
     processor_config.width = arguments.width;
     processor_config.height = arguments.height;
     processor_config.scaling_factor = arguments.scaling_factor;
-    processor_config.frame_rate_multiplier = arguments.frame_rate_multiplier;
+    processor_config.frm_rate_mul = arguments.frm_rate_mul;
+    processor_config.scn_det_thresh = arguments.scn_det_thresh;
 
     if (arguments.processor_type == STR("libplacebo")) {
         processor_config.processor_type = PROCESSOR_LIBPLACEBO;

@@ -78,15 +78,12 @@ int InterpolatorRIFE::interpolate(
 ) {
     int ret;
 
-    /*
     ncnn::Mat in_mat1 = avframe_to_ncnn_mat(prev_frame);
     if (in_mat1.empty()) {
         spdlog::error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
     }
-    */
 
-    // Convert the input frame to RGB24
     ncnn::Mat in_mat2 = avframe_to_ncnn_mat(in_frame);
     if (in_mat2.empty()) {
         spdlog::error("Failed to convert AVFrame to ncnn::Mat");
@@ -96,9 +93,7 @@ int InterpolatorRIFE::interpolate(
     // Allocate space for output ncnn::Mat
     ncnn::Mat out_mat = ncnn::Mat(in_mat2.w, in_mat2.h, static_cast<size_t>(3), 3);
 
-    // TODO: handle frames properly
-    // ret = rife_->process(in_mat1, in_mat2, time_step, out_mat);
-    ret = rife_->process(in_mat2, in_mat2, time_step, out_mat);
+    ret = rife_->process(in_mat1, in_mat2, time_step, out_mat);
     if (ret != 0) {
         spdlog::error("RIFE processing failed");
         return ret;
