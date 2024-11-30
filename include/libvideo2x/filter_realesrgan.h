@@ -12,14 +12,14 @@ extern "C" {
 // FilterRealesrgan class definition
 class FilterRealesrgan : public Filter {
    private:
-    RealESRGAN *realesrgan;
-    int gpuid;
-    bool tta_mode;
-    int scaling_factor;
-    const StringType model_name;
-    AVRational in_time_base;
-    AVRational out_time_base;
-    AVPixelFormat out_pix_fmt;
+    RealESRGAN *realesrgan_;
+    int gpuid_;
+    bool tta_mode_;
+    int scaling_factor_;
+    const StringType model_name_;
+    AVRational in_time_base_;
+    AVRational out_time_base_;
+    AVPixelFormat out_pix_fmt_;
 
    public:
     // Constructor
@@ -40,7 +40,7 @@ class FilterRealesrgan : public Filter {
     int filter(AVFrame *in_frame, AVFrame **out_frame) override;
 
     // Returns the filter's type
-    FilterType get_filter_type() const override { return FILTER_REALESRGAN; }
+    ProcessorType get_processor_type() const override { return PROCESSOR_REALESRGAN; }
 };
 
 #endif  // FILTER_REALESRGAN_H

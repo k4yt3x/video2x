@@ -14,70 +14,70 @@ FilterLibplacebo::FilterLibplacebo(
     int out_width,
     int out_height
 )
-    : filter_graph(nullptr),
-      buffersrc_ctx(nullptr),
-      buffersink_ctx(nullptr),
-      vk_device_index(vk_device_index),
-      shader_path(std::move(shader_path)),
-      out_width(out_width),
-      out_height(out_height) {}
+    : filter_graph_(nullptr),
+      buffersrc_ctx_(nullptr),
+      buffersink_ctx_(nullptr),
+      vk_device_index_(vk_device_index),
+      shader_path_(std::move(shader_path)),
+      width_(out_width),
+      height_(out_height) {}
 
 FilterLibplacebo::~FilterLibplacebo() {
-    if (buffersrc_ctx) {
-        avfilter_free(buffersrc_ctx);
-        buffersrc_ctx = nullptr;
+    if (buffersrc_ctx_) {
+        avfilter_free(buffersrc_ctx_);
+        buffersrc_ctx_ = nullptr;
     }
-    if (buffersink_ctx) {
-        avfilter_free(buffersink_ctx);
-        buffersink_ctx = nullptr;
+    if (buffersink_ctx_) {
+        avfilter_free(buffersink_ctx_);
+        buffersink_ctx_ = nullptr;
     }
-    if (filter_graph) {
-        avfilter_graph_free(&filter_graph);
-        filter_graph = nullptr;
+    if (filter_graph_) {
+        avfilter_graph_free(&filter_graph_);
+        filter_graph_ = nullptr;
     }
 }
 
 int FilterLibplacebo::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *_) {
     // Construct the shader path
     std::filesystem::path shader_full_path;
-    if (filepath_is_readable(shader_path)) {
+    if (filepath_is_readable(shader_path_)) {
         // If the shader path is directly readable, use it
-        shader_full_path = shader_path;
+        shader_full_path = shader_path_;
     } else {
         // Construct the fallback path using std::filesystem
         shader_full_path = find_resource_file(
             std::filesystem::path(STR("models")) / STR("libplacebo") /
-            (path_to_string_type(shader_path) + STR(".glsl"))
+            (path_to_string_type(shader_path_) + STR(".glsl"))
         );
     }
 
     // Check if the shader file exists
     if (!std::filesystem::exists(shader_full_path)) {
-        spdlog::error("libplacebo shader file not found: '{}'", shader_path.u8string());
+        spdlog::error("libplacebo shader file not found: '{}'", shader_path_.u8string());
         return -1;
     }
 
     // Save the output time base
-    in_time_base = dec_ctx->time_base;
-    out_time_base = enc_ctx->time_base;
+    in_time_base_ = dec_ctx->time_base;
+    out_time_base_ = enc_ctx->time_base;
 
     // Initialize the libplacebo filter
     int ret = init_libplacebo(
-        &filter_graph,
-        &buffersrc_ctx,
-        &buffersink_ctx,
+        &filter_graph_,
+        &buffersrc_ctx_,
+        &buffersink_ctx_,
         dec_ctx,
-        out_width,
-        out_height,
-        vk_device_index,
+        width_,
+        height_,
+        vk_device_index_,
         shader_full_path
     );
 
     // Set these resources to nullptr since they are already freed by `avfilter_graph_free`
     if (ret < 0) {
-        buffersrc_ctx = nullptr;
-        buffersink_ctx = nullptr;
-        filter_graph = nullptr;
+        buffersrc_ctx_ = nullptr;
+        buffersink_ctx_ = nullptr;
+        filter_graph_ = nullptr;
     }
     return ret;
 }
@@ -93,28 +93,28 @@ int FilterLibplacebo::filter(AVFrame *in_frame, AVFrame **out_frame) {
     }
 
     // Feed the frame to the filter graph
-    ret = av_buffersrc_add_frame(buffersrc_ctx, in_frame);
+    ret = av_buffersrc_add_frame(buffersrc_ctx_, in_frame);
     if (ret < 0) {
         spdlog::error("Error while feeding the filter graph");
         av_frame_free(out_frame);
         return ret;
     }
 
-    ret = av_buffersink_get_frame(buffersink_ctx, *out_frame);
+    ret = av_buffersink_get_frame(buffersink_ctx_, *out_frame);
     if (ret < 0) {
         av_frame_free(out_frame);
         return ret;
     }
 
     // Rescale PTS to encoder's time base
-    (*out_frame)->pts = av_rescale_q((*out_frame)->pts, in_time_base, out_time_base);
+    (*out_frame)->pts = av_rescale_q((*out_frame)->pts, in_time_base_, out_time_base_);
 
     // Return the processed frame to the caller
     return 0;
 }
 
 int FilterLibplacebo::flush(std::vector<AVFrame *> &flushed_frames) {
-    int ret = av_buffersrc_add_frame(buffersrc_ctx, nullptr);
+    int ret = av_buffersrc_add_frame(buffersrc_ctx_, nullptr);
     if (ret < 0) {
         spdlog::error("Error while flushing filter graph");
         return ret;
@@ -127,7 +127,7 @@ int FilterLibplacebo::flush(std::vector<AVFrame *> &flushed_frames) {
             return AVERROR(ENOMEM);
         }
 
-        ret = av_buffersink_get_frame(buffersink_ctx, filt_frame);
+        ret = av_buffersink_get_frame(buffersink_ctx_, filt_frame);
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             av_frame_free(&filt_frame);
             break;
@@ -138,7 +138,7 @@ int FilterLibplacebo::flush(std::vector<AVFrame *> &flushed_frames) {
         }
 
         // Rescale PTS to encoder's time base
-        filt_frame->pts = av_rescale_q(filt_frame->pts, in_time_base, out_time_base);
+        filt_frame->pts = av_rescale_q(filt_frame->pts, in_time_base_, out_time_base_);
 
         // Add to processed frames
         flushed_frames.push_back(filt_frame);

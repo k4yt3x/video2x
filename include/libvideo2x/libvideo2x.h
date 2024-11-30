@@ -35,13 +35,10 @@ enum ProcessingMode {
     PROCESSING_MODE_INTERPOLATE,
 };
 
-enum FilterType {
-    FILTER_LIBPLACEBO,
-    FILTER_REALESRGAN
-};
-
-enum InterpolatorType {
-    INTERPOLATOR_RIFE,
+enum ProcessorType {
+    PROCESSOR_LIBPLACEBO,
+    PROCESSOR_REALESRGAN,
+    PROCESSOR_RIFE,
 };
 
 enum Libvideo2xLogLevel {
@@ -78,8 +75,8 @@ struct RIFEConfig {
 };
 
 // Unified filter configuration
-struct FilterConfig {
-    enum FilterType filter_type;
+struct ProcessorConfig {
+    enum ProcessorType processor_type;
     union {
         struct LibplaceboConfig libplacebo;
         struct RealESRGANConfig realesrgan;
@@ -157,7 +154,7 @@ LIBVIDEO2X_API int process_video(
     bool benchmark,
     uint32_t vk_device_index,
     enum AVHWDeviceType hw_device_type,
-    const struct FilterConfig *filter_config,
+    const struct ProcessorConfig *filter_config,
     struct EncoderConfig *encoder_config,
     struct VideoProcessingContext *proc_ctx
 );

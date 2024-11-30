@@ -16,6 +16,7 @@ extern "C" {
 #include "encoder.h"
 #include "filter_libplacebo.h"
 #include "filter_realesrgan.h"
+#include "interpolator_rife.h"
 #include "processor.h"
 
 // Process frames using the selected filter.
@@ -65,6 +66,8 @@ static int process_frames(
     }
 
     // Read frames from the input file
+    // TODO: Delete this line
+    bool delete_this = true;
     while (!proc_ctx->abort) {
         ret = av_read_frame(ifmt_ctx, packet.get());
         if (ret < 0) {
@@ -103,6 +106,11 @@ static int process_frames(
                     return ret;
                 }
 
+                if (delete_this) {
+                    delete_this = false;
+                    continue;
+                }
+
                 AVFrame *raw_processed_frame = nullptr;
 
                 switch (processor->get_processing_mode()) {
@@ -113,7 +121,10 @@ static int process_frames(
                     }
                     case PROCESSING_MODE_INTERPOLATE: {
                         Interpolator *interpolator = dynamic_cast<Interpolator *>(processor);
-                        ret = interpolator->interpolate(frame.get(), nullptr, &raw_processed_frame);
+                        // TODO: replace the nullptr
+                        ret = interpolator->interpolate(
+                            nullptr, frame.get(), &raw_processed_frame, 0.5
+                        );
                         break;
                     }
                 }
@@ -208,7 +219,7 @@ extern "C" int process_video(
     bool benchmark,
     uint32_t vk_device_index,
     AVHWDeviceType hw_type,
-    const FilterConfig *filter_config,
+    const ProcessorConfig *processor_config,
     EncoderConfig *encoder_config,
     VideoProcessingContext *proc_ctx
 ) {
@@ -289,14 +300,18 @@ extern "C" int process_video(
 
     // Initialize output dimensions based on filter configuration
     int output_width = 0, output_height = 0;
-    switch (filter_config->filter_type) {
-        case FILTER_LIBPLACEBO:
-            output_width = filter_config->config.libplacebo.width;
-            output_height = filter_config->config.libplacebo.height;
+    switch (processor_config->processor_type) {
+        case PROCESSOR_LIBPLACEBO:
+            output_width = processor_config->config.libplacebo.width;
+            output_height = processor_config->config.libplacebo.height;
             break;
-        case FILTER_REALESRGAN:
-            output_width = dec_ctx->width * filter_config->config.realesrgan.scaling_factor;
-            output_height = dec_ctx->height * filter_config->config.realesrgan.scaling_factor;
+        case PROCESSOR_REALESRGAN:
+            output_width = dec_ctx->width * processor_config->config.realesrgan.scaling_factor;
+            output_height = dec_ctx->height * processor_config->config.realesrgan.scaling_factor;
+            break;
+        case PROCESSOR_RIFE:
+            output_width = dec_ctx->width;
+            output_height = dec_ctx->height;
             break;
         default:
             spdlog::critical("Unknown filter type");
@@ -326,48 +341,74 @@ extern "C" int process_video(
     }
 
     // Create and initialize the appropriate filter
-    std::unique_ptr<Filter> filter;
-    if (filter_config->filter_type == FILTER_LIBPLACEBO) {
-        const auto &config = filter_config->config.libplacebo;
-        if (!config.shader_path) {
-            spdlog::critical("Shader path must be provided for the libplacebo filter");
-            return -1;
+    std::unique_ptr<Processor> processor;
+    switch (processor_config->processor_type) {
+        case PROCESSOR_LIBPLACEBO: {
+            const auto &config = processor_config->config.libplacebo;
+            if (!config.shader_path) {
+                spdlog::critical("Shader path must be provided for the libplacebo filter");
+                return -1;
+            }
+            processor = std::make_unique<FilterLibplacebo>(
+                vk_device_index,
+                std::filesystem::path(config.shader_path),
+                config.width,
+                config.height
+            );
+            break;
         }
-        filter = std::make_unique<FilterLibplacebo>(
-            vk_device_index, std::filesystem::path(config.shader_path), config.width, config.height
-        );
-    } else if (filter_config->filter_type == FILTER_REALESRGAN) {
-        const auto &config = filter_config->config.realesrgan;
-        if (!config.model_name) {
-            spdlog::critical("Model name must be provided for the RealESRGAN filter");
-            return -1;
+        case PROCESSOR_REALESRGAN: {
+            const auto &config = processor_config->config.realesrgan;
+            if (!config.model_name) {
+                spdlog::critical("Model name must be provided for the RealESRGAN filter");
+                return -1;
+            }
+            processor = std::make_unique<FilterRealesrgan>(
+                static_cast<int>(vk_device_index),
+                config.tta_mode,
+                config.scaling_factor,
+                config.model_name
+            );
+            break;
         }
-        filter = std::make_unique<FilterRealesrgan>(
-            static_cast<int>(vk_device_index),
-            config.tta_mode,
-            config.scaling_factor,
-            config.model_name
-        );
-    } else {
-        spdlog::critical("Unknown filter type");
-        return -1;
+        case PROCESSOR_RIFE: {
+            const auto &config = processor_config->config.rife;
+            if (!config.model_name) {
+                spdlog::critical("Model name must be provided for the RIFE filter");
+                return -1;
+            }
+            processor = std::make_unique<InterpolatorRIFE>(
+                static_cast<int>(vk_device_index),
+                config.tta_mode,
+                config.tta_temporal_mode,
+                config.uhd_mode,
+                config.num_threads,
+                config.rife_v2,
+                config.rife_v4,
+                config.model_name
+            );
+            break;
+        }
+        default:
+            spdlog::critical("Unknown filter type");
+            return -1;
     }
 
     // Check if the filter instance was created successfully
-    if (filter == nullptr) {
+    if (processor == nullptr) {
         spdlog::critical("Failed to create filter instance");
         return -1;
     }
 
     // Initialize the filter
-    ret = filter->init(dec_ctx, encoder.get_encoder_context(), hw_ctx.get());
+    ret = processor->init(dec_ctx, encoder.get_encoder_context(), hw_ctx.get());
     if (ret < 0) {
         spdlog::critical("Failed to initialize filter");
         return ret;
     }
 
     // Process frames using the encoder and decoder
-    ret = process_frames(encoder_config, proc_ctx, decoder, encoder, filter.get(), benchmark);
+    ret = process_frames(encoder_config, proc_ctx, decoder, encoder, processor.get(), benchmark);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Error processing frames: {}", errbuf);

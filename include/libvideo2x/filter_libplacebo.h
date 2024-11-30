@@ -14,15 +14,15 @@ extern "C" {
 // FilterLibplacebo class definition
 class FilterLibplacebo : public Filter {
    private:
-    AVFilterGraph *filter_graph;
-    AVFilterContext *buffersrc_ctx;
-    AVFilterContext *buffersink_ctx;
-    uint32_t vk_device_index;
-    const std::filesystem::path shader_path;
-    int out_width;
-    int out_height;
-    AVRational in_time_base;
-    AVRational out_time_base;
+    AVFilterGraph *filter_graph_;
+    AVFilterContext *buffersrc_ctx_;
+    AVFilterContext *buffersink_ctx_;
+    uint32_t vk_device_index_;
+    const std::filesystem::path shader_path_;
+    int width_;
+    int height_;
+    AVRational in_time_base_;
+    AVRational out_time_base_;
 
    public:
     // Constructor
@@ -46,7 +46,7 @@ class FilterLibplacebo : public Filter {
     int flush(std::vector<AVFrame *> &flushed_frames) override;
 
     // Returns the filter's type
-    FilterType get_filter_type() const override { return FILTER_LIBPLACEBO; }
+    ProcessorType get_processor_type() const override { return PROCESSOR_LIBPLACEBO; }
 };
 
 #endif  // FILTER_LIBPLACEBO_H

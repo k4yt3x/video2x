@@ -62,7 +62,7 @@ struct Arguments {
     // General options
     std::filesystem::path in_fname;
     std::filesystem::path out_fname;
-    StringType filter_type;
+    StringType processor_type;
     uint32_t gpu_id = 0;
     StringType hwaccel = STR("none");
     bool no_copy_streams = false;
@@ -289,7 +289,7 @@ void process_video_thread(
     Arguments *arguments,
     int *proc_ret,
     AVHWDeviceType hw_device_type,
-    FilterConfig *filter_config,
+    ProcessorConfig *filter_config,
     EncoderConfig *encoder_config,
     VideoProcessingContext *proc_ctx
 ) {
@@ -360,8 +360,8 @@ int main(int argc, char **argv) {
             // General Processing Options
             ("input,i", PO_STR_VALUE<StringType>(), "Input video file path")
             ("output,o", PO_STR_VALUE<StringType>(), "Output video file path")
-            ("filter,f", PO_STR_VALUE<StringType>(&arguments.filter_type),
-                "Filter to use: 'libplacebo' or 'realesrgan'")
+            ("processor,p", PO_STR_VALUE<StringType>(&arguments.processor_type),
+                "Processor to use: 'libplacebo', 'realesrgan', or 'rife'")
             ("gpu,g", po::value<uint32_t>(&arguments.gpu_id)->default_value(0),
                 "GPU ID (Vulkan device index)")
             ("hwaccel,a", PO_STR_VALUE<StringType>(&arguments.hwaccel)->default_value(STR("none"),
@@ -479,8 +479,8 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        if (!vm.count("filter")) {
-            spdlog::critical("Filter type is required (libplacebo or realesrgan).");
+        if (!vm.count("processor")) {
+            spdlog::critical("Processor type is required (libplacebo, realesrgan, or rife).");
             return 1;
         }
 
@@ -521,7 +521,7 @@ int main(int argc, char **argv) {
     }
 
     // Additional validations
-    if (arguments.filter_type == STR("libplacebo")) {
+    if (arguments.processor_type == STR("libplacebo")) {
         if (arguments.shader_path.empty() || arguments.width == 0 || arguments.height == 0) {
             spdlog::critical(
                 "For libplacebo, shader name/path (-s), width (-w), "
@@ -529,7 +529,7 @@ int main(int argc, char **argv) {
             );
             return 1;
         }
-    } else if (arguments.filter_type == STR("realesrgan")) {
+    } else if (arguments.processor_type == STR("realesrgan")) {
         if (arguments.scaling_factor == 0 || arguments.model_name.empty()) {
             spdlog::critical("For realesrgan, scaling factor (-r) and model (-m) are required.");
             return 1;
@@ -539,8 +539,13 @@ int main(int argc, char **argv) {
             spdlog::critical("Scaling factor must be 2, 3, or 4.");
             return 1;
         }
+    } else if (arguments.processor_type == STR("rife")) {
+        // TODO: Complete RIFE validation
+        ;
     } else {
-        spdlog::critical("Invalid filter type specified. Must be 'libplacebo' or 'realesrgan'.");
+        spdlog::critical(
+            "Invalid processor type specified. Must be 'libplacebo', 'realesrgan', or 'rife'."
+        );
         return 1;
     }
 
@@ -616,17 +621,26 @@ int main(int argc, char **argv) {
 #endif
 
     // Setup filter configurations based on the parsed arguments
-    FilterConfig filter_config;
-    if (arguments.filter_type == STR("libplacebo")) {
-        filter_config.filter_type = FILTER_LIBPLACEBO;
-        filter_config.config.libplacebo.width = arguments.width;
-        filter_config.config.libplacebo.height = arguments.height;
-        filter_config.config.libplacebo.shader_path = shader_path_str.c_str();
-    } else if (arguments.filter_type == STR("realesrgan")) {
-        filter_config.filter_type = FILTER_REALESRGAN;
-        filter_config.config.realesrgan.tta_mode = false;
-        filter_config.config.realesrgan.scaling_factor = arguments.scaling_factor;
-        filter_config.config.realesrgan.model_name = arguments.model_name.c_str();
+    ProcessorConfig processor_config;
+    if (arguments.processor_type == STR("libplacebo")) {
+        processor_config.processor_type = PROCESSOR_LIBPLACEBO;
+        processor_config.config.libplacebo.width = arguments.width;
+        processor_config.config.libplacebo.height = arguments.height;
+        processor_config.config.libplacebo.shader_path = shader_path_str.c_str();
+    } else if (arguments.processor_type == STR("realesrgan")) {
+        processor_config.processor_type = PROCESSOR_REALESRGAN;
+        processor_config.config.realesrgan.tta_mode = false;
+        processor_config.config.realesrgan.scaling_factor = arguments.scaling_factor;
+        processor_config.config.realesrgan.model_name = arguments.model_name.c_str();
+    } else if (arguments.processor_type == STR("rife")) {
+        processor_config.processor_type = PROCESSOR_RIFE;
+        processor_config.config.rife.tta_mode = false;
+        processor_config.config.rife.tta_temporal_mode = false;
+        processor_config.config.rife.uhd_mode = false;
+        processor_config.config.rife.num_threads = 0;
+        processor_config.config.rife.rife_v2 = false;
+        processor_config.config.rife.rife_v4 = true;
+        processor_config.config.rife.model_name = STR("rife-v4.6");
     }
 
     // Setup encoder configuration
@@ -713,7 +727,7 @@ int main(int argc, char **argv) {
         &arguments,
         &proc_ret,
         hw_device_type,
-        &filter_config,
+        &processor_config,
         &encoder_config,
         &proc_ctx
     );

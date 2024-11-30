@@ -6,20 +6,24 @@ extern "C" {
 }
 
 #include "char_defs.h"
-#include "filter.h"
-#include "realesrgan.h"
+#include "processor.h"
+#include "rife.h"
 
 // InterpolatorRIFE class definition
 class InterpolatorRIFE : public Interpolator {
    private:
-    RealESRGAN *realesrgan;
-    int gpuid;
-    bool tta_mode;
-    int scaling_factor;
-    const StringType model_name;
-    AVRational in_time_base;
-    AVRational out_time_base;
-    AVPixelFormat out_pix_fmt;
+    RIFE *rife_;
+    int gpuid_;
+    bool tta_mode_;
+    bool tta_temporal_mode_;
+    bool uhd_mode_;
+    int num_threads_;
+    bool rife_v2_;
+    bool rife_v4_;
+    const StringType model_name_;
+    AVRational in_time_base_;
+    AVRational out_time_base_;
+    AVPixelFormat out_pix_fmt_;
 
    public:
     // Constructor
@@ -31,18 +35,21 @@ class InterpolatorRIFE : public Interpolator {
         int num_threads = 1,
         bool rife_v2 = false,
         bool rife_v4 = true,
-        const StringType model_name = STR("rife-v4.6"),
-        float time_step = 0.5f
+        const StringType model_name = STR("rife-v4.6")
     );
 
     // Destructor
     virtual ~InterpolatorRIFE() override;
 
-    // Initializes the filter with decoder and encoder contexts
+    // Initializes the processor with decoder and encoder contexts
     int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) override;
 
     // Processes an input frame and returns the processed frame
-    int interpolate(AVFrame *in_frame, AVFrame *prev_frame, AVFrame **out_frame) override;
+    int interpolate(AVFrame *prev_frame, AVFrame *in_frame, AVFrame **out_frame, float time_step)
+        override;
+
+    // Returns the processor's type
+    ProcessorType get_processor_type() const override { return PROCESSOR_RIFE; }
 };
 
 #endif  // INTERPOLATOR_RIFE_H

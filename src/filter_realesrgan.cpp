@@ -15,16 +15,16 @@ FilterRealesrgan::FilterRealesrgan(
     int scaling_factor,
     const StringType model_name
 )
-    : realesrgan(nullptr),
-      gpuid(gpuid),
-      tta_mode(tta_mode),
-      scaling_factor(scaling_factor),
-      model_name(std::move(model_name)) {}
+    : realesrgan_(nullptr),
+      gpuid_(gpuid),
+      tta_mode_(tta_mode),
+      scaling_factor_(scaling_factor),
+      model_name_(std::move(model_name)) {}
 
 FilterRealesrgan::~FilterRealesrgan() {
-    if (realesrgan) {
-        delete realesrgan;
-        realesrgan = nullptr;
+    if (realesrgan_) {
+        delete realesrgan_;
+        realesrgan_ = nullptr;
     }
 }
 
@@ -34,9 +34,9 @@ int FilterRealesrgan::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     std::filesystem::path model_bin_path;
 
     StringType param_file_name =
-        model_name + STR("-x") + to_string_type(scaling_factor) + STR(".param");
+        model_name_ + STR("-x") + to_string_type(scaling_factor_) + STR(".param");
     StringType bin_file_name =
-        model_name + STR("-x") + to_string_type(scaling_factor) + STR(".bin");
+        model_name_ + STR("-x") + to_string_type(scaling_factor_) + STR(".bin");
 
     // Find the model paths by model name if provided
     model_param_path = std::filesystem::path(STR("models")) / STR("realesrgan") / param_file_name;
@@ -57,33 +57,33 @@ int FilterRealesrgan::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     }
 
     // Create a new RealESRGAN instance
-    realesrgan = new RealESRGAN(gpuid, tta_mode);
+    realesrgan_ = new RealESRGAN(gpuid_, tta_mode_);
 
     // Store the time bases
-    in_time_base = dec_ctx->time_base;
-    out_time_base = enc_ctx->time_base;
-    out_pix_fmt = enc_ctx->pix_fmt;
+    in_time_base_ = dec_ctx->time_base;
+    out_time_base_ = enc_ctx->time_base;
+    out_pix_fmt_ = enc_ctx->pix_fmt;
 
     // Load the model
-    if (realesrgan->load(model_param_full_path, model_bin_full_path) != 0) {
+    if (realesrgan_->load(model_param_full_path, model_bin_full_path) != 0) {
         spdlog::error("Failed to load RealESRGAN model");
         return -1;
     }
 
     // Set RealESRGAN parameters
-    realesrgan->scale = scaling_factor;
-    realesrgan->prepadding = 10;
+    realesrgan_->scale = scaling_factor_;
+    realesrgan_->prepadding = 10;
 
     // Calculate tilesize based on GPU heap budget
-    uint32_t heap_budget = ncnn::get_gpu_device(gpuid)->get_heap_budget();
+    uint32_t heap_budget = ncnn::get_gpu_device(gpuid_)->get_heap_budget();
     if (heap_budget > 1900) {
-        realesrgan->tilesize = 200;
+        realesrgan_->tilesize = 200;
     } else if (heap_budget > 550) {
-        realesrgan->tilesize = 100;
+        realesrgan_->tilesize = 100;
     } else if (heap_budget > 190) {
-        realesrgan->tilesize = 64;
+        realesrgan_->tilesize = 64;
     } else {
-        realesrgan->tilesize = 32;
+        realesrgan_->tilesize = 32;
     }
 
     return 0;
@@ -99,22 +99,22 @@ int FilterRealesrgan::filter(AVFrame *in_frame, AVFrame **out_frame) {
         return -1;
     }
 
-    // Allocate space for ouptut ncnn::Mat
-    int output_width = in_mat.w * realesrgan->scale;
-    int output_height = in_mat.h * realesrgan->scale;
+    // Allocate space for output ncnn::Mat
+    int output_width = in_mat.w * realesrgan_->scale;
+    int output_height = in_mat.h * realesrgan_->scale;
     ncnn::Mat out_mat = ncnn::Mat(output_width, output_height, static_cast<size_t>(3), 3);
 
-    ret = realesrgan->process(in_mat, out_mat);
+    ret = realesrgan_->process(in_mat, out_mat);
     if (ret != 0) {
         spdlog::error("RealESRGAN processing failed");
         return ret;
     }
 
     // Convert ncnn::Mat to AVFrame
-    *out_frame = ncnn_mat_to_avframe(out_mat, out_pix_fmt);
+    *out_frame = ncnn_mat_to_avframe(out_mat, out_pix_fmt_);
 
     // Rescale PTS to encoder's time base
-    (*out_frame)->pts = av_rescale_q(in_frame->pts, in_time_base, out_time_base);
+    (*out_frame)->pts = av_rescale_q(in_frame->pts, in_time_base_, out_time_base_);
 
     // Return the processed frame to the caller
     return ret;
