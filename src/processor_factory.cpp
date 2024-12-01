@@ -103,8 +103,6 @@ void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
                 cfg.tta_temporal_mode,
                 cfg.uhd_mode,
                 cfg.num_threads,
-                cfg.rife_v2,
-                cfg.rife_v4,
                 cfg.model_name
             );
         }

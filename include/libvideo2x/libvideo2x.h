@@ -65,8 +65,6 @@ struct RIFEConfig {
     bool tta_temporal_mode;
     bool uhd_mode;
     int num_threads;
-    bool rife_v2;
-    bool rife_v4;
     const CharType *model_name;
 };
 
@@ -142,7 +140,7 @@ struct VideoProcessingContext {
  * @param[in] log_level Log level
  * @param[in] benchmark Flag to enable benchmarking mode
  * @param[in] vk_device_index Vulkan device index
- * @param[in] hw_type Hardware device type
+ * @param[in] hw_device_type Hardware device type
  * @param[in] filter_config Filter configurations
  * @param[in] encoder_config Encoder configurations
  * @param[in,out] proc_ctx Video processing context

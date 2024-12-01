@@ -280,6 +280,10 @@ int list_vulkan_devices() {
         std::cout << "\tDriver Version: " << VK_VERSION_MAJOR(device_properties.driverVersion)
                   << "." << VK_VERSION_MINOR(device_properties.driverVersion) << "."
                   << VK_VERSION_PATCH(device_properties.driverVersion) << std::endl;
+
+        // Print device ID
+        std::cout << "\tDevice ID: " << std::hex << std::showbase << device_properties.deviceID
+                  << std::dec << std::endl;
     }
 
     // Clean up Vulkan instance
@@ -394,9 +398,9 @@ int main(int argc, char **argv) {
             ("input,i", PO_STR_VALUE<StringType>(), "Input video file path")
             ("output,o", PO_STR_VALUE<StringType>(), "Output video file path")
             ("processor,p", PO_STR_VALUE<StringType>(&arguments.processor_type),
-                "Processor to use: 'libplacebo', 'realesrgan', or 'rife'")
+                "Processor to use (libplacebo, realesrgan, rife)")
             ("hwaccel,a", PO_STR_VALUE<StringType>(&arguments.hwaccel)->default_value(STR("none"),
-                "none"), "Hardware acceleration method (mostly for decoding)")
+                "none"), "Hardware acceleration method (decoding)")
             ("device,d", po::value<uint32_t>(&arguments.vk_device_index)->default_value(0),
                 "Vulkan device index (GPU ID)")
             ("benchmark,b", po::bool_switch(&arguments.benchmark),
@@ -406,7 +410,6 @@ int main(int argc, char **argv) {
 
         po::options_description encoder_opts("Encoder options");
         encoder_opts.add_options()
-            // Encoder options
             ("codec,c", PO_STR_VALUE<StringType>(&arguments.codec)->default_value(STR("libx264"),
                 "libx264"), "Output codec")
             ("no-copy-streams", po::bool_switch(&arguments.no_copy_streams),
@@ -438,7 +441,7 @@ int main(int argc, char **argv) {
             // Extra encoder options (key-value pairs)
             ("extra-encoder-option,e", PO_STR_VALUE<std::vector<StringType>>()->multitoken(),
                 "Additional AVOption(s) for the encoder (format: -e key=value)")
-            ;
+        ;
 
         po::options_description upscale_opts("Upscaling options");
         upscale_opts.add_options()
@@ -459,21 +462,22 @@ int main(int argc, char **argv) {
         po::options_description libplacebo_opts("libplacebo options");
         libplacebo_opts.add_options()
             ("libplacebo-shader", PO_STR_VALUE<StringType>(),
-                "Name/path of the GLSL shader file to use")
+                "Name/path of the GLSL shader file to use (built-in: anime4k-v4-a, anime4k-v4-a+a, "
+                "anime4k-v4-b, anime4k-v4-b+b, anime4k-v4-c, anime4k-v4-c+a, anime4k-v4.1-gan)")
         ;
 
-        // RealESRGAN options
         po::options_description realesrgan_opts("RealESRGAN options");
         realesrgan_opts.add_options()
             ("realesrgan-model", PO_STR_VALUE<StringType>(&arguments.realesrgan_model_name),
-                "Name of the RealESRGAN model to use")
+                "Name of the RealESRGAN model to use (realesr-animevideov3, realesrgan-plus-anime, "
+                "realesrgan-plus)")
         ;
 
-        // RIFE options
         po::options_description rife_opts("RIFE options");
         rife_opts.add_options()
             ("rife-model", PO_STR_VALUE<StringType>(&arguments.rife_model_name),
-                "Name of the RIFE model to use")
+                "Name of the RIFE model to use (rife, rife-HD, rife-UHD, rife-anime, rife-v2, "
+                "rife-v2.3, rife-v2.4, rife-v3.0, rife-v3.1, rife-v4, rife-v4.6)")
             ("rife-uhd", po::bool_switch(&arguments.rife_uhd_mode),
                 "Enable Ultra HD mode")
         ;
@@ -501,19 +505,23 @@ int main(int argc, char **argv) {
         po::notify(vm);
 
         if (vm.count("help") || argc == 1) {
-            std::cout << all_opts << std::endl;
             std::cout
+                << all_opts << std::endl
                 << "Examples:" << std::endl
                 << "  Upscale an anime video to 4K using libplacebo:" << std::endl
-                << "    video2x -i input.mp4 -o output.mp4 -f libplacebo -s anime4k-v4-a+a "
-                   "-w 3840 -h 2160"
+                << "    video2x -i input.mp4 -o output.mp4 -w 3840 -h 2160 \\" << std::endl
+                << "      -p libplacebo --libplacebo-shader anime4k-v4-a+a" << std::endl
                 << std::endl
+                << "  Upscale a film by 4x using RealESRGAN with custom encoder options:"
                 << std::endl
-                << "  Upscale a film video by 4x using RealESRGAN with custom encoder options"
+                << "    video2x -i input.mkv -o output.mkv -s 4 \\" << std::endl
+                << "      -p realesrgan --realesrgan-model realesrgan-plus \\" << std::endl
+                << "      -c libx264rgb -e crf=17 -e preset=veryslow -e tune=film" << std::endl
                 << std::endl
-                << "    video2x -i input.mkv -o output.mkv -f realesrgan -m realesrgan-plus -r 4 \\"
+                << "  Frame-interpolate a video using RIFE to 4x the original frame rate:"
                 << std::endl
-                << "      -c libx264rgb -e crf=17 -e preset=veryslow -e tune=film" << std::endl;
+                << "    video2x -i input.mp4 -o output.mp4 -m 4 -p rife --rife-model rife-v4.6"
+                << std::endl;
             return 0;
         }
 
@@ -643,7 +651,7 @@ int main(int argc, char **argv) {
         }
     } else {
         // Warn if the selected device is a CPU
-        spdlog::info("Using Vulkan device: {} ({})", dev_props.deviceName, dev_props.deviceID);
+        spdlog::info("Using Vulkan device: {} ({:#x})", dev_props.deviceName, dev_props.deviceID);
         if (dev_props.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
             spdlog::warn("The selected Vulkan device is a CPU device.");
         }
@@ -729,23 +737,6 @@ int main(int argc, char **argv) {
         processor_config.config.rife.uhd_mode = arguments.rife_uhd_mode;
         processor_config.config.rife.num_threads = 0;
         processor_config.config.rife.model_name = arguments.rife_model_name.c_str();
-
-        bool rife_v2 = false;
-        bool rife_v4 = false;
-
-        if (arguments.rife_model_name.find(STR("rife-v2")) != StringType::npos) {
-            rife_v2 = true;
-        } else if (arguments.rife_model_name.find(STR("rife-v3")) != StringType::npos) {
-            rife_v2 = true;
-        } else if (arguments.rife_model_name.find(STR("rife-v4")) != StringType::npos) {
-            rife_v4 = true;
-        } else if (arguments.rife_model_name.find(STR("rife")) == StringType::npos) {
-            spdlog::critical("Unknown RIFE model generation.");
-            return 1;
-        }
-
-        processor_config.config.rife.rife_v2 = rife_v2;
-        processor_config.config.rife.rife_v4 = rife_v4;
     }
 
     // Setup encoder configuration

@@ -14,8 +14,6 @@ InterpolatorRIFE::InterpolatorRIFE(
     bool tta_temporal_mode,
     bool uhd_mode,
     int num_threads,
-    bool rife_v2,
-    bool rife_v4,
     const StringType model_name
 )
     : rife_(nullptr),
@@ -24,8 +22,6 @@ InterpolatorRIFE::InterpolatorRIFE(
       tta_temporal_mode_(tta_temporal_mode),
       uhd_mode_(uhd_mode),
       num_threads_(num_threads),
-      rife_v2_(rife_v2),
-      rife_v4_(rife_v4),
       model_name_(std::move(model_name)) {}
 
 InterpolatorRIFE::~InterpolatorRIFE() {
@@ -51,10 +47,23 @@ int InterpolatorRIFE::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
         return -1;
     }
 
+    // Automatically infer the RIFE model generation based on the model name
+    bool rife_v2 = false;
+    bool rife_v4 = false;
+    if (model_name_.find(STR("rife-v2")) != StringType::npos) {
+        rife_v2 = true;
+    } else if (model_name_.find(STR("rife-v3")) != StringType::npos) {
+        rife_v2 = true;
+    } else if (model_name_.find(STR("rife-v4")) != StringType::npos) {
+        rife_v4 = true;
+    } else if (model_name_.find(STR("rife")) == StringType::npos) {
+        spdlog::critical("Failed to infer RIFE model generation from model name");
+        return -1;
+    }
+
     // Create a new RIFE instance
-    rife_ = new RIFE(
-        gpuid_, tta_mode_, tta_temporal_mode_, uhd_mode_, num_threads_, rife_v2_, rife_v4_
-    );
+    rife_ =
+        new RIFE(gpuid_, tta_mode_, tta_temporal_mode_, uhd_mode_, num_threads_, rife_v2, rife_v4);
 
     // Store the time bases
     in_time_base_ = dec_ctx->time_base;

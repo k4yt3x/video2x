@@ -18,8 +18,6 @@ class InterpolatorRIFE : public Interpolator {
     bool tta_temporal_mode_;
     bool uhd_mode_;
     int num_threads_;
-    bool rife_v2_;
-    bool rife_v4_;
     const StringType model_name_;
     AVRational in_time_base_;
     AVRational out_time_base_;
@@ -33,8 +31,6 @@ class InterpolatorRIFE : public Interpolator {
         bool tta_temporal_mode = false,
         bool uhd_mode = false,
         int num_threads = 1,
-        bool rife_v2 = false,
-        bool rife_v4 = true,
         const StringType model_name = STR("rife-v4.6")
     );
 
