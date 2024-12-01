@@ -129,7 +129,7 @@ static int process_frames(
 
                 switch (processor->get_processing_mode()) {
                     case PROCESSING_MODE_FILTER: {
-                        Filter *filter = dynamic_cast<Filter *>(processor);
+                        Filter *filter = static_cast<Filter *>(processor);
                         ret = filter->filter(frame.get(), &raw_processed_frame);
                         if (ret < 0 && ret != AVERROR(EAGAIN)) {
                             av_strerror(ret, errbuf, sizeof(errbuf));
@@ -154,7 +154,7 @@ static int process_frames(
                         break;
                     }
                     case PROCESSING_MODE_INTERPOLATE: {
-                        Interpolator *interpolator = dynamic_cast<Interpolator *>(processor);
+                        Interpolator *interpolator = static_cast<Interpolator *>(processor);
 
                         float time_step = 1.0f / static_cast<float>(processor_config->frm_rate_mul);
                         float current_time_step = time_step;

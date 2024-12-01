@@ -702,7 +702,7 @@ int main(int argc, char **argv) {
     }
 
 #ifdef _WIN32
-    std::wstring shader_path_str = arguments.shader_path.wstring();
+    std::wstring shader_path_str = arguments.libplacebo_shader_path.wstring();
 #else
     std::string shader_path_str = arguments.libplacebo_shader_path.string();
 #endif
