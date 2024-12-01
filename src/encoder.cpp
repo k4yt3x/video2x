@@ -33,6 +33,7 @@ int Encoder::init(
     AVFormatContext *ifmt_ctx,
     AVCodecContext *dec_ctx,
     EncoderConfig *encoder_config,
+    const ProcessorConfig *processor_config,
     int in_vstream_idx
 ) {
     int ret;
@@ -121,18 +122,26 @@ int Encoder::init(
         spdlog::debug("Auto-selected pixel format: {}", av_get_pix_fmt_name(enc_ctx_->pix_fmt));
     }
 
-    // Set the output video's time base
-    if (dec_ctx->time_base.num > 0 && dec_ctx->time_base.den > 0) {
-        enc_ctx_->time_base = dec_ctx->time_base;
+    if (processor_config->frm_rate_mul > 0) {
+        AVRational in_frame_rate = get_video_frame_rate(ifmt_ctx, in_vstream_idx);
+        enc_ctx_->framerate = {
+            in_frame_rate.num * processor_config->frm_rate_mul, in_frame_rate.den
+        };
+        enc_ctx_->time_base = av_inv_q(enc_ctx_->framerate);
     } else {
-        enc_ctx_->time_base = av_inv_q(av_guess_frame_rate(ifmt_ctx, out_vstream, nullptr));
-    }
+        // Set the output video's time base
+        if (dec_ctx->time_base.num > 0 && dec_ctx->time_base.den > 0) {
+            enc_ctx_->time_base = dec_ctx->time_base;
+        } else {
+            enc_ctx_->time_base = av_inv_q(av_guess_frame_rate(ifmt_ctx, out_vstream, nullptr));
+        }
 
-    // Set the output video's frame rate
-    if (dec_ctx->framerate.num > 0 && dec_ctx->framerate.den > 0) {
-        enc_ctx_->framerate = dec_ctx->framerate;
-    } else {
-        enc_ctx_->framerate = av_guess_frame_rate(ifmt_ctx, out_vstream, nullptr);
+        // Set the output video's frame rate
+        if (dec_ctx->framerate.num > 0 && dec_ctx->framerate.den > 0) {
+            enc_ctx_->framerate = dec_ctx->framerate;
+        } else {
+            enc_ctx_->framerate = av_guess_frame_rate(ifmt_ctx, out_vstream, nullptr);
+        }
     }
 
     // Set extra AVOptions
@@ -228,6 +237,13 @@ int Encoder::init(
             spdlog::error("Could not open output file '{}'", out_fpath.u8string());
             return ret;
         }
+    }
+
+    // Write the output file header
+    ret = avformat_write_header(ofmt_ctx_, nullptr);
+    if (ret < 0) {
+        spdlog::error("Error writing output file header");
+        return ret;
     }
 
     return 0;

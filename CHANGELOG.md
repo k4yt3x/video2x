@@ -10,11 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Automatic selection of the most suitable pixel format for the output video.
-- Support for specifying arbitrary `AVOptions` for the encoder (#1232).
+- Frame interpolation processing mode.
 - More `AVCodecContext` options.
+- Support for RIFE ncnn Vulkan.
+- Support for specifying arbitrary `AVOptions` for the encoder (#1232).
 
 ### Changed
 
+- Improve error handling and error messages.
 - Improve the CLI help message structure and clarity.
 
 ### Fixed
@@ -38,9 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A better timer that gets paused when the processing is paused.
 - Detection for the validity of the provided GPU ID.
+- Status bar and processing statistics. (Video2X Qt6)
 - The `--listgpus` option to list available Vulkan GPU devices.
 - Vulkan device selection for libplacebo.
-- Status bar and processing statistics. (Video2X Qt6)
 
 ### Changed
 

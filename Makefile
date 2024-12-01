@@ -1,7 +1,7 @@
 .PHONY: build static debug windows windows-debug debian ubuntu clean \
-	test-realesrgan test-libplacebo \
-	memcheck-realesrgan memcheck-libplacebo \
-	heaptrack-realesrgan heaptrack-libplacebo
+	test-realesrgan test-libplacebo test-rife \
+	memcheck-realesrgan memcheck-libplacebo memcheck-rife \
+	heaptrack-realesrgan heaptrack-libplacebo heaptrack-rife
 
 BINDIR=build
 CC=clang
@@ -130,11 +130,15 @@ clean:
 
 test-realesrgan:
 	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
-		-f realesrgan -r 4 -m realesr-animevideov3
+		-p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 
 test-libplacebo:
 	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
-		-f libplacebo -w 1920 -h 1080 -s anime4k-v4-a
+		-p libplacebo -w 1920 -h 1080 --libplacebo-shader anime4k-v4-a
+
+test-rife:
+	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-p rife -m 4 --rife-model rife-v4.6
 
 memcheck-realesrgan:
 	LD_LIBRARY_PATH=$(BINDIR) valgrind \
@@ -146,8 +150,8 @@ memcheck-realesrgan:
 		--verbose --log-file="valgrind.log" \
 		$(BINDIR)/video2x \
 		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
-		-f realesrgan -r 2 -m realesr-animevideov3 \
-		-p veryfast -b 1000000 -q 30
+		-p realesrgan -s 2 --realesrgan-model realesr-animevideov3 \
+		-e preset=veryfast -e crf=30
 
 memcheck-libplacebo:
 	LD_LIBRARY_PATH=$(BINDIR) valgrind \
@@ -159,19 +163,39 @@ memcheck-libplacebo:
 		--verbose --log-file="valgrind.log" \
 		$(BINDIR)/video2x \
 		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
-		-f libplacebo -w 1920 -h 1080 -s anime4k-v4-a \
-		-p veryfast -b 1000000 -q 30
+		-p libplacebo -w 1920 -h 1080 --libplacebo-shader anime4k-v4-a \
+		-e preset=veryfast -e crf=30
+
+memcheck-rife:
+	LD_LIBRARY_PATH=$(BINDIR) valgrind \
+		--tool=memcheck \
+		--leak-check=full \
+		--show-leak-kinds=all \
+		--track-origins=yes \
+		--show-reachable=yes \
+		--verbose --log-file="valgrind.log" \
+		$(BINDIR)/video2x \
+		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-p rife -m 4 --rife-model rife-v4.6 \
+		-e preset=veryfast -e crf=30
 
 heaptrack-realesrgan:
 	LD_LIBRARY_PATH=$(BINDIR) HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
 		$(BINDIR)/video2x \
 		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
-		-f realesrgan -r 4 -m realesr-animevideov3 \
-		-p veryfast -b 1000000 -q 30
+		-p realesrgan -s 4 --realesrgan-model realesr-animevideov3 \
+		-e preset=veryfast -e crf=30
 
 heaptrack-libplacebo:
 	LD_LIBRARY_PATH=$(BINDIR) HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
 		$(BINDIR)/video2x \
 		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
-		-f libplacebo -w 1920 -h 1080 -s anime4k-v4-a \
-		-p veryfast -b 1000000 -q 30
+		-p libplacebo -w 1920 -h 1080 --libplacebo-shader anime4k-v4-a \
+		-e preset=veryfast -e crf=30
+
+heaptrack-rife:
+	LD_LIBRARY_PATH=$(BINDIR) HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
+		$(BINDIR)/video2x \
+		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-p rife -m 4 --rife-model rife-v4.6 \
+		-e preset=veryfast -e crf=30
