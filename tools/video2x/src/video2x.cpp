@@ -64,7 +64,7 @@ struct Arguments {
     std::filesystem::path out_fname;
     StringType processor_type;
     StringType hwaccel = STR("none");
-    uint32_t gpu_id = 0;
+    uint32_t vk_device_index = 0;
     bool no_copy_streams = false;
     bool benchmark = false;
 
@@ -202,48 +202,54 @@ enum Libvideo2xLogLevel parse_log_level(const StringType &level_name) {
     }
 }
 
-int list_gpus() {
+int enumerate_vulkan_devices(VkInstance *instance, std::vector<VkPhysicalDevice> &devices) {
     // Create a Vulkan instance
-    VkInstance instance;
     VkInstanceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    if (vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS) {
-        spdlog::critical("Failed to create Vulkan instance.");
+
+    VkResult result = vkCreateInstance(&create_info, nullptr, instance);
+    if (result != VK_SUCCESS) {
+        spdlog::error("Failed to create Vulkan instance.");
         return -1;
     }
 
     // Enumerate physical devices
     uint32_t device_count = 0;
-    VkResult result = vkEnumeratePhysicalDevices(instance, &device_count, nullptr);
+    result = vkEnumeratePhysicalDevices(*instance, &device_count, nullptr);
+    if (result != VK_SUCCESS || device_count == 0) {
+        spdlog::error("Failed to enumerate Vulkan physical devices or no devices available.");
+        vkDestroyInstance(*instance, nullptr);
+        return -1;
+    }
+
+    devices.resize(device_count);
+    result = vkEnumeratePhysicalDevices(*instance, &device_count, devices.data());
     if (result != VK_SUCCESS) {
-        spdlog::critical("Failed to enumerate Vulkan physical devices.");
-        vkDestroyInstance(instance, nullptr);
+        spdlog::error("Failed to retrieve Vulkan physical devices.");
+        vkDestroyInstance(*instance, nullptr);
         return -1;
     }
 
-    // Check if any devices are found
-    if (device_count == 0) {
-        spdlog::critical("No Vulkan physical devices found.");
-        vkDestroyInstance(instance, nullptr);
-        return -1;
+    return 0;
+}
+
+int list_vulkan_devices() {
+    VkInstance instance;
+    std::vector<VkPhysicalDevice> physical_devices;
+    int result = enumerate_vulkan_devices(&instance, physical_devices);
+    if (result != 0) {
+        return result;
     }
 
-    // Get physical device properties
-    std::vector<VkPhysicalDevice> physical_devices(device_count);
-    result = vkEnumeratePhysicalDevices(instance, &device_count, physical_devices.data());
-    if (result != VK_SUCCESS) {
-        spdlog::critical("Failed to enumerate Vulkan physical devices.");
-        vkDestroyInstance(instance, nullptr);
-        return -1;
-    }
+    uint32_t device_count = static_cast<uint32_t>(physical_devices.size());
 
-    // List GPU information
+    // List Vulkan device information
     for (uint32_t i = 0; i < device_count; i++) {
         VkPhysicalDevice device = physical_devices[i];
         VkPhysicalDeviceProperties device_properties;
         vkGetPhysicalDeviceProperties(device, &device_properties);
 
-        // Print GPU ID and name
+        // Print Vulkan device ID and name
         std::cout << i << ". " << device_properties.deviceName << std::endl;
         std::cout << "\tType: ";
         switch (device_properties.deviceType) {
@@ -281,32 +287,34 @@ int list_gpus() {
     return 0;
 }
 
-int is_valid_gpu_id(uint32_t gpu_id) {
-    // Create a Vulkan instance
-    VkInstance instance;
-    VkInstanceCreateInfo create_info{};
-    create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    if (vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS) {
-        spdlog::error("Failed to create Vulkan instance.");
+int get_vulkan_device_prop(uint32_t vk_device_index, VkPhysicalDeviceProperties *dev_props) {
+    if (dev_props == nullptr) {
+        spdlog::error("Invalid device properties pointer.");
         return -1;
     }
 
-    // Enumerate physical devices
-    uint32_t device_count = 0;
-    VkResult result = vkEnumeratePhysicalDevices(instance, &device_count, nullptr);
-    if (result != VK_SUCCESS) {
-        spdlog::error("Failed to enumerate Vulkan physical devices.");
-        vkDestroyInstance(instance, nullptr);
-        return -1;
+    VkInstance instance;
+    std::vector<VkPhysicalDevice> devices;
+    int result = enumerate_vulkan_devices(&instance, devices);
+    if (result != 0) {
+        return result;
     }
+
+    uint32_t device_count = static_cast<uint32_t>(devices.size());
+
+    // Check if the Vulkan device ID is valid
+    if (vk_device_index >= device_count) {
+        vkDestroyInstance(instance, nullptr);
+        return -2;
+    }
+
+    // Get device properties for the specified Vulkan device ID
+    vkGetPhysicalDeviceProperties(devices[vk_device_index], dev_props);
 
     // Clean up Vulkan instance
     vkDestroyInstance(instance, nullptr);
 
-    if (gpu_id >= device_count) {
-        return 0;
-    }
-    return 1;
+    return 0;
 }
 
 // Wrapper function for video processing thread
@@ -339,7 +347,7 @@ void process_video_thread(
         out_fname,
         log_level,
         arguments->benchmark,
-        arguments->gpu_id,
+        arguments->vk_device_index,
         hw_device_type,
         filter_config,
         encoder_config,
@@ -380,7 +388,7 @@ int main(int argc, char **argv) {
                 "info"), "Set verbosity level (trace, debug, info, warn, error, critical, none)")
             ("no-progress", po::bool_switch(&arguments.no_progress),
                 "Do not display the progress bar")
-            ("list-gpus,l", "List the available GPUs")
+            ("list-devices,l", "List the available Vulkan devices (GPUs)")
 
             // General Processing Options
             ("input,i", PO_STR_VALUE<StringType>(), "Input video file path")
@@ -389,8 +397,8 @@ int main(int argc, char **argv) {
                 "Processor to use: 'libplacebo', 'realesrgan', or 'rife'")
             ("hwaccel,a", PO_STR_VALUE<StringType>(&arguments.hwaccel)->default_value(STR("none"),
                 "none"), "Hardware acceleration method (mostly for decoding)")
-            ("gpu,g", po::value<uint32_t>(&arguments.gpu_id)->default_value(0),
-                "GPU ID (Vulkan device index)")
+            ("device,d", po::value<uint32_t>(&arguments.vk_device_index)->default_value(0),
+                "Vulkan device index (GPU ID)")
             ("benchmark,b", po::bool_switch(&arguments.benchmark),
                 "Discard processed frames and calculate average FPS; "
                 "useful for detecting encoder bottlenecks")
@@ -441,10 +449,10 @@ int main(int argc, char **argv) {
 
         po::options_description interp_opts("Frame interpolation options");
         interp_opts.add_options()
-            ("frame-rate-mul,f",
-                po::value<int>(&arguments.frm_rate_mul)->default_value(0),
+            ("frame-rate-mul,m",
+                po::value<int>(&arguments.frm_rate_mul)->default_value(2),
                 "Frame rate multiplier")
-            ("scene-thresh,d", po::value<float>(&arguments.scn_det_thresh)->default_value(10.0f),
+            ("scene-thresh,t", po::value<float>(&arguments.scn_det_thresh)->default_value(10.0f),
                 "Scene detection threshold")
         ;
 
@@ -464,7 +472,7 @@ int main(int argc, char **argv) {
         // RIFE options
         po::options_description rife_opts("RIFE options");
         rife_opts.add_options()
-            ("rife-model,m", PO_STR_VALUE<StringType>(&arguments.rife_model_name),
+            ("rife-model", PO_STR_VALUE<StringType>(&arguments.rife_model_name),
                 "Name of the RIFE model to use")
             ("rife-uhd", po::bool_switch(&arguments.rife_uhd_mode),
                 "Enable Ultra HD mode")
@@ -514,13 +522,19 @@ int main(int argc, char **argv) {
             return 0;
         }
 
-        if (vm.count("list-gpus")) {
-            return list_gpus();
+        if (vm.count("list-devices")) {
+            return list_vulkan_devices();
         }
+
+        // Print program banner
+        spdlog::info("Video2X version {}", LIBVIDEO2X_VERSION_STRING);
+        // spdlog::info("Copyright (C) 2018-2024 K4YT3X and contributors.");
+        // spdlog::info("Licensed under GNU AGPL version 3.");
 
         // Assign positional arguments
         if (vm.count("input")) {
             arguments.in_fname = std::filesystem::path(vm["input"].as<StringType>());
+            spdlog::info("Processing file: {}", arguments.in_fname.u8string());
         } else {
             spdlog::critical("Input file path is required.");
             return 1;
@@ -588,8 +602,8 @@ int main(int argc, char **argv) {
         spdlog::critical("Invalid scaling factor specified.");
         return 1;
     }
-    if (arguments.frm_rate_mul < 0) {
-        spdlog::critical("Invalid target frame rate specified.");
+    if (arguments.frm_rate_mul <= 1) {
+        spdlog::critical("Invalid frame rate multiplier specified.");
         return 1;
     }
     if (arguments.scn_det_thresh < 0.0f || arguments.scn_det_thresh > 100.0f) {
@@ -617,12 +631,22 @@ int main(int argc, char **argv) {
     }
 
     // Validate GPU ID
-    int gpu_status = is_valid_gpu_id(arguments.gpu_id);
-    if (gpu_status < 0) {
-        spdlog::warn("Unable to validate GPU ID.");
-    } else if (arguments.gpu_id > 0 && gpu_status == 0) {
-        spdlog::critical("Invalid GPU ID specified.");
-        return 1;
+    VkPhysicalDeviceProperties dev_props;
+    int get_vulkan_dev_ret = get_vulkan_device_prop(arguments.vk_device_index, &dev_props);
+    if (get_vulkan_dev_ret != 0) {
+        if (get_vulkan_dev_ret == -2) {
+            spdlog::critical("Invalid Vulkan device ID specified.");
+            return 1;
+        } else {
+            spdlog::warn("Unable to validate Vulkan device ID.");
+            return 1;
+        }
+    } else {
+        // Warn if the selected device is a CPU
+        spdlog::info("Using Vulkan device: {} ({})", dev_props.deviceName, dev_props.deviceID);
+        if (dev_props.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
+            spdlog::warn("The selected Vulkan device is a CPU device.");
+        }
     }
 
     // Validate bitrate
@@ -676,10 +700,6 @@ int main(int argc, char **argv) {
             spdlog::set_level(spdlog::level::info);
             break;
     }
-
-    // Print program version and processing information
-    spdlog::info("Video2X version {}", LIBVIDEO2X_VERSION_STRING);
-    spdlog::info("Processing file: {}", arguments.in_fname.u8string());
 
 #ifdef _WIN32
     std::wstring shader_path_str = arguments.shader_path.wstring();

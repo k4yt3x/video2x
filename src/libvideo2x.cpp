@@ -46,8 +46,14 @@ static int process_frames(
 
     if (proc_ctx->total_frames <= 0) {
         spdlog::warn("Unable to determine the total number of frames");
+        proc_ctx->total_frames = 0;
     } else {
         spdlog::debug("{} frames to process", proc_ctx->total_frames);
+    }
+
+    // Set total frames for interpolation
+    if (processor->get_processing_mode() == PROCESSING_MODE_INTERPOLATE) {
+        proc_ctx->total_frames *= processor_config->frm_rate_mul;
     }
 
     // Allocate AVFrame for the current processed frame
