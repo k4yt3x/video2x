@@ -35,7 +35,7 @@ InterpolatorRIFE::~InterpolatorRIFE() {
     }
 }
 
-int InterpolatorRIFE::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *_) {
+int InterpolatorRIFE::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *) {
     // Construct the model directory path using std::filesystem
     std::filesystem::path model_param_dir;
 
@@ -107,4 +107,15 @@ int InterpolatorRIFE::interpolate(
 
     // Return the processed frame to the caller
     return ret;
+}
+
+void InterpolatorRIFE::get_output_dimensions(
+    const ProcessorConfig *,
+    int in_width,
+    int in_height,
+    int &out_width,
+    int &out_height
+) const {
+    out_width = in_width;
+    out_height = in_height;
 }

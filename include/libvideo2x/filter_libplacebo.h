@@ -47,6 +47,15 @@ class FilterLibplacebo : public Filter {
 
     // Returns the filter's type
     ProcessorType get_processor_type() const override { return PROCESSOR_LIBPLACEBO; }
+
+    // Returns the filter's output dimensions
+    void get_output_dimensions(
+        const ProcessorConfig *processor_config,
+        int in_width,
+        int in_height,
+        int &out_width,
+        int &out_height
+    ) const override;
 };
 
 #endif  // FILTER_LIBPLACEBO_H

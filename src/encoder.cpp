@@ -239,6 +239,13 @@ int Encoder::init(
         }
     }
 
+    // Write the output file header
+    ret = avformat_write_header(ofmt_ctx_, nullptr);
+    if (ret < 0) {
+        spdlog::error("Error writing output file header");
+        return ret;
+    }
+
     return 0;
 }
 

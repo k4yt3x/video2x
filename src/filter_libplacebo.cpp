@@ -11,16 +11,16 @@
 FilterLibplacebo::FilterLibplacebo(
     uint32_t vk_device_index,
     const std::filesystem::path &shader_path,
-    int out_width,
-    int out_height
+    int width,
+    int height
 )
     : filter_graph_(nullptr),
       buffersrc_ctx_(nullptr),
       buffersink_ctx_(nullptr),
       vk_device_index_(vk_device_index),
       shader_path_(std::move(shader_path)),
-      width_(out_width),
-      height_(out_height) {}
+      width_(width),
+      height_(height) {}
 
 FilterLibplacebo::~FilterLibplacebo() {
     if (buffersrc_ctx_) {
@@ -37,7 +37,7 @@ FilterLibplacebo::~FilterLibplacebo() {
     }
 }
 
-int FilterLibplacebo::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *_) {
+int FilterLibplacebo::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *) {
     // Construct the shader path
     std::filesystem::path shader_full_path;
     if (filepath_is_readable(shader_path_)) {
@@ -145,4 +145,15 @@ int FilterLibplacebo::flush(std::vector<AVFrame *> &flushed_frames) {
     }
 
     return 0;
+}
+
+void FilterLibplacebo::get_output_dimensions(
+    const ProcessorConfig *processor_config,
+    int,
+    int,
+    int &out_width,
+    int &out_height
+) const {
+    out_width = processor_config->width;
+    out_height = processor_config->height;
 }

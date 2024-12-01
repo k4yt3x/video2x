@@ -41,15 +41,24 @@ class InterpolatorRIFE : public Interpolator {
     // Destructor
     virtual ~InterpolatorRIFE() override;
 
-    // Initializes the processor with decoder and encoder contexts
+    // Initializes the interpolator with decoder and encoder contexts
     int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) override;
 
     // Processes an input frame and returns the processed frame
     int interpolate(AVFrame *prev_frame, AVFrame *in_frame, AVFrame **out_frame, float time_step)
         override;
 
-    // Returns the processor's type
+    // Returns the interpolator's type
     ProcessorType get_processor_type() const override { return PROCESSOR_RIFE; }
+
+    // Returns the interpolator's output dimensions
+    void get_output_dimensions(
+        const ProcessorConfig *processor_config,
+        int in_width,
+        int in_height,
+        int &out_width,
+        int &out_height
+    ) const override;
 };
 
 #endif  // INTERPOLATOR_RIFE_H

@@ -119,3 +119,14 @@ int FilterRealesrgan::filter(AVFrame *in_frame, AVFrame **out_frame) {
     // Return the processed frame to the caller
     return ret;
 }
+
+void FilterRealesrgan::get_output_dimensions(
+    const ProcessorConfig *,
+    int in_width,
+    int in_height,
+    int &out_width,
+    int &out_height
+) const {
+    out_width = in_width * scaling_factor_;
+    out_height = in_height * scaling_factor_;
+}

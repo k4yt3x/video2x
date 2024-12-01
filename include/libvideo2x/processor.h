@@ -18,6 +18,13 @@ class Processor {
     virtual int flush(std::vector<AVFrame *> &_) { return 0; }
     virtual ProcessingMode get_processing_mode() const = 0;
     virtual ProcessorType get_processor_type() const = 0;
+    virtual void get_output_dimensions(
+        const ProcessorConfig *processor_config,
+        int in_width,
+        int in_height,
+        int &width,
+        int &height
+    ) const = 0;
 };
 
 // Abstract base class for filters
