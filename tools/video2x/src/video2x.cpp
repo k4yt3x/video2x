@@ -105,7 +105,7 @@ struct Arguments {
 // Set UNIX terminal input to non-blocking mode
 #ifndef _WIN32
 void set_nonblocking_input(bool enable) {
-    static struct termios oldt, newt;
+    static termios oldt, newt;
     if (enable) {
         tcgetattr(STDIN_FILENO, &oldt);
         newt = oldt;
@@ -695,7 +695,7 @@ int main(int argc, char **argv) {
     }
 
     // Parse pixel format to AVPixelFormat
-    enum AVPixelFormat pix_fmt = AV_PIX_FMT_NONE;
+    AVPixelFormat pix_fmt = AV_PIX_FMT_NONE;
     if (!arguments.pix_fmt.empty()) {
         pix_fmt = av_get_pix_fmt(wstring_to_u8string(arguments.pix_fmt).c_str());
         if (pix_fmt == AV_PIX_FMT_NONE) {

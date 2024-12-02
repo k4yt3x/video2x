@@ -53,7 +53,7 @@ struct RIFEConfig {
 
 // Unified filter configuration
 struct ProcessorConfig {
-    enum ProcessorType processor_type;
+    ProcessorType processor_type;
     int width;
     int height;
     int scaling_factor;
@@ -65,13 +65,13 @@ struct ProcessorConfig {
 // Encoder configurations
 struct EncoderConfig {
     // Non-AVCodecContext options
-    enum AVCodecID codec;
+    AVCodecID codec;
     bool copy_streams;
 
     // Basic video options
     int width;
     int height;
-    enum AVPixelFormat pix_fmt;
+    AVPixelFormat pix_fmt;
 
     // Rate control and compression
     int64_t bit_rate;
