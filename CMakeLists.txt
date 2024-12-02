@@ -389,6 +389,8 @@ endif()
 # Install the header files
 install(FILES
     ${PROJECT_SOURCE_DIR}/include/libvideo2x/libvideo2x.h
+    ${PROJECT_SOURCE_DIR}/include/libvideo2x/fsutils.h
+    ${PROJECT_SOURCE_DIR}/include/libvideo2x/logging.h
     ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
     DESTINATION ${INSTALL_INCLUDE_DESTINATION}
 )
