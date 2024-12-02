@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <csignal>
@@ -118,9 +119,8 @@ void set_nonblocking_input(bool enable) {
 }
 #endif
 
-// Convert a wide string to UTF-8 string
 #ifdef _WIN32
-std::string wstring_to_utf8(const std::wstring &wstr) {
+std::string wstring_to_u8string(const std::wstring &wstr) {
     if (wstr.empty()) {
         return std::string();
     }
@@ -141,10 +141,68 @@ std::string wstring_to_utf8(const std::wstring &wstr) {
     return converted_str;
 }
 #else
-std::string wstring_to_utf8(const std::string &str) {
+std::string wstring_to_u8string(const std::string &str) {
     return str;
 }
 #endif
+
+void set_spdlog_level(Libvideo2xLogLevel log_level) {
+    switch (log_level) {
+        case Libvideo2xLogLevel::Trace:
+            spdlog::set_level(spdlog::level::trace);
+            break;
+        case Libvideo2xLogLevel::Debug:
+            spdlog::set_level(spdlog::level::debug);
+            break;
+        case Libvideo2xLogLevel::Info:
+            spdlog::set_level(spdlog::level::info);
+            break;
+        case Libvideo2xLogLevel::Warning:
+            spdlog::set_level(spdlog::level::warn);
+            break;
+        case Libvideo2xLogLevel::Error:
+            spdlog::set_level(spdlog::level::err);
+            break;
+        case Libvideo2xLogLevel::Critical:
+            spdlog::set_level(spdlog::level::critical);
+            break;
+        case Libvideo2xLogLevel::Off:
+            spdlog::set_level(spdlog::level::off);
+            break;
+        default:
+            spdlog::set_level(spdlog::level::info);
+            break;
+    }
+}
+
+std::optional<Libvideo2xLogLevel> find_log_level_by_name(const StringType &log_level_name) {
+    // Static map to store the mapping
+    static const std::unordered_map<StringType, Libvideo2xLogLevel> LogLevelMap = {
+        {STR("trace"), Libvideo2xLogLevel::Trace},
+        {STR("debug"), Libvideo2xLogLevel::Debug},
+        {STR("info"), Libvideo2xLogLevel::Info},
+        {STR("warning"), Libvideo2xLogLevel::Warning},
+        {STR("warn"), Libvideo2xLogLevel::Warning},
+        {STR("error"), Libvideo2xLogLevel::Error},
+        {STR("critical"), Libvideo2xLogLevel::Critical},
+        {STR("off"), Libvideo2xLogLevel::Off},
+        {STR("none"), Libvideo2xLogLevel::Off}
+    };
+
+    // Normalize the input to lowercase
+    StringType normalized_name = log_level_name;
+    std::transform(
+        normalized_name.begin(), normalized_name.end(), normalized_name.begin(), ::tolower
+    );
+
+    // Lookup the log level in the map
+    auto it = LogLevelMap.find(normalized_name);
+    if (it != LogLevelMap.end()) {
+        return it->second;
+    }
+
+    return std::nullopt;
+}
 
 // Newline-safe log callback for FFmpeg
 void newline_safe_ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list vl) {
@@ -502,7 +560,7 @@ int main(int argc, char **argv) {
             }
             arguments.log_level = log_level.value();
         }
-        set_log_level(arguments.log_level);
+        set_spdlog_level(arguments.log_level);
 
         // Print program banner
         spdlog::info("Video2X version {}", LIBVIDEO2X_VERSION_STRING);
@@ -539,7 +597,7 @@ int main(int argc, char **argv) {
                     StringType value = opt.substr(eq_pos + 1);
                     arguments.extra_encoder_opts.push_back(std::make_pair(key, value));
                 } else {
-                    spdlog::critical("Invalid extra AVOption format: {}", wstring_to_utf8(opt));
+                    spdlog::critical("Invalid extra AVOption format: {}", wstring_to_u8string(opt));
                     return 1;
                 }
             }
@@ -629,18 +687,19 @@ int main(int argc, char **argv) {
     }
 
     // Parse codec to AVCodec
-    const AVCodec *codec = avcodec_find_encoder_by_name(wstring_to_utf8(arguments.codec).c_str());
+    const AVCodec *codec =
+        avcodec_find_encoder_by_name(wstring_to_u8string(arguments.codec).c_str());
     if (!codec) {
-        spdlog::critical("Codec '{}' not found.", wstring_to_utf8(arguments.codec));
+        spdlog::critical("Codec '{}' not found.", wstring_to_u8string(arguments.codec));
         return 1;
     }
 
     // Parse pixel format to AVPixelFormat
     enum AVPixelFormat pix_fmt = AV_PIX_FMT_NONE;
     if (!arguments.pix_fmt.empty()) {
-        pix_fmt = av_get_pix_fmt(wstring_to_utf8(arguments.pix_fmt).c_str());
+        pix_fmt = av_get_pix_fmt(wstring_to_u8string(arguments.pix_fmt).c_str());
         if (pix_fmt == AV_PIX_FMT_NONE) {
-            spdlog::critical("Invalid pixel format '{}'.", wstring_to_utf8(arguments.pix_fmt));
+            spdlog::critical("Invalid pixel format '{}'.", wstring_to_u8string(arguments.pix_fmt));
             return 1;
         }
     }
@@ -704,10 +763,10 @@ int main(int argc, char **argv) {
     // Parse hardware acceleration method
     if (arguments.hwaccel != STR("none")) {
         hw_cfg.hw_device_type =
-            av_hwdevice_find_type_by_name(wstring_to_utf8(arguments.hwaccel).c_str());
+            av_hwdevice_find_type_by_name(wstring_to_u8string(arguments.hwaccel).c_str());
         if (hw_cfg.hw_device_type == AV_HWDEVICE_TYPE_NONE) {
             spdlog::critical(
-                "Invalid hardware device type '{}'.", wstring_to_utf8(arguments.hwaccel)
+                "Invalid hardware device type '{}'.", wstring_to_u8string(arguments.hwaccel)
             );
             return 1;
         }

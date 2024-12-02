@@ -1,7 +1,5 @@
 #include "logging.h"
 
-#include <algorithm>
-
 extern "C" {
 #include <libavutil/avutil.h>
 }
@@ -43,33 +41,4 @@ void set_log_level(Libvideo2xLogLevel log_level) {
             spdlog::set_level(spdlog::level::info);
             break;
     }
-}
-
-std::optional<Libvideo2xLogLevel> find_log_level_by_name(const StringType &log_level_name) {
-    // Static map to store the mapping
-    static const std::unordered_map<StringType, Libvideo2xLogLevel> LogLevelMap = {
-        {STR("trace"), Libvideo2xLogLevel::Trace},
-        {STR("debug"), Libvideo2xLogLevel::Debug},
-        {STR("info"), Libvideo2xLogLevel::Info},
-        {STR("warning"), Libvideo2xLogLevel::Warning},
-        {STR("warn"), Libvideo2xLogLevel::Warning},
-        {STR("error"), Libvideo2xLogLevel::Error},
-        {STR("critical"), Libvideo2xLogLevel::Critical},
-        {STR("off"), Libvideo2xLogLevel::Off},
-        {STR("none"), Libvideo2xLogLevel::Off}
-    };
-
-    // Normalize the input to lowercase
-    StringType normalized_name = log_level_name;
-    std::transform(
-        normalized_name.begin(), normalized_name.end(), normalized_name.begin(), ::tolower
-    );
-
-    // Lookup the log level in the map
-    auto it = LogLevelMap.find(normalized_name);
-    if (it != LogLevelMap.end()) {
-        return it->second;
-    }
-
-    return std::nullopt;
 }

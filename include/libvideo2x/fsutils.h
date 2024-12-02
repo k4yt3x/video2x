@@ -24,6 +24,8 @@ std::filesystem::path find_resource_file(const std::filesystem::path &path);
 
 std::string path_to_u8string(const std::filesystem::path &path);
 
+std::string wstring_to_u8string(const StringType &wstr);
+
 StringType path_to_string_type(const std::filesystem::path &path);
 
 StringType to_string_type(int value);

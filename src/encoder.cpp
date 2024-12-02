@@ -144,10 +144,12 @@ int Encoder::init(
 
     // Set extra AVOptions
     for (const auto &[opt_name, opt_value] : enc_cfg.extra_opts) {
-        spdlog::debug("Setting encoder option '{}' to '{}'", opt_name, opt_value);
+        std::string opt_name_str = wstring_to_u8string(opt_name);
+        std::string opt_value_str = wstring_to_u8string(opt_value);
+        spdlog::debug("Setting encoder option '{}' to '{}'", opt_name_str, opt_value_str);
 
-        if (av_opt_set(enc_ctx_->priv_data, opt_name.c_str(), opt_value.c_str(), 0) < 0) {
-            spdlog::warn("Failed to set encoder option '{}' to '{}'", opt_name, opt_value);
+        if (av_opt_set(enc_ctx_->priv_data, opt_name_str.c_str(), opt_value_str.c_str(), 0) < 0) {
+            spdlog::warn("Failed to set encoder option '{}' to '{}'", opt_name_str, opt_value_str);
         }
     }
 
