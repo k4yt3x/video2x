@@ -27,7 +27,7 @@ auto av_packet_deleter = [](AVPacket *packet) {
 
 // Sets the total number of frames to process in the VideoProcessingContext
 void set_total_frames(
-    const ProcessorConfig *processor_config,
+    const ProcessorConfig &proc_cfg,
     VideoProcessingContext *proc_ctx,
     AVFormatContext *ifmt_ctx,
     int in_vstream_idx,
@@ -44,8 +44,8 @@ void set_total_frames(
     }
 
     // Set total frames for interpolation
-    if (processor->get_processing_mode() == PROCESSING_MODE_INTERPOLATE) {
-        proc_ctx->total_frames *= processor_config->frm_rate_mul;
+    if (processor->get_processing_mode() == ProcessingMode::Interpolate) {
+        proc_ctx->total_frames *= proc_cfg.frm_rate_mul;
     }
 }
 
@@ -126,7 +126,7 @@ int process_filtering(
 
 int process_interpolation(
     Processor *processor,
-    const ProcessorConfig *processor_config,
+    const ProcessorConfig &proc_cfg,
     VideoProcessingContext *proc_ctx,
     Encoder &encoder,
     bool benchmark,
@@ -141,14 +141,14 @@ int process_interpolation(
     Interpolator *interpolator = static_cast<Interpolator *>(processor);
 
     // Calculate the time step for each frame
-    float time_step = 1.0f / static_cast<float>(processor_config->frm_rate_mul);
+    float time_step = 1.0f / static_cast<float>(proc_cfg.frm_rate_mul);
     float current_time_step = time_step;
 
     // Check if a scene change is detected
     bool skip_frame = false;
     if (prev_frame != nullptr) {
         float frame_diff = get_frame_diff(prev_frame.get(), frame);
-        if (frame_diff > processor_config->scn_det_thresh) {
+        if (frame_diff > proc_cfg.scn_det_thresh) {
             spdlog::debug(
                 "Scene change detected ({:.2f}%), skipping frame {}",
                 frame_diff,
@@ -159,7 +159,7 @@ int process_interpolation(
     }
 
     // Write the interpolated frames
-    for (int i = 0; i < processor_config->frm_rate_mul - 1; i++) {
+    for (int i = 0; i < proc_cfg.frm_rate_mul - 1; i++) {
         // Skip interpolation if this is the first frame
         if (prev_frame == nullptr) {
             break;
@@ -206,8 +206,8 @@ int process_interpolation(
 
 // Process frames using the selected filter.
 int process_frames(
-    const EncoderConfig *encoder_config,
-    const ProcessorConfig *processor_config,
+    const EncoderConfig &enc_cfg,
+    const ProcessorConfig &proc_cfg,
     VideoProcessingContext *proc_ctx,
     Decoder &decoder,
     Encoder &encoder,
@@ -245,7 +245,7 @@ int process_frames(
     }
 
     // Set the total number of frames in the VideoProcessingContext
-    set_total_frames(processor_config, proc_ctx, ifmt_ctx, in_vstream_idx, processor);
+    set_total_frames(proc_cfg, proc_ctx, ifmt_ctx, in_vstream_idx, processor);
 
     // Read frames from the input file
     while (!proc_ctx->abort) {
@@ -292,7 +292,7 @@ int process_frames(
 
                 // Process the frame based on the selected processing mode
                 switch (processor->get_processing_mode()) {
-                    case PROCESSING_MODE_FILTER: {
+                    case ProcessingMode::Filter: {
                         ret = process_filtering(
                             processor,
                             proc_ctx,
@@ -303,10 +303,10 @@ int process_frames(
                         );
                         break;
                     }
-                    case PROCESSING_MODE_INTERPOLATE: {
+                    case ProcessingMode::Interpolate: {
                         ret = process_interpolation(
                             processor,
-                            processor_config,
+                            proc_cfg,
                             proc_ctx,
                             encoder,
                             benchmark,
@@ -329,7 +329,7 @@ int process_frames(
                     "Processed frame {}/{}", proc_ctx->processed_frames, proc_ctx->total_frames
                 );
             }
-        } else if (encoder_config->copy_streams && stream_map[packet->stream_index] >= 0) {
+        } else if (enc_cfg.copy_streams && stream_map[packet->stream_index] >= 0) {
             write_raw_packet(packet.get(), ifmt_ctx, ofmt_ctx, stream_map);
         }
         av_packet_unref(packet.get());

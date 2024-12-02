@@ -16,63 +16,21 @@ extern "C" {
 #include "processor.h"
 #include "processor_factory.h"
 
-static void set_log_level(Libvideo2xLogLevel log_level) {
-    switch (log_level) {
-        case LIBVIDEO2X_LOG_LEVEL_TRACE:
-            av_log_set_level(AV_LOG_TRACE);
-            spdlog::set_level(spdlog::level::trace);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_DEBUG:
-            av_log_set_level(AV_LOG_DEBUG);
-            spdlog::set_level(spdlog::level::debug);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_INFO:
-            av_log_set_level(AV_LOG_INFO);
-            spdlog::set_level(spdlog::level::info);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_WARNING:
-            av_log_set_level(AV_LOG_WARNING);
-            spdlog::set_level(spdlog::level::warn);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_ERROR:
-            av_log_set_level(AV_LOG_ERROR);
-            spdlog::set_level(spdlog::level::err);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_CRITICAL:
-            av_log_set_level(AV_LOG_FATAL);
-            spdlog::set_level(spdlog::level::critical);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_OFF:
-            av_log_set_level(AV_LOG_QUIET);
-            spdlog::set_level(spdlog::level::off);
-            break;
-        default:
-            av_log_set_level(AV_LOG_INFO);
-            spdlog::set_level(spdlog::level::info);
-            break;
-    }
-}
-
-extern "C" int process_video(
-    const CharType *in_fname,
-    const CharType *out_fname,
+int process_video(
+    const std::filesystem::path in_fname,
+    const std::filesystem::path out_fname,
+    const HardwareConfig hw_cfg,
+    const ProcessorConfig proc_cfg,
+    EncoderConfig enc_cfg,
+    VideoProcessingContext *proc_ctx,
     Libvideo2xLogLevel log_level,
-    bool benchmark,
-    uint32_t vk_device_index,
-    AVHWDeviceType hw_type,
-    const ProcessorConfig *processor_config,
-    EncoderConfig *encoder_config,
-    VideoProcessingContext *proc_ctx
+    bool benchmark
 ) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
     // Set the log level for FFmpeg and spdlog
     set_log_level(log_level);
-
-    // Convert the file names to std::filesystem::path
-    std::filesystem::path in_fpath(in_fname);
-    std::filesystem::path out_fpath(out_fname);
 
     // Create a smart pointer to manage the hardware device context
     auto hw_ctx_deleter = [](AVBufferRef *ref) {
@@ -83,9 +41,9 @@ extern "C" int process_video(
     std::unique_ptr<AVBufferRef, decltype(hw_ctx_deleter)> hw_ctx(nullptr, hw_ctx_deleter);
 
     // Initialize hardware device context
-    if (hw_type != AV_HWDEVICE_TYPE_NONE) {
+    if (hw_cfg.hw_device_type != AV_HWDEVICE_TYPE_NONE) {
         AVBufferRef *tmp_hw_ctx = nullptr;
-        ret = av_hwdevice_ctx_create(&tmp_hw_ctx, hw_type, NULL, NULL, 0);
+        ret = av_hwdevice_ctx_create(&tmp_hw_ctx, hw_cfg.hw_device_type, NULL, NULL, 0);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             spdlog::critical("Error initializing hardware device context: {}", errbuf);
@@ -96,7 +54,7 @@ extern "C" int process_video(
 
     // Initialize input decoder
     Decoder decoder;
-    ret = decoder.init(hw_type, hw_ctx.get(), in_fpath);
+    ret = decoder.init(hw_cfg.hw_device_type, hw_ctx.get(), in_fname);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Failed to initialize decoder: {}", errbuf);
@@ -109,7 +67,7 @@ extern "C" int process_video(
 
     // Create and initialize the appropriate filter
     std::unique_ptr<Processor> processor(
-        ProcessorFactory::instance().create_processor(processor_config, vk_device_index)
+        ProcessorFactory::instance().create_processor(proc_cfg, hw_cfg.vk_device_index)
     );
     if (processor == nullptr) {
         spdlog::critical("Failed to create filter instance");
@@ -119,7 +77,7 @@ extern "C" int process_video(
     // Initialize output dimensions based on filter configuration
     int output_width = 0, output_height = 0;
     processor->get_output_dimensions(
-        processor_config, dec_ctx->width, dec_ctx->height, output_width, output_height
+        proc_cfg, dec_ctx->width, dec_ctx->height, output_width, output_height
     );
     if (output_width <= 0 || output_height <= 0) {
         spdlog::critical("Failed to determine the output dimensions");
@@ -127,14 +85,13 @@ extern "C" int process_video(
     }
 
     // Update encoder configuration with output dimensions
-    encoder_config->width = output_width;
-    encoder_config->height = output_height;
+    enc_cfg.width = output_width;
+    enc_cfg.height = output_height;
 
     // Initialize the encoder
     Encoder encoder;
-    ret = encoder.init(
-        hw_ctx.get(), out_fpath, ifmt_ctx, dec_ctx, encoder_config, processor_config, in_vstream_idx
-    );
+    ret =
+        encoder.init(hw_ctx.get(), out_fname, ifmt_ctx, dec_ctx, enc_cfg, proc_cfg, in_vstream_idx);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Failed to initialize encoder: {}", errbuf);
@@ -149,9 +106,7 @@ extern "C" int process_video(
     }
 
     // Process frames using the encoder and decoder
-    ret = process_frames(
-        encoder_config, processor_config, proc_ctx, decoder, encoder, processor.get(), benchmark
-    );
+    ret = process_frames(enc_cfg, proc_cfg, proc_ctx, decoder, encoder, processor.get(), benchmark);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Error processing frames: {}", errbuf);

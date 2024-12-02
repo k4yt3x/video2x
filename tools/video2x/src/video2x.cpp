@@ -28,11 +28,10 @@ extern "C" {
 #include <libavutil/hwcontext.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/pixfmt.h>
+}
 
 #include <libvideo2x/libvideo2x.h>
 #include <libvideo2x/version.h>
-}
-
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.h>
 
@@ -45,7 +44,6 @@ extern "C" {
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include "libvideo2x/char_defs.h"
 #include "timer.h"
 
 // Indicate if a newline needs to be printed before the next output
@@ -56,7 +54,7 @@ std::mutex proc_ctx_mutex;
 
 // Structure to hold parsed arguments
 struct Arguments {
-    StringType log_level = STR("info");
+    Libvideo2xLogLevel log_level = Libvideo2xLogLevel::Info;
     bool no_progress = false;
 
     // General options
@@ -83,7 +81,7 @@ struct Arguments {
     int refs = -1;
     int thread_count = 0;
     int delay = 0;
-    std::vector<std::pair<StringType, StringType>> extra_options;
+    std::vector<std::pair<StringType, StringType>> extra_encoder_opts;
 
     // General processing options
     int width = 0;
@@ -93,7 +91,7 @@ struct Arguments {
     float scn_det_thresh = 0.0f;
 
     // libplacebo options
-    std::filesystem::path libplacebo_shader_path;
+    StringType libplacebo_shader_path;
 
     // RealESRGAN options
     StringType realesrgan_model_name = STR("realesr-animevideov3");
@@ -179,27 +177,6 @@ bool is_valid_rife_model(const StringType &model) {
         STR("rife-v4.6"),
     };
     return valid_realesrgan_models.count(model) > 0;
-}
-
-enum Libvideo2xLogLevel parse_log_level(const StringType &level_name) {
-    if (level_name == STR("trace")) {
-        return LIBVIDEO2X_LOG_LEVEL_TRACE;
-    } else if (level_name == STR("debug")) {
-        return LIBVIDEO2X_LOG_LEVEL_DEBUG;
-    } else if (level_name == STR("info")) {
-        return LIBVIDEO2X_LOG_LEVEL_INFO;
-    } else if (level_name == STR("warning") || level_name == STR("warn")) {
-        return LIBVIDEO2X_LOG_LEVEL_WARNING;
-    } else if (level_name == STR("error")) {
-        return LIBVIDEO2X_LOG_LEVEL_ERROR;
-    } else if (level_name == STR("critical")) {
-        return LIBVIDEO2X_LOG_LEVEL_CRITICAL;
-    } else if (level_name == STR("off") || level_name == STR("none")) {
-        return LIBVIDEO2X_LOG_LEVEL_OFF;
-    } else {
-        spdlog::warn("Invalid log level specified. Defaulting to 'info'.");
-        return LIBVIDEO2X_LOG_LEVEL_INFO;
-    }
 }
 
 int enumerate_vulkan_devices(VkInstance *instance, std::vector<VkPhysicalDevice> &devices) {
@@ -325,37 +302,20 @@ int get_vulkan_device_prop(uint32_t vk_device_index, VkPhysicalDeviceProperties 
 void process_video_thread(
     Arguments *arguments,
     int *proc_ret,
-    AVHWDeviceType hw_device_type,
-    ProcessorConfig *filter_config,
-    EncoderConfig *encoder_config,
+    HardwareConfig hw_cfg,
+    ProcessorConfig proc_cfg,
+    EncoderConfig enc_cfg,
     VideoProcessingContext *proc_ctx
 ) {
-    enum Libvideo2xLogLevel log_level = parse_log_level(arguments->log_level);
-
-    StringType in_fname_string;
-    StringType out_fname_string;
-
-#ifdef _WIN32
-    in_fname_string = StringType(arguments->in_fname.wstring());
-    out_fname_string = StringType(arguments->out_fname.wstring());
-#else
-    in_fname_string = StringType(arguments->in_fname.string());
-    out_fname_string = StringType(arguments->out_fname.string());
-#endif
-
-    const CharType *in_fname = in_fname_string.c_str();
-    const CharType *out_fname = out_fname_string.c_str();
-
     *proc_ret = process_video(
-        in_fname,
-        out_fname,
-        log_level,
-        arguments->benchmark,
-        arguments->vk_device_index,
-        hw_device_type,
-        filter_config,
-        encoder_config,
-        proc_ctx
+        arguments->in_fname,
+        arguments->out_fname,
+        hw_cfg,
+        proc_cfg,
+        enc_cfg,
+        proc_ctx,
+        arguments->log_level,
+        arguments->benchmark
     );
 
     {
@@ -388,8 +348,8 @@ int main(int argc, char **argv) {
         all_opts.add_options()
             ("help", "Display this help page")
             ("version,V", "Print program version and exit")
-            ("verbose,v", PO_STR_VALUE<StringType>(&arguments.log_level)->default_value(STR("info"),
-                "info"), "Set verbosity level (trace, debug, info, warn, error, critical, none)")
+            ("log-level", PO_STR_VALUE<StringType>()->default_value(STR("info"), "info"),
+                "Set verbosity level (trace, debug, info, warn, error, critical, none)")
             ("no-progress", po::bool_switch(&arguments.no_progress),
                 "Do not display the progress bar")
             ("list-devices,l", "List the available Vulkan devices (GPUs)")
@@ -461,7 +421,7 @@ int main(int argc, char **argv) {
 
         po::options_description libplacebo_opts("libplacebo options");
         libplacebo_opts.add_options()
-            ("libplacebo-shader", PO_STR_VALUE<StringType>(),
+            ("libplacebo-shader", PO_STR_VALUE<StringType>(&arguments.libplacebo_shader_path),
                 "Name/path of the GLSL shader file to use (built-in: anime4k-v4-a, anime4k-v4-a+a, "
                 "anime4k-v4-b, anime4k-v4-b+b, anime4k-v4-c, anime4k-v4-c+a, anime4k-v4.1-gan)")
         ;
@@ -495,11 +455,10 @@ int main(int argc, char **argv) {
         po::positional_options_description p;
         p.add("input", 1).add("output", 1).add("processor", 1);
 
-#ifdef _WIN32
         po::variables_map vm;
+#ifdef _WIN32
         po::store(po::wcommand_line_parser(argc, argv).options(all_opts).positional(p).run(), vm);
 #else
-        po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(all_opts).positional(p).run(), vm);
 #endif
         po::notify(vm);
@@ -534,6 +493,17 @@ int main(int argc, char **argv) {
             return list_vulkan_devices();
         }
 
+        if (vm.count("log-level")) {
+            std::optional<Libvideo2xLogLevel> log_level =
+                find_log_level_by_name(vm["log-level"].as<StringType>());
+            if (!log_level.has_value()) {
+                spdlog::critical("Invalid log level specified.");
+                return 1;
+            }
+            arguments.log_level = log_level.value();
+        }
+        set_log_level(arguments.log_level);
+
         // Print program banner
         spdlog::info("Video2X version {}", LIBVIDEO2X_VERSION_STRING);
         // spdlog::info("Copyright (C) 2018-2024 K4YT3X and contributors.");
@@ -567,17 +537,12 @@ int main(int argc, char **argv) {
                 if (eq_pos != StringType::npos) {
                     StringType key = opt.substr(0, eq_pos);
                     StringType value = opt.substr(eq_pos + 1);
-                    arguments.extra_options.push_back(std::make_pair(key, value));
+                    arguments.extra_encoder_opts.push_back(std::make_pair(key, value));
                 } else {
                     spdlog::critical("Invalid extra AVOption format: {}", wstring_to_utf8(opt));
                     return 1;
                 }
             }
-        }
-
-        if (vm.count("libplacebo-shader")) {
-            arguments.libplacebo_shader_path =
-                std::filesystem::path(vm["libplacebo-shader"].as<StringType>());
         }
 
         if (vm.count("libplacebo-model")) {
@@ -680,124 +645,67 @@ int main(int argc, char **argv) {
         }
     }
 
-    // Set spdlog log level
-    auto log_level = parse_log_level(arguments.log_level);
-    switch (log_level) {
-        case LIBVIDEO2X_LOG_LEVEL_TRACE:
-            spdlog::set_level(spdlog::level::trace);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_DEBUG:
-            spdlog::set_level(spdlog::level::debug);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_INFO:
-            spdlog::set_level(spdlog::level::info);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_WARNING:
-            spdlog::set_level(spdlog::level::warn);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_ERROR:
-            spdlog::set_level(spdlog::level::err);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_CRITICAL:
-            spdlog::set_level(spdlog::level::critical);
-            break;
-        case LIBVIDEO2X_LOG_LEVEL_OFF:
-            spdlog::set_level(spdlog::level::off);
-            break;
-        default:
-            spdlog::set_level(spdlog::level::info);
-            break;
-    }
-
-#ifdef _WIN32
-    std::wstring shader_path_str = arguments.libplacebo_shader_path.wstring();
-#else
-    std::string shader_path_str = arguments.libplacebo_shader_path.string();
-#endif
-
     // Setup filter configurations based on the parsed arguments
-    ProcessorConfig processor_config;
-    processor_config.width = arguments.width;
-    processor_config.height = arguments.height;
-    processor_config.scaling_factor = arguments.scaling_factor;
-    processor_config.frm_rate_mul = arguments.frm_rate_mul;
-    processor_config.scn_det_thresh = arguments.scn_det_thresh;
+    ProcessorConfig proc_cfg;
+    proc_cfg.width = arguments.width;
+    proc_cfg.height = arguments.height;
+    proc_cfg.scaling_factor = arguments.scaling_factor;
+    proc_cfg.frm_rate_mul = arguments.frm_rate_mul;
+    proc_cfg.scn_det_thresh = arguments.scn_det_thresh;
 
     if (arguments.processor_type == STR("libplacebo")) {
-        processor_config.processor_type = PROCESSOR_LIBPLACEBO;
-        processor_config.config.libplacebo.shader_path = shader_path_str.c_str();
+        proc_cfg.processor_type = ProcessorType::Libplacebo;
+        LibplaceboConfig libplacebo_config;
+        libplacebo_config.shader_path = arguments.libplacebo_shader_path;
+        proc_cfg.config = libplacebo_config;
     } else if (arguments.processor_type == STR("realesrgan")) {
-        processor_config.processor_type = PROCESSOR_REALESRGAN;
-        processor_config.config.realesrgan.tta_mode = false;
-        processor_config.config.realesrgan.model_name = arguments.realesrgan_model_name.c_str();
+        proc_cfg.processor_type = ProcessorType::RealESRGAN;
+        RealESRGANConfig realesrgan_config;
+        realesrgan_config.tta_mode = false;
+        realesrgan_config.model_name = arguments.realesrgan_model_name;
+        proc_cfg.config = realesrgan_config;
     } else if (arguments.processor_type == STR("rife")) {
-        processor_config.processor_type = PROCESSOR_RIFE;
-        processor_config.config.rife.tta_mode = false;
-        processor_config.config.rife.tta_temporal_mode = false;
-        processor_config.config.rife.uhd_mode = arguments.rife_uhd_mode;
-        processor_config.config.rife.num_threads = 0;
-        processor_config.config.rife.model_name = arguments.rife_model_name.c_str();
+        proc_cfg.processor_type = ProcessorType::RIFE;
+        RIFEConfig rife_config;
+        rife_config.tta_mode = false;
+        rife_config.tta_temporal_mode = false;
+        rife_config.uhd_mode = arguments.rife_uhd_mode;
+        rife_config.num_threads = 0;
+        rife_config.model_name = arguments.rife_model_name;
+        proc_cfg.config = rife_config;
     }
 
     // Setup encoder configuration
-    EncoderConfig encoder_config;
-    encoder_config.codec = codec->id;
-    encoder_config.copy_streams = !arguments.no_copy_streams;
-    encoder_config.width = 0;
-    encoder_config.height = 0;
-    encoder_config.pix_fmt = pix_fmt;
-    encoder_config.bit_rate = arguments.bit_rate;
-    encoder_config.rc_buffer_size = arguments.rc_buffer_size;
-    encoder_config.rc_max_rate = arguments.rc_max_rate;
-    encoder_config.rc_min_rate = arguments.rc_min_rate;
-    encoder_config.qmin = arguments.qmin;
-    encoder_config.qmax = arguments.qmax;
-    encoder_config.gop_size = arguments.gop_size;
-    encoder_config.max_b_frames = arguments.max_b_frames;
-    encoder_config.keyint_min = arguments.keyint_min;
-    encoder_config.refs = arguments.refs;
-    encoder_config.thread_count = arguments.thread_count;
-    encoder_config.delay = arguments.delay;
+    EncoderConfig enc_cfg;
+    enc_cfg.codec = codec->id;
+    enc_cfg.copy_streams = !arguments.no_copy_streams;
+    enc_cfg.width = 0;
+    enc_cfg.height = 0;
+    enc_cfg.pix_fmt = pix_fmt;
+    enc_cfg.bit_rate = arguments.bit_rate;
+    enc_cfg.rc_buffer_size = arguments.rc_buffer_size;
+    enc_cfg.rc_max_rate = arguments.rc_max_rate;
+    enc_cfg.rc_min_rate = arguments.rc_min_rate;
+    enc_cfg.qmin = arguments.qmin;
+    enc_cfg.qmax = arguments.qmax;
+    enc_cfg.gop_size = arguments.gop_size;
+    enc_cfg.max_b_frames = arguments.max_b_frames;
+    enc_cfg.keyint_min = arguments.keyint_min;
+    enc_cfg.refs = arguments.refs;
+    enc_cfg.thread_count = arguments.thread_count;
+    enc_cfg.delay = arguments.delay;
+    enc_cfg.extra_opts = arguments.extra_encoder_opts;
 
-    // Handle extra AVOptions
-    encoder_config.nb_extra_options = arguments.extra_options.size();
-    encoder_config.extra_options = static_cast<decltype(encoder_config.extra_options)>(malloc(
-        static_cast<unsigned long>(encoder_config.nb_extra_options + 1) *
-        sizeof(encoder_config.extra_options[0])
-    ));
-    if (encoder_config.extra_options == nullptr) {
-        spdlog::critical("Failed to allocate memory for extra AVOptions.");
-        return 1;
-    }
-
-    // Copy extra AVOptions to the encoder configuration
-    for (size_t i = 0; i < encoder_config.nb_extra_options; i++) {
-        const std::string key = wstring_to_utf8(arguments.extra_options[i].first);
-        const std::string value = wstring_to_utf8(arguments.extra_options[i].second);
-        encoder_config.extra_options[i].key = strdup(key.c_str());
-        encoder_config.extra_options[i].value = strdup(value.c_str());
-    }
-
-    // Custom deleter for extra AVOptions
-    auto extra_options_deleter = [&](decltype(encoder_config.extra_options) *extra_options_ptr) {
-        auto extra_options = *extra_options_ptr;
-        for (size_t i = 0; i < encoder_config.nb_extra_options; i++) {
-            free(const_cast<char *>(extra_options[i].key));
-            free(const_cast<char *>(extra_options[i].value));
-        }
-        free(extra_options);
-        *extra_options_ptr = nullptr;
-    };
-
-    // Define a unique_ptr to automatically free extra_options
-    std::unique_ptr<decltype(encoder_config.extra_options), decltype(extra_options_deleter)>
-        extra_options_guard(&encoder_config.extra_options, extra_options_deleter);
+    // Setup hardware configuration
+    HardwareConfig hw_cfg;
+    hw_cfg.hw_device_type = AV_HWDEVICE_TYPE_NONE;
+    hw_cfg.vk_device_index = arguments.vk_device_index;
 
     // Parse hardware acceleration method
-    enum AVHWDeviceType hw_device_type = AV_HWDEVICE_TYPE_NONE;
     if (arguments.hwaccel != STR("none")) {
-        hw_device_type = av_hwdevice_find_type_by_name(wstring_to_utf8(arguments.hwaccel).c_str());
-        if (hw_device_type == AV_HWDEVICE_TYPE_NONE) {
+        hw_cfg.hw_device_type =
+            av_hwdevice_find_type_by_name(wstring_to_utf8(arguments.hwaccel).c_str());
+        if (hw_cfg.hw_device_type == AV_HWDEVICE_TYPE_NONE) {
             spdlog::critical(
                 "Invalid hardware device type '{}'.", wstring_to_utf8(arguments.hwaccel)
             );
@@ -819,13 +727,7 @@ int main(int argc, char **argv) {
     // Create a thread for video processing
     int proc_ret = 0;
     std::thread processing_thread(
-        process_video_thread,
-        &arguments,
-        &proc_ret,
-        hw_device_type,
-        &processor_config,
-        &encoder_config,
-        &proc_ctx
+        process_video_thread, &arguments, &proc_ret, hw_cfg, proc_cfg, enc_cfg, &proc_ctx
     );
     spdlog::info("Press [space] to pause/resume, [q] to abort.");
 

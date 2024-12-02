@@ -5,7 +5,6 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 }
 
-#include "char_defs.h"
 #include "processor.h"
 #include "realesrgan.h"
 
@@ -40,11 +39,11 @@ class FilterRealesrgan : public Filter {
     int filter(AVFrame *in_frame, AVFrame **out_frame) override;
 
     // Returns the filter's type
-    ProcessorType get_processor_type() const override { return PROCESSOR_REALESRGAN; }
+    ProcessorType get_processor_type() const override { return ProcessorType::RealESRGAN; }
 
     // Returns the filter's output dimensions
     void get_output_dimensions(
-        const ProcessorConfig *processor_config,
+        const ProcessorConfig &proc_cfg,
         int in_width,
         int in_height,
         int &out_width,

@@ -5,7 +5,6 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 }
 
-#include "char_defs.h"
 #include "processor.h"
 #include "rife.h"
 
@@ -45,11 +44,11 @@ class InterpolatorRIFE : public Interpolator {
         override;
 
     // Returns the interpolator's type
-    ProcessorType get_processor_type() const override { return PROCESSOR_RIFE; }
+    ProcessorType get_processor_type() const override { return ProcessorType::RIFE; }
 
     // Returns the interpolator's output dimensions
     void get_output_dimensions(
-        const ProcessorConfig *processor_config,
+        const ProcessorConfig &proc_cfg,
         int in_width,
         int in_height,
         int &out_width,

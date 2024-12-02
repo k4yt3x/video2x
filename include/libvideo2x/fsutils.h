@@ -4,7 +4,19 @@
 #include <filesystem>
 #include <string>
 
-#include "char_defs.h"
+#ifdef _WIN32
+typedef wchar_t CharType;
+#define STR(x) L##x
+#else
+typedef char CharType;
+#define STR(x) x
+#endif
+
+#ifdef _WIN32
+typedef std::wstring StringType;
+#else
+typedef std::string StringType;
+#endif
 
 bool filepath_is_readable(const std::filesystem::path &path);
 
