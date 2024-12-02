@@ -1,9 +1,5 @@
 #include "libvideo2x.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 extern "C" {
 #include <libavutil/avutil.h>
 }
