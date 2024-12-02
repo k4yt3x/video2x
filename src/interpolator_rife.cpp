@@ -119,7 +119,7 @@ int InterpolatorRIFE::interpolate(
 }
 
 void InterpolatorRIFE::get_output_dimensions(
-    const ProcessorConfig *,
+    const ProcessorConfig &,
     int in_width,
     int in_height,
     int &out_width,

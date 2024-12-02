@@ -32,8 +32,8 @@ int Encoder::init(
     const std::filesystem::path &out_fpath,
     AVFormatContext *ifmt_ctx,
     AVCodecContext *dec_ctx,
-    EncoderConfig *encoder_config,
-    const ProcessorConfig *processor_config,
+    EncoderConfig &enc_cfg,
+    const ProcessorConfig &proc_cfg,
     int in_vstream_idx
 ) {
     int ret;
@@ -46,10 +46,10 @@ int Encoder::init(
     }
 
     // Find the encoder
-    const AVCodec *encoder = avcodec_find_encoder(encoder_config->codec);
+    const AVCodec *encoder = avcodec_find_encoder(enc_cfg.codec);
     if (!encoder) {
         spdlog::error(
-            "Required video encoder not found for codec {}", avcodec_get_name(encoder_config->codec)
+            "Required video encoder not found for codec {}", avcodec_get_name(enc_cfg.codec)
         );
         return AVERROR_ENCODER_NOT_FOUND;
     }
@@ -85,33 +85,33 @@ int Encoder::init(
     enc_ctx_->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
 
     // Set basic video options
-    enc_ctx_->width = encoder_config->width;
-    enc_ctx_->height = encoder_config->height;
+    enc_ctx_->width = enc_cfg.width;
+    enc_ctx_->height = enc_cfg.height;
 
     // Set rate control and compression options
-    enc_ctx_->bit_rate = encoder_config->bit_rate;
-    enc_ctx_->rc_buffer_size = encoder_config->rc_buffer_size;
-    enc_ctx_->rc_min_rate = encoder_config->rc_min_rate;
-    enc_ctx_->rc_max_rate = encoder_config->rc_max_rate;
-    enc_ctx_->qmin = encoder_config->qmin;
-    enc_ctx_->qmax = encoder_config->qmax;
+    enc_ctx_->bit_rate = enc_cfg.bit_rate;
+    enc_ctx_->rc_buffer_size = enc_cfg.rc_buffer_size;
+    enc_ctx_->rc_min_rate = enc_cfg.rc_min_rate;
+    enc_ctx_->rc_max_rate = enc_cfg.rc_max_rate;
+    enc_ctx_->qmin = enc_cfg.qmin;
+    enc_ctx_->qmax = enc_cfg.qmax;
 
     // Set GOP and frame structure options
-    enc_ctx_->gop_size = encoder_config->gop_size;
-    enc_ctx_->max_b_frames = encoder_config->max_b_frames;
-    enc_ctx_->keyint_min = encoder_config->keyint_min;
-    enc_ctx_->refs = encoder_config->refs;
+    enc_ctx_->gop_size = enc_cfg.gop_size;
+    enc_ctx_->max_b_frames = enc_cfg.max_b_frames;
+    enc_ctx_->keyint_min = enc_cfg.keyint_min;
+    enc_ctx_->refs = enc_cfg.refs;
 
     // Set performance and threading options
-    enc_ctx_->thread_count = encoder_config->thread_count;
+    enc_ctx_->thread_count = enc_cfg.thread_count;
 
     // Set latency and buffering options
-    enc_ctx_->delay = encoder_config->delay;
+    enc_ctx_->delay = enc_cfg.delay;
 
     // Set the pixel format
-    if (encoder_config->pix_fmt != AV_PIX_FMT_NONE) {
+    if (enc_cfg.pix_fmt != AV_PIX_FMT_NONE) {
         // Use the specified pixel format
-        enc_ctx_->pix_fmt = encoder_config->pix_fmt;
+        enc_ctx_->pix_fmt = enc_cfg.pix_fmt;
     } else {
         // Automatically select the pixel format
         enc_ctx_->pix_fmt = get_encoder_default_pix_fmt(encoder, dec_ctx->pix_fmt);
@@ -122,11 +122,9 @@ int Encoder::init(
         spdlog::debug("Auto-selected pixel format: {}", av_get_pix_fmt_name(enc_ctx_->pix_fmt));
     }
 
-    if (processor_config->frm_rate_mul > 0) {
+    if (proc_cfg.frm_rate_mul > 0) {
         AVRational in_frame_rate = get_video_frame_rate(ifmt_ctx, in_vstream_idx);
-        enc_ctx_->framerate = {
-            in_frame_rate.num * processor_config->frm_rate_mul, in_frame_rate.den
-        };
+        enc_ctx_->framerate = {in_frame_rate.num * proc_cfg.frm_rate_mul, in_frame_rate.den};
         enc_ctx_->time_base = av_inv_q(enc_ctx_->framerate);
     } else {
         // Set the output video's time base
@@ -145,13 +143,13 @@ int Encoder::init(
     }
 
     // Set extra AVOptions
-    for (size_t i = 0; i < encoder_config->nb_extra_options; i++) {
-        const char *key = encoder_config->extra_options[i].key;
-        const char *value = encoder_config->extra_options[i].value;
-        spdlog::debug("Setting encoder option '{}' to '{}'", key, value);
+    for (const auto &[opt_name, opt_value] : enc_cfg.extra_opts) {
+        std::string opt_name_str = wstring_to_u8string(opt_name);
+        std::string opt_value_str = wstring_to_u8string(opt_value);
+        spdlog::debug("Setting encoder option '{}' to '{}'", opt_name_str, opt_value_str);
 
-        if (av_opt_set(enc_ctx_->priv_data, key, value, 0) < 0) {
-            spdlog::warn("Failed to set encoder option '{}' to '{}'", key, value);
+        if (av_opt_set(enc_ctx_->priv_data, opt_name_str.c_str(), opt_value_str.c_str(), 0) < 0) {
+            spdlog::warn("Failed to set encoder option '{}' to '{}'", opt_name_str, opt_value_str);
         }
     }
 
@@ -178,7 +176,7 @@ int Encoder::init(
     out_vstream->r_frame_rate = enc_ctx_->framerate;
 
     // Copy other streams if necessary
-    if (encoder_config->copy_streams) {
+    if (enc_cfg.copy_streams) {
         // Allocate the stream mape frame o
         stream_map_ =
             reinterpret_cast<int *>(av_malloc_array(ifmt_ctx->nb_streams, sizeof(*stream_map_)));

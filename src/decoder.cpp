@@ -2,7 +2,7 @@
 
 #include <spdlog/spdlog.h>
 
-enum AVPixelFormat Decoder::hw_pix_fmt_ = AV_PIX_FMT_NONE;
+AVPixelFormat Decoder::hw_pix_fmt_ = AV_PIX_FMT_NONE;
 
 Decoder::Decoder() : fmt_ctx_(nullptr), dec_ctx_(nullptr), in_vstream_idx_(-1) {}
 
@@ -17,8 +17,8 @@ Decoder::~Decoder() {
     }
 }
 
-enum AVPixelFormat Decoder::get_hw_format(AVCodecContext *_, const enum AVPixelFormat *pix_fmts) {
-    for (const enum AVPixelFormat *p = pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
+AVPixelFormat Decoder::get_hw_format(AVCodecContext *_, const AVPixelFormat *pix_fmts) {
+    for (const AVPixelFormat *p = pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
         if (*p == hw_pix_fmt_) {
             return *p;
         }

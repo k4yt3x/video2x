@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve error handling and error messages.
 - Improve the CLI help message structure and clarity.
 
+### Removed
+
+- The C API for easier maintenance and development.
+
 ### Fixed
 
 - Timestamp errors processing frames with PTS equal to 0 (#1222).

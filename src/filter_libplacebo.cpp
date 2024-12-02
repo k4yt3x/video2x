@@ -4,7 +4,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include "char_defs.h"
 #include "fsutils.h"
 #include "libplacebo.h"
 
@@ -148,12 +147,12 @@ int FilterLibplacebo::flush(std::vector<AVFrame *> &flushed_frames) {
 }
 
 void FilterLibplacebo::get_output_dimensions(
-    const ProcessorConfig *processor_config,
+    const ProcessorConfig &proc_cfg,
     int,
     int,
     int &out_width,
     int &out_height
 ) const {
-    out_width = processor_config->width;
-    out_height = processor_config->height;
+    out_width = proc_cfg.width;
+    out_height = proc_cfg.height;
 }

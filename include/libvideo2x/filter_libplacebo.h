@@ -46,11 +46,11 @@ class FilterLibplacebo : public Filter {
     int flush(std::vector<AVFrame *> &flushed_frames) override;
 
     // Returns the filter's type
-    ProcessorType get_processor_type() const override { return PROCESSOR_LIBPLACEBO; }
+    ProcessorType get_processor_type() const override { return ProcessorType::Libplacebo; }
 
     // Returns the filter's output dimensions
     void get_output_dimensions(
-        const ProcessorConfig *processor_config,
+        const ProcessorConfig &proc_cfg,
         int in_width,
         int in_height,
         int &out_width,

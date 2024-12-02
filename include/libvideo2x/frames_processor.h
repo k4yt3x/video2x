@@ -7,8 +7,8 @@
 #include "processor.h"
 
 int process_frames(
-    const EncoderConfig *encoder_config,
-    const ProcessorConfig *processor_config,
+    const EncoderConfig &enc_cfg,
+    const ProcessorConfig &proc_cfg,
     VideoProcessingContext *proc_ctx,
     Decoder &decoder,
     Encoder &encoder,

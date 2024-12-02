@@ -21,8 +21,8 @@ class Encoder {
         const std::filesystem::path &out_fpath,
         AVFormatContext *ifmt_ctx,
         AVCodecContext *dec_ctx,
-        EncoderConfig *encoder_config,
-        const ProcessorConfig *processor_config,
+        EncoderConfig &enc_cfg,
+        const ProcessorConfig &proc_cfg,
         int in_vstream_idx
     );
 

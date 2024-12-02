@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(video2x VERSION 6.1.1 LANGUAGES CXX)
+project(video2x VERSION 6.2.0 LANGUAGES CXX)
 
 if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
@@ -389,7 +389,6 @@ endif()
 # Install the header files
 install(FILES
     ${PROJECT_SOURCE_DIR}/include/libvideo2x/libvideo2x.h
-    ${PROJECT_SOURCE_DIR}/include/libvideo2x/char_defs.h
     ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
     DESTINATION ${INSTALL_INCLUDE_DESTINATION}
 )

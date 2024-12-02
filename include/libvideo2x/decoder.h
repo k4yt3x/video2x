@@ -20,9 +20,8 @@ class Decoder {
     int get_video_stream_index() const;
 
    private:
-    static enum AVPixelFormat hw_pix_fmt_;
-    static enum AVPixelFormat
-    get_hw_format(AVCodecContext *ctx, const enum AVPixelFormat *pix_fmts);
+    static AVPixelFormat hw_pix_fmt_;
+    static AVPixelFormat get_hw_format(AVCodecContext *ctx, const AVPixelFormat *pix_fmts);
 
     AVFormatContext *fmt_ctx_;
     AVCodecContext *dec_ctx_;
