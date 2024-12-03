@@ -173,7 +173,7 @@ void set_spdlog_level(Video2xLogLevel log_level) {
 
 std::optional<Video2xLogLevel> find_log_level_by_name(const StringType &log_level_name) {
     // Static map to store the mapping
-    static const std::unordered_map<StringType, Video2xLogLevel> LogLevelMap = {
+    static const std::unordered_map<StringType, Video2xLogLevel> log_level_map = {
         {STR("trace"), Video2xLogLevel::Trace},
         {STR("debug"), Video2xLogLevel::Debug},
         {STR("info"), Video2xLogLevel::Info},
@@ -192,8 +192,8 @@ std::optional<Video2xLogLevel> find_log_level_by_name(const StringType &log_leve
     );
 
     // Lookup the log level in the map
-    auto it = LogLevelMap.find(normalized_name);
-    if (it != LogLevelMap.end()) {
+    auto it = log_level_map.find(normalized_name);
+    if (it != log_level_map.end()) {
         return it->second;
     }
 
