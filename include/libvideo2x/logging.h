@@ -5,7 +5,7 @@
 
 #include "fsutils.h"
 
-enum class Libvideo2xLogLevel {
+enum class Video2xLogLevel {
     Unknown,
     Trace,
     Debug,
@@ -16,8 +16,8 @@ enum class Libvideo2xLogLevel {
     Off
 };
 
-void set_log_level(Libvideo2xLogLevel log_level);
+void set_log_level(Video2xLogLevel log_level);
 
-std::optional<Libvideo2xLogLevel> find_log_level_by_name(const StringType &log_level_name);
+std::optional<Video2xLogLevel> find_log_level_by_name(const StringType &log_level_name);
 
 #endif  // LOGGING_H

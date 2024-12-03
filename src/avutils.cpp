@@ -35,7 +35,7 @@ int64_t get_video_frame_count(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
         spdlog::debug("Read total number of frames from 'nb_frames': {}", nb_frames);
         return nb_frames;
     }
-    spdlog::warn("Estimating the total number of frames from duration * fps");
+    spdlog::warn("Estimating the total number of frames using duration * fps");
 
     // Get the duration of the video
     double duration_secs = 0.0;
@@ -68,7 +68,7 @@ AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat 
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
 
     // Retrieve the list of supported pixel formats
-#if LIBAVCODEC_BUILD >= CALC_FFMPEG_VERSION(61, 13, 100)
+#if LIBAVCODEC_BUILD >= AV_VERSION_INT(61, 13, 100)
     const AVPixelFormat *supported_pix_fmts = nullptr;
     ret = avcodec_get_supported_config(
         nullptr, encoder, AV_CODEC_CONFIG_PIX_FORMAT, 0, (const void **)&supported_pix_fmts, nullptr
@@ -184,4 +184,28 @@ float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
     float percent_diff = (static_cast<float>(sum_diff) / static_cast<float>(max_diff)) * 100.0f;
 
     return percent_diff;
+}
+
+// Deleter for AVBufferRef unique_ptr
+void av_bufferref_deleter(AVBufferRef *bufferref) {
+    if (bufferref != nullptr) {
+        av_buffer_unref(&bufferref);
+    }
+}
+
+// Deleter for AVFrame unique_ptr
+void av_frame_deleter(AVFrame *frame) {
+    if (frame != nullptr) {
+        av_frame_free(&frame);
+        frame = nullptr;
+    }
+}
+
+// Deleter for AVPacket unique_ptr
+void av_packet_deleter(AVPacket *packet) {
+    if (packet != nullptr) {
+        av_packet_unref(packet);
+        av_packet_free(&packet);
+        packet = nullptr;
+    }
 }

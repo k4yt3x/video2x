@@ -9,7 +9,6 @@
 #include <cstring>
 #include <filesystem>
 #include <iostream>
-#include <mutex>
 #include <string>
 #include <thread>
 #include <unordered_set>
@@ -50,12 +49,9 @@ namespace po = boost::program_options;
 // Indicate if a newline needs to be printed before the next output
 std::atomic<bool> newline_required = false;
 
-// Mutex for synchronizing access to VideoProcessingContext
-std::mutex proc_ctx_mutex;
-
 // Structure to hold parsed arguments
 struct Arguments {
-    Libvideo2xLogLevel log_level = Libvideo2xLogLevel::Info;
+    Video2xLogLevel log_level = Video2xLogLevel::Info;
     bool no_progress = false;
 
     // General options
@@ -146,27 +142,27 @@ std::string wstring_to_u8string(const std::string &str) {
 }
 #endif
 
-void set_spdlog_level(Libvideo2xLogLevel log_level) {
+void set_spdlog_level(Video2xLogLevel log_level) {
     switch (log_level) {
-        case Libvideo2xLogLevel::Trace:
+        case Video2xLogLevel::Trace:
             spdlog::set_level(spdlog::level::trace);
             break;
-        case Libvideo2xLogLevel::Debug:
+        case Video2xLogLevel::Debug:
             spdlog::set_level(spdlog::level::debug);
             break;
-        case Libvideo2xLogLevel::Info:
+        case Video2xLogLevel::Info:
             spdlog::set_level(spdlog::level::info);
             break;
-        case Libvideo2xLogLevel::Warning:
+        case Video2xLogLevel::Warning:
             spdlog::set_level(spdlog::level::warn);
             break;
-        case Libvideo2xLogLevel::Error:
+        case Video2xLogLevel::Error:
             spdlog::set_level(spdlog::level::err);
             break;
-        case Libvideo2xLogLevel::Critical:
+        case Video2xLogLevel::Critical:
             spdlog::set_level(spdlog::level::critical);
             break;
-        case Libvideo2xLogLevel::Off:
+        case Video2xLogLevel::Off:
             spdlog::set_level(spdlog::level::off);
             break;
         default:
@@ -175,18 +171,18 @@ void set_spdlog_level(Libvideo2xLogLevel log_level) {
     }
 }
 
-std::optional<Libvideo2xLogLevel> find_log_level_by_name(const StringType &log_level_name) {
+std::optional<Video2xLogLevel> find_log_level_by_name(const StringType &log_level_name) {
     // Static map to store the mapping
-    static const std::unordered_map<StringType, Libvideo2xLogLevel> LogLevelMap = {
-        {STR("trace"), Libvideo2xLogLevel::Trace},
-        {STR("debug"), Libvideo2xLogLevel::Debug},
-        {STR("info"), Libvideo2xLogLevel::Info},
-        {STR("warning"), Libvideo2xLogLevel::Warning},
-        {STR("warn"), Libvideo2xLogLevel::Warning},
-        {STR("error"), Libvideo2xLogLevel::Error},
-        {STR("critical"), Libvideo2xLogLevel::Critical},
-        {STR("off"), Libvideo2xLogLevel::Off},
-        {STR("none"), Libvideo2xLogLevel::Off}
+    static const std::unordered_map<StringType, Video2xLogLevel> LogLevelMap = {
+        {STR("trace"), Video2xLogLevel::Trace},
+        {STR("debug"), Video2xLogLevel::Debug},
+        {STR("info"), Video2xLogLevel::Info},
+        {STR("warning"), Video2xLogLevel::Warning},
+        {STR("warn"), Video2xLogLevel::Warning},
+        {STR("error"), Video2xLogLevel::Error},
+        {STR("critical"), Video2xLogLevel::Critical},
+        {STR("off"), Video2xLogLevel::Off},
+        {STR("none"), Video2xLogLevel::Off}
     };
 
     // Normalize the input to lowercase
@@ -354,32 +350,6 @@ int get_vulkan_device_prop(uint32_t vk_device_index, VkPhysicalDeviceProperties 
     vkDestroyInstance(instance, nullptr);
 
     return 0;
-}
-
-// Wrapper function for video processing thread
-void process_video_thread(
-    Arguments *arguments,
-    int *proc_ret,
-    HardwareConfig hw_cfg,
-    ProcessorConfig proc_cfg,
-    EncoderConfig enc_cfg,
-    VideoProcessingContext *proc_ctx
-) {
-    *proc_ret = process_video(
-        arguments->in_fname,
-        arguments->out_fname,
-        hw_cfg,
-        proc_cfg,
-        enc_cfg,
-        proc_ctx,
-        arguments->log_level,
-        arguments->benchmark
-    );
-
-    {
-        std::lock_guard<std::mutex> lock(proc_ctx_mutex);
-        proc_ctx->completed = true;
-    }
 }
 
 #ifdef _WIN32
@@ -552,7 +522,7 @@ int main(int argc, char **argv) {
         }
 
         if (vm.count("log-level")) {
-            std::optional<Libvideo2xLogLevel> log_level =
+            std::optional<Video2xLogLevel> log_level =
                 find_log_level_by_name(vm["log-level"].as<StringType>());
             if (!log_level.has_value()) {
                 spdlog::critical("Invalid log level specified.");
@@ -772,22 +742,20 @@ int main(int argc, char **argv) {
         }
     }
 
-    // Setup struct to store processing context
-    VideoProcessingContext proc_ctx;
-    proc_ctx.processed_frames = 0;
-    proc_ctx.total_frames = 0;
-    proc_ctx.pause = false;
-    proc_ctx.abort = false;
-    proc_ctx.completed = false;
+    // Create video processor object
+    VideoProcessor video_processor =
+        VideoProcessor(hw_cfg, proc_cfg, enc_cfg, arguments.log_level, arguments.benchmark);
 
     // Register a newline-safe log callback for FFmpeg
     av_log_set_callback(newline_safe_ffmpeg_log_callback);
 
     // Create a thread for video processing
     int proc_ret = 0;
-    std::thread processing_thread(
-        process_video_thread, &arguments, &proc_ret, hw_cfg, proc_cfg, enc_cfg, &proc_ctx
-    );
+    std::atomic<bool> completed = false;  // Use atomic for thread-safe updates
+    std::thread processing_thread([&]() {
+        proc_ret = video_processor.process(arguments.in_fname, arguments.out_fname);
+        completed.store(true, std::memory_order_relaxed);
+    });
     spdlog::info("Press [space] to pause/resume, [q] to abort.");
 
     // Setup timer
@@ -801,12 +769,7 @@ int main(int argc, char **argv) {
 
     // Main thread loop to display progress and handle input
     while (true) {
-        bool completed;
-        {
-            std::lock_guard<std::mutex> lock(proc_ctx_mutex);
-            completed = proc_ctx.completed;
-        }
-        if (completed) {
+        if (completed.load()) {
             break;
         }
 
@@ -825,9 +788,12 @@ int main(int argc, char **argv) {
         if (ch == ' ' || ch == '\n') {
             // Toggle pause state
             {
-                std::lock_guard<std::mutex> lock(proc_ctx_mutex);
-                proc_ctx.pause = !proc_ctx.pause;
-                if (proc_ctx.pause) {
+                if (video_processor.is_paused()) {
+                    video_processor.resume();
+                } else {
+                    video_processor.pause();
+                }
+                if (video_processor.is_paused()) {
                     std::cout
                         << "\r\033[KProcessing paused; press [space] to resume, [q] to abort.";
                     std::cout.flush();
@@ -846,8 +812,7 @@ int main(int argc, char **argv) {
             }
             spdlog::warn("Aborting gracefully; press Ctrl+C to terminate forcefully.");
             {
-                std::lock_guard<std::mutex> lock(proc_ctx_mutex);
-                proc_ctx.abort = true;
+                video_processor.abort();
                 newline_required = false;
             }
             break;
@@ -856,14 +821,13 @@ int main(int argc, char **argv) {
         // Display progress
         if (!arguments.no_progress) {
             int64_t processed_frames, total_frames;
-            bool pause;
+            bool paused;
             {
-                std::lock_guard<std::mutex> lock(proc_ctx_mutex);
-                processed_frames = proc_ctx.processed_frames;
-                total_frames = proc_ctx.total_frames;
-                pause = proc_ctx.pause;
+                processed_frames = video_processor.get_processed_frames();
+                total_frames = video_processor.get_total_frames();
+                paused = video_processor.is_paused();
             }
-            if (!pause && (total_frames > 0 || processed_frames > 0)) {
+            if (!paused && (total_frames > 0 || processed_frames > 0)) {
                 double percentage = total_frames > 0 ? static_cast<double>(processed_frames) *
                                                            100.0 / static_cast<double>(total_frames)
                                                      : 0.0;
@@ -919,12 +883,7 @@ int main(int argc, char **argv) {
     }
 
     // Print final message based on processing result
-    bool aborted;
-    {
-        std::lock_guard<std::mutex> lock(proc_ctx_mutex);
-        aborted = proc_ctx.abort;
-    }
-    if (aborted) {
+    if (video_processor.is_aborted()) {
         spdlog::warn("Video processing aborted");
         return 2;
     } else if (proc_ret != 0) {
@@ -935,11 +894,7 @@ int main(int argc, char **argv) {
     }
 
     // Calculate statistics
-    int64_t processed_frames;
-    {
-        std::lock_guard<std::mutex> lock(proc_ctx_mutex);
-        processed_frames = proc_ctx.processed_frames;
-    }
+    int64_t processed_frames = video_processor.get_processed_frames();
     int time_elapsed = static_cast<int>(timer.get_elapsed_time() / 1000);
     int hours_elapsed = time_elapsed / 3600;
     int minutes_elapsed = (time_elapsed % 3600) / 60;

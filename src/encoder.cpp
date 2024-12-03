@@ -33,7 +33,6 @@ int Encoder::init(
     AVFormatContext *ifmt_ctx,
     AVCodecContext *dec_ctx,
     EncoderConfig &enc_cfg,
-    const ProcessorConfig &proc_cfg,
     int in_vstream_idx
 ) {
     int ret;
@@ -122,9 +121,9 @@ int Encoder::init(
         spdlog::debug("Auto-selected pixel format: {}", av_get_pix_fmt_name(enc_ctx_->pix_fmt));
     }
 
-    if (proc_cfg.frm_rate_mul > 0) {
+    if (enc_cfg.frm_rate_mul > 0) {
         AVRational in_frame_rate = get_video_frame_rate(ifmt_ctx, in_vstream_idx);
-        enc_ctx_->framerate = {in_frame_rate.num * proc_cfg.frm_rate_mul, in_frame_rate.den};
+        enc_ctx_->framerate = {in_frame_rate.num * enc_cfg.frm_rate_mul, in_frame_rate.den};
         enc_ctx_->time_base = av_inv_q(enc_ctx_->framerate);
     } else {
         // Set the output video's time base
