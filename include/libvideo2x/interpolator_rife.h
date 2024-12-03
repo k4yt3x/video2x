@@ -10,18 +10,6 @@ extern "C" {
 
 // InterpolatorRIFE class definition
 class InterpolatorRIFE : public Interpolator {
-   private:
-    RIFE *rife_;
-    int gpuid_;
-    bool tta_mode_;
-    bool tta_temporal_mode_;
-    bool uhd_mode_;
-    int num_threads_;
-    const StringType model_name_;
-    AVRational in_time_base_;
-    AVRational out_time_base_;
-    AVPixelFormat out_pix_fmt_;
-
    public:
     // Constructor
     InterpolatorRIFE(
@@ -54,6 +42,18 @@ class InterpolatorRIFE : public Interpolator {
         int &out_width,
         int &out_height
     ) const override;
+
+   private:
+    RIFE *rife_;
+    int gpuid_;
+    bool tta_mode_;
+    bool tta_temporal_mode_;
+    bool uhd_mode_;
+    int num_threads_;
+    const StringType model_name_;
+    AVRational in_time_base_;
+    AVRational out_time_base_;
+    AVPixelFormat out_pix_fmt_;
 };
 
 #endif  // INTERPOLATOR_RIFE_H

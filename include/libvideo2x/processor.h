@@ -1,6 +1,7 @@
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
 
+#include <variant>
 #include <vector>
 
 extern "C" {
@@ -9,7 +10,46 @@ extern "C" {
 #include <libavutil/buffer.h>
 }
 
-#include "libvideo2x.h"
+#include "fsutils.h"
+
+enum class ProcessingMode {
+    Filter,
+    Interpolate,
+};
+
+enum class ProcessorType {
+    Libplacebo,
+    RealESRGAN,
+    RIFE,
+};
+
+struct LibplaceboConfig {
+    StringType shader_path;
+};
+
+struct RealESRGANConfig {
+    bool tta_mode;
+    StringType model_name;
+};
+
+struct RIFEConfig {
+    bool tta_mode;
+    bool tta_temporal_mode;
+    bool uhd_mode;
+    int num_threads;
+    StringType model_name;
+};
+
+// Unified filter configuration
+struct ProcessorConfig {
+    ProcessorType processor_type;
+    int width;
+    int height;
+    int scaling_factor;
+    int frm_rate_mul;
+    float scn_det_thresh;
+    std::variant<LibplaceboConfig, RealESRGANConfig, RIFEConfig> config;
+};
 
 class Processor {
    public:

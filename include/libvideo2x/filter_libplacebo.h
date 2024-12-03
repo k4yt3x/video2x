@@ -13,17 +13,6 @@ extern "C" {
 
 // FilterLibplacebo class definition
 class FilterLibplacebo : public Filter {
-   private:
-    AVFilterGraph *filter_graph_;
-    AVFilterContext *buffersrc_ctx_;
-    AVFilterContext *buffersink_ctx_;
-    uint32_t vk_device_index_;
-    const std::filesystem::path shader_path_;
-    int width_;
-    int height_;
-    AVRational in_time_base_;
-    AVRational out_time_base_;
-
    public:
     // Constructor
     FilterLibplacebo(
@@ -56,6 +45,17 @@ class FilterLibplacebo : public Filter {
         int &out_width,
         int &out_height
     ) const override;
+
+   private:
+    AVFilterGraph *filter_graph_;
+    AVFilterContext *buffersrc_ctx_;
+    AVFilterContext *buffersink_ctx_;
+    uint32_t vk_device_index_;
+    const std::filesystem::path shader_path_;
+    int width_;
+    int height_;
+    AVRational in_time_base_;
+    AVRational out_time_base_;
 };
 
 #endif  // FILTER_LIBPLACEBO_H

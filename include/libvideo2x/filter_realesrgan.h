@@ -10,16 +10,6 @@ extern "C" {
 
 // FilterRealesrgan class definition
 class FilterRealesrgan : public Filter {
-   private:
-    RealESRGAN *realesrgan_;
-    int gpuid_;
-    bool tta_mode_;
-    int scaling_factor_;
-    const StringType model_name_;
-    AVRational in_time_base_;
-    AVRational out_time_base_;
-    AVPixelFormat out_pix_fmt_;
-
    public:
     // Constructor
     FilterRealesrgan(
@@ -49,6 +39,16 @@ class FilterRealesrgan : public Filter {
         int &out_width,
         int &out_height
     ) const override;
+
+   private:
+    RealESRGAN *realesrgan_;
+    int gpuid_;
+    bool tta_mode_;
+    int scaling_factor_;
+    const StringType model_name_;
+    AVRational in_time_base_;
+    AVRational out_time_base_;
+    AVPixelFormat out_pix_fmt_;
 };
 
 #endif  // FILTER_REALESRGAN_H

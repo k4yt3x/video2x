@@ -387,10 +387,9 @@ if(BUILD_VIDEO2X_CLI)
 endif()
 
 # Install the header files
+file(GLOB HEADER_FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x/*.h)
 install(FILES
-    ${PROJECT_SOURCE_DIR}/include/libvideo2x/libvideo2x.h
-    ${PROJECT_SOURCE_DIR}/include/libvideo2x/fsutils.h
-    ${PROJECT_SOURCE_DIR}/include/libvideo2x/logging.h
+    ${HEADER_FILES}
     ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
     DESTINATION ${INSTALL_INCLUDE_DESTINATION}
 )
@@ -403,9 +402,7 @@ if(WIN32)
         set(BOOST_DLL_PATH ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-gd-x64-1_86.dll)
     endif()
 
-    # Find all FFmpeg DLLs
     file(GLOB FFMPEG_DLLS "${FFMPEG_BASE_PATH}/bin/*.dll")
-
     install(FILES
         ${CMAKE_BINARY_DIR}/realesrgan_install/bin/librealesrgan-ncnn-vulkan.dll
         ${CMAKE_BINARY_DIR}/rife_install/bin/librife-ncnn-vulkan.dll
