@@ -1,5 +1,4 @@
-#ifndef FILTER_LIBPLACEBO_H
-#define FILTER_LIBPLACEBO_H
+#pragma once
 
 #include <filesystem>
 
@@ -57,5 +56,3 @@ class FilterLibplacebo : public Filter {
     AVRational in_time_base_;
     AVRational out_time_base_;
 };
-
-#endif  // FILTER_LIBPLACEBO_H

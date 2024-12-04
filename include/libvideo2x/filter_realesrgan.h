@@ -1,5 +1,4 @@
-#ifndef FILTER_REALESRGAN_H
-#define FILTER_REALESRGAN_H
+#pragma once
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -50,5 +49,3 @@ class FilterRealesrgan : public Filter {
     AVRational out_time_base_;
     AVPixelFormat out_pix_fmt_;
 };
-
-#endif  // FILTER_REALESRGAN_H

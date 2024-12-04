@@ -1,5 +1,4 @@
-#ifndef ENCODER_H
-#define ENCODER_H
+#pragma once
 
 #include <cstdint>
 #include <filesystem>
@@ -16,34 +15,32 @@ extern "C" {
 // Encoder configurations
 struct EncoderConfig {
     // Non-AVCodecContext options
-    AVCodecID codec;
-    bool copy_streams;
+    AVCodecID codec = AV_CODEC_ID_NONE;
+    bool copy_streams = true;
 
     // Basic video options
-    int width;
-    int height;
-    int frm_rate_mul;
-    AVPixelFormat pix_fmt;
+    int frm_rate_mul = 0;
+    AVPixelFormat pix_fmt = AV_PIX_FMT_NONE;
 
     // Rate control and compression
-    int64_t bit_rate;
-    int rc_buffer_size;
-    int rc_min_rate;
-    int rc_max_rate;
-    int qmin;
-    int qmax;
+    int64_t bit_rate = 0;
+    int rc_buffer_size = 0;
+    int rc_min_rate = 0;
+    int rc_max_rate = 0;
+    int qmin = -1;
+    int qmax = -1;
 
     // GOP and frame structure
-    int gop_size;
-    int max_b_frames;
-    int keyint_min;
-    int refs;
+    int gop_size = -1;
+    int max_b_frames = -1;
+    int keyint_min = -1;
+    int refs = -1;
 
     // Performance and threading
-    int thread_count;
+    int thread_count = 0;
 
     // Latency and buffering
-    int delay;
+    int delay = -1;
 
     // Extra AVOptions
     std::vector<std::pair<StringType, StringType>> extra_opts;
@@ -60,6 +57,8 @@ class Encoder {
         AVFormatContext *ifmt_ctx,
         AVCodecContext *dec_ctx,
         EncoderConfig &enc_cfg,
+        int width,
+        int height,
         int in_vstream_idx
     );
 
@@ -77,5 +76,3 @@ class Encoder {
     int out_vstream_idx_;
     int *stream_map_;
 };
-
-#endif  // ENCODER_H

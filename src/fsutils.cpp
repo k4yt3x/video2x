@@ -1,7 +1,7 @@
 #include "fsutils.h"
 
 #if _WIN32
-#include <windows.h>
+#include <Windows.h>
 #include <cwchar>
 #else
 #include <unistd.h>

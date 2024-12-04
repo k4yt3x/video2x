@@ -14,13 +14,18 @@ extern "C" {
 #include "processor_factory.h"
 
 VideoProcessor::VideoProcessor(
-    const HardwareConfig hw_cfg,
     const ProcessorConfig proc_cfg,
     const EncoderConfig enc_cfg,
-    Video2xLogLevel log_level,
-    bool benchmark
+    const uint32_t vk_device_index,
+    const AVHWDeviceType hw_device_type,
+    const Video2xLogLevel log_level,
+    const bool benchmark
 )
-    : hw_cfg_(hw_cfg), proc_cfg_(proc_cfg), enc_cfg_(enc_cfg), benchmark_(benchmark) {
+    : proc_cfg_(proc_cfg),
+      enc_cfg_(enc_cfg),
+      vk_device_index_(vk_device_index),
+      hw_device_type_(hw_device_type),
+      benchmark_(benchmark) {
     set_log_level(log_level);
 }
 
@@ -37,9 +42,9 @@ int VideoProcessor::process(
     );
 
     // Initialize hardware device context
-    if (hw_cfg_.hw_device_type != AV_HWDEVICE_TYPE_NONE) {
+    if (hw_device_type_ != AV_HWDEVICE_TYPE_NONE) {
         AVBufferRef *tmp_hw_ctx = nullptr;
-        ret = av_hwdevice_ctx_create(&tmp_hw_ctx, hw_cfg_.hw_device_type, NULL, NULL, 0);
+        ret = av_hwdevice_ctx_create(&tmp_hw_ctx, hw_device_type_, NULL, NULL, 0);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             spdlog::critical("Error initializing hardware device context: {}", errbuf);
@@ -50,7 +55,7 @@ int VideoProcessor::process(
 
     // Initialize input decoder
     Decoder decoder;
-    ret = decoder.init(hw_cfg_.hw_device_type, hw_ctx.get(), in_fname);
+    ret = decoder.init(hw_device_type_, hw_ctx.get(), in_fname);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Failed to initialize decoder: {}", errbuf);
@@ -63,7 +68,7 @@ int VideoProcessor::process(
 
     // Create and initialize the appropriate filter
     std::unique_ptr<Processor> processor(
-        ProcessorFactory::instance().create_processor(proc_cfg_, hw_cfg_.vk_device_index)
+        ProcessorFactory::instance().create_processor(proc_cfg_, vk_device_index_)
     );
     if (processor == nullptr) {
         spdlog::critical("Failed to create filter instance");
@@ -80,16 +85,21 @@ int VideoProcessor::process(
         return -1;
     }
 
-    // Update encoder output dimensions
-    enc_cfg_.width = output_width;
-    enc_cfg_.height = output_height;
-
     // Update encoder frame rate multiplier
     enc_cfg_.frm_rate_mul = proc_cfg_.frm_rate_mul;
 
     // Initialize the encoder
     Encoder encoder;
-    ret = encoder.init(hw_ctx.get(), out_fname, ifmt_ctx, dec_ctx, enc_cfg_, in_vstream_idx);
+    ret = encoder.init(
+        hw_ctx.get(),
+        out_fname,
+        ifmt_ctx,
+        dec_ctx,
+        enc_cfg_,
+        output_width,
+        output_height,
+        in_vstream_idx
+    );
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Failed to initialize encoder: {}", errbuf);

@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improve error handling and error messages.
 - Improve the CLI help message structure and clarity.
+- Improve CLI argument validation.
 
 ### Removed
 

@@ -1,5 +1,4 @@
-#ifndef FSUTILS_H
-#define FSUTILS_H
+#pragma once
 
 #include <filesystem>
 #include <string>
@@ -29,5 +28,3 @@ std::string wstring_to_u8string(const StringType &wstr);
 StringType path_to_string_type(const std::filesystem::path &path);
 
 StringType to_string_type(int value);
-
-#endif  // FSUTILS_H

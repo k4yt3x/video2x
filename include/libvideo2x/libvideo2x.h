@@ -1,5 +1,4 @@
-#ifndef LIBVIDEO2X_H
-#define LIBVIDEO2X_H
+#pragma once
 
 #include <atomic>
 #include <cstdint>
@@ -26,19 +25,15 @@ extern "C" {
 #define LIBVIDEO2X_API
 #endif
 
-struct HardwareConfig {
-    uint32_t vk_device_index;
-    AVHWDeviceType hw_device_type;
-};
-
 class LIBVIDEO2X_API VideoProcessor {
    public:
     VideoProcessor(
-        const HardwareConfig hw_cfg,
         const ProcessorConfig proc_cfg,
-        EncoderConfig enc_cfg,
-        Video2xLogLevel = Video2xLogLevel::Info,
-        bool benchmark = false
+        const EncoderConfig enc_cfg,
+        const uint32_t vk_device_index = 0,
+        const AVHWDeviceType hw_device_type = AV_HWDEVICE_TYPE_NONE,
+        const Video2xLogLevel = Video2xLogLevel::Info,
+        const bool benchmark = false
     );
 
     virtual ~VideoProcessor() = default;
@@ -85,9 +80,10 @@ class LIBVIDEO2X_API VideoProcessor {
         AVFrame *proc_frame
     );
 
-    HardwareConfig hw_cfg_;
     ProcessorConfig proc_cfg_;
     EncoderConfig enc_cfg_;
+    uint32_t vk_device_index_ = 0;
+    AVHWDeviceType hw_device_type_ = AV_HWDEVICE_TYPE_NONE;
     bool benchmark_ = false;
 
     std::atomic<int64_t> frame_index_ = 0;
@@ -96,5 +92,3 @@ class LIBVIDEO2X_API VideoProcessor {
     std::atomic<bool> aborted_ = false;
     std::atomic<bool> completed_ = false;
 };
-
-#endif  // LIBVIDEO2X_H

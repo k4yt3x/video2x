@@ -1,5 +1,4 @@
-#ifndef DECODER_H
-#define DECODER_H
+#pragma once
 
 #include <filesystem>
 
@@ -27,5 +26,3 @@ class Decoder {
     AVCodecContext *dec_ctx_;
     int in_vstream_idx_;
 };
-
-#endif  // DECODER_H

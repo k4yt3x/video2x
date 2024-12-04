@@ -33,6 +33,8 @@ int Encoder::init(
     AVFormatContext *ifmt_ctx,
     AVCodecContext *dec_ctx,
     EncoderConfig &enc_cfg,
+    int width,
+    int height,
     int in_vstream_idx
 ) {
     int ret;
@@ -84,8 +86,8 @@ int Encoder::init(
     enc_ctx_->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
 
     // Set basic video options
-    enc_ctx_->width = enc_cfg.width;
-    enc_ctx_->height = enc_cfg.height;
+    enc_ctx_->width = width;
+    enc_ctx_->height = height;
 
     // Set rate control and compression options
     enc_ctx_->bit_rate = enc_cfg.bit_rate;
