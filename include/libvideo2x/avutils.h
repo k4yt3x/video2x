@@ -1,5 +1,4 @@
-#ifndef AVUTILS_H
-#define AVUTILS_H
+#pragma once
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -18,5 +17,3 @@ void av_bufferref_deleter(AVBufferRef *bufferref);
 void av_frame_deleter(AVFrame *frame);
 
 void av_packet_deleter(AVPacket *packet);
-
-#endif  // AVUTILS_H

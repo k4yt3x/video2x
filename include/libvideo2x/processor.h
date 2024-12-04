@@ -1,5 +1,4 @@
-#ifndef PROCESSOR_H
-#define PROCESSOR_H
+#pragma once
 
 #include <variant>
 #include <vector>
@@ -18,6 +17,7 @@ enum class ProcessingMode {
 };
 
 enum class ProcessorType {
+    None,
     Libplacebo,
     RealESRGAN,
     RIFE,
@@ -28,26 +28,26 @@ struct LibplaceboConfig {
 };
 
 struct RealESRGANConfig {
-    bool tta_mode;
+    bool tta_mode = false;
     StringType model_name;
 };
 
 struct RIFEConfig {
-    bool tta_mode;
-    bool tta_temporal_mode;
-    bool uhd_mode;
-    int num_threads;
+    bool tta_mode = false;
+    bool tta_temporal_mode = false;
+    bool uhd_mode = false;
+    int num_threads = 0;
     StringType model_name;
 };
 
 // Unified filter configuration
 struct ProcessorConfig {
-    ProcessorType processor_type;
-    int width;
-    int height;
-    int scaling_factor;
-    int frm_rate_mul;
-    float scn_det_thresh;
+    ProcessorType processor_type = ProcessorType::None;
+    int width = 0;
+    int height = 0;
+    int scaling_factor = 0;
+    int frm_rate_mul = 0;
+    float scn_det_thresh = 0.0f;
     std::variant<LibplaceboConfig, RealESRGANConfig, RIFEConfig> config;
 };
 
@@ -81,5 +81,3 @@ class Interpolator : public Processor {
     virtual int
     interpolate(AVFrame *prev_frame, AVFrame *in_frame, AVFrame **out_frame, float time_step) = 0;
 };
-
-#endif  // PROCESSOR_H

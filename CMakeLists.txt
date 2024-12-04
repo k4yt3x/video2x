@@ -332,7 +332,6 @@ if(BUILD_VIDEO2X_CLI)
         ${ALL_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
         ${PROJECT_SOURCE_DIR}/include
-        ${PROJECT_SOURCE_DIR}/include/libvideo2x
         ${PROJECT_SOURCE_DIR}/tools/video2x/include
     )
 

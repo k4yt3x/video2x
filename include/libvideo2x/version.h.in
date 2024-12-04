@@ -1,6 +1,3 @@
-#ifndef VERSION_H
-#define VERSION_H
+#pragma once
 
 #define LIBVIDEO2X_VERSION_STRING "@PROJECT_VERSION@"
-
-#endif  // VERSION_H

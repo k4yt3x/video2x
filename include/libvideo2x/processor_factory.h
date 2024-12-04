@@ -1,5 +1,4 @@
-#ifndef PROCESSOR_FACTORY_H
-#define PROCESSOR_FACTORY_H
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -32,5 +31,3 @@ class ProcessorFactory {
     // Static initializer for default processors
     static void init_default_processors(ProcessorFactory &factory);
 };
-
-#endif  // PROCESSOR_FACTORY_H

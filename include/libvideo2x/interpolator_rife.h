@@ -1,5 +1,4 @@
-#ifndef INTERPOLATOR_RIFE_H
-#define INTERPOLATOR_RIFE_H
+#pragma once
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -55,5 +54,3 @@ class InterpolatorRIFE : public Interpolator {
     AVRational out_time_base_;
     AVPixelFormat out_pix_fmt_;
 };
-
-#endif  // INTERPOLATOR_RIFE_H

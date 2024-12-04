@@ -1,5 +1,4 @@
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
 
 #include <atomic>
 #include <chrono>
@@ -30,5 +29,3 @@ class Timer {
 
     void update_elapsed_time();
 };
-
-#endif  // TIMER_H

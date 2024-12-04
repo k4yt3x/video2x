@@ -1,5 +1,4 @@
-#ifndef CONVERSIONS_H
-#define CONVERSIONS_H
+#pragma once
 
 extern "C" {
 #include <libavutil/frame.h>
@@ -16,5 +15,3 @@ ncnn::Mat avframe_to_ncnn_mat(AVFrame *frame);
 
 // Convert ncnn::Mat to AVFrame
 AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt);
-
-#endif  // CONVERSIONS_H

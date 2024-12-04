@@ -1,5 +1,6 @@
 <p align="center">
-   <img src="https://github.com/user-attachments/assets/5cd63373-e806-474f-94ec-6e04963bf90f"/>
+   <img src="https://github.com/user-attachments/assets/5cd63373-e806-474f-94ec-6e04963bf90f"
+        alt="Video2X: A machine learning-based video super resolution and frame interpolation framework."/>
    </br>
    <img src="https://img.shields.io/github/v/release/k4yt3x/video2x?style=flat-square"/>
    <img src="https://img.shields.io/github/downloads/k4yt3x/video2x/total?style=flat-square"/>
@@ -69,15 +70,7 @@ Join our Telegram discussion group to ask any questions you have about Video2X, 
 
 Comprehensive documentation for Video2X is available at [https://docs.video2x.org/](https://docs.video2x.org/). It offers detailed instructions on how to [build](https://docs.video2x.org/building/index.html), [install](https://docs.video2x.org/installing/index.html), [use](https://docs.video2x.org/running/index.html), and [develop](https://docs.video2x.org/developing/index.html) with this program.
 
-## 🔰 Introduction
-
-Video2X is a machine-learning-powered framework for video upscaling and frame interpolation, built around three main components:
-
-- [libvideo2x](https://github.com/k4yt3x/video2x/blob/master/src/libvideo2x.cpp): The core C++ library providing upscaling and frame interpolation capabilities.
-- [Video2X CLI](https://github.com/k4yt3x/video2x/blob/master/src/video2x.c): A command-line interface that utilizes `libvideo2x` for video processing.
-- [Video2X Qt6](https://github.com/k4yt3x/video2x-qt6): A Qt6-based graphical interface that utilizes `libvideo2x` for video processing.
-
-### Video Demos
+## 📽️ Video Demos (Outdated)
 
 ![Spirited Away Demo](https://user-images.githubusercontent.com/21986859/49412428-65083280-f73a-11e8-8237-bb34158a545e.png)\
 _Upscale demo: Spirited Away's movie trailer_

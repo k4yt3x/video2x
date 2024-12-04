@@ -1,5 +1,4 @@
-#ifndef PLACEBO_H
-#define PLACEBO_H
+#pragma once
 
 #include <filesystem>
 
@@ -18,5 +17,3 @@ int init_libplacebo(
     uint32_t vk_device_index,
     const std::filesystem::path &shader_path
 );
-
-#endif  // PLACEBO_H

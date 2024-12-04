@@ -169,9 +169,8 @@ float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
         uint8_t *ptr1 = rgb_frame1->data[0] + y * rgb_frame1->linesize[0];
         uint8_t *ptr2 = rgb_frame2->data[0] + y * rgb_frame2->linesize[0];
         for (int x = 0; x < width * 3; x++) {
-            sum_diff += static_cast<uint64_t>(
-                std::abs(static_cast<int>(ptr1[x]) - static_cast<int>(ptr2[x]))
-            );
+            sum_diff +=
+                static_cast<uint64_t>(ptr1[x] > ptr2[x] ? ptr1[x] - ptr2[x] : ptr2[x] - ptr1[x]);
             max_diff += 255;
         }
     }
