@@ -25,6 +25,15 @@ extern "C" {
 #define LIBVIDEO2X_API
 #endif
 
+enum class VideoProcessorState {
+    Idle,
+    Running,
+    Paused,
+    Failed,
+    Aborted,
+    Completed
+};
+
 class LIBVIDEO2X_API VideoProcessor {
    public:
     VideoProcessor(
@@ -41,16 +50,13 @@ class LIBVIDEO2X_API VideoProcessor {
     [[nodiscard]] int
     process(const std::filesystem::path in_fname, const std::filesystem::path out_fname);
 
-    void pause() { paused_.store(true); }
-    void resume() { paused_.store(false); }
-    void abort() { aborted_.store(true); }
+    void pause() { state_.store(VideoProcessorState::Paused); }
+    void resume() { state_.store(VideoProcessorState::Running); }
+    void abort() { state_.store(VideoProcessorState::Aborted); }
 
+    VideoProcessorState get_state() const { return state_.load(); }
     int64_t get_processed_frames() const { return frame_index_.load(); }
     int64_t get_total_frames() const { return total_frames_.load(); }
-
-    bool is_paused() const { return paused_.load(); }
-    bool is_aborted() const { return aborted_.load(); }
-    bool is_completed() const { return completed_.load(); }
 
    private:
     [[nodiscard]] int
@@ -86,9 +92,7 @@ class LIBVIDEO2X_API VideoProcessor {
     AVHWDeviceType hw_device_type_ = AV_HWDEVICE_TYPE_NONE;
     bool benchmark_ = false;
 
+    std::atomic<VideoProcessorState> state_ = VideoProcessorState::Idle;
     std::atomic<int64_t> frame_index_ = 0;
     std::atomic<int64_t> total_frames_ = 0;
-    std::atomic<bool> paused_ = false;
-    std::atomic<bool> aborted_ = false;
-    std::atomic<bool> completed_ = false;
 };

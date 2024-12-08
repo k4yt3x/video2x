@@ -33,8 +33,22 @@ int VideoProcessor::process(
     const std::filesystem::path in_fname,
     const std::filesystem::path out_fname
 ) {
-    char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
+
+    // Helper lambda to handle errors:
+    auto handle_error = [&](int error_code, const std::string &msg) {
+        // Format and log the error message
+        char errbuf[AV_ERROR_MAX_STRING_SIZE];
+        av_strerror(error_code, errbuf, sizeof(errbuf));
+        spdlog::critical("{}: {}", msg, errbuf);
+
+        // Set the video processor state to failed and return the error code
+        state_.store(VideoProcessorState::Failed);
+        return error_code;
+    };
+
+    // Set the video processor state to running
+    state_.store(VideoProcessorState::Running);
 
     // Create a smart pointer to manage the hardware device context
     std::unique_ptr<AVBufferRef, decltype(&av_bufferref_deleter)> hw_ctx(
@@ -46,9 +60,7 @@ int VideoProcessor::process(
         AVBufferRef *tmp_hw_ctx = nullptr;
         ret = av_hwdevice_ctx_create(&tmp_hw_ctx, hw_device_type_, NULL, NULL, 0);
         if (ret < 0) {
-            av_strerror(ret, errbuf, sizeof(errbuf));
-            spdlog::critical("Error initializing hardware device context: {}", errbuf);
-            return ret;
+            return handle_error(ret, "Error initializing hardware device context");
         }
         hw_ctx.reset(tmp_hw_ctx);
     }
@@ -57,9 +69,7 @@ int VideoProcessor::process(
     Decoder decoder;
     ret = decoder.init(hw_device_type_, hw_ctx.get(), in_fname);
     if (ret < 0) {
-        av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::critical("Failed to initialize decoder: {}", errbuf);
-        return ret;
+        return handle_error(ret, "Failed to initialize decoder");
     }
 
     AVFormatContext *ifmt_ctx = decoder.get_format_context();
@@ -71,8 +81,7 @@ int VideoProcessor::process(
         ProcessorFactory::instance().create_processor(proc_cfg_, vk_device_index_)
     );
     if (processor == nullptr) {
-        spdlog::critical("Failed to create filter instance");
-        return -1;
+        return handle_error(-1, "Failed to create filter instance");
     }
 
     // Initialize output dimensions based on filter configuration
@@ -81,8 +90,7 @@ int VideoProcessor::process(
         proc_cfg_, dec_ctx->width, dec_ctx->height, output_width, output_height
     );
     if (output_width <= 0 || output_height <= 0) {
-        spdlog::critical("Failed to determine the output dimensions");
-        return -1;
+        return handle_error(-1, "Failed to determine the output dimensions");
     }
 
     // Update encoder frame rate multiplier
@@ -101,34 +109,34 @@ int VideoProcessor::process(
         in_vstream_idx
     );
     if (ret < 0) {
-        av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::critical("Failed to initialize encoder: {}", errbuf);
-        return ret;
+        return handle_error(ret, "Failed to initialize encoder");
     }
 
     // Initialize the filter
     ret = processor->init(dec_ctx, encoder.get_encoder_context(), hw_ctx.get());
     if (ret < 0) {
-        spdlog::critical("Failed to initialize filter");
-        return ret;
+        return handle_error(ret, "Failed to initialize filter");
     }
 
     // Process frames using the encoder and decoder
     ret = process_frames(decoder, encoder, processor);
     if (ret < 0) {
-        av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::critical("Error processing frames: {}", errbuf);
-        return ret;
+        return handle_error(ret, "Error processing frames");
     }
 
     // Write the output file trailer
-    av_write_trailer(encoder.get_format_context());
-
-    if (ret < 0 && ret != AVERROR_EOF) {
-        av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::critical("Error occurred: {}", errbuf);
-        return ret;
+    ret = av_write_trailer(encoder.get_format_context());
+    if (ret < 0) {
+        return handle_error(ret, "Error writing output file trailer");
     }
+
+    // Check if an error occurred during processing
+    if (ret < 0 && ret != AVERROR_EOF) {
+        return handle_error(ret, "Error occurred");
+    }
+
+    // Processing has completed successfully
+    state_.store(VideoProcessorState::Completed);
     return 0;
 }
 
@@ -187,7 +195,7 @@ int VideoProcessor::process_frames(
     }
 
     // Read frames from the input file
-    while (!aborted_.load()) {
+    while (state_.load() != VideoProcessorState::Aborted) {
         ret = av_read_frame(ifmt_ctx, packet.get());
         if (ret < 0) {
             if (ret == AVERROR_EOF) {
@@ -209,9 +217,9 @@ int VideoProcessor::process_frames(
             }
 
             // Process frames decoded from the packet
-            while (!aborted_.load()) {
+            while (state_.load() != VideoProcessorState::Aborted) {
                 // Sleep for 100 ms if processing is paused
-                if (paused_.load()) {
+                if (state_.load() == VideoProcessorState::Paused) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     continue;
                 }
