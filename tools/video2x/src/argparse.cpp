@@ -137,9 +137,9 @@ int parse_args(
             ("frame-rate-mul,m", po::value<int>(&proc_cfg.frm_rate_mul)
                 ->notifier([](int v) { validate_min(v, "frame-rate-mul", 2); }),
                 "Frame rate multiplier")
-            ("scene-thresh,t", po::value<float>(&proc_cfg.scn_det_thresh)->default_value(20.0f)
+            ("scene-thresh,t", po::value<float>(&proc_cfg.scn_det_thresh)->default_value(100.0f)
                 ->notifier([](float v) { validate_range<float>(v, "scene-thresh", 0.0, 100.0); }),
-                "Scene detection threshold")
+                "Scene detection threshold (20 means 20% diff between frames is a scene change)")
         ;
 
         po::options_description libplacebo_opts("libplacebo options");

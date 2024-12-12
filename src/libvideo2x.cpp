@@ -93,9 +93,6 @@ int VideoProcessor::process(
         return handle_error(-1, "Failed to determine the output dimensions");
     }
 
-    // Update encoder frame rate multiplier
-    enc_cfg_.frm_rate_mul = proc_cfg_.frm_rate_mul;
-
     // Initialize the encoder
     Encoder encoder;
     ret = encoder.init(
@@ -106,6 +103,7 @@ int VideoProcessor::process(
         enc_cfg_,
         output_width,
         output_height,
+        proc_cfg_.frm_rate_mul,
         in_vstream_idx
     );
     if (ret < 0) {
@@ -389,7 +387,7 @@ int VideoProcessor::process_interpolation(
 
     // Check if a scene change is detected
     bool skip_frame = false;
-    if (prev_frame.get() != nullptr) {
+    if (proc_cfg_.scn_det_thresh < 100.0 && prev_frame.get() != nullptr) {
         float frame_diff = get_frame_diff(prev_frame.get(), frame);
         if (frame_diff > proc_cfg_.scn_det_thresh) {
             spdlog::debug(

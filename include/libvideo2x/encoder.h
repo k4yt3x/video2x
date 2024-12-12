@@ -19,7 +19,6 @@ struct EncoderConfig {
     bool copy_streams = true;
 
     // Basic video options
-    int frm_rate_mul = 0;
     AVPixelFormat pix_fmt = AV_PIX_FMT_NONE;
 
     // Rate control and compression
@@ -59,6 +58,7 @@ class Encoder {
         EncoderConfig &enc_cfg,
         int width,
         int height,
+        int frm_rate_mul,
         int in_vstream_idx
     );
 
