@@ -31,19 +31,18 @@ Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 - supports two modes: filtering (upscaling) and frame interpolation;
 - supports Anime4K v4 and all custom MPV-compatible GLSL shaders;
 - supports RealESRGAN (all three models) via ncnn and Vulkan;
-- supports RIFE via ncnn and Vulkan;
-- requires zero additional disk space during processing, just space for the final output; and
-- exports a standard C function for easy integration into other projects! (documentation is on the way)
+- supports RIFE via ncnn and Vulkan; and
+- requires zero additional disk space during processing, just space for the final output.
 
 Support for RealCUGAN is coming soon.
 
 </details>
 
-![6.1.0-screenshot](https://github.com/user-attachments/assets/57aa11d0-dd01-49e9-b6b0-2d2f21a363ac)
+![6.2.0-screenshot](https://github.com/user-attachments/assets/68c6d65b-89a2-4553-a783-f5e663aa1313)
 
 ## [🪟 Install on Windows](https://docs.video2x.org/installing/windows-qt6.html)
 
-**[Download the Latest Windows Installer Executable (6.1.1)](https://github.com/k4yt3x/video2x/releases/download/6.1.1/video2x-qt6-windows-amd64-installer.exe)**
+**[Download the Latest Windows Installer Executable (6.2.0)](https://github.com/k4yt3x/video2x/releases/download/6.2.0/video2x-qt6-windows-amd64-installer.exe)**
 
 You can download the latest Windows release on the [releases page](https://github.com/k4yt3x/video2x/releases/latest). For basic GUI usage, refer to the [documentation](https://docs.video2x.org/running/desktop.html). If you're unable to download directly from GitHub, try the [mirror site](https://files.k4yt3x.com/Projects/Video2X). The GUI currently supports the following languages:
 
