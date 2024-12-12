@@ -27,13 +27,15 @@ Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 - genuinely works this time, with much less hassle compared to the 5.0.0 beta;
 - is blazing fast, thanks to the new optimized pipeline and the efficiency of C/C++;
 - is cross-platform, available now for both Windows and Linux;
-- offers significantly better output quality with Anime4K v4 and RealESRGAN;
+- offers significantly better output quality with Anime4K v4, RealESRGAN, and RIFE;
+- supports two modes: filtering (upscaling) and frame interpolation;
 - supports Anime4K v4 and all custom MPV-compatible GLSL shaders;
-- includes support for RealESRGAN (all three models) via ncnn and Vulkan;
+- supports RealESRGAN (all three models) via ncnn and Vulkan;
+- supports RIFE via ncnn and Vulkan;
 - requires zero additional disk space during processing, just space for the final output; and
 - exports a standard C function for easy integration into other projects! (documentation is on the way)
 
-Support for RealCUGAN and frame interpolation with RIFE are coming soon.
+Support for RealCUGAN is coming soon.
 
 </details>
 

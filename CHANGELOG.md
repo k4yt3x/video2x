@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [6.2.0] - 2024-12-11
 
 ### Added
 
@@ -14,12 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More `AVCodecContext` options.
 - Support for RIFE ncnn Vulkan.
 - Support for specifying arbitrary `AVOptions` for the encoder (#1232).
+- Visual C++ Redistributable version check to the installer. (Video2X Qt6)
 
 ### Changed
 
+- Improve CLI argument validation.
 - Improve error handling and error messages.
 - Improve the CLI help message structure and clarity.
-- Improve CLI argument validation.
+- Improve the UI with a complete redesign. (Video2X Qt6)
 
 ### Removed
 
