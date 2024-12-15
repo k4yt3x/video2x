@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: Video2X
+abstract: >-
+  Video2X is a A machine learning-based video super resolution and frame interpolation framework.
+message: Please cite this software using these metadata.
+type: software
+authors:
+  - name: K4YT3X
+date-released: 2018-02-24
+url: https://video2x.org
+repository-code: https://github.com/k4yt3x/video2x
+license: AGPL-3.0
+keywords:
+  - machine learning
+  - super resolution
+  - frame interpolation
