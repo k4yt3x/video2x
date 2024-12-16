@@ -16,14 +16,14 @@ extern "C" {
 VideoProcessor::VideoProcessor(
     const ProcessorConfig proc_cfg,
     const EncoderConfig enc_cfg,
-    const uint32_t vk_device_index,
+    const uint32_t vk_device_idx,
     const AVHWDeviceType hw_device_type,
     const Video2xLogLevel log_level,
     const bool benchmark
 )
     : proc_cfg_(proc_cfg),
       enc_cfg_(enc_cfg),
-      vk_device_index_(vk_device_index),
+      vk_device_idx_(vk_device_idx),
       hw_device_type_(hw_device_type),
       benchmark_(benchmark) {
     set_log_level(log_level);
@@ -78,7 +78,7 @@ int VideoProcessor::process(
 
     // Create and initialize the appropriate filter
     std::unique_ptr<Processor> processor(
-        ProcessorFactory::instance().create_processor(proc_cfg_, vk_device_index_)
+        ProcessorFactory::instance().create_processor(proc_cfg_, vk_device_idx_)
     );
     if (processor == nullptr) {
         return handle_error(-1, "Failed to create filter instance");
@@ -254,8 +254,8 @@ int VideoProcessor::process_frames(
                     return ret;
                 }
                 av_frame_unref(frame.get());
-                frame_index_++;
-                spdlog::debug("Processed frame {}/{}", frame_index_.load(), total_frames_.load());
+                frame_idx_++;
+                spdlog::debug("Processed frame {}/{}", frame_idx_.load(), total_frames_.load());
             }
         } else if (enc_cfg_.copy_streams && stream_map[packet->stream_index] >= 0) {
             ret = write_raw_packet(packet.get(), ifmt_ctx, ofmt_ctx, stream_map);
@@ -287,7 +287,7 @@ int VideoProcessor::process_frames(
         if (ret < 0) {
             return ret;
         }
-        frame_index_++;
+        frame_idx_++;
     }
 
     // Flush the encoder
@@ -306,9 +306,7 @@ int VideoProcessor::write_frame(AVFrame *frame, Encoder &encoder) {
     int ret = 0;
 
     if (!benchmark_) {
-        // Set the frame type to none to let the encoder decide
-        frame->pict_type = AV_PICTURE_TYPE_NONE;
-        ret = encoder.write_frame(frame, frame_index_);
+        ret = encoder.write_frame(frame, frame_idx_);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             spdlog::critical("Error encoding/writing frame: {}", errbuf);
@@ -327,11 +325,11 @@ int VideoProcessor::write_raw_packet(
     int ret = 0;
 
     AVStream *in_stream = ifmt_ctx->streams[packet->stream_index];
-    int out_stream_index = stream_map[packet->stream_index];
-    AVStream *out_stream = ofmt_ctx->streams[out_stream_index];
+    int out_stream_idx = stream_map[packet->stream_index];
+    AVStream *out_stream = ofmt_ctx->streams[out_stream_idx];
 
     av_packet_rescale_ts(packet, in_stream->time_base, out_stream->time_base);
-    packet->stream_index = out_stream_index;
+    packet->stream_index = out_stream_idx;
 
     ret = av_interleaved_write_frame(ofmt_ctx, packet);
     if (ret < 0) {
@@ -391,9 +389,7 @@ int VideoProcessor::process_interpolation(
         float frame_diff = get_frame_diff(prev_frame.get(), frame);
         if (frame_diff > proc_cfg_.scn_det_thresh) {
             spdlog::debug(
-                "Scene change detected ({:.2f}%), skipping frame {}",
-                frame_diff,
-                frame_index_.load()
+                "Scene change detected ({:.2f}%), skipping frame {}", frame_diff, frame_idx_.load()
             );
             skip_frame = true;
         }
@@ -425,19 +421,17 @@ int VideoProcessor::process_interpolation(
                 proc_frame, &av_frame_deleter
             );
 
-            processed_frame->pts = frame_index_;
             ret = write_frame(processed_frame.get(), encoder);
             if (ret < 0) {
                 return ret;
             }
         }
 
-        frame_index_++;
+        frame_idx_++;
         current_time_step += time_step;
     }
 
     // Write the original frame
-    frame->pts = frame_index_;
     ret = write_frame(frame, encoder);
 
     // Update the previous frame with the current frame

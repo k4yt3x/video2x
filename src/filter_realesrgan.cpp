@@ -28,7 +28,7 @@ FilterRealesrgan::~FilterRealesrgan() {
     }
 }
 
-int FilterRealesrgan::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *_) {
+int FilterRealesrgan::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *) {
     // Construct the model paths using std::filesystem
     std::filesystem::path model_param_path;
     std::filesystem::path model_bin_path;

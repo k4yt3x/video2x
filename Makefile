@@ -4,7 +4,6 @@
 	heaptrack-realesrgan heaptrack-libplacebo heaptrack-rife
 
 BINDIR=build
-CC=clang
 CXX=clang++
 
 TEST_VIDEO=data/standard-test.mp4
@@ -13,7 +12,6 @@ TEST_OUTPUT=data/output.mp4
 build:
 	cmake -S . -B $(BINDIR) \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Release
 	cmake --build $(BINDIR) --config Release --parallel
@@ -22,17 +20,18 @@ build:
 static:
 	cmake -S . -B $(BINDIR) \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DBUILD_SHARED_LIBS=OFF
+		-DBUILD_SHARED_LIBS=OFF \
+		-DUSE_SYSTEM_NCNN=OFF \
+		-DUSE_SYSTEM_SPDLOG=OFF \
+		-DUSE_SYSTEM_BOOST=OFF
 	cmake --build $(BINDIR) --config Release --parallel
 	cp $(BINDIR)/compile_commands.json .
 
 debug:
 	cmake -S . -B $(BINDIR) \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Debug
 	cmake --build $(BINDIR) --config Debug --parallel
@@ -71,8 +70,7 @@ debian:
 		libomp-dev \
 		libspdlog-dev \
 		libboost-program-options-dev
-	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF \
-		-DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX) \
+	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF -DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \
 		-DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \
 		-DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
@@ -93,8 +91,8 @@ ubuntu2404:
 		libomp-dev \
 		libboost-program-options-dev
 	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
-		-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
-		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=video2x-linux-ubuntu-amd64/usr
+		-DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX=video2x-linux-ubuntu-amd64/usr
 	cmake --build build --config Release --target install --parallel
 	mkdir -p video2x-linux-ubuntu-amd64/DEBIAN
 	cp packaging/debian/control.ubuntu2404 video2x-linux-ubuntu-amd64/DEBIAN/control
@@ -118,8 +116,8 @@ ubuntu2204:
 		libomp-dev \
 		libboost-program-options-dev
 	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
-		-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
-		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=video2x-linux-ubuntu-amd64/usr
+		-DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX=video2x-linux-ubuntu-amd64/usr
 	cmake --build build --config Release --target install --parallel
 	mkdir -p video2x-linux-ubuntu-amd64/DEBIAN
 	cp packaging/debian/control.ubuntu2204 video2x-linux-ubuntu-amd64/DEBIAN/control

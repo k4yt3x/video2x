@@ -55,7 +55,7 @@ class Processor {
    public:
     virtual ~Processor() = default;
     virtual int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) = 0;
-    virtual int flush(std::vector<AVFrame *> &_) { return 0; }
+    virtual int flush(std::vector<AVFrame *> &) { return 0; }
     virtual ProcessingMode get_processing_mode() const = 0;
     virtual ProcessorType get_processor_type() const = 0;
     virtual void get_output_dimensions(

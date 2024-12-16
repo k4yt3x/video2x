@@ -39,7 +39,7 @@ class LIBVIDEO2X_API VideoProcessor {
     VideoProcessor(
         const ProcessorConfig proc_cfg,
         const EncoderConfig enc_cfg,
-        const uint32_t vk_device_index = 0,
+        const uint32_t vk_device_idx = 0,
         const AVHWDeviceType hw_device_type = AV_HWDEVICE_TYPE_NONE,
         const Video2xLogLevel = Video2xLogLevel::Info,
         const bool benchmark = false
@@ -55,7 +55,7 @@ class LIBVIDEO2X_API VideoProcessor {
     void abort() { state_.store(VideoProcessorState::Aborted); }
 
     VideoProcessorState get_state() const { return state_.load(); }
-    int64_t get_processed_frames() const { return frame_index_.load(); }
+    int64_t get_processed_frames() const { return frame_idx_.load(); }
     int64_t get_total_frames() const { return total_frames_.load(); }
 
    private:
@@ -88,11 +88,11 @@ class LIBVIDEO2X_API VideoProcessor {
 
     ProcessorConfig proc_cfg_;
     EncoderConfig enc_cfg_;
-    uint32_t vk_device_index_ = 0;
+    uint32_t vk_device_idx_ = 0;
     AVHWDeviceType hw_device_type_ = AV_HWDEVICE_TYPE_NONE;
     bool benchmark_ = false;
 
     std::atomic<VideoProcessorState> state_ = VideoProcessorState::Idle;
-    std::atomic<int64_t> frame_index_ = 0;
+    std::atomic<int64_t> frame_idx_ = 0;
     std::atomic<int64_t> total_frames_ = 0;
 };
