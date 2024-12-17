@@ -11,6 +11,9 @@ extern "C" {
 
 #include "fsutils.h"
 
+namespace video2x {
+namespace processors {
+
 enum class ProcessingMode {
     Filter,
     Interpolate,
@@ -24,12 +27,12 @@ enum class ProcessorType {
 };
 
 struct LibplaceboConfig {
-    StringType shader_path;
+    fsutils::StringType shader_path;
 };
 
 struct RealESRGANConfig {
     bool tta_mode = false;
-    StringType model_name;
+    fsutils::StringType model_name;
 };
 
 struct RIFEConfig {
@@ -37,7 +40,7 @@ struct RIFEConfig {
     bool tta_temporal_mode = false;
     bool uhd_mode = false;
     int num_threads = 0;
-    StringType model_name;
+    fsutils::StringType model_name;
 };
 
 // Unified filter configuration
@@ -81,3 +84,6 @@ class Interpolator : public Processor {
     virtual int
     interpolate(AVFrame *prev_frame, AVFrame *in_frame, AVFrame **out_frame, float time_step) = 0;
 };
+
+}  // namespace processors
+}  // namespace video2x

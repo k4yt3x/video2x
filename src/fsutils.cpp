@@ -10,6 +10,9 @@
 
 #include <spdlog/spdlog.h>
 
+namespace video2x {
+namespace fsutils {
+
 #if _WIN32
 static std::filesystem::path get_executable_directory() {
     std::vector<wchar_t> filepath(MAX_PATH);
@@ -120,7 +123,7 @@ std::string wstring_to_u8string(const std::string &str) {
 }
 #endif
 
-StringType path_to_string_type(const std::filesystem::path &path) {
+fsutils::StringType path_to_string_type(const std::filesystem::path &path) {
 #if _WIN32
     return path.wstring();
 #else
@@ -128,10 +131,13 @@ StringType path_to_string_type(const std::filesystem::path &path) {
 #endif
 }
 
-StringType to_string_type(int value) {
+fsutils::StringType to_string_type(int value) {
 #if _WIN32
     return std::to_wstring(value);
 #else
     return std::to_string(value);
 #endif
 }
+
+}  // namespace fsutils
+}  // namespace video2x

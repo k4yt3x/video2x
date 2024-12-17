@@ -7,6 +7,9 @@
 #include "filter_realesrgan.h"
 #include "interpolator_rife.h"
 
+namespace video2x {
+namespace processors {
+
 // Access the singleton instance
 ProcessorFactory &ProcessorFactory::instance() {
     static ProcessorFactory factory;
@@ -111,3 +114,6 @@ void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
         }
     );
 }
+
+}  // namespace processors
+}  // namespace video2x

@@ -9,6 +9,9 @@ extern "C" {
 #include "avutils.h"
 #include "conversions.h"
 
+namespace video2x {
+namespace encoder {
+
 Encoder::Encoder()
     : ofmt_ctx_(nullptr), enc_ctx_(nullptr), out_vstream_idx_(-1), stream_map_(nullptr) {}
 
@@ -116,7 +119,7 @@ int Encoder::init(
         enc_ctx_->pix_fmt = enc_cfg.pix_fmt;
     } else {
         // Automatically select the pixel format
-        enc_ctx_->pix_fmt = get_encoder_default_pix_fmt(encoder, dec_ctx->pix_fmt);
+        enc_ctx_->pix_fmt = avutils::get_encoder_default_pix_fmt(encoder, dec_ctx->pix_fmt);
         if (enc_ctx_->pix_fmt == AV_PIX_FMT_NONE) {
             spdlog::error("Could not get the default pixel format for the encoder");
             return AVERROR(EINVAL);
@@ -125,7 +128,7 @@ int Encoder::init(
     }
 
     if (frm_rate_mul > 0) {
-        AVRational in_frame_rate = get_video_frame_rate(ifmt_ctx, in_vstream_idx);
+        AVRational in_frame_rate = avutils::get_video_frame_rate(ifmt_ctx, in_vstream_idx);
         enc_ctx_->framerate = {in_frame_rate.num * frm_rate_mul, in_frame_rate.den};
         enc_ctx_->time_base = av_inv_q(enc_ctx_->framerate);
     } else {
@@ -146,8 +149,8 @@ int Encoder::init(
 
     // Set extra AVOptions
     for (const auto &[opt_name, opt_value] : enc_cfg.extra_opts) {
-        std::string opt_name_str = wstring_to_u8string(opt_name);
-        std::string opt_value_str = wstring_to_u8string(opt_value);
+        std::string opt_name_str = fsutils::wstring_to_u8string(opt_name);
+        std::string opt_value_str = fsutils::wstring_to_u8string(opt_value);
         spdlog::debug("Setting encoder option '{}' to '{}'", opt_name_str, opt_value_str);
 
         if (av_opt_set(enc_ctx_->priv_data, opt_name_str.c_str(), opt_value_str.c_str(), 0) < 0) {
@@ -262,7 +265,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
 
     // Convert the frame to the encoder's pixel format if needed
     if (frame->format != enc_ctx_->pix_fmt) {
-        converted_frame = convert_avframe_pix_fmt(frame, enc_ctx_->pix_fmt);
+        converted_frame = conversions::convert_avframe_pix_fmt(frame, enc_ctx_->pix_fmt);
         if (!converted_frame) {
             spdlog::error("Error converting frame to encoder's pixel format");
             return AVERROR_EXTERNAL;
@@ -384,3 +387,6 @@ int Encoder::get_output_video_stream_index() const {
 int *Encoder::get_stream_map() const {
     return stream_map_;
 }
+
+}  // namespace encoder
+}  // namespace video2x

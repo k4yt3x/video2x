@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Improve optimization flags and add namespaces for better code organization.
+
 ### Fixed
 
 - Make the encoder always use the calculated PTS with corrected math.

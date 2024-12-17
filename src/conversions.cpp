@@ -5,6 +5,9 @@
 
 #include <spdlog/spdlog.h>
 
+namespace video2x {
+namespace conversions {
+
 // Convert AVFrame format
 AVFrame *convert_avframe_pix_fmt(AVFrame *src_frame, AVPixelFormat pix_fmt) {
     AVFrame *dst_frame = av_frame_alloc();
@@ -195,3 +198,6 @@ AVFrame *ncnn_mat_to_avframe(const ncnn::Mat &mat, AVPixelFormat pix_fmt) {
 
     return dst_frame;
 }
+
+}  // namespace conversions
+}  // namespace video2x

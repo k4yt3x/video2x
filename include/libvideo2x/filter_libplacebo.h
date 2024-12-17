@@ -10,6 +10,9 @@ extern "C" {
 
 #include "processor.h"
 
+namespace video2x {
+namespace processors {
+
 // FilterLibplacebo class definition
 class FilterLibplacebo : public Filter {
    public:
@@ -56,3 +59,6 @@ class FilterLibplacebo : public Filter {
     AVRational in_time_base_;
     AVRational out_time_base_;
 };
+
+}  // namespace processors
+}  // namespace video2x

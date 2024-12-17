@@ -8,8 +8,10 @@
 
 extern std::atomic<bool> newline_required;
 
-void set_spdlog_level(Video2xLogLevel log_level);
+void set_spdlog_level(video2x::logutils::Video2xLogLevel log_level);
 
-std::optional<Video2xLogLevel> find_log_level_by_name(const StringType &log_level_name);
+std::optional<video2x::logutils::Video2xLogLevel> find_log_level_by_name(
+    const video2x::fsutils::StringType &log_level_name
+);
 
 void newline_safe_ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list vl);

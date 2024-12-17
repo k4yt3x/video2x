@@ -6,6 +6,9 @@
 
 #include "processor.h"
 
+namespace video2x {
+namespace processors {
+
 // Processor Factory Class
 class ProcessorFactory {
    public:
@@ -31,3 +34,6 @@ class ProcessorFactory {
     // Static initializer for default processors
     static void init_default_processors(ProcessorFactory &factory);
 };
+
+}  // namespace processors
+}  // namespace video2x

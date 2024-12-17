@@ -7,6 +7,9 @@
 #include "fsutils.h"
 #include "libplacebo.h"
 
+namespace video2x {
+namespace processors {
+
 FilterLibplacebo::FilterLibplacebo(
     uint32_t vk_device_index,
     const std::filesystem::path &shader_path,
@@ -39,14 +42,14 @@ FilterLibplacebo::~FilterLibplacebo() {
 int FilterLibplacebo::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *) {
     // Construct the shader path
     std::filesystem::path shader_full_path;
-    if (filepath_is_readable(shader_path_)) {
+    if (fsutils::filepath_is_readable(shader_path_)) {
         // If the shader path is directly readable, use it
         shader_full_path = shader_path_;
     } else {
         // Construct the fallback path using std::filesystem
-        shader_full_path = find_resource_file(
+        shader_full_path = fsutils::find_resource_file(
             std::filesystem::path(STR("models")) / STR("libplacebo") /
-            (path_to_string_type(shader_path_) + STR(".glsl"))
+            (fsutils::path_to_string_type(shader_path_) + STR(".glsl"))
         );
     }
 
@@ -156,3 +159,6 @@ void FilterLibplacebo::get_output_dimensions(
     out_width = proc_cfg.width;
     out_height = proc_cfg.height;
 }
+
+}  // namespace processors
+}  // namespace video2x

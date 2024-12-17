@@ -8,13 +8,16 @@
 #include "conversions.h"
 #include "fsutils.h"
 
+namespace video2x {
+namespace processors {
+
 InterpolatorRIFE::InterpolatorRIFE(
     int gpuid,
     bool tta_mode,
     bool tta_temporal_mode,
     bool uhd_mode,
     int num_threads,
-    const StringType model_name
+    const fsutils::StringType model_name
 )
     : rife_(nullptr),
       gpuid_(gpuid),
@@ -39,7 +42,8 @@ int InterpolatorRIFE::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     model_param_dir = std::filesystem::path(STR("models")) / STR("rife") / model_name_;
 
     // Get the full paths using a function that possibly modifies or validates the path
-    std::filesystem::path model_param_full_path = find_resource_file(model_param_dir);
+    std::filesystem::path model_param_full_path =
+        fsutils::find_resource_file(model_param_dir);
 
     // Check if the model files exist
     if (!std::filesystem::exists(model_param_full_path)) {
@@ -50,13 +54,13 @@ int InterpolatorRIFE::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     // Automatically infer the RIFE model generation based on the model name
     bool rife_v2 = false;
     bool rife_v4 = false;
-    if (model_name_.find(STR("rife-v2")) != StringType::npos) {
+    if (model_name_.find(STR("rife-v2")) != fsutils::StringType::npos) {
         rife_v2 = true;
-    } else if (model_name_.find(STR("rife-v3")) != StringType::npos) {
+    } else if (model_name_.find(STR("rife-v3")) != fsutils::StringType::npos) {
         rife_v2 = true;
-    } else if (model_name_.find(STR("rife-v4")) != StringType::npos) {
+    } else if (model_name_.find(STR("rife-v4")) != fsutils::StringType::npos) {
         rife_v4 = true;
-    } else if (model_name_.find(STR("rife")) == StringType::npos) {
+    } else if (model_name_.find(STR("rife")) == fsutils::StringType::npos) {
         spdlog::critical("Failed to infer RIFE model generation from model name");
         return -1;
     }
@@ -87,13 +91,13 @@ int InterpolatorRIFE::interpolate(
 ) {
     int ret;
 
-    ncnn::Mat in_mat1 = avframe_to_ncnn_mat(prev_frame);
+    ncnn::Mat in_mat1 = conversions::avframe_to_ncnn_mat(prev_frame);
     if (in_mat1.empty()) {
         spdlog::error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
     }
 
-    ncnn::Mat in_mat2 = avframe_to_ncnn_mat(in_frame);
+    ncnn::Mat in_mat2 = conversions::avframe_to_ncnn_mat(in_frame);
     if (in_mat2.empty()) {
         spdlog::error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
@@ -109,7 +113,7 @@ int InterpolatorRIFE::interpolate(
     }
 
     // Convert ncnn::Mat to AVFrame
-    *out_frame = ncnn_mat_to_avframe(out_mat, out_pix_fmt_);
+    *out_frame = conversions::ncnn_mat_to_avframe(out_mat, out_pix_fmt_);
 
     // Rescale PTS to encoder's time base
     (*out_frame)->pts = av_rescale_q(in_frame->pts, in_time_base_, out_time_base_);
@@ -128,3 +132,6 @@ void InterpolatorRIFE::get_output_dimensions(
     out_width = in_width;
     out_height = in_height;
 }
+
+}  // namespace processors
+}  // namespace video2x

@@ -9,11 +9,14 @@
 #include "conversions.h"
 #include "fsutils.h"
 
+namespace video2x {
+namespace processors {
+
 FilterRealesrgan::FilterRealesrgan(
     int gpuid,
     bool tta_mode,
     int scaling_factor,
-    const StringType model_name
+    const fsutils::StringType model_name
 )
     : realesrgan_(nullptr),
       gpuid_(gpuid),
@@ -33,18 +36,20 @@ int FilterRealesrgan::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     std::filesystem::path model_param_path;
     std::filesystem::path model_bin_path;
 
-    StringType param_file_name =
-        model_name_ + STR("-x") + to_string_type(scaling_factor_) + STR(".param");
-    StringType bin_file_name =
-        model_name_ + STR("-x") + to_string_type(scaling_factor_) + STR(".bin");
+    fsutils::StringType param_file_name =
+        model_name_ + STR("-x") + fsutils::to_string_type(scaling_factor_) + STR(".param");
+    fsutils::StringType bin_file_name =
+        model_name_ + STR("-x") + fsutils::to_string_type(scaling_factor_) + STR(".bin");
 
     // Find the model paths by model name if provided
     model_param_path = std::filesystem::path(STR("models")) / STR("realesrgan") / param_file_name;
     model_bin_path = std::filesystem::path(STR("models")) / STR("realesrgan") / bin_file_name;
 
     // Get the full paths using a function that possibly modifies or validates the path
-    std::filesystem::path model_param_full_path = find_resource_file(model_param_path);
-    std::filesystem::path model_bin_full_path = find_resource_file(model_bin_path);
+    std::filesystem::path model_param_full_path =
+        fsutils::find_resource_file(model_param_path);
+    std::filesystem::path model_bin_full_path =
+        fsutils::find_resource_file(model_bin_path);
 
     // Check if the model files exist
     if (!std::filesystem::exists(model_param_full_path)) {
@@ -93,7 +98,7 @@ int FilterRealesrgan::filter(AVFrame *in_frame, AVFrame **out_frame) {
     int ret;
 
     // Convert the input frame to RGB24
-    ncnn::Mat in_mat = avframe_to_ncnn_mat(in_frame);
+    ncnn::Mat in_mat = conversions::avframe_to_ncnn_mat(in_frame);
     if (in_mat.empty()) {
         spdlog::error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
@@ -111,7 +116,7 @@ int FilterRealesrgan::filter(AVFrame *in_frame, AVFrame **out_frame) {
     }
 
     // Convert ncnn::Mat to AVFrame
-    *out_frame = ncnn_mat_to_avframe(out_mat, out_pix_fmt_);
+    *out_frame = conversions::ncnn_mat_to_avframe(out_mat, out_pix_fmt_);
 
     // Rescale PTS to encoder's time base
     (*out_frame)->pts = av_rescale_q(in_frame->pts, in_time_base_, out_time_base_);
@@ -130,3 +135,6 @@ void FilterRealesrgan::get_output_dimensions(
     out_width = in_width * scaling_factor_;
     out_height = in_height * scaling_factor_;
 }
+
+}  // namespace processors
+}  // namespace video2x

@@ -11,6 +11,9 @@ extern "C" {
 
 #include "conversions.h"
 
+namespace video2x {
+namespace avutils {
+
 AVRational get_video_frame_rate(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
     AVRational frame_rate = ifmt_ctx->streams[in_vstream_idx]->avg_frame_rate;
     if (frame_rate.num == 0 && frame_rate.den == 0) {
@@ -147,8 +150,8 @@ float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
 
     // Convert both frames to the target pixel format using the provided function
     AVPixelFormat target_pix_fmt = AV_PIX_FMT_RGB24;
-    AVFrame *rgb_frame1 = convert_avframe_pix_fmt(frame1, target_pix_fmt);
-    AVFrame *rgb_frame2 = convert_avframe_pix_fmt(frame2, target_pix_fmt);
+    AVFrame *rgb_frame1 = conversions::convert_avframe_pix_fmt(frame1, target_pix_fmt);
+    AVFrame *rgb_frame2 = conversions::convert_avframe_pix_fmt(frame2, target_pix_fmt);
 
     if (!rgb_frame1 || !rgb_frame2) {
         spdlog::error("Failed to convert frames to target pixel format");
@@ -208,3 +211,6 @@ void av_packet_deleter(AVPacket *packet) {
         packet = nullptr;
     }
 }
+
+}  // namespace avutils
+}  // namespace video2x

@@ -3,6 +3,9 @@
 #include <filesystem>
 #include <string>
 
+namespace video2x {
+namespace fsutils {
+
 #ifdef _WIN32
 typedef wchar_t CharType;
 #define STR(x) L##x
@@ -23,8 +26,11 @@ std::filesystem::path find_resource_file(const std::filesystem::path &path);
 
 std::string path_to_u8string(const std::filesystem::path &path);
 
-std::string wstring_to_u8string(const StringType &wstr);
+std::string wstring_to_u8string(const fsutils::StringType &wstr);
 
-StringType path_to_string_type(const std::filesystem::path &path);
+fsutils::StringType path_to_string_type(const std::filesystem::path &path);
 
-StringType to_string_type(int value);
+fsutils::StringType to_string_type(int value);
+
+}  // namespace fsutils
+}  // namespace video2x

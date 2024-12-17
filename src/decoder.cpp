@@ -2,6 +2,9 @@
 
 #include <spdlog/spdlog.h>
 
+namespace video2x {
+namespace decoder {
+
 AVPixelFormat Decoder::hw_pix_fmt_ = AV_PIX_FMT_NONE;
 
 Decoder::Decoder() : fmt_ctx_(nullptr), dec_ctx_(nullptr), in_vstream_idx_(-1) {}
@@ -130,3 +133,6 @@ AVCodecContext *Decoder::get_codec_context() const {
 int Decoder::get_video_stream_index() const {
     return in_vstream_idx_;
 }
+
+}  // namespace decoder
+}  // namespace video2x
