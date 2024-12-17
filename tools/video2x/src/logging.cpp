@@ -9,27 +9,27 @@ extern "C" {
 
 std::atomic<bool> newline_required = false;
 
-void set_spdlog_level(Video2xLogLevel log_level) {
+void set_spdlog_level(video2x::logutils::Video2xLogLevel log_level) {
     switch (log_level) {
-        case Video2xLogLevel::Trace:
+        case video2x::logutils::Video2xLogLevel::Trace:
             spdlog::set_level(spdlog::level::trace);
             break;
-        case Video2xLogLevel::Debug:
+        case video2x::logutils::Video2xLogLevel::Debug:
             spdlog::set_level(spdlog::level::debug);
             break;
-        case Video2xLogLevel::Info:
+        case video2x::logutils::Video2xLogLevel::Info:
             spdlog::set_level(spdlog::level::info);
             break;
-        case Video2xLogLevel::Warning:
+        case video2x::logutils::Video2xLogLevel::Warning:
             spdlog::set_level(spdlog::level::warn);
             break;
-        case Video2xLogLevel::Error:
+        case video2x::logutils::Video2xLogLevel::Error:
             spdlog::set_level(spdlog::level::err);
             break;
-        case Video2xLogLevel::Critical:
+        case video2x::logutils::Video2xLogLevel::Critical:
             spdlog::set_level(spdlog::level::critical);
             break;
-        case Video2xLogLevel::Off:
+        case video2x::logutils::Video2xLogLevel::Off:
             spdlog::set_level(spdlog::level::off);
             break;
         default:
@@ -38,22 +38,26 @@ void set_spdlog_level(Video2xLogLevel log_level) {
     }
 }
 
-std::optional<Video2xLogLevel> find_log_level_by_name(const StringType &log_level_name) {
+std::optional<video2x::logutils::Video2xLogLevel> find_log_level_by_name(
+    const video2x::fsutils::StringType &log_level_name
+) {
     // Static map to store the mapping
-    static const std::unordered_map<StringType, Video2xLogLevel> log_level_map = {
-        {STR("trace"), Video2xLogLevel::Trace},
-        {STR("debug"), Video2xLogLevel::Debug},
-        {STR("info"), Video2xLogLevel::Info},
-        {STR("warning"), Video2xLogLevel::Warning},
-        {STR("warn"), Video2xLogLevel::Warning},
-        {STR("error"), Video2xLogLevel::Error},
-        {STR("critical"), Video2xLogLevel::Critical},
-        {STR("off"), Video2xLogLevel::Off},
-        {STR("none"), Video2xLogLevel::Off}
-    };
+    static const std::
+        unordered_map<video2x::fsutils::StringType, video2x::logutils::Video2xLogLevel>
+            log_level_map = {
+                {STR("trace"), video2x::logutils::Video2xLogLevel::Trace},
+                {STR("debug"), video2x::logutils::Video2xLogLevel::Debug},
+                {STR("info"), video2x::logutils::Video2xLogLevel::Info},
+                {STR("warning"), video2x::logutils::Video2xLogLevel::Warning},
+                {STR("warn"), video2x::logutils::Video2xLogLevel::Warning},
+                {STR("error"), video2x::logutils::Video2xLogLevel::Error},
+                {STR("critical"), video2x::logutils::Video2xLogLevel::Critical},
+                {STR("off"), video2x::logutils::Video2xLogLevel::Off},
+                {STR("none"), video2x::logutils::Video2xLogLevel::Off}
+            };
 
     // Normalize the input to lowercase
-    StringType normalized_name = log_level_name;
+    video2x::fsutils::StringType normalized_name = log_level_name;
     std::transform(
         normalized_name.begin(), normalized_name.end(), normalized_name.begin(), ::tolower
     );

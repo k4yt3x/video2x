@@ -61,8 +61,8 @@ void validate_greater_equal_one(const T &value, const std::string &option_name) 
     }
 }
 
-void validate_anime4k_shader_name(const StringType &shader_name);
+void validate_anime4k_shader_name(const video2x::fsutils::StringType &shader_name);
 
-void validate_realesrgan_model_name(const StringType &model_name);
+void validate_realesrgan_model_name(const video2x::fsutils::StringType &model_name);
 
-void validate_rife_model_name(const StringType &model_name);
+void validate_rife_model_name(const video2x::fsutils::StringType &model_name);

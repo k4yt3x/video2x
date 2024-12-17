@@ -11,6 +11,9 @@ extern "C" {
 
 #include <spdlog/spdlog.h>
 
+namespace video2x {
+namespace processors {
+
 int init_libplacebo(
     AVFilterGraph **filter_graph,
     AVFilterContext **buffersrc_ctx,
@@ -161,3 +164,6 @@ int init_libplacebo(
     *filter_graph = graph;
     return 0;
 }
+
+}  // namespace processors
+}  // namespace video2x

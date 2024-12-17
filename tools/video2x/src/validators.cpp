@@ -2,8 +2,8 @@
 
 #include <unordered_set>
 
-void validate_anime4k_shader_name(const StringType &shader_name) {
-    static const std::unordered_set<StringType> valid_anime4k_shaders = {
+void validate_anime4k_shader_name(const video2x::fsutils::StringType &shader_name) {
+    static const std::unordered_set<video2x::fsutils::StringType> valid_anime4k_shaders = {
         STR("anime4k-v4-a"),
         STR("anime4k-v4-a+a"),
         STR("anime4k-v4-b"),
@@ -22,8 +22,8 @@ void validate_anime4k_shader_name(const StringType &shader_name) {
     }
 }
 
-void validate_realesrgan_model_name(const StringType &model_name) {
-    static const std::unordered_set<StringType> valid_realesrgan_models = {
+void validate_realesrgan_model_name(const video2x::fsutils::StringType &model_name) {
+    static const std::unordered_set<video2x::fsutils::StringType> valid_realesrgan_models = {
         STR("realesrgan-plus"), STR("realesrgan-plus-anime"), STR("realesr-animevideov3")
     };
     if (valid_realesrgan_models.count(model_name) == 0) {
@@ -36,8 +36,8 @@ void validate_realesrgan_model_name(const StringType &model_name) {
     }
 }
 
-void validate_rife_model_name(const StringType &model_name) {
-    static const std::unordered_set<StringType> valid_realesrgan_models = {
+void validate_rife_model_name(const video2x::fsutils::StringType &model_name) {
+    static const std::unordered_set<video2x::fsutils::StringType> valid_realesrgan_models = {
         STR("rife"),
         STR("rife-HD"),
         STR("rife-UHD"),

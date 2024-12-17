@@ -1,10 +1,13 @@
-#include "logging.h"
+#include "logutils.h"
 
 extern "C" {
 #include <libavutil/avutil.h>
 }
 
 #include <spdlog/spdlog.h>
+
+namespace video2x {
+namespace logutils {
 
 void set_log_level(Video2xLogLevel log_level) {
     switch (log_level) {
@@ -42,3 +45,6 @@ void set_log_level(Video2xLogLevel log_level) {
             break;
     }
 }
+
+}  // namespace logutils
+}  // namespace video2x

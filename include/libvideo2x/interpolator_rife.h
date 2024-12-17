@@ -7,6 +7,9 @@ extern "C" {
 #include "processor.h"
 #include "rife.h"
 
+namespace video2x {
+namespace processors {
+
 // InterpolatorRIFE class definition
 class InterpolatorRIFE : public Interpolator {
    public:
@@ -17,7 +20,7 @@ class InterpolatorRIFE : public Interpolator {
         bool tta_temporal_mode = false,
         bool uhd_mode = false,
         int num_threads = 1,
-        const StringType model_name = STR("rife-v4.6")
+        const fsutils::StringType model_name = STR("rife-v4.6")
     );
 
     // Destructor
@@ -49,8 +52,11 @@ class InterpolatorRIFE : public Interpolator {
     bool tta_temporal_mode_;
     bool uhd_mode_;
     int num_threads_;
-    const StringType model_name_;
+    const fsutils::StringType model_name_;
     AVRational in_time_base_;
     AVRational out_time_base_;
     AVPixelFormat out_pix_fmt_;
 };
+
+}  // namespace processors
+}  // namespace video2x

@@ -59,8 +59,8 @@ int parse_args(
     char *argv[],
 #endif
     Arguments &arguments,
-    ProcessorConfig &proc_cfg,
-    EncoderConfig &enc_cfg
+    video2x::processors::ProcessorConfig &proc_cfg,
+    video2x::encoder::EncoderConfig &enc_cfg
 ) {
     try {
         // clang-format off
@@ -68,19 +68,20 @@ int parse_args(
         all_opts.add_options()
             ("help", "Display this help page")
             ("version,V", "Print program version and exit")
-            ("log-level", PO_STR_VALUE<StringType>()->default_value(STR("info"), "info"),
+            ("log-level", PO_STR_VALUE<video2x::fsutils::StringType>()
+                ->default_value(STR("info"), "info"),
                 "Set verbosity level (trace, debug, info, warn, error, critical, none)")
             ("no-progress", po::bool_switch(&arguments.no_progress),
                 "Do not display the progress bar")
             ("list-devices,l", "List the available Vulkan devices (GPUs)")
 
             // General Processing Options
-            ("input,i", PO_STR_VALUE<StringType>(), "Input video file path")
-            ("output,o", PO_STR_VALUE<StringType>(), "Output video file path")
-            ("processor,p", PO_STR_VALUE<StringType>(),
+            ("input,i", PO_STR_VALUE<video2x::fsutils::StringType>(), "Input video file path")
+            ("output,o", PO_STR_VALUE<video2x::fsutils::StringType>(), "Output video file path")
+            ("processor,p", PO_STR_VALUE<video2x::fsutils::StringType>(),
                 "Processor to use (libplacebo, realesrgan, rife)")
-            ("hwaccel,a", PO_STR_VALUE<StringType>()->default_value(STR("none"), "none"),
-                "Hardware acceleration method (decoding)")
+            ("hwaccel,a", PO_STR_VALUE<video2x::fsutils::StringType>()
+                ->default_value(STR("none"), "none"), "Hardware acceleration method (decoding)")
             ("device,d", po::value<uint32_t>(&arguments.vk_device_index)->default_value(0),
                 "Vulkan device index (GPU ID)")
             ("benchmark,b", po::bool_switch(&arguments.benchmark),
@@ -90,10 +91,10 @@ int parse_args(
 
         po::options_description encoder_opts("Encoder options");
         encoder_opts.add_options()
-            ("codec,c", PO_STR_VALUE<StringType>()->default_value(STR("libx264"), "libx264"),
-                "Output codec")
+            ("codec,c", PO_STR_VALUE<video2x::fsutils::StringType>()
+                ->default_value(STR("libx264"), "libx264"), "Output codec")
             ("no-copy-streams", "Do not copy audio and subtitle streams")
-            ("pix-fmt", PO_STR_VALUE<StringType>(), "Output pixel format")
+            ("pix-fmt", PO_STR_VALUE<video2x::fsutils::StringType>(), "Output pixel format")
             ("bit-rate", po::value<int64_t>(&enc_cfg.bit_rate)->default_value(0),
                 "Bitrate in bits per second")
             ("rc-buffer-size", po::value<int>(&enc_cfg.rc_buffer_size)->default_value(0),
@@ -118,8 +119,8 @@ int parse_args(
                 "Delay in milliseconds for encoder")
 
             // Extra encoder options (key-value pairs)
-            ("extra-encoder-option,e", PO_STR_VALUE<std::vector<StringType>>()->multitoken(),
-                "Additional AVOption(s) for the encoder (format: -e key=value)")
+            ("extra-encoder-option,e", PO_STR_VALUE<std::vector<video2x::fsutils::StringType>>()
+                ->multitoken(), "Additional AVOption(s) for the encoder (format: -e key=value)")
         ;
 
         po::options_description upscale_opts("Upscaling options");
@@ -144,7 +145,7 @@ int parse_args(
 
         po::options_description libplacebo_opts("libplacebo options");
         libplacebo_opts.add_options()
-            ("libplacebo-shader", PO_STR_VALUE<StringType>()
+            ("libplacebo-shader", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("anime4k-v4-a"), "anime4k-v4-a")
                 ->notifier(validate_anime4k_shader_name),
                 "Name/path of the GLSL shader file to use (built-in: anime4k-v4-a, anime4k-v4-a+a, "
@@ -153,7 +154,7 @@ int parse_args(
 
         po::options_description realesrgan_opts("RealESRGAN options");
         realesrgan_opts.add_options()
-            ("realesrgan-model", PO_STR_VALUE<StringType>()
+            ("realesrgan-model", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("realesr-animevideov3"), "realesr-animevideov3")
                 ->notifier(validate_realesrgan_model_name),
                 "Name of the RealESRGAN model to use (realesr-animevideov3, realesrgan-plus-anime, "
@@ -162,8 +163,8 @@ int parse_args(
 
         po::options_description rife_opts("RIFE options");
         rife_opts.add_options()
-            ("rife-model", PO_STR_VALUE<StringType>()->default_value(STR("rife-v4.6"), "rife-v4.6")
-                ->notifier(validate_rife_model_name),
+            ("rife-model", PO_STR_VALUE<video2x::fsutils::StringType>()
+                ->default_value(STR("rife-v4.6"), "rife-v4.6")->notifier(validate_rife_model_name),
                 "Name of the RIFE model to use (rife, rife-HD, rife-UHD, rife-anime, rife-v2, "
                 "rife-v2.3, rife-v2.4, rife-v3.0, rife-v3.1, rife-v4, rife-v4.6)")
             ("rife-uhd", "Enable Ultra HD mode")
@@ -220,8 +221,8 @@ int parse_args(
         }
 
         if (vm.count("log-level")) {
-            std::optional<Video2xLogLevel> log_level =
-                find_log_level_by_name(vm["log-level"].as<StringType>());
+            std::optional<video2x::logutils::Video2xLogLevel> log_level =
+                find_log_level_by_name(vm["log-level"].as<video2x::fsutils::StringType>());
             if (!log_level.has_value()) {
                 spdlog::critical("Invalid log level specified.");
                 return -1;
@@ -237,7 +238,8 @@ int parse_args(
 
         // Assign positional arguments
         if (vm.count("input")) {
-            arguments.in_fname = std::filesystem::path(vm["input"].as<StringType>());
+            arguments.in_fname =
+                std::filesystem::path(vm["input"].as<video2x::fsutils::StringType>());
             spdlog::info("Processing file: {}", arguments.in_fname.u8string());
         } else {
             spdlog::critical("Input file path is required.");
@@ -245,7 +247,8 @@ int parse_args(
         }
 
         if (vm.count("output")) {
-            arguments.out_fname = std::filesystem::path(vm["output"].as<StringType>());
+            arguments.out_fname =
+                std::filesystem::path(vm["output"].as<video2x::fsutils::StringType>());
         } else if (!arguments.benchmark) {
             spdlog::critical("Output file path is required.");
             return -1;
@@ -253,13 +256,14 @@ int parse_args(
 
         // Parse processor type
         if (vm.count("processor")) {
-            StringType processor_type_str = vm["processor"].as<StringType>();
+            video2x::fsutils::StringType processor_type_str =
+                vm["processor"].as<video2x::fsutils::StringType>();
             if (processor_type_str == STR("libplacebo")) {
-                proc_cfg.processor_type = ProcessorType::Libplacebo;
+                proc_cfg.processor_type = video2x::processors::ProcessorType::Libplacebo;
             } else if (processor_type_str == STR("realesrgan")) {
-                proc_cfg.processor_type = ProcessorType::RealESRGAN;
+                proc_cfg.processor_type = video2x::processors::ProcessorType::RealESRGAN;
             } else if (processor_type_str == STR("rife")) {
-                proc_cfg.processor_type = ProcessorType::RIFE;
+                proc_cfg.processor_type = video2x::processors::ProcessorType::RIFE;
             } else {
                 spdlog::critical(
                     "Invalid processor specified. Must be 'libplacebo', 'realesrgan', or 'rife'."
@@ -274,7 +278,8 @@ int parse_args(
         // Parse hardware acceleration method
         arguments.hw_device_type = AV_HWDEVICE_TYPE_NONE;
         if (vm.count("hwaccel")) {
-            StringType hwaccel_str = vm["hwaccel"].as<StringType>();
+            video2x::fsutils::StringType hwaccel_str =
+                vm["hwaccel"].as<video2x::fsutils::StringType>();
             if (hwaccel_str != STR("none")) {
                 arguments.hw_device_type =
                     av_hwdevice_find_type_by_name(wstring_to_u8string(hwaccel_str).c_str());
@@ -290,7 +295,7 @@ int parse_args(
         // Parse codec to AVCodec
         enc_cfg.codec = AV_CODEC_ID_H264;
         if (vm.count("codec")) {
-            StringType codec_str = vm["codec"].as<StringType>();
+            video2x::fsutils::StringType codec_str = vm["codec"].as<video2x::fsutils::StringType>();
             const AVCodec *codec =
                 avcodec_find_encoder_by_name(wstring_to_u8string(codec_str).c_str());
             if (codec == nullptr) {
@@ -306,7 +311,8 @@ int parse_args(
         // Parse pixel format to AVPixelFormat
         enc_cfg.pix_fmt = AV_PIX_FMT_NONE;
         if (vm.count("pix-fmt")) {
-            StringType pix_fmt_str = vm["pix-fmt"].as<StringType>();
+            video2x::fsutils::StringType pix_fmt_str =
+                vm["pix-fmt"].as<video2x::fsutils::StringType>();
             if (!pix_fmt_str.empty()) {
                 enc_cfg.pix_fmt = av_get_pix_fmt(wstring_to_u8string(pix_fmt_str).c_str());
                 if (enc_cfg.pix_fmt == AV_PIX_FMT_NONE) {
@@ -320,11 +326,12 @@ int parse_args(
 
         // Parse extra AVOptions
         if (vm.count("extra-encoder-option")) {
-            for (const auto &opt : vm["extra-encoder-option"].as<std::vector<StringType>>()) {
+            for (const auto &opt :
+                 vm["extra-encoder-option"].as<std::vector<video2x::fsutils::StringType>>()) {
                 size_t eq_pos = opt.find('=');
-                if (eq_pos != StringType::npos) {
-                    StringType key = opt.substr(0, eq_pos);
-                    StringType value = opt.substr(eq_pos + 1);
+                if (eq_pos != video2x::fsutils::StringType::npos) {
+                    video2x::fsutils::StringType key = opt.substr(0, eq_pos);
+                    video2x::fsutils::StringType value = opt.substr(eq_pos + 1);
                     enc_cfg.extra_opts.push_back(std::make_pair(key, value));
                 } else {
                     spdlog::critical("Invalid extra AVOption format: {}", wstring_to_u8string(opt));
@@ -335,7 +342,7 @@ int parse_args(
 
         // Parse processor-specific configurations
         switch (proc_cfg.processor_type) {
-            case ProcessorType::Libplacebo: {
+            case video2x::processors::ProcessorType::Libplacebo: {
                 if (!vm.count("libplacebo-shader")) {
                     spdlog::critical("Shader name/path must be set for libplacebo.");
                     return -1;
@@ -345,13 +352,14 @@ int parse_args(
                     return -1;
                 }
 
-                proc_cfg.processor_type = ProcessorType::Libplacebo;
-                LibplaceboConfig libplacebo_config;
-                libplacebo_config.shader_path = vm["libplacebo-shader"].as<StringType>();
+                proc_cfg.processor_type = video2x::processors::ProcessorType::Libplacebo;
+                video2x::processors::LibplaceboConfig libplacebo_config;
+                libplacebo_config.shader_path =
+                    vm["libplacebo-shader"].as<video2x::fsutils::StringType>();
                 proc_cfg.config = libplacebo_config;
                 break;
             }
-            case ProcessorType::RealESRGAN: {
+            case video2x::processors::ProcessorType::RealESRGAN: {
                 if (!vm.count("realesrgan-model")) {
                     spdlog::critical("RealESRGAN model name must be set for RealESRGAN.");
                     return -1;
@@ -362,14 +370,15 @@ int parse_args(
                     return -1;
                 }
 
-                proc_cfg.processor_type = ProcessorType::RealESRGAN;
-                RealESRGANConfig realesrgan_config;
+                proc_cfg.processor_type = video2x::processors::ProcessorType::RealESRGAN;
+                video2x::processors::RealESRGANConfig realesrgan_config;
                 realesrgan_config.tta_mode = false;
-                realesrgan_config.model_name = vm["realesrgan-model"].as<StringType>();
+                realesrgan_config.model_name =
+                    vm["realesrgan-model"].as<video2x::fsutils::StringType>();
                 proc_cfg.config = realesrgan_config;
                 break;
             }
-            case ProcessorType::RIFE: {
+            case video2x::processors::ProcessorType::RIFE: {
                 if (!vm.count("rife-model")) {
                     spdlog::critical("RIFE model name must be set for RIFE.");
                     return -1;
@@ -379,13 +388,13 @@ int parse_args(
                     return -1;
                 }
 
-                proc_cfg.processor_type = ProcessorType::RIFE;
-                RIFEConfig rife_config;
+                proc_cfg.processor_type = video2x::processors::ProcessorType::RIFE;
+                video2x::processors::RIFEConfig rife_config;
                 rife_config.tta_mode = false;
                 rife_config.tta_temporal_mode = false;
                 rife_config.uhd_mode = vm.count("rife-uhd") > 0;
                 rife_config.num_threads = 0;
-                rife_config.model_name = vm["rife-model"].as<StringType>();
+                rife_config.model_name = vm["rife-model"].as<video2x::fsutils::StringType>();
                 proc_cfg.config = rife_config;
                 break;
             }

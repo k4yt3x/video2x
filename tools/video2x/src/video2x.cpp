@@ -55,8 +55,8 @@ int main(int argc, char **argv) {
 #endif
     // Initialize arguments structures
     Arguments arguments;
-    ProcessorConfig proc_cfg;
-    EncoderConfig enc_cfg;
+    video2x::processors::ProcessorConfig proc_cfg;
+    video2x::encoder::EncoderConfig enc_cfg;
 
     // Parse command line arguments
     int parse_ret = parse_args(argc, argv, arguments, proc_cfg, enc_cfg);
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
     }
 
     // Create video processor object
-    VideoProcessor video_processor = VideoProcessor(
+    video2x::VideoProcessor video_processor = video2x::VideoProcessor(
         proc_cfg,
         enc_cfg,
         arguments.vk_device_index,
@@ -123,14 +123,14 @@ int main(int argc, char **argv) {
         if (ch == ' ' || ch == '\n') {
             {
                 // Toggle pause state
-                if (video_processor.get_state() == VideoProcessorState::Paused) {
+                if (video_processor.get_state() == video2x::VideoProcessorState::Paused) {
                     video_processor.resume();
                 } else {
                     video_processor.pause();
                 }
 
                 // Print message based on current state and pause/resume the timer
-                if (video_processor.get_state() == VideoProcessorState::Paused) {
+                if (video_processor.get_state() == video2x::VideoProcessorState::Paused) {
                     std::cout
                         << "\r\033[KProcessing paused; press [space] to resume, [q] to abort.";
                     std::cout.flush();
@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
             int64_t total_frames = video_processor.get_total_frames();
 
             // Print the progress bar if processing is not paused
-            if (video_processor.get_state() != VideoProcessorState::Paused &&
+            if (video_processor.get_state() != video2x::VideoProcessorState::Paused &&
                 (total_frames > 0 || processed_frames > 0)) {
                 double percentage = total_frames > 0 ? static_cast<double>(processed_frames) *
                                                            100.0 / static_cast<double>(total_frames)
@@ -214,10 +214,11 @@ int main(int argc, char **argv) {
     }
 
     // Print final message based on processing result
-    if (video_processor.get_state() == VideoProcessorState::Aborted) {
+    if (video_processor.get_state() == video2x::VideoProcessorState::Aborted) {
         spdlog::warn("Video processing aborted");
         return 2;
-    } else if (proc_ret != 0 || video_processor.get_state() == VideoProcessorState::Failed) {
+    } else if (proc_ret != 0 ||
+               video_processor.get_state() == video2x::VideoProcessorState::Failed) {
         spdlog::critical("Video processing failed with error code {}", proc_ret);
         return 1;
     } else {

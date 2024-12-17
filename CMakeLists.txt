@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(video2x VERSION 6.2.0 LANGUAGES CXX)
 
+# The FindBoost module is removed in CMake 3.30
 if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
 endif()
@@ -15,22 +16,22 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Set the default optimization flags for Release builds
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /GL /LTCG /MD /DNDEBUG")
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto")
-        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -s")
-        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -s")
-    endif()
-endif()
-
 # Set global compile options for all targets
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/W4 /permissive-)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+endif()
+
+# Set the default optimization flags for Release builds
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_compile_options(/Ox /Ot /GL /DNDEBUG)
+        add_link_options(/LTCG /OPT:REF /OPT:ICF)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        add_compile_options(-O3 -march=native -ffunction-sections -fdata-sections)
+        add_link_options(-Wl,-s -flto -Wl,--gc-sections)
+    endif()
 endif()
 
 # Build options
@@ -48,8 +49,10 @@ configure_file(
 )
 
 # Find the required packages
-set(ALL_INCLUDE_DIRS)
-set(ALL_LIBRARIES)
+set(LIBVIDEO2X_INCLUDE_DIRS)
+set(LIBVIDEO2X_LIBS)
+set(VIDEO2X_INCLUDE_DIRS)
+set(VIDEO2X_LIBS)
 
 # Platform-specific dependencies
 if(WIN32)
@@ -66,11 +69,12 @@ if(WIN32)
         ${FFMPEG_BASE_PATH}/lib/avutil.lib
         ${FFMPEG_BASE_PATH}/lib/swscale.lib
     )
-    list(APPEND ALL_LIBRARIES ${FFMPEG_LIB})
-    list(APPEND ALL_INCLUDE_DIRS ${FFMPEG_BASE_PATH}/include)
+    list(APPEND LIBVIDEO2X_LIBS ${FFMPEG_LIB})
+    list(APPEND LIBVIDEO2X_INCLUDE_DIRS ${FFMPEG_BASE_PATH}/include)
+    list(APPEND VIDEO2X_LIBS ${FFMPEG_LIB})
+    list(APPEND VIDEO2X_INCLUDE_DIRS ${FFMPEG_BASE_PATH}/include)
 
     # ncnn
-    # TODO: Figure out why this file is not being copied to the install directory
     set(SPIRV_BUILD_PATH
         ${CMAKE_BINARY_DIR}/realesrgan-prefix/src/realesrgan-build/ncnn/glslang/SPIRV
     )
@@ -80,11 +84,8 @@ if(WIN32)
         set(SPIRV_LIB ${SPIRV_BUILD_PATH}/Debug/SPIRVd.lib)
     endif()
 
-    list(APPEND ALL_LIBRARIES
-        ${NCNN_BASE_PATH}/lib/ncnn.lib
-        ${SPIRV_LIB}
-    )
-    list(APPEND ALL_INCLUDE_DIRS ${NCNN_BASE_PATH}/include/ncnn)
+    list(APPEND LIBVIDEO2X_LIBS ${NCNN_BASE_PATH}/lib/ncnn.lib ${SPIRV_LIB})
+    list(APPEND LIBVIDEO2X_INCLUDE_DIRS ${NCNN_BASE_PATH}/include/ncnn)
 else()
     # FFmpeg
     find_package(PkgConfig REQUIRED)
@@ -98,13 +99,13 @@ else()
     )
 
     # Loop through each package to find and collect include dirs and libraries
-    set(FFMPEG_LIB)
     foreach(PKG ${FFMPEG_REQUIRED_PKGS})
         pkg_check_modules(${PKG} REQUIRED ${PKG})
-        list(APPEND ALL_INCLUDE_DIRS ${${PKG}_INCLUDE_DIRS})
-        list(APPEND FFMPEG_LIB ${${PKG}_LIBRARIES})
+        list(APPEND LIBVIDEO2X_INCLUDE_DIRS ${${PKG}_INCLUDE_DIRS})
+        list(APPEND LIBVIDEO2X_LIBS ${${PKG}_LIBRARIES})
+        list(APPEND VIDEO2X_INCLUDE_DIRS ${${PKG}_INCLUDE_DIRS})
+        list(APPEND VIDEO2X_LIBS ${${PKG}_LIBRARIES})
     endforeach()
-    list(APPEND ALL_LIBRARIES ${FFMPEG_LIB})
 endif() # WIN32
 
 # Find ncnn package
@@ -209,32 +210,38 @@ endif()
 # spdlog
 if(USE_SYSTEM_SPDLOG)
     find_package(spdlog REQUIRED)
-    list(APPEND ALL_INCLUDE_DIRS ${spdlog_INCLUDE_DIRS})
+    list(APPEND LIBVIDEO2X_INCLUDE_DIRS ${spdlog_INCLUDE_DIRS})
+    list(APPEND VIDEO2X_INCLUDE_DIRS ${spdlog_INCLUDE_DIRS})
     set(SPDLOG_LIB spdlog::spdlog)
 else()
     add_subdirectory(third_party/spdlog)
     set(SPDLOG_LIB spdlog::spdlog_header_only)
 endif()
-list(APPEND ALL_LIBRARIES ${SPDLOG_LIB})
+list(APPEND LIBVIDEO2X_LIBS ${SPDLOG_LIB})
+list(APPEND VIDEO2X_LIBS ${SPDLOG_LIB})
 
-# Boost
-if(USE_SYSTEM_BOOST)
-    find_package(Boost REQUIRED COMPONENTS program_options)
-    list(APPEND ALL_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
-else()
-    option(Boost_USE_STATIC_LIBS "" ON)
-    option(Boost_USE_STATIC_RUNTIME "" ON)
-    option(Boost_COMPONENTS "program_options")
-
-    add_subdirectory(third_party/boost)
-    include_directories(${PROJECT_SOURCE_DIR}/third_party/boost/libs/program_options/include)
-    set(BOOST_BASE_PATH ${CMAKE_BINARY_DIR}/third_party/boost/libs/program_options/${CMAKE_BUILD_TYPE})
-endif()
-set(BOOST_LIB Boost::program_options)
-
+# Find dependencies required for the CLI
 if(BUILD_VIDEO2X_CLI)
+    # Vulkan
     find_package(Vulkan REQUIRED)
-    set(VULKAN_LIB Vulkan::Vulkan)
+    list(APPEND VIDEO2X_LIBS Vulkan::Vulkan)
+
+    # Boost
+    if(USE_SYSTEM_BOOST)
+        find_package(Boost REQUIRED COMPONENTS program_options)
+        list(APPEND LIBVIDEO2X_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+    else()
+        option(Boost_USE_STATIC_LIBS "" ON)
+        option(Boost_USE_STATIC_RUNTIME "" ON)
+        option(Boost_COMPONENTS "program_options")
+
+        add_subdirectory(third_party/boost)
+        include_directories(${PROJECT_SOURCE_DIR}/third_party/boost/libs/program_options/include)
+        set(BOOST_BASE_PATH
+            ${CMAKE_BINARY_DIR}/third_party/boost/libs/program_options/${CMAKE_BUILD_TYPE}
+        )
+    endif()
+    list(APPEND VIDEO2X_LIBS Boost::program_options)
 endif()
 
 # Include ExternalProject module
@@ -267,8 +274,10 @@ ExternalProject_Add(
 )
 
 # Remove duplicate entries
-list(REMOVE_DUPLICATES ALL_INCLUDE_DIRS)
-list(REMOVE_DUPLICATES ALL_LIBRARIES)
+list(REMOVE_DUPLICATES LIBVIDEO2X_INCLUDE_DIRS)
+list(REMOVE_DUPLICATES LIBVIDEO2X_LIBS)
+list(REMOVE_DUPLICATES VIDEO2X_INCLUDE_DIRS)
+list(REMOVE_DUPLICATES VIDEO2X_LIBS)
 
 # Create the shared library 'libvideo2x'
 file(GLOB LIBVIDEO2X_SOURCES src/*.cpp)
@@ -285,7 +294,7 @@ add_dependencies(libvideo2x realesrgan rife)
 
 # Include directories for the shared library
 target_include_directories(libvideo2x PRIVATE
-    ${ALL_INCLUDE_DIRS}
+    ${LIBVIDEO2X_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/include/libvideo2x
@@ -294,11 +303,7 @@ target_include_directories(libvideo2x PRIVATE
 )
 
 # Compile options for the shared library
-target_compile_options(libvideo2x PRIVATE
-    -fPIC
-    $<$<CONFIG:Release>:-Ofast>
-    $<$<CONFIG:Debug>:-g -DDEBUG>
-)
+target_compile_options(libvideo2x PRIVATE -fPIC $<$<CONFIG:Debug>:-g -DDEBUG>)
 
 # Define the paths to the shared libraries
 if(WIN32)
@@ -308,10 +313,10 @@ else()
     set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
     set(RIFE_LIB ${CMAKE_BINARY_DIR}/rife_install/lib/librife-ncnn-vulkan.so)
 endif()
-list(APPEND ALL_LIBRARIES ${REALESRGAN_LIB} ${RIFE_LIB})
+list(APPEND LIBVIDEO2X_LIBS ${REALESRGAN_LIB} ${RIFE_LIB})
 
 # Link the shared library with the dependencies
-target_link_libraries(libvideo2x PRIVATE ${ALL_LIBRARIES})
+target_link_libraries(libvideo2x PRIVATE ${LIBVIDEO2X_LIBS})
 
 if(NOT WIN32)
     if(USE_SYSTEM_NCNN)
@@ -329,7 +334,7 @@ if(BUILD_VIDEO2X_CLI)
 
     # Include directories for the executable
     target_include_directories(video2x PRIVATE
-        ${ALL_INCLUDE_DIRS}
+        ${VIDEO2X_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/tools/video2x/include
@@ -339,13 +344,7 @@ if(BUILD_VIDEO2X_CLI)
     target_compile_options(video2x PRIVATE $<$<CONFIG:Debug>:-g -DDEBUG>)
 
     # Link the executable with the shared library
-    target_link_libraries(video2x PRIVATE
-        libvideo2x
-        ${FFMPEG_LIB}
-        ${SPDLOG_LIB}
-        ${BOOST_LIB}
-        ${VULKAN_LIB}
-    )
+    target_link_libraries(video2x PRIVATE libvideo2x ${VIDEO2X_LIBS})
 endif()
 
 # Define the default installation directories

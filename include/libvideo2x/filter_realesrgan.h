@@ -7,6 +7,9 @@ extern "C" {
 #include "processor.h"
 #include "realesrgan.h"
 
+namespace video2x {
+namespace processors {
+
 // FilterRealesrgan class definition
 class FilterRealesrgan : public Filter {
    public:
@@ -15,7 +18,7 @@ class FilterRealesrgan : public Filter {
         int gpuid = 0,
         bool tta_mode = false,
         int scaling_factor = 4,
-        const StringType model_name = STR("realesr-animevideov3")
+        const fsutils::StringType model_name = STR("realesr-animevideov3")
     );
 
     // Destructor
@@ -44,8 +47,11 @@ class FilterRealesrgan : public Filter {
     int gpuid_;
     bool tta_mode_;
     int scaling_factor_;
-    const StringType model_name_;
+    const fsutils::StringType model_name_;
     AVRational in_time_base_;
     AVRational out_time_base_;
     AVPixelFormat out_pix_fmt_;
 };
+
+}  // namespace processors
+}  // namespace video2x

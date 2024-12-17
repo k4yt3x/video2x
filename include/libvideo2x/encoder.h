@@ -12,6 +12,9 @@ extern "C" {
 
 #include "fsutils.h"
 
+namespace video2x {
+namespace encoder {
+
 // Encoder configurations
 struct EncoderConfig {
     // Non-AVCodecContext options
@@ -42,7 +45,7 @@ struct EncoderConfig {
     int delay = -1;
 
     // Extra AVOptions
-    std::vector<std::pair<StringType, StringType>> extra_opts;
+    std::vector<std::pair<fsutils::StringType, fsutils::StringType>> extra_opts;
 };
 
 class Encoder {
@@ -76,3 +79,6 @@ class Encoder {
     int out_vstream_idx_;
     int *stream_map_;
 };
+
+}  // namespace encoder
+}  // namespace video2x

@@ -7,6 +7,9 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+namespace video2x {
+namespace decoder {
+
 class Decoder {
    public:
     Decoder();
@@ -26,3 +29,6 @@ class Decoder {
     AVCodecContext *dec_ctx_;
     int in_vstream_idx_;
 };
+
+}  // namespace decoder
+}  // namespace video2x

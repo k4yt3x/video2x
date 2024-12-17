@@ -9,16 +9,18 @@ extern "C" {
 #include "avutils.h"
 #include "decoder.h"
 #include "encoder.h"
-#include "logging.h"
+#include "logutils.h"
 #include "processor.h"
 #include "processor_factory.h"
 
+namespace video2x {
+
 VideoProcessor::VideoProcessor(
-    const ProcessorConfig proc_cfg,
-    const EncoderConfig enc_cfg,
+    const processors::ProcessorConfig proc_cfg,
+    const encoder::EncoderConfig enc_cfg,
     const uint32_t vk_device_idx,
     const AVHWDeviceType hw_device_type,
-    const Video2xLogLevel log_level,
+    const logutils::Video2xLogLevel log_level,
     const bool benchmark
 )
     : proc_cfg_(proc_cfg),
@@ -51,8 +53,8 @@ int VideoProcessor::process(
     state_.store(VideoProcessorState::Running);
 
     // Create a smart pointer to manage the hardware device context
-    std::unique_ptr<AVBufferRef, decltype(&av_bufferref_deleter)> hw_ctx(
-        nullptr, &av_bufferref_deleter
+    std::unique_ptr<AVBufferRef, decltype(&avutils::av_bufferref_deleter)> hw_ctx(
+        nullptr, &avutils::av_bufferref_deleter
     );
 
     // Initialize hardware device context
@@ -66,7 +68,7 @@ int VideoProcessor::process(
     }
 
     // Initialize input decoder
-    Decoder decoder;
+    decoder::Decoder decoder;
     ret = decoder.init(hw_device_type_, hw_ctx.get(), in_fname);
     if (ret < 0) {
         return handle_error(ret, "Failed to initialize decoder");
@@ -77,8 +79,8 @@ int VideoProcessor::process(
     int in_vstream_idx = decoder.get_video_stream_index();
 
     // Create and initialize the appropriate filter
-    std::unique_ptr<Processor> processor(
-        ProcessorFactory::instance().create_processor(proc_cfg_, vk_device_idx_)
+    std::unique_ptr<processors::Processor> processor(
+        processors::ProcessorFactory::instance().create_processor(proc_cfg_, vk_device_idx_)
     );
     if (processor == nullptr) {
         return handle_error(-1, "Failed to create filter instance");
@@ -94,7 +96,7 @@ int VideoProcessor::process(
     }
 
     // Initialize the encoder
-    Encoder encoder;
+    encoder::Encoder encoder;
     ret = encoder.init(
         hw_ctx.get(),
         out_fname,
@@ -140,9 +142,9 @@ int VideoProcessor::process(
 
 // Process frames using the selected filter.
 int VideoProcessor::process_frames(
-    Decoder &decoder,
-    Encoder &encoder,
-    std::unique_ptr<Processor> &processor
+    decoder::Decoder &decoder,
+    encoder::Encoder &encoder,
+    std::unique_ptr<processors::Processor> &processor
 ) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
@@ -156,11 +158,13 @@ int VideoProcessor::process_frames(
 
     // Reference to the previous frame does not require allocation
     // It will be cloned from the current frame
-    std::unique_ptr<AVFrame, decltype(&av_frame_deleter)> prev_frame(nullptr, &av_frame_deleter);
+    std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)> prev_frame(
+        nullptr, &avutils::av_frame_deleter
+    );
 
     // Allocate space for the decoded frames
-    std::unique_ptr<AVFrame, decltype(&av_frame_deleter)> frame(
-        av_frame_alloc(), &av_frame_deleter
+    std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)> frame(
+        av_frame_alloc(), &avutils::av_frame_deleter
     );
     if (frame == nullptr) {
         spdlog::critical("Error allocating frame");
@@ -168,8 +172,8 @@ int VideoProcessor::process_frames(
     }
 
     // Allocate space for the decoded packets
-    std::unique_ptr<AVPacket, decltype(&av_packet_deleter)> packet(
-        av_packet_alloc(), &av_packet_deleter
+    std::unique_ptr<AVPacket, decltype(&avutils::av_packet_deleter)> packet(
+        av_packet_alloc(), &avutils::av_packet_deleter
     );
     if (packet == nullptr) {
         spdlog::critical("Error allocating packet");
@@ -178,7 +182,7 @@ int VideoProcessor::process_frames(
 
     // Set the total number of frames in the VideoProcessingContext
     spdlog::debug("Estimating the total number of frames to process");
-    total_frames_ = get_video_frame_count(ifmt_ctx, in_vstream_idx);
+    total_frames_ = avutils::get_video_frame_count(ifmt_ctx, in_vstream_idx);
 
     if (total_frames_ <= 0) {
         spdlog::warn("Unable to determine the total number of frames");
@@ -188,7 +192,7 @@ int VideoProcessor::process_frames(
     }
 
     // Set total frames for interpolation
-    if (processor->get_processing_mode() == ProcessingMode::Interpolate) {
+    if (processor->get_processing_mode() == processors::ProcessingMode::Interpolate) {
         total_frames_.store(total_frames_.load() * proc_cfg_.frm_rate_mul);
     }
 
@@ -236,11 +240,11 @@ int VideoProcessor::process_frames(
                 // Process the frame based on the selected processing mode
                 AVFrame *proc_frame = nullptr;
                 switch (processor->get_processing_mode()) {
-                    case ProcessingMode::Filter: {
+                    case processors::ProcessingMode::Filter: {
                         ret = process_filtering(processor, encoder, frame.get(), proc_frame);
                         break;
                     }
-                    case ProcessingMode::Interpolate: {
+                    case processors::ProcessingMode::Interpolate: {
                         ret = process_interpolation(
                             processor, encoder, prev_frame, frame.get(), proc_frame
                         );
@@ -276,9 +280,9 @@ int VideoProcessor::process_frames(
     }
 
     // Wrap flushed frames in unique_ptrs
-    std::vector<std::unique_ptr<AVFrame, decltype(&av_frame_deleter)>> flushed_frames;
+    std::vector<std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>> flushed_frames;
     for (AVFrame *raw_frame : raw_flushed_frames) {
-        flushed_frames.emplace_back(raw_frame, &av_frame_deleter);
+        flushed_frames.emplace_back(raw_frame, &avutils::av_frame_deleter);
     }
 
     // Encode and write all flushed frames
@@ -301,7 +305,7 @@ int VideoProcessor::process_frames(
     return ret;
 }
 
-int VideoProcessor::write_frame(AVFrame *frame, Encoder &encoder) {
+int VideoProcessor::write_frame(AVFrame *frame, encoder::Encoder &encoder) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
@@ -340,8 +344,8 @@ int VideoProcessor::write_raw_packet(
 }
 
 int VideoProcessor::process_filtering(
-    std::unique_ptr<Processor> &processor,
-    Encoder &encoder,
+    std::unique_ptr<processors::Processor> &processor,
+    encoder::Encoder &encoder,
     AVFrame *frame,
     AVFrame *proc_frame
 ) {
@@ -349,7 +353,7 @@ int VideoProcessor::process_filtering(
     int ret = 0;
 
     // Cast the processor to a Filter
-    Filter *filter = static_cast<Filter *>(processor.get());
+    processors::Filter *filter = static_cast<processors::Filter *>(processor.get());
 
     // Process the frame using the filter
     ret = filter->filter(frame, &proc_frame);
@@ -359,17 +363,18 @@ int VideoProcessor::process_filtering(
         av_strerror(ret, errbuf, sizeof(errbuf));
         spdlog::critical("Error filtering frame: {}", errbuf);
     } else if (ret == 0 && proc_frame != nullptr) {
-        auto processed_frame =
-            std::unique_ptr<AVFrame, decltype(&av_frame_deleter)>(proc_frame, &av_frame_deleter);
+        auto processed_frame = std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>(
+            proc_frame, &avutils::av_frame_deleter
+        );
         ret = write_frame(processed_frame.get(), encoder);
     }
     return ret;
 }
 
 int VideoProcessor::process_interpolation(
-    std::unique_ptr<Processor> &processor,
-    Encoder &encoder,
-    std::unique_ptr<AVFrame, decltype(&av_frame_deleter)> &prev_frame,
+    std::unique_ptr<processors::Processor> &processor,
+    encoder::Encoder &encoder,
+    std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)> &prev_frame,
     AVFrame *frame,
     AVFrame *proc_frame
 ) {
@@ -377,7 +382,8 @@ int VideoProcessor::process_interpolation(
     int ret = 0;
 
     // Cast the processor to an Interpolator
-    Interpolator *interpolator = static_cast<Interpolator *>(processor.get());
+    processors::Interpolator *interpolator =
+        static_cast<processors::Interpolator *>(processor.get());
 
     // Calculate the time step for each frame
     float time_step = 1.0f / static_cast<float>(proc_cfg_.frm_rate_mul);
@@ -386,7 +392,7 @@ int VideoProcessor::process_interpolation(
     // Check if a scene change is detected
     bool skip_frame = false;
     if (proc_cfg_.scn_det_thresh < 100.0 && prev_frame.get() != nullptr) {
-        float frame_diff = get_frame_diff(prev_frame.get(), frame);
+        float frame_diff = avutils::get_frame_diff(prev_frame.get(), frame);
         if (frame_diff > proc_cfg_.scn_det_thresh) {
             spdlog::debug(
                 "Scene change detected ({:.2f}%), skipping frame {}", frame_diff, frame_idx_.load()
@@ -417,8 +423,8 @@ int VideoProcessor::process_interpolation(
             spdlog::critical("Error interpolating frame: {}", errbuf);
             return ret;
         } else if (ret == 0 && proc_frame != nullptr) {
-            auto processed_frame = std::unique_ptr<AVFrame, decltype(&av_frame_deleter)>(
-                proc_frame, &av_frame_deleter
+            auto processed_frame = std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>(
+                proc_frame, &avutils::av_frame_deleter
             );
 
             ret = write_frame(processed_frame.get(), encoder);
@@ -438,3 +444,5 @@ int VideoProcessor::process_interpolation(
     prev_frame.reset(av_frame_clone(frame));
     return ret;
 }
+
+}  // namespace video2x

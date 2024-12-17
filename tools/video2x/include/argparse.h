@@ -5,7 +5,7 @@
 
 // Structure to hold parsed arguments
 struct Arguments {
-    Video2xLogLevel log_level = Video2xLogLevel::Info;
+    video2x::logutils::Video2xLogLevel log_level = video2x::logutils::Video2xLogLevel::Info;
     bool no_progress = false;
 
     // General options
@@ -24,6 +24,6 @@ struct Arguments {
     char *argv[],
 #endif
     Arguments &arguments,
-    ProcessorConfig &proc_cfg,
-    EncoderConfig &enc_cfg
+    video2x::processors::ProcessorConfig &proc_cfg,
+    video2x::encoder::EncoderConfig &enc_cfg
 );

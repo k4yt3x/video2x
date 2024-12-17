@@ -1,3 +1,7 @@
 #pragma once
 
+namespace video2x {
+
 #define LIBVIDEO2X_VERSION_STRING "@PROJECT_VERSION@"
+
+}  // namespace video2x

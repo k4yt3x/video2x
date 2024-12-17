@@ -12,7 +12,7 @@ extern "C" {
 #include "avutils.h"
 #include "decoder.h"
 #include "encoder.h"
-#include "logging.h"
+#include "logutils.h"
 #include "processor.h"
 
 #ifdef _WIN32
@@ -24,6 +24,8 @@ extern "C" {
 #else
 #define LIBVIDEO2X_API
 #endif
+
+namespace video2x {
 
 enum class VideoProcessorState {
     Idle,
@@ -37,11 +39,11 @@ enum class VideoProcessorState {
 class LIBVIDEO2X_API VideoProcessor {
    public:
     VideoProcessor(
-        const ProcessorConfig proc_cfg,
-        const EncoderConfig enc_cfg,
+        const processors::ProcessorConfig proc_cfg,
+        const encoder::EncoderConfig enc_cfg,
         const uint32_t vk_device_idx = 0,
         const AVHWDeviceType hw_device_type = AV_HWDEVICE_TYPE_NONE,
-        const Video2xLogLevel = Video2xLogLevel::Info,
+        const logutils::Video2xLogLevel = logutils::Video2xLogLevel::Info,
         const bool benchmark = false
     );
 
@@ -59,10 +61,13 @@ class LIBVIDEO2X_API VideoProcessor {
     int64_t get_total_frames() const { return total_frames_.load(); }
 
    private:
-    [[nodiscard]] int
-    process_frames(Decoder &decoder, Encoder &encoder, std::unique_ptr<Processor> &processor);
+    [[nodiscard]] int process_frames(
+        decoder::Decoder &decoder,
+        encoder::Encoder &encoder,
+        std::unique_ptr<processors::Processor> &processor
+    );
 
-    [[nodiscard]] int write_frame(AVFrame *frame, Encoder &encoder);
+    [[nodiscard]] int write_frame(AVFrame *frame, encoder::Encoder &encoder);
 
     [[nodiscard]] inline int write_raw_packet(
         AVPacket *packet,
@@ -72,22 +77,22 @@ class LIBVIDEO2X_API VideoProcessor {
     );
 
     [[nodiscard]] inline int process_filtering(
-        std::unique_ptr<Processor> &processor,
-        Encoder &encoder,
+        std::unique_ptr<processors::Processor> &processor,
+        encoder::Encoder &encoder,
         AVFrame *frame,
         AVFrame *proc_frame
     );
 
     [[nodiscard]] inline int process_interpolation(
-        std::unique_ptr<Processor> &processor,
-        Encoder &encoder,
-        std::unique_ptr<AVFrame, decltype(&av_frame_deleter)> &prev_frame,
+        std::unique_ptr<processors::Processor> &processor,
+        encoder::Encoder &encoder,
+        std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)> &prev_frame,
         AVFrame *frame,
         AVFrame *proc_frame
     );
 
-    ProcessorConfig proc_cfg_;
-    EncoderConfig enc_cfg_;
+    processors::ProcessorConfig proc_cfg_;
+    encoder::EncoderConfig enc_cfg_;
     uint32_t vk_device_idx_ = 0;
     AVHWDeviceType hw_device_type_ = AV_HWDEVICE_TYPE_NONE;
     bool benchmark_ = false;
@@ -96,3 +101,5 @@ class LIBVIDEO2X_API VideoProcessor {
     std::atomic<int64_t> frame_idx_ = 0;
     std::atomic<int64_t> total_frames_ = 0;
 };
+
+}  // namespace video2x
