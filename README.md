@@ -110,8 +110,9 @@ This project includes or depends on these following projects:
 | ------------------------------------------------------------------------------------- | --------------- |
 | [bloc97/Anime4K](https://github.com/bloc97/Anime4K)                                   | MIT License     |
 | [FFmpeg/FFmpeg](https://www.ffmpeg.org/)                                              | LGPLv2.1, GPLv2 |
-| [xinntao/Real-ESRGAN-ncnn-vulkan](https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan) | MIT License     |
+| [nihui/rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)                   | MIT License     |
 | [Tencent/ncnn](https://github.com/Tencent/ncnn)                                       | BSD 3-Clause    |
+| [xinntao/Real-ESRGAN-ncnn-vulkan](https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan) | MIT License     |
 
 More licensing information can be found in the [NOTICE](NOTICE) file.
 
