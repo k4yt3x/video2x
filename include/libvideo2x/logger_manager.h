@@ -21,7 +21,7 @@ class LIBVIDEO2X_API LoggerManager {
 
     std::shared_ptr<spdlog::logger> logger();
 
-    void reconfigure_logger(
+    bool reconfigure_logger(
         const std::string &logger_name,
         const std::vector<spdlog::sink_ptr> &sinks,
         const std::string &pattern = "%+"
@@ -35,7 +35,7 @@ class LIBVIDEO2X_API LoggerManager {
    private:
     LoggerManager();
 
-    std::shared_ptr<spdlog::logger> logger_;
+    std::shared_ptr<spdlog::logger> logger_ = nullptr;
 };
 
 }  // namespace logger_manager

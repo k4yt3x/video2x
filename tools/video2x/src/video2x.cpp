@@ -56,9 +56,12 @@ int main(int argc, char **argv) {
     // Initialize newline-safe logger with custom formatting pattern
     std::shared_ptr<newline_safe_sink> logger_sink = std::make_shared<newline_safe_sink>();
     std::vector<spdlog::sink_ptr> sinks = {logger_sink};
-    video2x::logger_manager::LoggerManager::instance().reconfigure_logger(
-        "video2x", sinks, "[%Y-%m-%d %H:%M:%S] [%^%l%$] %v"
-    );
+    if (!video2x::logger_manager::LoggerManager::instance().reconfigure_logger(
+            "video2x", sinks, "[%Y-%m-%d %H:%M:%S] [%^%l%$] %v"
+        )) {
+        std::cerr << "Error: Failed to configure logger." << std::endl;
+        return 1;
+    }
 
     // Initialize argument and configuration structs
     Arguments arguments;

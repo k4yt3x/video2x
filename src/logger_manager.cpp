@@ -48,9 +48,9 @@ namespace logger_manager {
 LoggerManager::LoggerManager() {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_pattern("%+");
+    console_sink->set_level(spdlog::level::info);
     logger_ = std::make_shared<spdlog::logger>("video2x", console_sink);
     spdlog::register_logger(logger_);
-    logger_->set_level(spdlog::level::info);
 }
 
 LoggerManager &LoggerManager::instance() {
@@ -62,31 +62,36 @@ std::shared_ptr<spdlog::logger> LoggerManager::logger() {
     return logger_;
 }
 
-void LoggerManager::reconfigure_logger(
+bool LoggerManager::reconfigure_logger(
     const std::string &logger_name,
     const std::vector<spdlog::sink_ptr> &sinks,
     const std::string &pattern
 ) {
-    if (!sinks.empty()) {
-        // If a logger with the same name exists, remove it first
-        auto old_logger = spdlog::get(logger_name);
-        if (old_logger) {
-            spdlog::drop(logger_name);
-        }
-
-        // Create a new logger with the given name, sinks, and pattern
-        auto new_logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
-        new_logger->set_pattern(pattern);
-
-        // Maintain the log level from the previous logger
-        if (logger_) {
-            new_logger->set_level(logger_->level());
-        }
-
-        // Replace the internal logger_ member and register the new one
-        logger_ = new_logger;
-        spdlog::register_logger(logger_);
+    if (logger_name.empty() || sinks.empty()) {
+        return false;
     }
+
+    // Create a new logger with the given name, sinks, and pattern
+    std::shared_ptr<spdlog::logger> new_logger =
+        std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+    new_logger->set_pattern(pattern);
+
+    // Maintain the log level from the previous logger
+    if (logger_ != nullptr) {
+        new_logger->set_level(logger_->level());
+    }
+
+    // If a logger with the same name exists, remove it first
+    std::shared_ptr<spdlog::logger> old_logger = spdlog::get(logger_name);
+    if (old_logger != nullptr) {
+        spdlog::drop(logger_name);
+        logger_ = nullptr;
+    }
+
+    // Replace the internal logger_ member and register the new one
+    logger_ = new_logger;
+    spdlog::register_logger(logger_);
+    return true;
 }
 
 bool LoggerManager::set_log_level(const std::string &level_str) {
