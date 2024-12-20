@@ -26,19 +26,20 @@ static spdlog::level::level_enum ffmpeg_level_to_spdlog(int av_level) {
     }
 }
 
-static void ffmpeg_log_callback(void *, int av_level, const char *fmt, va_list vargs) {
-    // Format the message into a buffer
-    char buffer[1024];
-    vsnprintf(buffer, sizeof(buffer), fmt, vargs);
+static void ffmpeg_log_callback(void *avcl, int level, const char *fmt, va_list vargs) {
+    // Format the message the same way as the default callback
+    char line[1024];
+    int print_prefix = 1;
+    av_log_format_line(avcl, level, fmt, vargs, line, sizeof(line), &print_prefix);
 
     // Trim trailing newlines
-    std::string message = buffer;
+    std::string message = line;
     while (!message.empty() && (message.back() == '\n' || message.back() == '\r')) {
         message.pop_back();
     }
 
-    // Forward FFmpeg log message to the logger instance
-    video2x::logger()->log(ffmpeg_level_to_spdlog(av_level), message);
+    // Forward the formatted FFmpeg log message to the logger
+    video2x::logger()->log(ffmpeg_level_to_spdlog(level), "[FFmpeg] {}", message);
 }
 
 namespace video2x {

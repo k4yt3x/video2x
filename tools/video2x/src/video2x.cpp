@@ -53,7 +53,14 @@ int wmain(int argc, wchar_t *argv[]) {
 #else
 int main(int argc, char **argv) {
 #endif
-    // Initialize arguments structures
+    // Initialize newline-safe logger with custom formatting pattern
+    std::shared_ptr<newline_safe_sink> logger_sink = std::make_shared<newline_safe_sink>();
+    std::vector<spdlog::sink_ptr> sinks = {logger_sink};
+    video2x::logger_manager::LoggerManager::instance().reconfigure_logger(
+        "video2x", sinks, "[%Y-%m-%d %H:%M:%S] [%^%l%$] %v"
+    );
+
+    // Initialize argument and configuration structs
     Arguments arguments;
     video2x::processors::ProcessorConfig proc_cfg;
     video2x::encoder::EncoderConfig enc_cfg;
@@ -75,11 +82,6 @@ int main(int argc, char **argv) {
     video2x::VideoProcessor video_processor = video2x::VideoProcessor(
         proc_cfg, enc_cfg, arguments.vk_device_index, arguments.hw_device_type, arguments.benchmark
     );
-
-    // Register a newline-safe log sink
-    std::shared_ptr<newline_safe_sink> logger_sink = std::make_shared<newline_safe_sink>();
-    std::vector<spdlog::sink_ptr> sinks = {logger_sink};
-    video2x::logger_manager::LoggerManager::instance().reconfigure_logger("video2x", sinks);
 
     // Create a thread for video processing
     int proc_ret = 0;
@@ -207,6 +209,7 @@ int main(int argc, char **argv) {
 
     // Print a newline if progress bar was displayed
     if (logger_sink->get_needs_newline()) {
+        logger_sink->set_needs_newline(false);
         std::cout << '\n';
     }
 
@@ -222,28 +225,31 @@ int main(int argc, char **argv) {
         video2x::logger()->info("Video processed successfully");
     }
 
-    // Calculate statistics
-    int64_t processed_frames = video_processor.get_processed_frames();
-    int time_elapsed = static_cast<int>(timer.get_elapsed_time() / 1000);
-    auto [hours_elapsed, minutes_elapsed, seconds_elapsed] =
-        calculate_time_components(time_elapsed);
-    float average_speed_fps = static_cast<float>(processed_frames) /
-                              (time_elapsed > 0 ? static_cast<float>(time_elapsed) : 1);
+    // Print the processing summary if the log level is info or lower
+    if (video2x::logger()->level() <= spdlog::level::info) {
+        // Calculate statistics
+        int64_t processed_frames = video_processor.get_processed_frames();
+        int time_elapsed = static_cast<int>(timer.get_elapsed_time() / 1000);
+        auto [hours_elapsed, minutes_elapsed, seconds_elapsed] =
+            calculate_time_components(time_elapsed);
+        float average_speed_fps = static_cast<float>(processed_frames) /
+                                  (time_elapsed > 0 ? static_cast<float>(time_elapsed) : 1);
 
-    // Print processing summary
-    std::cout << "====== Video2X " << (arguments.benchmark ? "Benchmark" : "Processing")
-              << " summary ======" << std::endl;
-    std::cout << "Video file processed: " << arguments.in_fname.u8string() << std::endl;
-    std::cout << "Total frames processed: " << processed_frames << std::endl;
-    std::cout << "Total time taken: " << std::setw(2) << std::setfill('0') << hours_elapsed << ":"
-              << std::setw(2) << std::setfill('0') << minutes_elapsed << ":" << std::setw(2)
-              << std::setfill('0') << seconds_elapsed << std::endl;
-    std::cout << "Average processing speed: " << std::fixed << std::setprecision(2)
-              << average_speed_fps << " FPS" << std::endl;
+        // Print processing summary
+        std::cout << "====== Video2X " << (arguments.benchmark ? "Benchmark" : "Processing")
+                  << " summary ======" << std::endl;
+        std::cout << "Video file processed: " << arguments.in_fname.u8string() << std::endl;
+        std::cout << "Total frames processed: " << processed_frames << std::endl;
+        std::cout << "Total time taken: " << std::setw(2) << std::setfill('0') << hours_elapsed
+                  << ":" << std::setw(2) << std::setfill('0') << minutes_elapsed << ":"
+                  << std::setw(2) << std::setfill('0') << seconds_elapsed << std::endl;
+        std::cout << "Average processing speed: " << std::fixed << std::setprecision(2)
+                  << average_speed_fps << " FPS" << std::endl;
 
-    // Print additional information if not in benchmark mode
-    if (!arguments.benchmark) {
-        std::cout << "Output written to: " << arguments.out_fname.u8string() << std::endl;
+        // Print additional information if not in benchmark mode
+        if (!arguments.benchmark) {
+            std::cout << "Output written to: " << arguments.out_fname.u8string() << std::endl;
+        }
     }
 
     return 0;
