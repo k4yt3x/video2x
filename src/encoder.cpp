@@ -6,6 +6,8 @@ extern "C" {
 #include <libavutil/opt.h>
 }
 
+#include "logger_manager.h"
+
 #include "avutils.h"
 #include "conversions.h"
 
@@ -46,14 +48,14 @@ int Encoder::init(
     // Allocate the output format context
     avformat_alloc_output_context2(&ofmt_ctx_, nullptr, nullptr, out_fpath.u8string().c_str());
     if (!ofmt_ctx_) {
-        spdlog::error("Could not create output context");
+        logger()->error("Could not create output context");
         return AVERROR_UNKNOWN;
     }
 
     // Find the encoder
     const AVCodec *encoder = avcodec_find_encoder(enc_cfg.codec);
     if (!encoder) {
-        spdlog::error(
+        logger()->error(
             "Required video encoder not found for codec {}", avcodec_get_name(enc_cfg.codec)
         );
         return AVERROR_ENCODER_NOT_FOUND;
@@ -62,7 +64,7 @@ int Encoder::init(
     // Create a new video stream in the output file
     AVStream *out_vstream = avformat_new_stream(ofmt_ctx_, nullptr);
     if (!out_vstream) {
-        spdlog::error("Failed to allocate the output video stream");
+        logger()->error("Failed to allocate the output video stream");
         return AVERROR_UNKNOWN;
     }
     out_vstream_idx_ = out_vstream->index;
@@ -70,7 +72,7 @@ int Encoder::init(
     // Allocate the encoder context
     enc_ctx_ = avcodec_alloc_context3(encoder);
     if (!enc_ctx_) {
-        spdlog::error("Failed to allocate the encoder context");
+        logger()->error("Failed to allocate the encoder context");
         return AVERROR(ENOMEM);
     }
 
@@ -121,7 +123,7 @@ int Encoder::init(
         // Automatically select the pixel format
         enc_ctx_->pix_fmt = avutils::get_encoder_default_pix_fmt(encoder, dec_ctx->pix_fmt);
         if (enc_ctx_->pix_fmt == AV_PIX_FMT_NONE) {
-            spdlog::error("Could not get the default pixel format for the encoder");
+            logger()->error("Could not get the default pixel format for the encoder");
             return AVERROR(EINVAL);
         }
         spdlog::debug("Auto-selected pixel format: {}", av_get_pix_fmt_name(enc_ctx_->pix_fmt));
@@ -165,14 +167,14 @@ int Encoder::init(
 
     // Open the encoder
     if ((ret = avcodec_open2(enc_ctx_, encoder, nullptr)) < 0) {
-        spdlog::error("Cannot open video encoder");
+        logger()->error("Cannot open video encoder");
         return ret;
     }
 
     // Copy encoder parameters to output video stream
     ret = avcodec_parameters_from_context(out_vstream->codecpar, enc_ctx_);
     if (ret < 0) {
-        spdlog::error("Failed to copy encoder parameters to output video stream");
+        logger()->error("Failed to copy encoder parameters to output video stream");
         return ret;
     }
 
@@ -186,7 +188,7 @@ int Encoder::init(
         stream_map_ =
             reinterpret_cast<int *>(av_malloc_array(ifmt_ctx->nb_streams, sizeof(*stream_map_)));
         if (!stream_map_) {
-            spdlog::error("Could not allocate stream mapping");
+            logger()->error("Could not allocate stream mapping");
             return AVERROR(ENOMEM);
         }
 
@@ -212,14 +214,14 @@ int Encoder::init(
             // Create corresponding output stream for audio and subtitle streams
             AVStream *out_stream = avformat_new_stream(ofmt_ctx_, nullptr);
             if (!out_stream) {
-                spdlog::error("Failed allocating output stream");
+                logger()->error("Failed allocating output stream");
                 return AVERROR_UNKNOWN;
             }
 
             // Copy codec parameters from input to output
             ret = avcodec_parameters_copy(out_stream->codecpar, in_codecpar);
             if (ret < 0) {
-                spdlog::error("Failed to copy codec parameters");
+                logger()->error("Failed to copy codec parameters");
                 return ret;
             }
             out_stream->codecpar->codec_tag = 0;
@@ -237,7 +239,7 @@ int Encoder::init(
     if (!(ofmt_ctx_->oformat->flags & AVFMT_NOFILE)) {
         ret = avio_open(&ofmt_ctx_->pb, out_fpath.u8string().c_str(), AVIO_FLAG_WRITE);
         if (ret < 0) {
-            spdlog::error("Could not open output file '{}'", out_fpath.u8string());
+            logger()->error("Could not open output file '{}'", out_fpath.u8string());
             return ret;
         }
     }
@@ -245,7 +247,7 @@ int Encoder::init(
     // Write the output file header
     ret = avformat_write_header(ofmt_ctx_, nullptr);
     if (ret < 0) {
-        spdlog::error("Error writing output file header");
+        logger()->error("Error writing output file header");
         return ret;
     }
 
@@ -267,7 +269,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
     if (frame->format != enc_ctx_->pix_fmt) {
         converted_frame = conversions::convert_avframe_pix_fmt(frame, enc_ctx_->pix_fmt);
         if (!converted_frame) {
-            spdlog::error("Error converting frame to encoder's pixel format");
+            logger()->error("Error converting frame to encoder's pixel format");
             return AVERROR_EXTERNAL;
         }
         converted_frame->pts = frame->pts;
@@ -275,7 +277,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
 
     AVPacket *enc_pkt = av_packet_alloc();
     if (!enc_pkt) {
-        spdlog::error("Could not allocate AVPacket");
+        logger()->error("Could not allocate AVPacket");
         return AVERROR(ENOMEM);
     }
 
@@ -287,7 +289,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
         ret = avcodec_send_frame(enc_ctx_, frame);
     }
     if (ret < 0) {
-        spdlog::error("Error sending frame to encoder");
+        logger()->error("Error sending frame to encoder");
         av_packet_free(&enc_pkt);
         return ret;
     }
@@ -299,7 +301,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
             av_packet_unref(enc_pkt);
             break;
         } else if (ret < 0) {
-            spdlog::error("Error encoding frame");
+            logger()->error("Error encoding frame");
             av_packet_free(&enc_pkt);
             return ret;
         }
@@ -314,7 +316,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
         ret = av_interleaved_write_frame(ofmt_ctx_, enc_pkt);
         av_packet_unref(enc_pkt);
         if (ret < 0) {
-            spdlog::error("Error muxing packet");
+            logger()->error("Error muxing packet");
             av_packet_free(&enc_pkt);
             return ret;
         }
@@ -328,14 +330,14 @@ int Encoder::flush() {
     int ret;
     AVPacket *enc_pkt = av_packet_alloc();
     if (!enc_pkt) {
-        spdlog::error("Could not allocate AVPacket");
+        logger()->error("Could not allocate AVPacket");
         return AVERROR(ENOMEM);
     }
 
     // Send a NULL frame to signal the encoder to flush
     ret = avcodec_send_frame(enc_ctx_, nullptr);
     if (ret < 0) {
-        spdlog::error("Error sending NULL frame to encoder during flush");
+        logger()->error("Error sending NULL frame to encoder during flush");
         av_packet_free(&enc_pkt);
         return ret;
     }
@@ -347,7 +349,7 @@ int Encoder::flush() {
             av_packet_unref(enc_pkt);
             break;
         } else if (ret < 0) {
-            spdlog::error("Error encoding packet during flush");
+            logger()->error("Error encoding packet during flush");
             av_packet_free(&enc_pkt);
             return ret;
         }
@@ -362,7 +364,7 @@ int Encoder::flush() {
         ret = av_interleaved_write_frame(ofmt_ctx_, enc_pkt);
         av_packet_unref(enc_pkt);
         if (ret < 0) {
-            spdlog::error("Error muxing packet during flush");
+            logger()->error("Error muxing packet during flush");
             av_packet_free(&enc_pkt);
             return ret;
         }

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-#include <spdlog/spdlog.h>
+#include <libvideo2x/logger_manager.h>
 
 static int enumerate_vulkan_devices(VkInstance *instance, std::vector<VkPhysicalDevice> &devices) {
     // Create a Vulkan instance
@@ -12,7 +12,7 @@ static int enumerate_vulkan_devices(VkInstance *instance, std::vector<VkPhysical
 
     VkResult result = vkCreateInstance(&create_info, nullptr, instance);
     if (result != VK_SUCCESS) {
-        spdlog::error("Failed to create Vulkan instance.");
+        video2x::logger()->error("Failed to create Vulkan instance.");
         return -1;
     }
 
@@ -20,7 +20,9 @@ static int enumerate_vulkan_devices(VkInstance *instance, std::vector<VkPhysical
     uint32_t device_count = 0;
     result = vkEnumeratePhysicalDevices(*instance, &device_count, nullptr);
     if (result != VK_SUCCESS || device_count == 0) {
-        spdlog::error("Failed to enumerate Vulkan physical devices or no devices available.");
+        video2x::logger()->error(
+            "Failed to enumerate Vulkan physical devices or no devices available."
+        );
         vkDestroyInstance(*instance, nullptr);
         return -1;
     }
@@ -28,7 +30,7 @@ static int enumerate_vulkan_devices(VkInstance *instance, std::vector<VkPhysical
     devices.resize(device_count);
     result = vkEnumeratePhysicalDevices(*instance, &device_count, devices.data());
     if (result != VK_SUCCESS) {
-        spdlog::error("Failed to retrieve Vulkan physical devices.");
+        video2x::logger()->error("Failed to retrieve Vulkan physical devices.");
         vkDestroyInstance(*instance, nullptr);
         return -1;
     }
@@ -96,7 +98,7 @@ int list_vulkan_devices() {
 
 int get_vulkan_device_prop(uint32_t vk_device_index, VkPhysicalDeviceProperties *dev_props) {
     if (dev_props == nullptr) {
-        spdlog::error("Invalid device properties pointer.");
+        video2x::logger()->error("Invalid device properties pointer.");
         return -1;
     }
 

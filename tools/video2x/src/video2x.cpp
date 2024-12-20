@@ -9,10 +9,10 @@
 #include <unistd.h>
 #endif
 
-#include <spdlog/spdlog.h>
+#include <libvideo2x/logger_manager.h>
 
 #include "argparse.h"
-#include "logging.h"
+#include "newline_safe_sink.h"
 #include "timer.h"
 
 // Set UNIX terminal input to non-blocking mode
@@ -73,16 +73,13 @@ int main(int argc, char **argv) {
 
     // Create video processor object
     video2x::VideoProcessor video_processor = video2x::VideoProcessor(
-        proc_cfg,
-        enc_cfg,
-        arguments.vk_device_index,
-        arguments.hw_device_type,
-        arguments.log_level,
-        arguments.benchmark
+        proc_cfg, enc_cfg, arguments.vk_device_index, arguments.hw_device_type, arguments.benchmark
     );
 
-    // Register a newline-safe log callback for FFmpeg
-    av_log_set_callback(newline_safe_ffmpeg_log_callback);
+    // Register a newline-safe log sink
+    std::shared_ptr<newline_safe_sink> logger_sink = std::make_shared<newline_safe_sink>();
+    std::vector<spdlog::sink_ptr> sinks = {logger_sink};
+    video2x::logger_manager::LoggerManager::instance().reconfigure_logger("video2x", sinks);
 
     // Create a thread for video processing
     int proc_ret = 0;
@@ -91,7 +88,7 @@ int main(int argc, char **argv) {
         proc_ret = video_processor.process(arguments.in_fname, arguments.out_fname);
         completed.store(true, std::memory_order_relaxed);
     });
-    spdlog::info("Press [space] to pause/resume, [q] to abort.");
+    video2x::logger()->info("Press [space] to pause/resume, [q] to abort.");
 
     // Setup timer
     Timer timer;
@@ -140,15 +137,15 @@ int main(int argc, char **argv) {
                     std::cout.flush();
                     timer.resume();
                 }
-                newline_required.store(true);
+                logger_sink->set_needs_newline(true);
             }
         } else if (ch == 'q' || ch == 'Q') {
             // Abort processing
-            if (newline_required.load()) {
+            if (logger_sink->get_needs_newline()) {
                 putchar('\n');
             }
-            spdlog::warn("Aborting gracefully; press Ctrl+C to terminate forcefully.");
-            newline_required.store(false);
+            video2x::logger()->warn("Aborting gracefully; press Ctrl+C to terminate forcefully.");
+            logger_sink->set_needs_newline(false);
             video_processor.abort();
             break;
         }
@@ -192,7 +189,7 @@ int main(int argc, char **argv) {
                           << ":" << std::setw(2) << std::setfill('0') << minutes_remaining << ":"
                           << std::setw(2) << std::setfill('0') << seconds_remaining;
                 std::cout.flush();
-                newline_required.store(true);
+                logger_sink->set_needs_newline(true);
             }
         }
 
@@ -209,20 +206,20 @@ int main(int argc, char **argv) {
     processing_thread.join();
 
     // Print a newline if progress bar was displayed
-    if (newline_required.load()) {
+    if (logger_sink->get_needs_newline()) {
         std::cout << '\n';
     }
 
     // Print final message based on processing result
     if (video_processor.get_state() == video2x::VideoProcessorState::Aborted) {
-        spdlog::warn("Video processing aborted");
+        video2x::logger()->warn("Video processing aborted");
         return 2;
     } else if (proc_ret != 0 ||
                video_processor.get_state() == video2x::VideoProcessorState::Failed) {
-        spdlog::critical("Video processing failed with error code {}", proc_ret);
+        video2x::logger()->critical("Video processing failed with error code {}", proc_ret);
         return 1;
     } else {
-        spdlog::info("Video processed successfully");
+        video2x::logger()->info("Video processed successfully");
     }
 
     // Calculate statistics

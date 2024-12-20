@@ -11,6 +11,8 @@ extern "C" {
 
 #include <spdlog/spdlog.h>
 
+#include "logger_manager.h"
+
 namespace video2x {
 namespace processors {
 
@@ -32,20 +34,20 @@ int init_libplacebo(
         &vk_hw_device_ctx, AV_HWDEVICE_TYPE_VULKAN, std::to_string(vk_device_index).c_str(), NULL, 0
     );
     if (ret < 0) {
-        spdlog::error("Failed to create Vulkan hardware device context for libplacebo.");
+        logger()->error("Failed to create Vulkan hardware device context for libplacebo.");
         vk_hw_device_ctx = nullptr;
     }
 
     AVFilterGraph *graph = avfilter_graph_alloc();
     if (!graph) {
-        spdlog::error("Unable to create filter graph.");
+        logger()->error("Unable to create filter graph.");
         return AVERROR(ENOMEM);
     }
 
     // Create buffer source
     const AVFilter *buffersrc = avfilter_get_by_name("buffer");
     if (!buffersrc) {
-        spdlog::error("Filter 'buffer' not found.");
+        logger()->error("Filter 'buffer' not found.");
         avfilter_graph_free(&graph);
         return AVERROR_FILTER_NOT_FOUND;
     }
@@ -82,7 +84,7 @@ int init_libplacebo(
     spdlog::debug("Buffer source args: {}", args);
     ret = avfilter_graph_create_filter(buffersrc_ctx, buffersrc, "in", args.c_str(), NULL, graph);
     if (ret < 0) {
-        spdlog::error("Cannot create buffer source.");
+        logger()->error("Cannot create buffer source.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -92,7 +94,7 @@ int init_libplacebo(
     // Create the libplacebo filter
     const AVFilter *libplacebo_filter = avfilter_get_by_name("libplacebo");
     if (!libplacebo_filter) {
-        spdlog::error("Filter 'libplacebo' not found.");
+        logger()->error("Filter 'libplacebo' not found.");
         avfilter_graph_free(&graph);
         return AVERROR_FILTER_NOT_FOUND;
     }
@@ -115,7 +117,7 @@ int init_libplacebo(
         &libplacebo_ctx, libplacebo_filter, "libplacebo", filter_args.c_str(), NULL, graph
     );
     if (ret < 0) {
-        spdlog::error("Cannot create libplacebo filter.");
+        logger()->error("Cannot create libplacebo filter.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -129,7 +131,7 @@ int init_libplacebo(
     // Link buffersrc to libplacebo
     ret = avfilter_link(last_filter, 0, libplacebo_ctx, 0);
     if (ret < 0) {
-        spdlog::error("Error connecting buffersrc to libplacebo filter.");
+        logger()->error("Error connecting buffersrc to libplacebo filter.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -140,7 +142,7 @@ int init_libplacebo(
     const AVFilter *buffersink = avfilter_get_by_name("buffersink");
     ret = avfilter_graph_create_filter(buffersink_ctx, buffersink, "out", NULL, NULL, graph);
     if (ret < 0) {
-        spdlog::error("Cannot create buffer sink.");
+        logger()->error("Cannot create buffer sink.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -148,7 +150,7 @@ int init_libplacebo(
     // Link libplacebo to buffersink
     ret = avfilter_link(last_filter, 0, *buffersink_ctx, 0);
     if (ret < 0) {
-        spdlog::error("Error connecting libplacebo filter to buffersink.");
+        logger()->error("Error connecting libplacebo filter to buffersink.");
         avfilter_graph_free(&graph);
         return ret;
     }
@@ -156,7 +158,7 @@ int init_libplacebo(
     // Configure the filter graph
     ret = avfilter_graph_config(graph, NULL);
     if (ret < 0) {
-        spdlog::error("Error configuring the filter graph.");
+        logger()->error("Error configuring the filter graph.");
         avfilter_graph_free(&graph);
         return ret;
     }

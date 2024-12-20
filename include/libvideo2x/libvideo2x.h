@@ -12,18 +12,8 @@ extern "C" {
 #include "avutils.h"
 #include "decoder.h"
 #include "encoder.h"
-#include "logutils.h"
+#include "libvideo2x_export.h"
 #include "processor.h"
-
-#ifdef _WIN32
-#ifdef LIBVIDEO2X_EXPORTS
-#define LIBVIDEO2X_API __declspec(dllexport)
-#else
-#define LIBVIDEO2X_API __declspec(dllimport)
-#endif
-#else
-#define LIBVIDEO2X_API
-#endif
 
 namespace video2x {
 
@@ -43,7 +33,6 @@ class LIBVIDEO2X_API VideoProcessor {
         const encoder::EncoderConfig enc_cfg,
         const uint32_t vk_device_idx = 0,
         const AVHWDeviceType hw_device_type = AV_HWDEVICE_TYPE_NONE,
-        const logutils::Video2xLogLevel = logutils::Video2xLogLevel::Info,
         const bool benchmark = false
     );
 

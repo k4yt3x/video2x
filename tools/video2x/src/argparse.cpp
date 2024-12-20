@@ -7,13 +7,13 @@
 #include <cwchar>
 #endif
 
+#include <libvideo2x/logger_manager.h>
 #include <libvideo2x/version.h>
 #include <spdlog/spdlog.h>
-#include <vulkan_utils.h>
 #include <boost/program_options.hpp>
 
-#include "logging.h"
 #include "validators.h"
+#include "vulkan_utils.h"
 
 #ifdef _WIN32
 #define BOOST_PROGRAM_OPTIONS_WCHAR_T
@@ -221,28 +221,27 @@ int parse_args(
         }
 
         if (vm.count("log-level")) {
-            std::optional<video2x::logutils::Video2xLogLevel> log_level =
-                find_log_level_by_name(vm["log-level"].as<video2x::fsutils::StringType>());
-            if (!log_level.has_value()) {
-                spdlog::critical("Invalid log level specified.");
+            if (!video2x::logger_manager::LoggerManager::instance().set_log_level(
+                    wstring_to_u8string(vm["log-level"].as<video2x::fsutils::StringType>())
+                )) {
+                video2x::logger()->critical("Invalid log level specified.");
                 return -1;
             }
-            arguments.log_level = log_level.value();
         }
-        set_spdlog_level(arguments.log_level);
+        video2x::logger_manager::LoggerManager::instance().hook_ffmpeg_logging();
 
         // Print program banner
-        spdlog::info("Video2X version {}", LIBVIDEO2X_VERSION_STRING);
-        // spdlog::info("Copyright (C) 2018-2024 K4YT3X and contributors.");
-        // spdlog::info("Licensed under GNU AGPL version 3.");
+        video2x::logger()->info("Video2X version {}", LIBVIDEO2X_VERSION_STRING);
+        // video2x::logger()->info("Copyright (C) 2018-2024 K4YT3X and contributors.");
+        // video2x::logger()->info("Licensed under GNU AGPL version 3.");
 
         // Assign positional arguments
         if (vm.count("input")) {
             arguments.in_fname =
                 std::filesystem::path(vm["input"].as<video2x::fsutils::StringType>());
-            spdlog::info("Processing file: {}", arguments.in_fname.u8string());
+            video2x::logger()->info("Processing file: {}", arguments.in_fname.u8string());
         } else {
-            spdlog::critical("Input file path is required.");
+            video2x::logger()->critical("Input file path is required.");
             return -1;
         }
 
@@ -250,7 +249,7 @@ int parse_args(
             arguments.out_fname =
                 std::filesystem::path(vm["output"].as<video2x::fsutils::StringType>());
         } else if (!arguments.benchmark) {
-            spdlog::critical("Output file path is required.");
+            video2x::logger()->critical("Output file path is required.");
             return -1;
         }
 
@@ -265,13 +264,13 @@ int parse_args(
             } else if (processor_type_str == STR("rife")) {
                 proc_cfg.processor_type = video2x::processors::ProcessorType::RIFE;
             } else {
-                spdlog::critical(
+                video2x::logger()->critical(
                     "Invalid processor specified. Must be 'libplacebo', 'realesrgan', or 'rife'."
                 );
                 return -1;
             }
         } else {
-            spdlog::critical("Processor type is required.");
+            video2x::logger()->critical("Processor type is required.");
             return -1;
         }
 
@@ -284,7 +283,7 @@ int parse_args(
                 arguments.hw_device_type =
                     av_hwdevice_find_type_by_name(wstring_to_u8string(hwaccel_str).c_str());
                 if (arguments.hw_device_type == AV_HWDEVICE_TYPE_NONE) {
-                    spdlog::critical(
+                    video2x::logger()->critical(
                         "Invalid hardware device type '{}'.", wstring_to_u8string(hwaccel_str)
                     );
                     return -1;
@@ -299,7 +298,9 @@ int parse_args(
             const AVCodec *codec =
                 avcodec_find_encoder_by_name(wstring_to_u8string(codec_str).c_str());
             if (codec == nullptr) {
-                spdlog::critical("Codec '{}' not found.", wstring_to_u8string(codec_str));
+                video2x::logger()->critical(
+                    "Codec '{}' not found.", wstring_to_u8string(codec_str)
+                );
                 return -1;
             }
             enc_cfg.codec = codec->id;
@@ -316,7 +317,7 @@ int parse_args(
             if (!pix_fmt_str.empty()) {
                 enc_cfg.pix_fmt = av_get_pix_fmt(wstring_to_u8string(pix_fmt_str).c_str());
                 if (enc_cfg.pix_fmt == AV_PIX_FMT_NONE) {
-                    spdlog::critical(
+                    video2x::logger()->critical(
                         "Invalid pixel format '{}'.", wstring_to_u8string(pix_fmt_str)
                     );
                     return -1;
@@ -334,7 +335,9 @@ int parse_args(
                     video2x::fsutils::StringType value = opt.substr(eq_pos + 1);
                     enc_cfg.extra_opts.push_back(std::make_pair(key, value));
                 } else {
-                    spdlog::critical("Invalid extra AVOption format: {}", wstring_to_u8string(opt));
+                    video2x::logger()->critical(
+                        "Invalid extra AVOption format: {}", wstring_to_u8string(opt)
+                    );
                     return -1;
                 }
             }
@@ -344,11 +347,13 @@ int parse_args(
         switch (proc_cfg.processor_type) {
             case video2x::processors::ProcessorType::Libplacebo: {
                 if (!vm.count("libplacebo-shader")) {
-                    spdlog::critical("Shader name/path must be set for libplacebo.");
+                    video2x::logger()->critical("Shader name/path must be set for libplacebo.");
                     return -1;
                 }
                 if (proc_cfg.width <= 0 || proc_cfg.height <= 0) {
-                    spdlog::critical("Output width and height must be set for libplacebo.");
+                    video2x::logger()->critical(
+                        "Output width and height must be set for libplacebo."
+                    );
                     return -1;
                 }
 
@@ -361,12 +366,15 @@ int parse_args(
             }
             case video2x::processors::ProcessorType::RealESRGAN: {
                 if (!vm.count("realesrgan-model")) {
-                    spdlog::critical("RealESRGAN model name must be set for RealESRGAN.");
+                    video2x::logger()->critical("RealESRGAN model name must be set for RealESRGAN."
+                    );
                     return -1;
                 }
                 if (proc_cfg.scaling_factor != 2 && proc_cfg.scaling_factor != 3 &&
                     proc_cfg.scaling_factor != 4) {
-                    spdlog::critical("Scaling factor must be set to 2, 3, or 4 for RealESRGAN.");
+                    video2x::logger()->critical(
+                        "Scaling factor must be set to 2, 3, or 4 for RealESRGAN."
+                    );
                     return -1;
                 }
 
@@ -380,11 +388,13 @@ int parse_args(
             }
             case video2x::processors::ProcessorType::RIFE: {
                 if (!vm.count("rife-model")) {
-                    spdlog::critical("RIFE model name must be set for RIFE.");
+                    video2x::logger()->critical("RIFE model name must be set for RIFE.");
                     return -1;
                 }
                 if (proc_cfg.frm_rate_mul < 2) {
-                    spdlog::critical("Frame rate multiplier must be set to at least 2 for RIFE.");
+                    video2x::logger()->critical(
+                        "Frame rate multiplier must be set to at least 2 for RIFE."
+                    );
                     return -1;
                 }
 
@@ -399,14 +409,16 @@ int parse_args(
                 break;
             }
             default:
-                spdlog::critical("Invalid processor type.");
+                video2x::logger()->critical("Invalid processor type.");
                 return -1;
         }
     } catch (const po::error &e) {
-        spdlog::critical("Error parsing arguments: {}", e.what());
+        video2x::logger()->critical("Error parsing arguments: {}", e.what());
         return -1;
     } catch (const std::exception &e) {
-        spdlog::critical("Unexpected exception caught while parsing options: {}", e.what());
+        video2x::logger()->critical(
+            "Unexpected exception caught while parsing options: {}", e.what()
+        );
         return -1;
     }
 
@@ -415,17 +427,19 @@ int parse_args(
     int get_vulkan_dev_ret = get_vulkan_device_prop(arguments.vk_device_index, &dev_props);
     if (get_vulkan_dev_ret != 0) {
         if (get_vulkan_dev_ret == -2) {
-            spdlog::critical("Invalid Vulkan device ID specified.");
+            video2x::logger()->critical("Invalid Vulkan device ID specified.");
             return -1;
         } else {
-            spdlog::warn("Unable to validate Vulkan device ID.");
+            video2x::logger()->warn("Unable to validate Vulkan device ID.");
             return -1;
         }
     } else {
         // Warn if the selected device is a CPU
-        spdlog::info("Using Vulkan device: {} ({:#x})", dev_props.deviceName, dev_props.deviceID);
+        video2x::logger()->info(
+            "Using Vulkan device: {} ({:#x})", dev_props.deviceName, dev_props.deviceID
+        );
         if (dev_props.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
-            spdlog::warn("The selected Vulkan device is a CPU device.");
+            video2x::logger()->warn("The selected Vulkan device is a CPU device.");
         }
     }
     return 0;

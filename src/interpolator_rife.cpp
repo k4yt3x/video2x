@@ -7,6 +7,7 @@
 
 #include "conversions.h"
 #include "fsutils.h"
+#include "logger_manager.h"
 
 namespace video2x {
 namespace processors {
@@ -42,12 +43,11 @@ int InterpolatorRIFE::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     model_param_dir = std::filesystem::path(STR("models")) / STR("rife") / model_name_;
 
     // Get the full paths using a function that possibly modifies or validates the path
-    std::filesystem::path model_param_full_path =
-        fsutils::find_resource_file(model_param_dir);
+    std::filesystem::path model_param_full_path = fsutils::find_resource_file(model_param_dir);
 
     // Check if the model files exist
     if (!std::filesystem::exists(model_param_full_path)) {
-        spdlog::error("RIFE model param directory not found: {}", model_param_dir.u8string());
+        logger()->error("RIFE model param directory not found: {}", model_param_dir.u8string());
         return -1;
     }
 
@@ -61,7 +61,7 @@ int InterpolatorRIFE::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     } else if (model_name_.find(STR("rife-v4")) != fsutils::StringType::npos) {
         rife_v4 = true;
     } else if (model_name_.find(STR("rife")) == fsutils::StringType::npos) {
-        spdlog::critical("Failed to infer RIFE model generation from model name");
+        logger()->critical("Failed to infer RIFE model generation from model name");
         return -1;
     }
 
@@ -76,7 +76,7 @@ int InterpolatorRIFE::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     // Load the model
     if (rife_->load(model_param_full_path) != 0) {
-        spdlog::error("Failed to load RIFE model");
+        logger()->error("Failed to load RIFE model");
         return -1;
     }
 
@@ -93,13 +93,13 @@ int InterpolatorRIFE::interpolate(
 
     ncnn::Mat in_mat1 = conversions::avframe_to_ncnn_mat(prev_frame);
     if (in_mat1.empty()) {
-        spdlog::error("Failed to convert AVFrame to ncnn::Mat");
+        logger()->error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
     }
 
     ncnn::Mat in_mat2 = conversions::avframe_to_ncnn_mat(in_frame);
     if (in_mat2.empty()) {
-        spdlog::error("Failed to convert AVFrame to ncnn::Mat");
+        logger()->error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
     }
 
@@ -108,7 +108,7 @@ int InterpolatorRIFE::interpolate(
 
     ret = rife_->process(in_mat1, in_mat2, time_step, out_mat);
     if (ret != 0) {
-        spdlog::error("RIFE processing failed");
+        logger()->error("RIFE processing failed");
         return ret;
     }
 

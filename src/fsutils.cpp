@@ -10,6 +10,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "logger_manager.h"
+
 namespace video2x {
 namespace fsutils {
 
@@ -20,7 +22,7 @@ static std::filesystem::path get_executable_directory() {
     // Get the executable path, expanding the buffer if necessary
     DWORD size = GetModuleFileNameW(NULL, filepath.data(), static_cast<DWORD>(filepath.size()));
     if (size == 0) {
-        spdlog::error("Error getting executable path: {}", GetLastError());
+        logger()->error("Error getting executable path: {}", GetLastError());
         return std::filesystem::path();
     }
 
@@ -29,7 +31,7 @@ static std::filesystem::path get_executable_directory() {
         filepath.resize(filepath.size() * 2);
         size = GetModuleFileNameW(NULL, filepath.data(), static_cast<DWORD>(filepath.size()));
         if (size == 0) {
-            spdlog::error("Error getting executable path: {}", GetLastError());
+            logger()->error("Error getting executable path: {}", GetLastError());
             return std::filesystem::path();
         }
     }
@@ -44,7 +46,7 @@ static std::filesystem::path get_executable_directory() {
     std::filesystem::path filepath = std::filesystem::read_symlink("/proc/self/exe", ec);
 
     if (ec) {
-        spdlog::error("Error reading /proc/self/exe: {}", ec.message());
+        logger()->error("Error reading /proc/self/exe: {}", ec.message());
         return std::filesystem::path();
     }
 

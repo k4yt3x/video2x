@@ -10,6 +10,7 @@ extern "C" {
 #include <spdlog/spdlog.h>
 
 #include "conversions.h"
+#include "logger_manager.h"
 
 namespace video2x {
 namespace avutils {
@@ -78,7 +79,7 @@ AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat 
     );
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::error("Failed to get supported pixel formats: {}", errbuf);
+        logger()->error("Failed to get supported pixel formats: {}", errbuf);
         return AV_PIX_FMT_NONE;
     }
 
@@ -119,7 +120,7 @@ AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat 
         }
     }
     if (best_pix_fmt == AV_PIX_FMT_NONE) {
-        spdlog::error("No suitable pixel format found for encoder");
+        logger()->error("No suitable pixel format found for encoder");
     }
 
     if (target_pix_fmt != AV_PIX_FMT_NONE && best_pix_fmt != target_pix_fmt) {
@@ -136,12 +137,12 @@ AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat 
 
 float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
     if (!frame1 || !frame2) {
-        spdlog::error("Invalid frame(s) provided for comparison");
+        logger()->error("Invalid frame(s) provided for comparison");
         return -1.0f;
     }
 
     if (frame1->width != frame2->width || frame1->height != frame2->height) {
-        spdlog::error("Frame dimensions do not match");
+        logger()->error("Frame dimensions do not match");
         return -1.0f;
     }
 
@@ -154,7 +155,7 @@ float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
     AVFrame *rgb_frame2 = conversions::convert_avframe_pix_fmt(frame2, target_pix_fmt);
 
     if (!rgb_frame1 || !rgb_frame2) {
-        spdlog::error("Failed to convert frames to target pixel format");
+        logger()->error("Failed to convert frames to target pixel format");
         if (rgb_frame1) {
             av_frame_free(&rgb_frame1);
         }
