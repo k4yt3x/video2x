@@ -9,7 +9,7 @@ extern "C" {
 #include "avutils.h"
 #include "decoder.h"
 #include "encoder.h"
-#include "logutils.h"
+#include "logger_manager.h"
 #include "processor.h"
 #include "processor_factory.h"
 
@@ -20,16 +20,13 @@ VideoProcessor::VideoProcessor(
     const encoder::EncoderConfig enc_cfg,
     const uint32_t vk_device_idx,
     const AVHWDeviceType hw_device_type,
-    const logutils::Video2xLogLevel log_level,
     const bool benchmark
 )
     : proc_cfg_(proc_cfg),
       enc_cfg_(enc_cfg),
       vk_device_idx_(vk_device_idx),
       hw_device_type_(hw_device_type),
-      benchmark_(benchmark) {
-    set_log_level(log_level);
-}
+      benchmark_(benchmark) {}
 
 int VideoProcessor::process(
     const std::filesystem::path in_fname,
@@ -42,7 +39,7 @@ int VideoProcessor::process(
         // Format and log the error message
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         av_strerror(error_code, errbuf, sizeof(errbuf));
-        spdlog::critical("{}: {}", msg, errbuf);
+        logger()->critical("{}: {}", msg, errbuf);
 
         // Set the video processor state to failed and return the error code
         state_.store(VideoProcessorState::Failed);
@@ -167,7 +164,7 @@ int VideoProcessor::process_frames(
         av_frame_alloc(), &avutils::av_frame_deleter
     );
     if (frame == nullptr) {
-        spdlog::critical("Error allocating frame");
+        logger()->critical("Error allocating frame");
         return AVERROR(ENOMEM);
     }
 
@@ -176,7 +173,7 @@ int VideoProcessor::process_frames(
         av_packet_alloc(), &avutils::av_packet_deleter
     );
     if (packet == nullptr) {
-        spdlog::critical("Error allocating packet");
+        logger()->critical("Error allocating packet");
         return AVERROR(ENOMEM);
     }
 
@@ -205,7 +202,7 @@ int VideoProcessor::process_frames(
                 break;
             }
             av_strerror(ret, errbuf, sizeof(errbuf));
-            spdlog::critical("Error reading packet: {}", errbuf);
+            logger()->critical("Error reading packet: {}", errbuf);
             return ret;
         }
 
@@ -214,7 +211,7 @@ int VideoProcessor::process_frames(
             ret = avcodec_send_packet(dec_ctx, packet.get());
             if (ret < 0) {
                 av_strerror(ret, errbuf, sizeof(errbuf));
-                spdlog::critical("Error sending packet to decoder: {}", errbuf);
+                logger()->critical("Error sending packet to decoder: {}", errbuf);
                 return ret;
             }
 
@@ -233,7 +230,7 @@ int VideoProcessor::process_frames(
                     break;
                 } else if (ret < 0) {
                     av_strerror(ret, errbuf, sizeof(errbuf));
-                    spdlog::critical("Error decoding video frame: {}", errbuf);
+                    logger()->critical("Error decoding video frame: {}", errbuf);
                     return ret;
                 }
 
@@ -251,7 +248,7 @@ int VideoProcessor::process_frames(
                         break;
                     }
                     default:
-                        spdlog::critical("Unknown processing mode");
+                        logger()->critical("Unknown processing mode");
                         return -1;
                 }
                 if (ret < 0 && ret != AVERROR(EAGAIN)) {
@@ -275,7 +272,7 @@ int VideoProcessor::process_frames(
     ret = processor->flush(raw_flushed_frames);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::critical("Error flushing filter: {}", errbuf);
+        logger()->critical("Error flushing filter: {}", errbuf);
         return ret;
     }
 
@@ -298,7 +295,7 @@ int VideoProcessor::process_frames(
     ret = encoder.flush();
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::critical("Error flushing encoder: {}", errbuf);
+        logger()->critical("Error flushing encoder: {}", errbuf);
         return ret;
     }
 
@@ -313,7 +310,7 @@ int VideoProcessor::write_frame(AVFrame *frame, encoder::Encoder &encoder) {
         ret = encoder.write_frame(frame, frame_idx_);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
-            spdlog::critical("Error encoding/writing frame: {}", errbuf);
+            logger()->critical("Error encoding/writing frame: {}", errbuf);
         }
     }
     return ret;
@@ -338,7 +335,7 @@ int VideoProcessor::write_raw_packet(
     ret = av_interleaved_write_frame(ofmt_ctx, packet);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::critical("Error muxing audio/subtitle packet: {}", errbuf);
+        logger()->critical("Error muxing audio/subtitle packet: {}", errbuf);
     }
     return ret;
 }
@@ -361,7 +358,7 @@ int VideoProcessor::process_filtering(
     // Write the processed frame
     if (ret < 0 && ret != AVERROR(EAGAIN)) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        spdlog::critical("Error filtering frame: {}", errbuf);
+        logger()->critical("Error filtering frame: {}", errbuf);
     } else if (ret == 0 && proc_frame != nullptr) {
         auto processed_frame = std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>(
             proc_frame, &avutils::av_frame_deleter
@@ -420,7 +417,7 @@ int VideoProcessor::process_interpolation(
         // Write the interpolated frame
         if (ret < 0 && ret != AVERROR(EAGAIN)) {
             av_strerror(ret, errbuf, sizeof(errbuf));
-            spdlog::critical("Error interpolating frame: {}", errbuf);
+            logger()->critical("Error interpolating frame: {}", errbuf);
             return ret;
         } else if (ret == 0 && proc_frame != nullptr) {
             auto processed_frame = std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>(

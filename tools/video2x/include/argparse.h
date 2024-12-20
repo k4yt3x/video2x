@@ -5,10 +5,7 @@
 
 // Structure to hold parsed arguments
 struct Arguments {
-    video2x::logutils::Video2xLogLevel log_level = video2x::logutils::Video2xLogLevel::Info;
     bool no_progress = false;
-
-    // General options
     std::filesystem::path in_fname;
     std::filesystem::path out_fname;
     uint32_t vk_device_index = 0;

@@ -8,6 +8,7 @@
 
 #include "conversions.h"
 #include "fsutils.h"
+#include "logger_manager.h"
 
 namespace video2x {
 namespace processors {
@@ -46,18 +47,16 @@ int FilterRealesrgan::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     model_bin_path = std::filesystem::path(STR("models")) / STR("realesrgan") / bin_file_name;
 
     // Get the full paths using a function that possibly modifies or validates the path
-    std::filesystem::path model_param_full_path =
-        fsutils::find_resource_file(model_param_path);
-    std::filesystem::path model_bin_full_path =
-        fsutils::find_resource_file(model_bin_path);
+    std::filesystem::path model_param_full_path = fsutils::find_resource_file(model_param_path);
+    std::filesystem::path model_bin_full_path = fsutils::find_resource_file(model_bin_path);
 
     // Check if the model files exist
     if (!std::filesystem::exists(model_param_full_path)) {
-        spdlog::error("RealESRGAN model param file not found: {}", model_param_path.u8string());
+        logger()->error("RealESRGAN model param file not found: {}", model_param_path.u8string());
         return -1;
     }
     if (!std::filesystem::exists(model_bin_full_path)) {
-        spdlog::error("RealESRGAN model bin file not found: {}", model_bin_path.u8string());
+        logger()->error("RealESRGAN model bin file not found: {}", model_bin_path.u8string());
         return -1;
     }
 
@@ -71,7 +70,7 @@ int FilterRealesrgan::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     // Load the model
     if (realesrgan_->load(model_param_full_path, model_bin_full_path) != 0) {
-        spdlog::error("Failed to load RealESRGAN model");
+        logger()->error("Failed to load RealESRGAN model");
         return -1;
     }
 
@@ -100,7 +99,7 @@ int FilterRealesrgan::filter(AVFrame *in_frame, AVFrame **out_frame) {
     // Convert the input frame to RGB24
     ncnn::Mat in_mat = conversions::avframe_to_ncnn_mat(in_frame);
     if (in_mat.empty()) {
-        spdlog::error("Failed to convert AVFrame to ncnn::Mat");
+        logger()->error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
     }
 
@@ -111,7 +110,7 @@ int FilterRealesrgan::filter(AVFrame *in_frame, AVFrame **out_frame) {
 
     ret = realesrgan_->process(in_mat, out_mat);
     if (ret != 0) {
-        spdlog::error("RealESRGAN processing failed");
+        logger()->error("RealESRGAN processing failed");
         return ret;
     }
 

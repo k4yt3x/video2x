@@ -6,6 +6,7 @@
 #include "filter_libplacebo.h"
 #include "filter_realesrgan.h"
 #include "interpolator_rife.h"
+#include "logger_manager.h"
 
 namespace video2x {
 namespace processors {
@@ -36,7 +37,7 @@ std::unique_ptr<Processor> ProcessorFactory::create_processor(
 ) const {
     auto it = creators.find(proc_cfg.processor_type);
     if (it == creators.end()) {
-        spdlog::critical(
+        logger()->critical(
             "Processor type not registered: {}", static_cast<int>(proc_cfg.processor_type)
         );
         return nullptr;
@@ -54,11 +55,11 @@ void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
            uint32_t vk_device_index) -> std::unique_ptr<Processor> {
             const auto &config = std::get<LibplaceboConfig>(proc_cfg.config);
             if (config.shader_path.empty()) {
-                spdlog::critical("Shader path must be provided for the libplacebo filter");
+                logger()->critical("Shader path must be provided for the libplacebo filter");
                 return nullptr;
             }
             if (proc_cfg.width <= 0 || proc_cfg.height <= 0) {
-                spdlog::critical(
+                logger()->critical(
                     "Output width and height must be provided for the libplacebo filter"
                 );
                 return nullptr;
@@ -78,11 +79,11 @@ void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
            uint32_t vk_device_index) -> std::unique_ptr<Processor> {
             const auto &config = std::get<RealESRGANConfig>(proc_cfg.config);
             if (proc_cfg.scaling_factor <= 0) {
-                spdlog::critical("Scaling factor must be provided for the RealESRGAN filter");
+                logger()->critical("Scaling factor must be provided for the RealESRGAN filter");
                 return nullptr;
             }
             if (config.model_name.empty()) {
-                spdlog::critical("Model name must be provided for the RealESRGAN filter");
+                logger()->critical("Model name must be provided for the RealESRGAN filter");
                 return nullptr;
             }
             return std::make_unique<FilterRealesrgan>(
@@ -100,7 +101,7 @@ void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
            uint32_t vk_device_index) -> std::unique_ptr<Processor> {
             const auto &cfg = std::get<RIFEConfig>(proc_cfg.config);
             if (cfg.model_name.empty()) {
-                spdlog::critical("Model name must be provided for the RIFE filter");
+                logger()->critical("Model name must be provided for the RIFE filter");
                 return nullptr;
             }
             return std::make_unique<InterpolatorRIFE>(

@@ -6,6 +6,7 @@
 
 #include "fsutils.h"
 #include "libplacebo.h"
+#include "logger_manager.h"
 
 namespace video2x {
 namespace processors {
@@ -55,7 +56,7 @@ int FilterLibplacebo::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
 
     // Check if the shader file exists
     if (!std::filesystem::exists(shader_full_path)) {
-        spdlog::error("libplacebo shader file not found: '{}'", shader_path_.u8string());
+        logger()->error("libplacebo shader file not found: '{}'", shader_path_.u8string());
         return -1;
     }
 
@@ -90,14 +91,14 @@ int FilterLibplacebo::filter(AVFrame *in_frame, AVFrame **out_frame) {
     // Get the filtered frame
     *out_frame = av_frame_alloc();
     if (*out_frame == nullptr) {
-        spdlog::error("Failed to allocate output frame");
+        logger()->error("Failed to allocate output frame");
         return -1;
     }
 
     // Feed the frame to the filter graph
     ret = av_buffersrc_add_frame(buffersrc_ctx_, in_frame);
     if (ret < 0) {
-        spdlog::error("Error while feeding the filter graph");
+        logger()->error("Error while feeding the filter graph");
         av_frame_free(out_frame);
         return ret;
     }
@@ -118,7 +119,7 @@ int FilterLibplacebo::filter(AVFrame *in_frame, AVFrame **out_frame) {
 int FilterLibplacebo::flush(std::vector<AVFrame *> &flushed_frames) {
     int ret = av_buffersrc_add_frame(buffersrc_ctx_, nullptr);
     if (ret < 0) {
-        spdlog::error("Error while flushing filter graph");
+        logger()->error("Error while flushing filter graph");
         return ret;
     }
 
