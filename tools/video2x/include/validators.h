@@ -65,4 +65,6 @@ void validate_anime4k_shader_name(const video2x::fsutils::StringType &shader_nam
 
 void validate_realesrgan_model_name(const video2x::fsutils::StringType &model_name);
 
+void validate_realcugan_model_name(const video2x::fsutils::StringType &model_name);
+
 void validate_rife_model_name(const video2x::fsutils::StringType &model_name);

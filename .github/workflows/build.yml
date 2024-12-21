@@ -54,7 +54,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/tmp/install \
             -DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \
             -DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
-          cmake --build /tmp/build --config Debug --target install --parallel
+          cmake --build /tmp/build --config Debug --target install
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

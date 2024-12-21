@@ -36,8 +36,21 @@ void validate_realesrgan_model_name(const video2x::fsutils::StringType &model_na
     }
 }
 
+void validate_realcugan_model_name(const video2x::fsutils::StringType &model_name) {
+    static const std::unordered_set<video2x::fsutils::StringType> valid_realcugan_models = {
+        STR("models-nose"), STR("models-pro"), STR("models-se")
+    };
+    if (valid_realcugan_models.count(model_name) == 0) {
+        throw po::validation_error(
+            po::validation_error::invalid_option_value,
+            "realcugan-model",
+            "realcugan-model must be one of: models-nose, models-pro, models-se"
+        );
+    }
+}
+
 void validate_rife_model_name(const video2x::fsutils::StringType &model_name) {
-    static const std::unordered_set<video2x::fsutils::StringType> valid_realesrgan_models = {
+    static const std::unordered_set<video2x::fsutils::StringType> valid_rife_models = {
         STR("rife"),
         STR("rife-HD"),
         STR("rife-UHD"),
@@ -50,7 +63,7 @@ void validate_rife_model_name(const video2x::fsutils::StringType &model_name) {
         STR("rife-v4"),
         STR("rife-v4.6"),
     };
-    if (valid_realesrgan_models.count(model_name) == 0) {
+    if (valid_rife_models.count(model_name) == 0) {
         throw po::validation_error(
             po::validation_error::invalid_option_value,
             "rife-model",

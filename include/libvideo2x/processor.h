@@ -23,6 +23,7 @@ enum class ProcessorType {
     None,
     Libplacebo,
     RealESRGAN,
+    RealCUGAN,
     RIFE,
 };
 
@@ -32,6 +33,13 @@ struct LibplaceboConfig {
 
 struct RealESRGANConfig {
     bool tta_mode = false;
+    fsutils::StringType model_name;
+};
+
+struct RealCUGANConfig {
+    bool tta_mode = false;
+    int num_threads = 1;
+    int syncgap = 3;
     fsutils::StringType model_name;
 };
 
@@ -49,9 +57,10 @@ struct ProcessorConfig {
     int width = 0;
     int height = 0;
     int scaling_factor = 0;
+    int noise_level = -1;
     int frm_rate_mul = 0;
     float scn_det_thresh = 0.0f;
-    std::variant<LibplaceboConfig, RealESRGANConfig, RIFEConfig> config;
+    std::variant<LibplaceboConfig, RealESRGANConfig, RealCUGANConfig, RIFEConfig> config;
 };
 
 class Processor {
