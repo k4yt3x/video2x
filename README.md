@@ -47,6 +47,7 @@ You can download the latest Windows release on the [releases page](https://githu
 - 简体中文（中国）
 - 日本語（日本）
 - Português (Portugal)
+- Français (France)
 
 ## [🐧 Install on Linux](https://docs.video2x.org/installing/linux.html)
 
