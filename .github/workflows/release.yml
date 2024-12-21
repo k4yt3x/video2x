@@ -68,6 +68,8 @@ jobs:
           path: build/video2x-linux-ubuntu-2404-amd64.deb
 
   windows:
+    # Disabled because it takes too long to build
+    if: false
     name: Build Windows release
     needs:
       - setup
@@ -143,14 +145,14 @@ jobs:
     needs:
       - setup
       # - ubuntu-2404
-      - windows
+      # - windows
       - container
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    # outputs:
+    #   upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      # - name: Download artifacts
+      #   uses: actions/download-artifact@v4
 
       - name: Create release
         id: create_release
@@ -161,5 +163,3 @@ jobs:
           name: ${{ needs.setup.outputs.version }}
           draft: true
           prerelease: false
-          files: |
-            video2x-windows-amd64.zip

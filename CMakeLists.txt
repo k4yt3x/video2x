@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(video2x VERSION 6.2.0 LANGUAGES CXX)
+project(video2x VERSION 6.3.0 LANGUAGES CXX)
 
 # The FindBoost module is removed in CMake 3.30
 if(POLICY CMP0167)
