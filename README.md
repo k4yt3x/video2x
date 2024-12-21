@@ -35,11 +35,11 @@ Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 
 </details>
 
-![6.2.0-screenshot](https://github.com/user-attachments/assets/68c6d65b-89a2-4553-a783-f5e663aa1313)
+![6.3.0-screenshot](https://github.com/user-attachments/assets/c5442f84-5ffc-4476-915f-a0fc188a2cb3)
 
 ## [🪟 Install on Windows](https://docs.video2x.org/installing/windows-qt6.html)
 
-**[Download the Latest Windows Installer Executable (6.2.0)](https://github.com/k4yt3x/video2x/releases/download/6.2.0/video2x-qt6-windows-amd64-installer.exe)**
+**[Download the Latest Windows Installer Executable (6.3.0)](https://github.com/k4yt3x/video2x/releases/download/6.3.0/video2x-qt6-windows-amd64-installer.exe)**
 
 You can download the latest Windows release on the [releases page](https://github.com/k4yt3x/video2x/releases/latest). For basic GUI usage, refer to the [documentation](https://docs.video2x.org/running/desktop.html). If you're unable to download directly from GitHub, try the [mirror site](https://files.k4yt3x.com/Projects/Video2X). The GUI currently supports the following languages:
 
