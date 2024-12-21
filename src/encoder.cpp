@@ -262,8 +262,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
     frame->pict_type = AV_PICTURE_TYPE_NONE;
 
     // Calculate this frame's presentation timestamp (PTS)
-    frame->pts = frame_idx * (enc_ctx_->time_base.den * enc_ctx_->framerate.den /
-                              (enc_ctx_->time_base.num * enc_ctx_->framerate.num));
+    frame->pts = av_rescale_q(frame_idx, av_inv_q(enc_ctx_->framerate), enc_ctx_->time_base);
 
     // Convert the frame to the encoder's pixel format if needed
     if (frame->format != enc_ctx_->pix_fmt) {
