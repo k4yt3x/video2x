@@ -88,6 +88,8 @@ _Upscale demo: Spirited Away's movie trailer_
 The following clip can be used to test if your setup works properly. This is also the standard clip used for running performance benchmarks.
 
 - [Standard Test Clip (240P)](https://files.k4yt3x.com/Resources/Videos/standard-test.mp4) 4.54 MiB
+- [Real-CUGAN Upscaled Sample (1704P)](https://files.k4yt3x.com/Resources/Videos/standard-realcugan.mp4) 3.5 MiB
+- [Real-ESRGAN Upscaled Sample (1704P)](https://files.k4yt3x.com/Resources/Videos/standard-realesrgan.mp4) 3.1 MiB
 - [waifu2x Upscaled Sample (1080P)](https://files.k4yt3x.com/Resources/Videos/standard-waifu2x.mp4) 4.54 MiB
 - [Ground Truth (1080P)](https://files.k4yt3x.com/Resources/Videos/standard-original.mp4) 22.2 MiB
 
