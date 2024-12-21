@@ -164,7 +164,7 @@ int parse_args(
         ;
 
         po::options_description realcugan_opts("RealCUGAN options");
-        realesrgan_opts.add_options()
+        realcugan_opts.add_options()
             ("realcugan-model", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("models-se"), "models-se")
                 ->notifier(validate_realcugan_model_name),
@@ -191,6 +191,7 @@ int parse_args(
             .add(interp_opts)
             .add(libplacebo_opts)
             .add(realesrgan_opts)
+            .add(realcugan_opts)
             .add(rife_opts);
 
         po::variables_map vm;
