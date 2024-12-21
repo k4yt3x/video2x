@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "filter_libplacebo.h"
+#include "filter_realcugan.h"
 #include "filter_realesrgan.h"
 #include "interpolator_rife.h"
 #include "logger_manager.h"
@@ -90,6 +91,31 @@ void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
                 static_cast<int>(vk_device_index),
                 config.tta_mode,
                 proc_cfg.scaling_factor,
+                config.model_name
+            );
+        }
+    );
+
+    factory.register_processor(
+        ProcessorType::RealCUGAN,
+        [](const ProcessorConfig &proc_cfg,
+           uint32_t vk_device_index) -> std::unique_ptr<Processor> {
+            const auto &config = std::get<RealCUGANConfig>(proc_cfg.config);
+            if (proc_cfg.scaling_factor <= 0) {
+                logger()->critical("Scaling factor must be provided for the RealCUGAN filter");
+                return nullptr;
+            }
+            if (config.model_name.empty()) {
+                logger()->critical("Model name must be provided for the RealCUGAN filter");
+                return nullptr;
+            }
+            return std::make_unique<FilterRealcugan>(
+                static_cast<int>(vk_device_index),
+                config.tta_mode,
+                proc_cfg.scaling_factor,
+                proc_cfg.noise_level,
+                config.num_threads,
+                config.syncgap,
                 config.model_name
             );
         }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for Real-CUGAN ncnn Vulkan (#1198).
+
 ### Changed
 
 - Improve optimization flags and add namespaces for better code organization.

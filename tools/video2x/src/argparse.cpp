@@ -79,7 +79,7 @@ int parse_args(
             ("input,i", PO_STR_VALUE<video2x::fsutils::StringType>(), "Input video file path")
             ("output,o", PO_STR_VALUE<video2x::fsutils::StringType>(), "Output video file path")
             ("processor,p", PO_STR_VALUE<video2x::fsutils::StringType>(),
-                "Processor to use (libplacebo, realesrgan, rife)")
+                "Processor to use (libplacebo, realesrgan, realcugan, rife)")
             ("hwaccel,a", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("none"), "none"), "Hardware acceleration method (decoding)")
             ("device,d", po::value<uint32_t>(&arguments.vk_device_index)->default_value(0),
@@ -131,6 +131,8 @@ int parse_args(
                 ->notifier([](int v) { validate_greater_equal_one(v, "height"); }), "Output height")
             ("scaling-factor,s", po::value<int>(&proc_cfg.scaling_factor)
                 ->notifier([](int v) { validate_min(v, "scaling-factor", 2); }), "Scaling factor")
+            ("noise-level,n", po::value<int>(&proc_cfg.noise_level)
+                ->notifier([](int v) { validate_min(v, "noise-level", 0); }), "Noise level")
         ;
 
         po::options_description interp_opts("Frame interpolation options");
@@ -159,6 +161,18 @@ int parse_args(
                 ->notifier(validate_realesrgan_model_name),
                 "Name of the RealESRGAN model to use (realesr-animevideov3, realesrgan-plus-anime, "
                 "realesrgan-plus)")
+        ;
+
+        po::options_description realcugan_opts("RealCUGAN options");
+        realesrgan_opts.add_options()
+            ("realcugan-model", PO_STR_VALUE<video2x::fsutils::StringType>()
+                ->default_value(STR("models-se"), "models-se")
+                ->notifier(validate_realcugan_model_name),
+                "Name of the RealCUGAN model to use (models-nose, models-pro, models-se)")
+            ("realcugan-threads", po::value<int>()->default_value(1),
+                "Number of threads to use for RealCUGAN")
+            ("realcugan-syncgap", po::value<int>()->default_value(3),
+                "Sync gap mode; 0:no sync, 1: accurate sync: 2 = rough sync, 3: very rough sync")
         ;
 
         po::options_description rife_opts("RIFE options");
@@ -261,12 +275,12 @@ int parse_args(
                 proc_cfg.processor_type = video2x::processors::ProcessorType::Libplacebo;
             } else if (processor_type_str == STR("realesrgan")) {
                 proc_cfg.processor_type = video2x::processors::ProcessorType::RealESRGAN;
+            } else if (processor_type_str == STR("realcugan")) {
+                proc_cfg.processor_type = video2x::processors::ProcessorType::RealCUGAN;
             } else if (processor_type_str == STR("rife")) {
                 proc_cfg.processor_type = video2x::processors::ProcessorType::RIFE;
             } else {
-                video2x::logger()->critical(
-                    "Invalid processor specified. Must be 'libplacebo', 'realesrgan', or 'rife'."
-                );
+                video2x::logger()->critical("Invalid processor specified.");
                 return -1;
             }
         } else {
@@ -370,8 +384,7 @@ int parse_args(
                     );
                     return -1;
                 }
-                if (proc_cfg.scaling_factor != 2 && proc_cfg.scaling_factor != 3 &&
-                    proc_cfg.scaling_factor != 4) {
+                if (proc_cfg.scaling_factor < 2 || proc_cfg.scaling_factor > 4) {
                     video2x::logger()->critical(
                         "Scaling factor must be set to 2, 3, or 4 for RealESRGAN."
                     );
@@ -384,6 +397,47 @@ int parse_args(
                 realesrgan_config.model_name =
                     vm["realesrgan-model"].as<video2x::fsutils::StringType>();
                 proc_cfg.config = realesrgan_config;
+                break;
+            }
+            case video2x::processors::ProcessorType::RealCUGAN: {
+                if (!vm.count("realcugan-model")) {
+                    video2x::logger()->critical("RealCUGAN model name must be set for RealCUGAN.");
+                    return -1;
+                }
+                if (vm.count("realcugan-threads") && vm["realcugan-threads"].as<int>() < 1) {
+                    video2x::logger()->critical(
+                        "Number of threads must be at least 1 for RealCUGAN."
+                    );
+                    return -1;
+                }
+                if (vm.count("realcugan-syncgap") && (vm["realcugan-syncgap"].as<int>() < 0 ||
+                                                      vm["realcugan-syncgap"].as<int>() > 3)) {
+                    video2x::logger()->critical(
+                        "Sync gap mode must be set to 0, 1, 2, or 3 for RealCUGAN."
+                    );
+                    return -1;
+                }
+                if (proc_cfg.scaling_factor < 2 || proc_cfg.scaling_factor > 4) {
+                    video2x::logger()->critical(
+                        "Scaling factor must be set to 2, 3, or 4 for RealCUGAN."
+                    );
+                    return -1;
+                }
+                if (proc_cfg.noise_level < -1 || proc_cfg.noise_level > 3) {
+                    video2x::logger()->critical(
+                        "Noise level must be set to -1, 0, 1, 2, or 3 for RealCUGAN."
+                    );
+                    return -1;
+                }
+
+                proc_cfg.processor_type = video2x::processors::ProcessorType::RealCUGAN;
+                video2x::processors::RealCUGANConfig realcugan_config;
+                realcugan_config.tta_mode = false;
+                realcugan_config.model_name =
+                    vm["realcugan-model"].as<video2x::fsutils::StringType>();
+                realcugan_config.num_threads = vm["realcugan-threads"].as<int>();
+                realcugan_config.syncgap = vm["realcugan-syncgap"].as<int>();
+                proc_cfg.config = realcugan_config;
                 break;
             }
             case video2x::processors::ProcessorType::RIFE: {

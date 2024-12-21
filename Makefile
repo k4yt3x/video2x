@@ -1,7 +1,7 @@
 .PHONY: build static debug windows windows-debug debian ubuntu clean \
-	test-realesrgan test-libplacebo test-rife \
-	memcheck-realesrgan memcheck-libplacebo memcheck-rife \
-	heaptrack-realesrgan heaptrack-libplacebo heaptrack-rife
+	test-realesrgan test-realcugan test-libplacebo test-rife \
+	memcheck-realesrgan memcheck-realcugan memcheck-libplacebo memcheck-rife \
+	heaptrack-realesrgan heaptrack-realcugan heaptrack-libplacebo heaptrack-rife
 
 BINDIR=build
 CXX=clang++
@@ -130,6 +130,10 @@ test-realesrgan:
 	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
 		-p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 
+test-realcugan:
+	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-p realcugan -s 4 -n 0 --realcugan-model models-se
+
 test-libplacebo:
 	LD_LIBRARY_PATH=$(BINDIR) $(BINDIR)/video2x -i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
 		-p libplacebo -w 1920 -h 1080 --libplacebo-shader anime4k-v4-a
@@ -149,6 +153,19 @@ memcheck-realesrgan:
 		$(BINDIR)/video2x \
 		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
 		-p realesrgan -s 2 --realesrgan-model realesr-animevideov3 \
+		-e preset=veryfast -e crf=30
+
+memcheck-realcugan:
+	LD_LIBRARY_PATH=$(BINDIR) valgrind \
+		--tool=memcheck \
+		--leak-check=full \
+		--show-leak-kinds=all \
+		--track-origins=yes \
+		--show-reachable=yes \
+		--verbose --log-file="valgrind.log" \
+		$(BINDIR)/video2x \
+		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-p realcugan -s 2 -n 0 --realcugan-model models-se \
 		-e preset=veryfast -e crf=30
 
 memcheck-libplacebo:
@@ -182,6 +199,13 @@ heaptrack-realesrgan:
 		$(BINDIR)/video2x \
 		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
 		-p realesrgan -s 4 --realesrgan-model realesr-animevideov3 \
+		-e preset=veryfast -e crf=30
+
+heaptrack-realcugan:
+	LD_LIBRARY_PATH=$(BINDIR) HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
+		$(BINDIR)/video2x \
+		-i $(TEST_VIDEO) -o $(TEST_OUTPUT) \
+		-p realcugan -s 4 -n 0 --realcugan-model models-se \
 		-e preset=veryfast -e crf=30
 
 heaptrack-libplacebo:

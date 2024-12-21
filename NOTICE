@@ -10,6 +10,9 @@ The source code can be found at https://github.com/bloc97/Anime4K.
 This product depends on Real-ESRGAN ncnn Vulkan, which is available under the MIT License.
 The source code can be found at https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan.
 
+This product depends on Real-CUGAN ncnn Vulkan, which is available under the MIT License.
+The source code can be found at https://github.com/nihui/realcugan-ncnn-vulkan.
+
 This product depends on RIFE ncnn Vulkan, which is available under the MIT License.
 The source code can be found at https://github.com/nihui/rife-ncnn-vulkan.
 

@@ -27,14 +27,11 @@ Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 - genuinely works this time, with much less hassle compared to the 5.0.0 beta;
 - is blazing fast, thanks to the new optimized pipeline and the efficiency of C/C++;
 - is cross-platform, available now for both Windows and Linux;
-- offers significantly better output quality with Anime4K v4, RealESRGAN, and RIFE;
+- offers significantly better output quality with Anime4K v4, RealESRGAN, RealCUGAN, and RIFE;
 - supports two modes: filtering (upscaling) and frame interpolation;
 - supports Anime4K v4 and all custom MPV-compatible GLSL shaders;
-- supports RealESRGAN (all three models) via ncnn and Vulkan;
-- supports RIFE via ncnn and Vulkan; and
+- supports RealESRGAN, RealCUGAN, and RIFE (all models) via ncnn and Vulkan;
 - requires zero additional disk space during processing, just space for the final output.
-
-Support for RealCUGAN is coming soon.
 
 </details>
 
@@ -108,10 +105,11 @@ This project includes or depends on these following projects:
 
 | Project                                                                               | License         |
 | ------------------------------------------------------------------------------------- | --------------- |
-| [bloc97/Anime4K](https://github.com/bloc97/Anime4K)                                   | MIT License     |
 | [FFmpeg/FFmpeg](https://www.ffmpeg.org/)                                              | LGPLv2.1, GPLv2 |
-| [nihui/rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)                   | MIT License     |
 | [Tencent/ncnn](https://github.com/Tencent/ncnn)                                       | BSD 3-Clause    |
+| [bloc97/Anime4K](https://github.com/bloc97/Anime4K)                                   | MIT License     |
+| [nihui/realcugan-ncnn-vulkan](https://github.com/nihui/realcugan-ncnn-vulkan)         | MIT License     |
+| [nihui/rife-ncnn-vulkan](https://github.com/nihui/rife-ncnn-vulkan)                   | MIT License     |
 | [xinntao/Real-ESRGAN-ncnn-vulkan](https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan) | MIT License     |
 
 More licensing information can be found in the [NOTICE](NOTICE) file.
