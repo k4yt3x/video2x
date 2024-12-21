@@ -146,11 +146,7 @@ int main(int argc, char **argv) {
             }
         } else if (ch == 'q' || ch == 'Q') {
             // Abort processing
-            if (logger_sink->get_needs_newline()) {
-                putchar('\n');
-            }
             video2x::logger()->warn("Aborting gracefully; press Ctrl+C to terminate forcefully.");
-            logger_sink->set_needs_newline(false);
             video_processor.abort();
             break;
         }
@@ -209,12 +205,6 @@ int main(int argc, char **argv) {
 
     // Join the processing thread to ensure it completes before exiting
     processing_thread.join();
-
-    // Print a newline if progress bar was displayed
-    if (logger_sink->get_needs_newline()) {
-        logger_sink->set_needs_newline(false);
-        std::cout << '\n';
-    }
 
     // Print final message based on processing result
     if (video_processor.get_state() == video2x::VideoProcessorState::Aborted) {
