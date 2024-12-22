@@ -51,7 +51,11 @@ You can download the latest Windows release on the [releases page](https://githu
 
 ## [🐧 Install on Linux](https://docs.video2x.org/installing/linux.html)
 
-You can install Video2X on Arch Linux using the [video2x-git](https://aur.archlinux.org/packages/video2x-git) AUR package, or from [archlinuxcn](https://github.com/archlinuxcn/repo) repository. On Ubuntu/Debian, you can use the `.deb` package from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). If you'd like to build from source, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required packages and commands. If you'd prefer not to compile the program from source, consider using the container image below.
+Video2X packages are available for the Linux distros listed below. If you'd like to build it from source code, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required dependencies and commands. If a package is not available for your distro and you prefer not to compile the program from source code, consider using the container image outlined in the next section.
+
+- Arch Linux: AUR package [video2x-git](https://aur.archlinux.org/packages/video2x-git), maintained by K4YT3X.
+- Arch Linux (Chinese Mainland): [archlinuxcn](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x) package, maintained by [Integral](mailto:integral@archlinuxcn.org).
+- Ubuntu 24.04: `video2x-linux-ubuntu2404-amd64.deb` on the [releases page](ttps://github.com/k4yt3x/video2x/releases/latest).
 
 ## [📦 Container Image](https://docs.video2x.org/running/container.html)
 
