@@ -51,7 +51,7 @@ You can download the latest Windows release on the [releases page](https://githu
 
 ## [🐧 Install on Linux](https://docs.video2x.org/installing/linux.html)
 
-You can install Video2X on Arch Linux using the [video2x-git](https://aur.archlinux.org/packages/video2x-git) AUR package or on Ubuntu/Debian using the `.deb` package from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). If you'd like to build from source, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required packages and commands. If you'd prefer not to compile the program from source, consider using the container image below.
+You can install Video2X on Arch Linux using the [video2x-git](https://aur.archlinux.org/packages/video2x-git) AUR package, or from [archlinuxcn](https://github.com/archlinuxcn/repo) repository. On Ubuntu/Debian, you can use the `.deb` package from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). If you'd like to build from source, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required packages and commands. If you'd prefer not to compile the program from source, consider using the container image below.
 
 ## [📦 Container Image](https://docs.video2x.org/running/container.html)
 
