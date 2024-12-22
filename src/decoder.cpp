@@ -22,7 +22,7 @@ Decoder::~Decoder() {
     }
 }
 
-AVPixelFormat Decoder::get_hw_format(AVCodecContext *_, const AVPixelFormat *pix_fmts) {
+AVPixelFormat Decoder::get_hw_format(AVCodecContext *, const AVPixelFormat *pix_fmts) {
     for (const AVPixelFormat *p = pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
         if (*p == hw_pix_fmt_) {
             return *p;

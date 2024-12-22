@@ -16,6 +16,20 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# Build options
+option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
+option(VIDEO2X_BUILD_CLI "Build the video2x command line interface executable" ON)
+
+option(VIDEO2X_ENABLE_NATIVE "Enable native optimizations (-march=native)" OFF)
+option(VIDEO2X_ENABLE_X86_64_V4 "Enable x86-64-v4 optimizations (-march=x86-64-v4)" OFF)
+option(VIDEO2X_ENABLE_AVX512F "Enable AVX-512 foundation optimizations (-march=avx512f)" OFF)
+option(VIDEO2X_ENABLE_X86_64_V3 "Enable x86-64-v3 optimizations (-march=x86-64-v3)" OFF)
+option(VIDEO2X_ENABLE_AVX2 "Enable AVX2 optimizations (-march=avx2)" OFF)
+
+option(VIDEO2X_USE_EXTERNAL_NCNN "Use the system-provided ncnn library" ON)
+option(VIDEO2X_USE_EXTERNAL_SPDLOG "Use the system-provided spdlog library" ON)
+option(VIDEO2X_USE_EXTERNAL_BOOST "Use the system-provided Boost library" ON)
+
 # Set global compile options for all targets
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/W4 /permissive-)
@@ -25,30 +39,50 @@ endif()
 
 # Set the default optimization flags for Release builds
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    # Set the optimization flags for each compiler
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         add_compile_options(/Ox /Ot /GL /DNDEBUG)
         add_link_options(/LTCG /OPT:REF /OPT:ICF)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        add_compile_options(-O3 -march=native -ffunction-sections -fdata-sections)
+        add_compile_options(-O3 -ffunction-sections -fdata-sections)
         add_link_options(-Wl,-s -flto -Wl,--gc-sections)
     endif()
 endif()
 
-# Build options
-option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
-option(BUILD_VIDEO2X_CLI "Build the video2x executable" ON)
-option(USE_SYSTEM_NCNN "Use system ncnn library" ON)
-option(USE_SYSTEM_SPDLOG "Use system spdlog library" ON)
-option(USE_SYSTEM_BOOST "Use system Boost library" ON)
+# Enable the requested architecture-specific optimizations
+if(VIDEO2X_ENABLE_NATIVE)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_compile_options(/arch:NATIVE)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        add_compile_options(-march=native)
+    endif()
+elseif(VIDEO2X_ENABLE_X86_64_V4)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_compile_options(/arch:AVX2)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        add_compile_options(-march=x86-64-v4)
+    endif()
+elseif(VIDEO2X_ENABLE_AVX512F)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_compile_options(/arch:AVX512)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        add_compile_options(-mavx512f)
+    endif()
+elseif(VIDEO2X_ENABLE_X86_64_V3)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_compile_options(/arch:AVX2)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        add_compile_options(-march=x86-64-v3)
+    endif()
+elseif(VIDEO2X_ENABLE_AVX2)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_compile_options(/arch:AVX2)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        add_compile_options(-mavx2)
+    endif()
+endif()
 
-# Generate the version header file
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/libvideo2x/version.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h"
-    @ONLY
-)
-
-# Find the required packages
+# Define lists to store include directories and libraries
 set(LIBVIDEO2X_INCLUDE_DIRS)
 set(LIBVIDEO2X_LIBS)
 set(VIDEO2X_INCLUDE_DIRS)
@@ -109,7 +143,7 @@ else()
 endif() # WIN32
 
 # Find ncnn package
-if(USE_SYSTEM_NCNN)
+if(VIDEO2X_USE_EXTERNAL_NCNN)
     find_package(ncnn REQUIRED)
 else()
     option(NCNN_INSTALL_SDK "" OFF)
@@ -208,12 +242,14 @@ else()
 endif()
 
 # spdlog
-if(USE_SYSTEM_SPDLOG)
+if(VIDEO2X_USE_EXTERNAL_SPDLOG)
     find_package(spdlog REQUIRED)
     list(APPEND LIBVIDEO2X_INCLUDE_DIRS ${spdlog_INCLUDE_DIRS})
     list(APPEND VIDEO2X_INCLUDE_DIRS ${spdlog_INCLUDE_DIRS})
     set(SPDLOG_LIB spdlog::spdlog)
 else()
+    # spdlog exceptions are incompatible with ncnn
+    option(SPDLOG_NO_EXCEPTIONS "" OFF)
     add_subdirectory(third_party/spdlog)
     set(SPDLOG_LIB spdlog::spdlog_header_only)
 endif()
@@ -221,13 +257,13 @@ list(APPEND LIBVIDEO2X_LIBS ${SPDLOG_LIB})
 list(APPEND VIDEO2X_LIBS ${SPDLOG_LIB})
 
 # Find dependencies required for the CLI
-if(BUILD_VIDEO2X_CLI)
+if(VIDEO2X_BUILD_CLI)
     # Vulkan
     find_package(Vulkan REQUIRED)
     list(APPEND VIDEO2X_LIBS Vulkan::Vulkan)
 
     # Boost
-    if(USE_SYSTEM_BOOST)
+    if(VIDEO2X_USE_EXTERNAL_BOOST)
         find_package(Boost REQUIRED COMPONENTS program_options)
         list(APPEND LIBVIDEO2X_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
     else()
@@ -255,7 +291,7 @@ ExternalProject_Add(
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realesrgan_install
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-        -DUSE_SYSTEM_NCNN=${USE_SYSTEM_NCNN}
+        -DUSE_SYSTEM_NCNN=${VIDEO2X_USE_EXTERNAL_NCNN}
     BUILD_ALWAYS ON
     INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
 )
@@ -268,7 +304,7 @@ ExternalProject_Add(
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realcugan_install
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-        -DUSE_SYSTEM_NCNN=${USE_SYSTEM_NCNN}
+        -DUSE_SYSTEM_NCNN=${VIDEO2X_USE_EXTERNAL_NCNN}
     BUILD_ALWAYS ON
     INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
 )
@@ -281,7 +317,7 @@ ExternalProject_Add(
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/rife_install
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-        -DUSE_SYSTEM_NCNN=${USE_SYSTEM_NCNN}
+        -DUSE_SYSTEM_NCNN=${VIDEO2X_USE_EXTERNAL_NCNN}
     BUILD_ALWAYS ON
     INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
 )
@@ -304,6 +340,13 @@ endif()
 
 # Ensure that the shared library is built after the external projects
 add_dependencies(libvideo2x realesrgan realcugan rife)
+
+# Generate the version header file
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/libvideo2x/version.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h"
+    @ONLY
+)
 
 # Include directories for the shared library
 target_include_directories(libvideo2x PRIVATE
@@ -335,7 +378,7 @@ list(APPEND LIBVIDEO2X_LIBS ${REALESRGAN_LIB} ${REALCUGAN_LIB} ${RIFE_LIB})
 target_link_libraries(libvideo2x PRIVATE ${LIBVIDEO2X_LIBS})
 
 if(NOT WIN32)
-    if(USE_SYSTEM_NCNN)
+    if(VIDEO2X_USE_EXTERNAL_NCNN)
         target_link_libraries(libvideo2x PUBLIC ncnn)
     else()
         target_link_libraries(libvideo2x PRIVATE ncnn)
@@ -343,7 +386,7 @@ if(NOT WIN32)
 endif()
 
 # Create the executable 'video2x'
-if(BUILD_VIDEO2X_CLI)
+if(VIDEO2X_BUILD_CLI)
     file(GLOB VIDEO2X_SOURCES tools/video2x/src/*.cpp)
     add_executable(video2x ${VIDEO2X_SOURCES})
     set_target_properties(video2x PROPERTIES OUTPUT_NAME video2x)
@@ -395,8 +438,8 @@ install(TARGETS libvideo2x
 # Install model files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION ${INSTALL_MODEL_DESTINATION})
 
-# Install the executable if BUILD_VIDEO2X_CLI is enabled
-if(BUILD_VIDEO2X_CLI)
+# Install the executable if VIDEO2X_BUILD_CLI is enabled
+if(VIDEO2X_BUILD_CLI)
     install(TARGETS video2x RUNTIME DESTINATION ${INSTALL_BIN_DESTINATION})
 endif()
 

@@ -13,7 +13,8 @@ build:
 	cmake -S . -B $(BINDIR) \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
-		-DCMAKE_BUILD_TYPE=Release
+		-DCMAKE_BUILD_TYPE=Release \
+		-DVIDEO2X_ENABLE_NATIVE=ON
 	cmake --build $(BINDIR) --config Release --parallel
 	cp $(BINDIR)/compile_commands.json .
 
@@ -23,9 +24,9 @@ static:
 		-DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DBUILD_SHARED_LIBS=OFF \
-		-DUSE_SYSTEM_NCNN=OFF \
-		-DUSE_SYSTEM_SPDLOG=OFF \
-		-DUSE_SYSTEM_BOOST=OFF
+		-DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
+		-DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
+		-DVIDEO2X_USE_EXTERNAL_BOOST=OFF
 	cmake --build $(BINDIR) --config Release --parallel
 	cp $(BINDIR)/compile_commands.json .
 
@@ -39,18 +40,18 @@ debug:
 
 windows:
 	cmake -S . -B $(BINDIR) \
-		-DUSE_SYSTEM_NCNN=OFF \
-		-DUSE_SYSTEM_SPDLOG=OFF \
-		-DUSE_SYSTEM_BOOST=OFF \
+		-DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
+		-DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
+		-DVIDEO2X_USE_EXTERNAL_BOOST=OFF \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX=build/libvideo2x-shared
 	cmake --build $(BINDIR) --config Release --parallel --target install
 
 windows-debug:
 	cmake -S . -B $(BINDIR) \
-		-DUSE_SYSTEM_NCNN=OFF \
-		-DUSE_SYSTEM_SPDLOG=OFF \
-		-DUSE_SYSTEM_BOOST=OFF \
+		-DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
+		-DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
+		-DVIDEO2X_USE_EXTERNAL_BOOST=OFF \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DCMAKE_INSTALL_PREFIX=build/libvideo2x-shared
 	cmake --build $(BINDIR) --config Debug --parallel --target install
@@ -70,7 +71,7 @@ debian:
 		libomp-dev \
 		libspdlog-dev \
 		libboost-program-options-dev
-	cmake -B /tmp/build -S . -DUSE_SYSTEM_NCNN=OFF -DCMAKE_CXX_COMPILER=$(CXX) \
+	cmake -B /tmp/build -S . -DVIDEO2X_USE_EXTERNAL_NCNN=OFF -DCMAKE_CXX_COMPILER=$(CXX) \
 		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/install \
 		-DINSTALL_BIN_DESTINATION=. -DINSTALL_INCLUDE_DESTINATION=include \
 		-DINSTALL_LIB_DESTINATION=. -DINSTALL_MODEL_DESTINATION=.
@@ -90,7 +91,7 @@ ubuntu2404:
 		glslang-tools \
 		libomp-dev \
 		libboost-program-options-dev
-	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
+	cmake -B build -S . -DVIDEO2X_USE_EXTERNAL_NCNN=OFF -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
 		-DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX=video2x-linux-ubuntu-amd64/usr
 	cmake --build build --config Release --target install --parallel
@@ -115,7 +116,7 @@ ubuntu2204:
 		glslang-tools \
 		libomp-dev \
 		libboost-program-options-dev
-	cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
+	cmake -B build -S . -DVIDEO2X_USE_EXTERNAL_NCNN=OFF -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
 		-DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX=video2x-linux-ubuntu-amd64/usr
 	cmake --build build --config Release --target install --parallel

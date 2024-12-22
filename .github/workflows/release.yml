@@ -53,9 +53,10 @@ jobs:
 
       - name: Build Video2X
         run: |
-          cmake -B build -S . -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DSPDLOG_NO_EXCEPTIONS=ON \
-              -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
-              -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x-linux-ubuntu-2404-amd64/usr
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
+            -DVIDEO2X_USE_EXTERNAL_NCNN=OFF -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
+            -DCMAKE_INSTALL_PREFIX=build/video2x-linux-ubuntu-2404-amd64/usr
           cmake --build build --config Release --target install --parallel
           mkdir -p build/video2x-linux-ubuntu-2404-amd64/DEBIAN
           cp packaging/debian/control build/video2x-linux-ubuntu-2404-amd64/DEBIAN/control
@@ -107,7 +108,7 @@ jobs:
         shell: pwsh
         run: |
           cmake -S . -B build `
-            -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DUSE_SYSTEM_BOOST=OFF `
+            -DVIDEO2X_USE_EXTERNAL_NCNN=OFF -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF -DVIDEO2X_USE_EXTERNAL_BOOST=OFF `
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/video2x_install
           cmake --build build --config Release --parallel --target install
 
