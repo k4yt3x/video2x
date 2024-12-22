@@ -53,9 +53,9 @@ You can download the latest Windows release on the [releases page](https://githu
 
 Video2X packages are available for the Linux distros listed below. If you'd like to build it from source code, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required dependencies and commands. If a package is not available for your distro and you prefer not to compile the program from source code, consider using the container image outlined in the next section.
 
-- Arch Linux: AUR package [video2x-git](https://aur.archlinux.org/packages/video2x-git), maintained by K4YT3X.
+- Arch Linux: AUR package [video2x-git](https://aur.archlinux.org/packages/video2x-git), maintained by [@K4YT3X](https://github.com/k4yt3x).
 - Arch Linux (Chinese Mainland): [archlinuxcn](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x) package, maintained by [Integral](mailto:integral@archlinuxcn.org).
-- Ubuntu 24.04: `video2x-linux-ubuntu2404-amd64.deb` on the [releases page](ttps://github.com/k4yt3x/video2x/releases/latest).
+- Ubuntu 24.04: `video2x-linux-ubuntu2404-amd64.deb` on the [releases page](https://github.com/k4yt3x/video2x/releases/latest).
 
 ## [📦 Container Image](https://docs.video2x.org/running/container.html)
 
