@@ -28,6 +28,7 @@ VideoProcessor::VideoProcessor(
       hw_device_type_(hw_device_type),
       benchmark_(benchmark) {}
 
+[[gnu::target_clones("default", "avx2", "avx512f")]]
 int VideoProcessor::process(
     const std::filesystem::path in_fname,
     const std::filesystem::path out_fname
