@@ -289,7 +289,7 @@ ExternalProject_Add(
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/librealesrgan_ncnn_vulkan/src
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realesrgan_install
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realesrgan-install
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
         -DUSE_SYSTEM_NCNN=${VIDEO2X_USE_EXTERNAL_NCNN}
     BUILD_ALWAYS ON
@@ -302,7 +302,7 @@ ExternalProject_Add(
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/librealcugan_ncnn_vulkan/src
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realcugan_install
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/realcugan-install
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
         -DUSE_SYSTEM_NCNN=${VIDEO2X_USE_EXTERNAL_NCNN}
     BUILD_ALWAYS ON
@@ -315,7 +315,7 @@ ExternalProject_Add(
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/librife_ncnn_vulkan/src
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/rife_install
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/rife-install
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
         -DUSE_SYSTEM_NCNN=${VIDEO2X_USE_EXTERNAL_NCNN}
     BUILD_ALWAYS ON
@@ -343,7 +343,7 @@ add_dependencies(libvideo2x realesrgan realcugan rife)
 
 # Generate the version header file
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/libvideo2x/version.h.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in"
     "${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h"
     @ONLY
 )
@@ -364,13 +364,13 @@ target_compile_options(libvideo2x PRIVATE -fPIC $<$<CONFIG:Debug>:-g -DDEBUG>)
 
 # Define the paths to the shared libraries
 if(WIN32)
-    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.lib)
-    set(REALCUGAN_LIB ${CMAKE_BINARY_DIR}/realcugan_install/lib/librealcugan-ncnn-vulkan.lib)
-    set(RIFE_LIB ${CMAKE_BINARY_DIR}/rife_install/lib/librife-ncnn-vulkan.lib)
+    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan-install/lib/librealesrgan-ncnn-vulkan.lib)
+    set(REALCUGAN_LIB ${CMAKE_BINARY_DIR}/realcugan-install/lib/librealcugan-ncnn-vulkan.lib)
+    set(RIFE_LIB ${CMAKE_BINARY_DIR}/rife-install/lib/librife-ncnn-vulkan.lib)
 else()
-    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan_install/lib/librealesrgan-ncnn-vulkan.so)
-    set(REALCUGAN_LIB ${CMAKE_BINARY_DIR}/realcugan_install/lib/librealcugan-ncnn-vulkan.so)
-    set(RIFE_LIB ${CMAKE_BINARY_DIR}/rife_install/lib/librife-ncnn-vulkan.so)
+    set(REALESRGAN_LIB ${CMAKE_BINARY_DIR}/realesrgan-install/lib/librealesrgan-ncnn-vulkan.so)
+    set(REALCUGAN_LIB ${CMAKE_BINARY_DIR}/realcugan-install/lib/librealcugan-ncnn-vulkan.so)
+    set(RIFE_LIB ${CMAKE_BINARY_DIR}/rife-install/lib/librife-ncnn-vulkan.so)
 endif()
 list(APPEND LIBVIDEO2X_LIBS ${REALESRGAN_LIB} ${REALCUGAN_LIB} ${RIFE_LIB})
 
@@ -385,7 +385,7 @@ if(NOT WIN32)
     endif()
 endif()
 
-# Create the executable 'video2x'
+# Build the Video2X CLI executable
 if(VIDEO2X_BUILD_CLI)
     file(GLOB VIDEO2X_SOURCES tools/video2x/src/*.cpp)
     add_executable(video2x ${VIDEO2X_SOURCES})
@@ -424,59 +424,81 @@ set(INSTALL_BIN_DESTINATION ${BIN_DESTINATION_DEFAULT} CACHE STRING "")
 set(INSTALL_INCLUDE_DESTINATION ${INCLUDE_DESTINATION_DEFAULT} CACHE STRING "")
 set(INSTALL_LIB_DESTINATION ${LIB_DESTINATION_DEFAULT} CACHE STRING "")
 set(INSTALL_MODEL_DESTINATION ${MODEL_DESTINATION_DEFAULT} CACHE STRING "")
+set(INSTALL_CMAKE_DESTINATION "${LIB_DESTINATION_DEFAULT}/cmake/Video2X" CACHE PATH "")
 
 # Common installation rules for libvideo2x and models
 install(TARGETS libvideo2x
+    EXPORT Video2XTargets
     LIBRARY DESTINATION ${INSTALL_LIB_DESTINATION}
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
     ARCHIVE DESTINATION ${INSTALL_LIB_DESTINATION}
     RUNTIME DESTINATION ${INSTALL_BIN_DESTINATION}
+)
+
+# Install the header files from the include directory
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/libvideo2x/
+    DESTINATION ${INSTALL_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h"
+)
+
+# Install the generated version.h file
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
+    DESTINATION ${INSTALL_INCLUDE_DESTINATION}
+)
+
+# Export targets and create CMake package config
+install(EXPORT Video2XTargets
+    FILE Video2XTargets.cmake
+    NAMESPACE Video2X::
+    DESTINATION ${INSTALL_CMAKE_DESTINATION}
+)
+
+# Generate the CMake package config file
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Video2XConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/Video2XConfig.cmake"
+    INSTALL_DESTINATION ${INSTALL_CMAKE_DESTINATION}
+)
+
+# Install the CMake package config file
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/Video2XConfig.cmake"
+    DESTINATION ${INSTALL_CMAKE_DESTINATION}
 )
 
 # Install model files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/models DESTINATION ${INSTALL_MODEL_DESTINATION})
 
-# Install the executable if VIDEO2X_BUILD_CLI is enabled
-if(VIDEO2X_BUILD_CLI)
-    install(TARGETS video2x RUNTIME DESTINATION ${INSTALL_BIN_DESTINATION})
-endif()
-
-# Install the header files
-file(GLOB HEADER_FILES ${PROJECT_SOURCE_DIR}/include/libvideo2x/*.h)
-install(FILES
-    ${HEADER_FILES}
-    ${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h
-    DESTINATION ${INSTALL_INCLUDE_DESTINATION}
-)
-
 # Platform-specific installation rules
 if(WIN32)
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(BOOST_DLL_PATH ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-x64-1_86.dll)
-    else()
-        set(BOOST_DLL_PATH ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-gd-x64-1_86.dll)
-    endif()
-
     file(GLOB FFMPEG_DLLS "${FFMPEG_BASE_PATH}/bin/*.dll")
     install(FILES
-        ${CMAKE_BINARY_DIR}/realesrgan_install/bin/librealesrgan-ncnn-vulkan.dll
-        ${CMAKE_BINARY_DIR}/realcugan_install/bin/librealcugan-ncnn-vulkan.dll
-        ${CMAKE_BINARY_DIR}/rife_install/bin/librife-ncnn-vulkan.dll
+        ${CMAKE_BINARY_DIR}/realesrgan-install/bin/librealesrgan-ncnn-vulkan.dll
+        ${CMAKE_BINARY_DIR}/realcugan-install/bin/librealcugan-ncnn-vulkan.dll
+        ${CMAKE_BINARY_DIR}/rife-install/bin/librife-ncnn-vulkan.dll
         ${FFMPEG_DLLS}
         ${NCNN_BASE_PATH}/bin/ncnn.dll
-        ${BOOST_DLL_PATH}
         DESTINATION ${INSTALL_BIN_DESTINATION}
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
     )
 else()
     install(FILES ${REALESRGAN_LIB} ${REALCUGAN_LIB} ${RIFE_LIB}
         DESTINATION ${INSTALL_LIB_DESTINATION}
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
     )
 endif()
+
+# Install the Video2X CLI executable
+if(VIDEO2X_BUILD_CLI)
+    install(TARGETS video2x RUNTIME DESTINATION ${INSTALL_BIN_DESTINATION})
+
+    # Install the Boost DLL
+    if(WIN32 AND NOT VIDEO2X_USE_EXTERNAL_BOOST)
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(BOOST_DLL_PATH ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-x64-1_86.dll)
+        else()
+            set(BOOST_DLL_PATH ${BOOST_BASE_PATH}/boost_program_options-vc143-mt-gd-x64-1_86.dll)
+        endif()
+        install(FILES ${BOOST_DLL_PATH} DESTINATION ${INSTALL_BIN_DESTINATION})
+    endif()
+endif()
+

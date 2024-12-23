@@ -13,9 +13,10 @@ build:
 	cmake -S . -B $(BINDIR) \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
+		-DCMAKE_INSTALL_PREFIX=$(BINDIR)/video2x-install \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DVIDEO2X_ENABLE_NATIVE=ON
-	cmake --build $(BINDIR) --config Release --parallel
+	cmake --build $(BINDIR) --config Release --parallel --target install
 	cp $(BINDIR)/compile_commands.json .
 
 static:
@@ -27,7 +28,7 @@ static:
 		-DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
 		-DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
 		-DVIDEO2X_USE_EXTERNAL_BOOST=OFF
-	cmake --build $(BINDIR) --config Release --parallel
+	cmake --build $(BINDIR) --config Release --parallel --target install
 	cp $(BINDIR)/compile_commands.json .
 
 debug:
