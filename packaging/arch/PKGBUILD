@@ -1,18 +1,19 @@
 pkgname=video2x-git
-pkgver=0
+pkgver=6.0.0
 pkgrel=1
 pkgdesc="A machine learning-based video super resolution and frame interpolation framework"
 arch=('x86_64')
 url="https://github.com/k4yt3x/video2x"
-license=('AGPL3')
+license=('AGPL-3.0-only')
 depends=('ffmpeg' 'ncnn' 'vulkan-driver' 'spdlog' 'boost-libs')
 makedepends=('git' 'cmake' 'clang' 'vulkan-headers' 'openmp' 'boost')
 
 pkgver() {
-    git describe --long --tags --abbrev=7 | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
 }
 
 prepare() {
+    git rm ../third_party/{ncnn,spdlog,boost}
     git submodule update --init --recursive
 }
 
