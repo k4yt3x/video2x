@@ -133,6 +133,7 @@ Special thanks to the following individuals for their significant contributions 
 
 - [@ArchieMeng](https://github.com/archiemeng)
 - [@BrianPetkovsek](https://github.com/BrianPetkovsek)
+- [@Integral-Tech](https://github.com/Integral-Tech)
 - [@ddouglas87](https://github.com/ddouglas87)
 - [@lhanjian](https://github.com/lhanjian)
 - [@nihui](https://github.com/nihui)
