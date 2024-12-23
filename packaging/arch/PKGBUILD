@@ -1,5 +1,5 @@
-pkgname=video2x
-pkgver=r958.996b0bf
+pkgname=video2x-git
+pkgver=0
 pkgrel=1
 pkgdesc="A machine learning-based video super resolution and frame interpolation framework"
 arch=('x86_64')
@@ -9,7 +9,7 @@ depends=('ffmpeg' 'ncnn' 'vulkan-driver' 'spdlog' 'boost-libs')
 makedepends=('git' 'cmake' 'clang' 'vulkan-headers' 'openmp' 'boost')
 
 pkgver() {
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+    git describe --long --tags --abbrev=7 | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
 }
 
 prepare() {
