@@ -249,7 +249,7 @@ if(VIDEO2X_USE_EXTERNAL_SPDLOG)
     set(SPDLOG_LIB spdlog::spdlog)
 else()
     # spdlog exceptions are incompatible with ncnn
-    option(SPDLOG_NO_EXCEPTIONS "" OFF)
+    option(SPDLOG_NO_EXCEPTIONS "" ON)
     add_subdirectory(third_party/spdlog)
     set(SPDLOG_LIB spdlog::spdlog_header_only)
 endif()
