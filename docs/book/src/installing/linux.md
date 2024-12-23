@@ -5,6 +5,7 @@ Video2X packages are available for the Linux distros listed below. If you'd like
 ## Arch Linux
 
 - AUR packages, maintained by [@K4YT3X](https://github.com/k4yt3x).
+  - [aur/video2x](https://aur.archlinux.org/packages/video2x)
   - [aur/video2x-git](https://aur.archlinux.org/packages/video2x-git)
   - [aur/video2x-qt6](https://aur.archlinux.org/packages/video2x-qt6)
   - [aur/video2x-qt6-git](https://aur.archlinux.org/packages/video2x-qt6-git)
