@@ -3,7 +3,7 @@ project(video2x VERSION 6.3.1 LANGUAGES CXX)
 
 # The FindBoost module is removed in CMake 3.30
 if(POLICY CMP0167)
-  cmake_policy(SET CMP0167 NEW)
+    cmake_policy(SET CMP0167 NEW)
 endif()
 
 # Set the C++ standard
@@ -20,11 +20,9 @@ endif()
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
 option(VIDEO2X_BUILD_CLI "Build the video2x command line interface executable" ON)
 
-option(VIDEO2X_ENABLE_NATIVE "Enable native optimizations (-march=native)" OFF)
-option(VIDEO2X_ENABLE_X86_64_V4 "Enable x86-64-v4 optimizations (-march=x86-64-v4)" OFF)
-option(VIDEO2X_ENABLE_AVX512F "Enable AVX-512 foundation optimizations (-march=avx512f)" OFF)
-option(VIDEO2X_ENABLE_X86_64_V3 "Enable x86-64-v3 optimizations (-march=x86-64-v3)" OFF)
-option(VIDEO2X_ENABLE_AVX2 "Enable AVX2 optimizations (-march=avx2)" OFF)
+option(VIDEO2X_ENABLE_NATIVE "Enable optimizations for the native architecture" OFF)
+option(VIDEO2X_ENABLE_X86_64_V4 "Enable x86-64-v4 (AVX-512) optimizations" OFF)
+option(VIDEO2X_ENABLE_X86_64_V3 "Enable x86-64-v3 (AVX2) optimizations" OFF)
 
 option(VIDEO2X_USE_EXTERNAL_NCNN "Use the system-provided ncnn library" ON)
 option(VIDEO2X_USE_EXTERNAL_SPDLOG "Use the system-provided spdlog library" ON)
@@ -58,27 +56,15 @@ if(VIDEO2X_ENABLE_NATIVE)
     endif()
 elseif(VIDEO2X_ENABLE_X86_64_V4)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        add_compile_options(/arch:AVX2)
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        add_compile_options(-march=x86-64-v4)
-    endif()
-elseif(VIDEO2X_ENABLE_AVX512F)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         add_compile_options(/arch:AVX512)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        add_compile_options(-mavx512f)
+        add_compile_options(-march=x86-64-v4)
     endif()
 elseif(VIDEO2X_ENABLE_X86_64_V3)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         add_compile_options(/arch:AVX2)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(-march=x86-64-v3)
-    endif()
-elseif(VIDEO2X_ENABLE_AVX2)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        add_compile_options(/arch:AVX2)
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        add_compile_options(-mavx2)
     endif()
 endif()
 
@@ -359,8 +345,12 @@ target_include_directories(libvideo2x PRIVATE
     ${PROJECT_SOURCE_DIR}/third_party/librife_ncnn_vulkan/src
 )
 
-# Compile options for the shared library
-target_compile_options(libvideo2x PRIVATE -fPIC $<$<CONFIG:Debug>:-g -DDEBUG>)
+# Set the compile options for the shared library
+if(MSVC)
+    target_compile_options(libvideo2x PRIVATE $<$<CONFIG:Debug>:/Zi /DDEBUG>)
+else()
+    target_compile_options(libvideo2x PRIVATE -fPIC $<$<CONFIG:Debug>:-g -DDEBUG>)
+endif()
 
 # Define the paths to the shared libraries
 if(WIN32)
@@ -501,4 +491,3 @@ if(VIDEO2X_BUILD_CLI)
         install(FILES ${BOOST_DLL_PATH} DESTINATION ${INSTALL_BIN_DESTINATION})
     endif()
 endif()
-
