@@ -155,8 +155,13 @@ int Encoder::init(
         std::string opt_value_str = fsutils::wstring_to_u8string(opt_value);
         spdlog::debug("Setting encoder option '{}' to '{}'", opt_name_str, opt_value_str);
 
-        if (av_opt_set(enc_ctx_->priv_data, opt_name_str.c_str(), opt_value_str.c_str(), 0) < 0) {
-            spdlog::warn("Failed to set encoder option '{}' to '{}'", opt_name_str, opt_value_str);
+        ret = av_opt_set(enc_ctx_->priv_data, opt_name_str.c_str(), opt_value_str.c_str(), 0);
+        if (ret < 0) {
+            char errbuf[AV_ERROR_MAX_STRING_SIZE];
+            av_strerror(ret, errbuf, sizeof(errbuf));
+            spdlog::warn(
+                "Failed to set encoder option '{}' to '{}': {}", opt_name_str, opt_value_str, errbuf
+            );
         }
     }
 
@@ -166,7 +171,8 @@ int Encoder::init(
     }
 
     // Open the encoder
-    if ((ret = avcodec_open2(enc_ctx_, encoder, nullptr)) < 0) {
+    ret = avcodec_open2(enc_ctx_, encoder, nullptr);
+    if (ret < 0) {
         logger()->error("Cannot open video encoder");
         return ret;
     }
@@ -178,6 +184,7 @@ int Encoder::init(
         return ret;
     }
 
+    // Copy time base and frame rate from the encoder context
     out_vstream->time_base = enc_ctx_->time_base;
     out_vstream->avg_frame_rate = enc_ctx_->framerate;
     out_vstream->r_frame_rate = enc_ctx_->framerate;
