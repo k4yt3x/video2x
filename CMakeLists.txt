@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(video2x VERSION 6.3.1 LANGUAGES CXX)
 
 # The FindBoost module is removed in CMake 3.30
@@ -346,10 +346,10 @@ target_include_directories(libvideo2x PRIVATE
 )
 
 # Set the compile options for the shared library
-if(MSVC)
-    target_compile_options(libvideo2x PRIVATE $<$<CONFIG:Debug>:/Zi /DDEBUG>)
-else()
-    target_compile_options(libvideo2x PRIVATE -fPIC $<$<CONFIG:Debug>:-g -DDEBUG>)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(libvideo2x PRIVATE $<$<CONFIG:Debug>:/Zi /Od /MDd>)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(libvideo2x PRIVATE -fPIC $<$<CONFIG:Debug>:-g -O0>)
 endif()
 
 # Define the paths to the shared libraries

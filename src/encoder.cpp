@@ -254,7 +254,7 @@ int Encoder::init(
     return 0;
 }
 
-[[gnu::target_clones("default", "avx2", "avx512f")]]
+[[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
 int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
     AVFrame *converted_frame = nullptr;
     int ret;
@@ -326,7 +326,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
     return 0;
 }
 
-[[gnu::target_clones("default", "avx2", "avx512f")]]
+[[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
 int Encoder::flush() {
     int ret;
     AVPacket *enc_pkt = av_packet_alloc();
