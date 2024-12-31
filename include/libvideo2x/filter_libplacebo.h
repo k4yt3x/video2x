@@ -19,7 +19,7 @@ class FilterLibplacebo : public Filter {
     // Constructor
     FilterLibplacebo(
         uint32_t vk_device_index,
-        const std::filesystem::path &shader_path,
+        const std::filesystem::path& shader_path,
         int width,
         int height
     );
@@ -28,30 +28,30 @@ class FilterLibplacebo : public Filter {
     virtual ~FilterLibplacebo() override;
 
     // Initializes the filter with decoder and encoder contexts
-    int init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *hw_ctx) override;
+    int init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef* hw_ctx) override;
 
     // Processes an input frame and returns the processed frame
-    int filter(AVFrame *in_frame, AVFrame **out_frame) override;
+    int filter(AVFrame* in_frame, AVFrame** out_frame) override;
 
     // Flushes any remaining frames
-    int flush(std::vector<AVFrame *> &flushed_frames) override;
+    int flush(std::vector<AVFrame*>& flushed_frames) override;
 
     // Returns the filter's type
     ProcessorType get_processor_type() const override { return ProcessorType::Libplacebo; }
 
     // Returns the filter's output dimensions
     void get_output_dimensions(
-        const ProcessorConfig &proc_cfg,
+        const ProcessorConfig& proc_cfg,
         int in_width,
         int in_height,
-        int &out_width,
-        int &out_height
+        int& out_width,
+        int& out_height
     ) const override;
 
    private:
-    AVFilterGraph *filter_graph_;
-    AVFilterContext *buffersrc_ctx_;
-    AVFilterContext *buffersink_ctx_;
+    AVFilterGraph* filter_graph_;
+    AVFilterContext* buffersrc_ctx_;
+    AVFilterContext* buffersink_ctx_;
     uint32_t vk_device_index_;
     const std::filesystem::path shader_path_;
     int width_;

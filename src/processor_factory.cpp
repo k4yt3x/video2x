@@ -13,7 +13,7 @@ namespace video2x {
 namespace processors {
 
 // Access the singleton instance
-ProcessorFactory &ProcessorFactory::instance() {
+ProcessorFactory& ProcessorFactory::instance() {
     static ProcessorFactory factory;
 
     // Ensure default processors are registered only once
@@ -33,7 +33,7 @@ void ProcessorFactory::register_processor(ProcessorType type, Creator creator) {
 
 // Create a processor instance
 std::unique_ptr<Processor> ProcessorFactory::create_processor(
-    const ProcessorConfig &proc_cfg,
+    const ProcessorConfig& proc_cfg,
     uint32_t vk_device_index
 ) const {
     auto it = creators.find(proc_cfg.processor_type);
@@ -49,12 +49,12 @@ std::unique_ptr<Processor> ProcessorFactory::create_processor(
 }
 
 // Initialize default processors
-void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
+void ProcessorFactory::init_default_processors(ProcessorFactory& factory) {
     factory.register_processor(
         ProcessorType::Libplacebo,
-        [](const ProcessorConfig &proc_cfg,
+        [](const ProcessorConfig& proc_cfg,
            uint32_t vk_device_index) -> std::unique_ptr<Processor> {
-            const auto &config = std::get<LibplaceboConfig>(proc_cfg.config);
+            const auto& config = std::get<LibplaceboConfig>(proc_cfg.config);
             if (config.shader_path.empty()) {
                 logger()->critical("Shader path must be provided for the libplacebo filter");
                 return nullptr;
@@ -76,9 +76,9 @@ void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
 
     factory.register_processor(
         ProcessorType::RealESRGAN,
-        [](const ProcessorConfig &proc_cfg,
+        [](const ProcessorConfig& proc_cfg,
            uint32_t vk_device_index) -> std::unique_ptr<Processor> {
-            const auto &config = std::get<RealESRGANConfig>(proc_cfg.config);
+            const auto& config = std::get<RealESRGANConfig>(proc_cfg.config);
             if (proc_cfg.scaling_factor <= 0) {
                 logger()->critical("Scaling factor must be provided for the RealESRGAN filter");
                 return nullptr;
@@ -98,9 +98,9 @@ void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
 
     factory.register_processor(
         ProcessorType::RealCUGAN,
-        [](const ProcessorConfig &proc_cfg,
+        [](const ProcessorConfig& proc_cfg,
            uint32_t vk_device_index) -> std::unique_ptr<Processor> {
-            const auto &config = std::get<RealCUGANConfig>(proc_cfg.config);
+            const auto& config = std::get<RealCUGANConfig>(proc_cfg.config);
             if (proc_cfg.scaling_factor <= 0) {
                 logger()->critical("Scaling factor must be provided for the RealCUGAN filter");
                 return nullptr;
@@ -123,9 +123,9 @@ void ProcessorFactory::init_default_processors(ProcessorFactory &factory) {
 
     factory.register_processor(
         ProcessorType::RIFE,
-        [](const ProcessorConfig &proc_cfg,
+        [](const ProcessorConfig& proc_cfg,
            uint32_t vk_device_index) -> std::unique_ptr<Processor> {
-            const auto &cfg = std::get<RIFEConfig>(proc_cfg.config);
+            const auto& cfg = std::get<RIFEConfig>(proc_cfg.config);
             if (cfg.model_name.empty()) {
                 logger()->critical("Model name must be provided for the RIFE filter");
                 return nullptr;

@@ -20,15 +20,15 @@ typedef std::wstring StringType;
 typedef std::string StringType;
 #endif
 
-bool filepath_is_readable(const std::filesystem::path &path);
+bool filepath_is_readable(const std::filesystem::path& path);
 
-std::filesystem::path find_resource_file(const std::filesystem::path &path);
+std::filesystem::path find_resource_file(const std::filesystem::path& path);
 
-std::string path_to_u8string(const std::filesystem::path &path);
+std::string path_to_u8string(const std::filesystem::path& path);
 
-std::string wstring_to_u8string(const fsutils::StringType &wstr);
+std::string wstring_to_u8string(const fsutils::StringType& wstr);
 
-fsutils::StringType path_to_string_type(const std::filesystem::path &path);
+fsutils::StringType path_to_string_type(const std::filesystem::path& path);
 
 fsutils::StringType to_string_type(int value);
 

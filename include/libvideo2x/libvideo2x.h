@@ -51,33 +51,33 @@ class LIBVIDEO2X_API VideoProcessor {
 
    private:
     [[nodiscard]] int process_frames(
-        decoder::Decoder &decoder,
-        encoder::Encoder &encoder,
-        std::unique_ptr<processors::Processor> &processor
+        decoder::Decoder& decoder,
+        encoder::Encoder& encoder,
+        std::unique_ptr<processors::Processor>& processor
     );
 
-    [[nodiscard]] int write_frame(AVFrame *frame, encoder::Encoder &encoder);
+    [[nodiscard]] int write_frame(AVFrame* frame, encoder::Encoder& encoder);
 
     [[nodiscard]] inline int write_raw_packet(
-        AVPacket *packet,
-        AVFormatContext *ifmt_ctx,
-        AVFormatContext *ofmt_ctx,
-        int *stream_map
+        AVPacket* packet,
+        AVFormatContext* ifmt_ctx,
+        AVFormatContext* ofmt_ctx,
+        int* stream_map
     );
 
     [[nodiscard]] inline int process_filtering(
-        std::unique_ptr<processors::Processor> &processor,
-        encoder::Encoder &encoder,
-        AVFrame *frame,
-        AVFrame *proc_frame
+        std::unique_ptr<processors::Processor>& processor,
+        encoder::Encoder& encoder,
+        AVFrame* frame,
+        AVFrame* proc_frame
     );
 
     [[nodiscard]] inline int process_interpolation(
-        std::unique_ptr<processors::Processor> &processor,
-        encoder::Encoder &encoder,
-        std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)> &prev_frame,
-        AVFrame *frame,
-        AVFrame *proc_frame
+        std::unique_ptr<processors::Processor>& processor,
+        encoder::Encoder& encoder,
+        std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>& prev_frame,
+        AVFrame* frame,
+        AVFrame* proc_frame
     );
 
     processors::ProcessorConfig proc_cfg_;

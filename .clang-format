@@ -1,0 +1,8 @@
+BasedOnStyle: Chromium
+AlignAfterOpenBracket: BlockIndent
+AllowShortEnumsOnASingleLine: false
+BinPackArguments: false
+BreakStringLiterals: false
+ColumnLimit: 100
+IndentWidth: 4
+InsertBraces: true

@@ -54,11 +54,11 @@ static std::filesystem::path get_executable_directory() {
 }
 #endif  // _WIN32
 
-bool filepath_is_readable(const std::filesystem::path &path) {
+bool filepath_is_readable(const std::filesystem::path& path) {
 #if _WIN32
-    FILE *fp = _wfopen(path.c_str(), L"rb");
+    FILE* fp = _wfopen(path.c_str(), L"rb");
 #else   // _WIN32
-    FILE *fp = fopen(path.c_str(), "rb");
+    FILE* fp = fopen(path.c_str(), "rb");
 #endif  // _WIN32
     if (!fp) {
         return false;
@@ -68,7 +68,7 @@ bool filepath_is_readable(const std::filesystem::path &path) {
     return true;
 }
 
-std::filesystem::path find_resource_file(const std::filesystem::path &path) {
+std::filesystem::path find_resource_file(const std::filesystem::path& path) {
     if (filepath_is_readable(path)) {
         return path;
     }
@@ -80,7 +80,7 @@ std::filesystem::path find_resource_file(const std::filesystem::path &path) {
     return get_executable_directory() / path;
 }
 
-std::string path_to_u8string(const std::filesystem::path &path) {
+std::string path_to_u8string(const std::filesystem::path& path) {
 #if _WIN32
     std::wstring wide_path = path.wstring();
     int buffer_size =
@@ -99,7 +99,7 @@ std::string path_to_u8string(const std::filesystem::path &path) {
 }
 
 #ifdef _WIN32
-std::string wstring_to_u8string(const std::wstring &wstr) {
+std::string wstring_to_u8string(const std::wstring& wstr) {
     if (wstr.empty()) {
         return std::string();
     }
@@ -120,12 +120,12 @@ std::string wstring_to_u8string(const std::wstring &wstr) {
     return converted_str;
 }
 #else
-std::string wstring_to_u8string(const std::string &str) {
+std::string wstring_to_u8string(const std::string& str) {
     return str;
 }
 #endif
 
-fsutils::StringType path_to_string_type(const std::filesystem::path &path) {
+fsutils::StringType path_to_string_type(const std::filesystem::path& path) {
 #if _WIN32
     return path.wstring();
 #else

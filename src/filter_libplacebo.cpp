@@ -13,7 +13,7 @@ namespace processors {
 
 FilterLibplacebo::FilterLibplacebo(
     uint32_t vk_device_index,
-    const std::filesystem::path &shader_path,
+    const std::filesystem::path& shader_path,
     int width,
     int height
 )
@@ -40,7 +40,7 @@ FilterLibplacebo::~FilterLibplacebo() {
     }
 }
 
-int FilterLibplacebo::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *) {
+int FilterLibplacebo::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {
     // Construct the shader path
     std::filesystem::path shader_full_path;
     if (fsutils::filepath_is_readable(shader_path_)) {
@@ -85,7 +85,7 @@ int FilterLibplacebo::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     return ret;
 }
 
-int FilterLibplacebo::filter(AVFrame *in_frame, AVFrame **out_frame) {
+int FilterLibplacebo::filter(AVFrame* in_frame, AVFrame** out_frame) {
     int ret;
 
     // Get the filtered frame
@@ -116,7 +116,7 @@ int FilterLibplacebo::filter(AVFrame *in_frame, AVFrame **out_frame) {
     return 0;
 }
 
-int FilterLibplacebo::flush(std::vector<AVFrame *> &flushed_frames) {
+int FilterLibplacebo::flush(std::vector<AVFrame*>& flushed_frames) {
     int ret = av_buffersrc_add_frame(buffersrc_ctx_, nullptr);
     if (ret < 0) {
         logger()->error("Error while flushing filter graph");
@@ -125,7 +125,7 @@ int FilterLibplacebo::flush(std::vector<AVFrame *> &flushed_frames) {
 
     // Retrieve all remaining frames from the filter graph
     while (1) {
-        AVFrame *filt_frame = av_frame_alloc();
+        AVFrame* filt_frame = av_frame_alloc();
         if (filt_frame == nullptr) {
             return AVERROR(ENOMEM);
         }
@@ -151,11 +151,11 @@ int FilterLibplacebo::flush(std::vector<AVFrame *> &flushed_frames) {
 }
 
 void FilterLibplacebo::get_output_dimensions(
-    const ProcessorConfig &proc_cfg,
+    const ProcessorConfig& proc_cfg,
     int,
     int,
-    int &out_width,
-    int &out_height
+    int& out_width,
+    int& out_height
 ) const {
     out_width = proc_cfg.width;
     out_height = proc_cfg.height;

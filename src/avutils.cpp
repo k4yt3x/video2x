@@ -15,7 +15,7 @@ extern "C" {
 namespace video2x {
 namespace avutils {
 
-AVRational get_video_frame_rate(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
+AVRational get_video_frame_rate(AVFormatContext* ifmt_ctx, int in_vstream_idx) {
     AVRational frame_rate = ifmt_ctx->streams[in_vstream_idx]->avg_frame_rate;
     if (frame_rate.num == 0 && frame_rate.den == 0) {
         frame_rate = ifmt_ctx->streams[in_vstream_idx]->r_frame_rate;
@@ -32,7 +32,7 @@ AVRational get_video_frame_rate(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
     return frame_rate;
 }
 
-int64_t get_video_frame_count(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
+int64_t get_video_frame_count(AVFormatContext* ifmt_ctx, int in_vstream_idx) {
     // Use the 'nb_frames' field if it is available
     int64_t nb_frames = ifmt_ctx->streams[in_vstream_idx]->nb_frames;
     if (nb_frames != AV_NOPTS_VALUE && nb_frames > 0) {
@@ -67,15 +67,15 @@ int64_t get_video_frame_count(AVFormatContext *ifmt_ctx, int in_vstream_idx) {
     return static_cast<int64_t>(duration_secs * fps);
 }
 
-AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat target_pix_fmt) {
+AVPixelFormat get_encoder_default_pix_fmt(const AVCodec* encoder, AVPixelFormat target_pix_fmt) {
     int ret;
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
 
     // Retrieve the list of supported pixel formats
 #if LIBAVCODEC_BUILD >= AV_VERSION_INT(61, 13, 100)
-    const AVPixelFormat *supported_pix_fmts = nullptr;
+    const AVPixelFormat* supported_pix_fmts = nullptr;
     ret = avcodec_get_supported_config(
-        nullptr, encoder, AV_CODEC_CONFIG_PIX_FORMAT, 0, (const void **)&supported_pix_fmts, nullptr
+        nullptr, encoder, AV_CODEC_CONFIG_PIX_FORMAT, 0, (const void**)&supported_pix_fmts, nullptr
     );
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
@@ -93,11 +93,11 @@ AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat 
         }
     }
 #else
-    const AVPixelFormat *supported_pix_fmts = encoder->pix_fmts;
+    const AVPixelFormat* supported_pix_fmts = encoder->pix_fmts;
 #endif
 
     // Determine if the target pixel format has an alpha channel
-    const AVPixFmtDescriptor *desc = nullptr;
+    const AVPixFmtDescriptor* desc = nullptr;
     int has_alpha = 0;
     if (target_pix_fmt != AV_PIX_FMT_NONE) {
         desc = av_pix_fmt_desc_get(target_pix_fmt);
@@ -106,7 +106,7 @@ AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat 
 
     // Iterate over supported pixel formats to find the best match
     AVPixelFormat best_pix_fmt = AV_PIX_FMT_NONE;
-    for (const AVPixelFormat *p = supported_pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
+    for (const AVPixelFormat* p = supported_pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
         if (target_pix_fmt != AV_PIX_FMT_NONE) {
             best_pix_fmt =
                 av_find_best_pix_fmt_of_2(best_pix_fmt, *p, target_pix_fmt, has_alpha, nullptr);
@@ -136,7 +136,7 @@ AVPixelFormat get_encoder_default_pix_fmt(const AVCodec *encoder, AVPixelFormat 
 }
 
 [[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
-float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
+float get_frame_diff(AVFrame* frame1, AVFrame* frame2) {
     if (!frame1 || !frame2) {
         logger()->error("Invalid frame(s) provided for comparison");
         return -1.0f;
@@ -152,8 +152,8 @@ float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
 
     // Convert both frames to the target pixel format using the provided function
     AVPixelFormat target_pix_fmt = AV_PIX_FMT_RGB24;
-    AVFrame *rgb_frame1 = conversions::convert_avframe_pix_fmt(frame1, target_pix_fmt);
-    AVFrame *rgb_frame2 = conversions::convert_avframe_pix_fmt(frame2, target_pix_fmt);
+    AVFrame* rgb_frame1 = conversions::convert_avframe_pix_fmt(frame1, target_pix_fmt);
+    AVFrame* rgb_frame2 = conversions::convert_avframe_pix_fmt(frame2, target_pix_fmt);
 
     if (!rgb_frame1 || !rgb_frame2) {
         logger()->error("Failed to convert frames to target pixel format");
@@ -171,8 +171,8 @@ float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
 
     // Calculate difference pixel by pixel
     for (int y = 0; y < height; y++) {
-        uint8_t *ptr1 = rgb_frame1->data[0] + y * rgb_frame1->linesize[0];
-        uint8_t *ptr2 = rgb_frame2->data[0] + y * rgb_frame2->linesize[0];
+        uint8_t* ptr1 = rgb_frame1->data[0] + y * rgb_frame1->linesize[0];
+        uint8_t* ptr2 = rgb_frame2->data[0] + y * rgb_frame2->linesize[0];
         for (int x = 0; x < width * 3; x++) {
             sum_diff +=
                 static_cast<uint64_t>(ptr1[x] > ptr2[x] ? ptr1[x] - ptr2[x] : ptr2[x] - ptr1[x]);
@@ -191,14 +191,14 @@ float get_frame_diff(AVFrame *frame1, AVFrame *frame2) {
 }
 
 // Deleter for AVBufferRef unique_ptr
-void av_bufferref_deleter(AVBufferRef *bufferref) {
+void av_bufferref_deleter(AVBufferRef* bufferref) {
     if (bufferref != nullptr) {
         av_buffer_unref(&bufferref);
     }
 }
 
 // Deleter for AVFrame unique_ptr
-void av_frame_deleter(AVFrame *frame) {
+void av_frame_deleter(AVFrame* frame) {
     if (frame != nullptr) {
         av_frame_free(&frame);
         frame = nullptr;
@@ -206,7 +206,7 @@ void av_frame_deleter(AVFrame *frame) {
 }
 
 // Deleter for AVPacket unique_ptr
-void av_packet_deleter(AVPacket *packet) {
+void av_packet_deleter(AVPacket* packet) {
     if (packet != nullptr) {
         av_packet_unref(packet);
         av_packet_free(&packet);

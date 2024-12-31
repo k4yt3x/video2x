@@ -17,19 +17,19 @@ namespace video2x {
 namespace processors {
 
 int init_libplacebo(
-    AVFilterGraph **filter_graph,
-    AVFilterContext **buffersrc_ctx,
-    AVFilterContext **buffersink_ctx,
-    AVCodecContext *dec_ctx,
+    AVFilterGraph** filter_graph,
+    AVFilterContext** buffersrc_ctx,
+    AVFilterContext** buffersink_ctx,
+    AVCodecContext* dec_ctx,
     int out_width,
     int out_height,
     uint32_t vk_device_index,
-    const std::filesystem::path &shader_path
+    const std::filesystem::path& shader_path
 ) {
     int ret;
 
     // Create the Vulkan hardware device context
-    AVBufferRef *vk_hw_device_ctx = nullptr;
+    AVBufferRef* vk_hw_device_ctx = nullptr;
     ret = av_hwdevice_ctx_create(
         &vk_hw_device_ctx, AV_HWDEVICE_TYPE_VULKAN, std::to_string(vk_device_index).c_str(), NULL, 0
     );
@@ -38,14 +38,14 @@ int init_libplacebo(
         vk_hw_device_ctx = nullptr;
     }
 
-    AVFilterGraph *graph = avfilter_graph_alloc();
+    AVFilterGraph* graph = avfilter_graph_alloc();
     if (!graph) {
         logger()->error("Unable to create filter graph.");
         return AVERROR(ENOMEM);
     }
 
     // Create buffer source
-    const AVFilter *buffersrc = avfilter_get_by_name("buffer");
+    const AVFilter* buffersrc = avfilter_get_by_name("buffer");
     if (!buffersrc) {
         logger()->error("Filter 'buffer' not found.");
         avfilter_graph_free(&graph);
@@ -65,7 +65,7 @@ int init_libplacebo(
 
     // Make a copy of the AVClass on the stack
     AVClass priv_class_copy = *buffersrc->priv_class;
-    AVClass *priv_class_copy_ptr = &priv_class_copy;
+    AVClass* priv_class_copy_ptr = &priv_class_copy;
 
     // Check if the colorspace option is supported
     if (av_opt_find(&priv_class_copy_ptr, "colorspace", NULL, 0, AV_OPT_SEARCH_FAKE_OBJ)) {
@@ -89,10 +89,10 @@ int init_libplacebo(
         return ret;
     }
 
-    AVFilterContext *last_filter = *buffersrc_ctx;
+    AVFilterContext* last_filter = *buffersrc_ctx;
 
     // Create the libplacebo filter
-    const AVFilter *libplacebo_filter = avfilter_get_by_name("libplacebo");
+    const AVFilter* libplacebo_filter = avfilter_get_by_name("libplacebo");
     if (!libplacebo_filter) {
         logger()->error("Filter 'libplacebo' not found.");
         avfilter_graph_free(&graph);
@@ -112,7 +112,7 @@ int init_libplacebo(
                               ":h=" + std::to_string(out_height) + ":custom_shader_path='" +
                               shader_path_string + "'";
 
-    AVFilterContext *libplacebo_ctx;
+    AVFilterContext* libplacebo_ctx;
     ret = avfilter_graph_create_filter(
         &libplacebo_ctx, libplacebo_filter, "libplacebo", filter_args.c_str(), NULL, graph
     );
@@ -139,7 +139,7 @@ int init_libplacebo(
     last_filter = libplacebo_ctx;
 
     // Create buffer sink
-    const AVFilter *buffersink = avfilter_get_by_name("buffersink");
+    const AVFilter* buffersink = avfilter_get_by_name("buffersink");
     ret = avfilter_graph_create_filter(buffersink_ctx, buffersink, "out", NULL, NULL, graph);
     if (ret < 0) {
         logger()->error("Cannot create buffer sink.");

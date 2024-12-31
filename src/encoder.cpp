@@ -33,11 +33,11 @@ Encoder::~Encoder() {
 }
 
 int Encoder::init(
-    AVBufferRef *hw_ctx,
-    const std::filesystem::path &out_fpath,
-    AVFormatContext *ifmt_ctx,
-    AVCodecContext *dec_ctx,
-    EncoderConfig &enc_cfg,
+    AVBufferRef* hw_ctx,
+    const std::filesystem::path& out_fpath,
+    AVFormatContext* ifmt_ctx,
+    AVCodecContext* dec_ctx,
+    EncoderConfig& enc_cfg,
     int width,
     int height,
     int frm_rate_mul,
@@ -53,7 +53,7 @@ int Encoder::init(
     }
 
     // Find the encoder
-    const AVCodec *encoder = avcodec_find_encoder(enc_cfg.codec);
+    const AVCodec* encoder = avcodec_find_encoder(enc_cfg.codec);
     if (!encoder) {
         logger()->error(
             "Required video encoder not found for codec {}", avcodec_get_name(enc_cfg.codec)
@@ -62,7 +62,7 @@ int Encoder::init(
     }
 
     // Create a new video stream in the output file
-    AVStream *out_vstream = avformat_new_stream(ofmt_ctx_, nullptr);
+    AVStream* out_vstream = avformat_new_stream(ofmt_ctx_, nullptr);
     if (!out_vstream) {
         logger()->error("Failed to allocate the output video stream");
         return AVERROR_UNKNOWN;
@@ -150,7 +150,7 @@ int Encoder::init(
     }
 
     // Set extra AVOptions
-    for (const auto &[opt_name, opt_value] : enc_cfg.extra_opts) {
+    for (const auto& [opt_name, opt_value] : enc_cfg.extra_opts) {
         std::string opt_name_str = fsutils::wstring_to_u8string(opt_name);
         std::string opt_value_str = fsutils::wstring_to_u8string(opt_value);
         spdlog::debug("Setting encoder option '{}' to '{}'", opt_name_str, opt_value_str);
@@ -193,7 +193,7 @@ int Encoder::init(
     if (enc_cfg.copy_streams) {
         // Allocate the stream mape frame o
         stream_map_ =
-            reinterpret_cast<int *>(av_malloc_array(ifmt_ctx->nb_streams, sizeof(*stream_map_)));
+            reinterpret_cast<int*>(av_malloc_array(ifmt_ctx->nb_streams, sizeof(*stream_map_)));
         if (!stream_map_) {
             logger()->error("Could not allocate stream mapping");
             return AVERROR(ENOMEM);
@@ -201,8 +201,8 @@ int Encoder::init(
 
         // Map each input stream to an output stream
         for (int i = 0; i < static_cast<int>(ifmt_ctx->nb_streams); i++) {
-            AVStream *in_stream = ifmt_ctx->streams[i];
-            AVCodecParameters *in_codecpar = in_stream->codecpar;
+            AVStream* in_stream = ifmt_ctx->streams[i];
+            AVCodecParameters* in_codecpar = in_stream->codecpar;
 
             // Skip the input video stream as it's already processed
             if (i == in_vstream_idx) {
@@ -219,7 +219,7 @@ int Encoder::init(
             }
 
             // Create corresponding output stream for audio and subtitle streams
-            AVStream *out_stream = avformat_new_stream(ofmt_ctx_, nullptr);
+            AVStream* out_stream = avformat_new_stream(ofmt_ctx_, nullptr);
             if (!out_stream) {
                 logger()->error("Failed allocating output stream");
                 return AVERROR_UNKNOWN;
@@ -262,8 +262,8 @@ int Encoder::init(
 }
 
 [[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
-int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
-    AVFrame *converted_frame = nullptr;
+int Encoder::write_frame(AVFrame* frame, int64_t frame_idx) {
+    AVFrame* converted_frame = nullptr;
     int ret;
 
     // Let the encoder decide the frame type
@@ -282,7 +282,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
         converted_frame->pts = frame->pts;
     }
 
-    AVPacket *enc_pkt = av_packet_alloc();
+    AVPacket* enc_pkt = av_packet_alloc();
     if (!enc_pkt) {
         logger()->error("Could not allocate AVPacket");
         return AVERROR(ENOMEM);
@@ -336,7 +336,7 @@ int Encoder::write_frame(AVFrame *frame, int64_t frame_idx) {
 [[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
 int Encoder::flush() {
     int ret;
-    AVPacket *enc_pkt = av_packet_alloc();
+    AVPacket* enc_pkt = av_packet_alloc();
     if (!enc_pkt) {
         logger()->error("Could not allocate AVPacket");
         return AVERROR(ENOMEM);
@@ -382,11 +382,11 @@ int Encoder::flush() {
     return 0;
 }
 
-AVCodecContext *Encoder::get_encoder_context() const {
+AVCodecContext* Encoder::get_encoder_context() const {
     return enc_ctx_;
 }
 
-AVFormatContext *Encoder::get_format_context() const {
+AVFormatContext* Encoder::get_format_context() const {
     return ofmt_ctx_;
 }
 
@@ -394,7 +394,7 @@ int Encoder::get_output_video_stream_index() const {
     return out_vstream_idx_;
 }
 
-int *Encoder::get_stream_map() const {
+int* Encoder::get_stream_map() const {
     return stream_map_;
 }
 

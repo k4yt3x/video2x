@@ -14,20 +14,20 @@ namespace logger_manager {
 
 class LIBVIDEO2X_API LoggerManager {
    public:
-    LoggerManager(const LoggerManager &) = delete;
-    LoggerManager &operator=(const LoggerManager &) = delete;
+    LoggerManager(const LoggerManager&) = delete;
+    LoggerManager& operator=(const LoggerManager&) = delete;
 
-    static LoggerManager &instance();
+    static LoggerManager& instance();
 
     std::shared_ptr<spdlog::logger> logger();
 
     bool reconfigure_logger(
-        const std::string &logger_name,
-        const std::vector<spdlog::sink_ptr> &sinks,
-        const std::string &pattern = "%+"
+        const std::string& logger_name,
+        const std::vector<spdlog::sink_ptr>& sinks,
+        const std::string& pattern = "%+"
     );
 
-    bool set_log_level(const std::string &level_str);
+    bool set_log_level(const std::string& level_str);
 
     void hook_ffmpeg_logging();
     void unhook_ffmpeg_logging();

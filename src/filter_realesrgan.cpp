@@ -32,7 +32,7 @@ FilterRealesrgan::~FilterRealesrgan() {
     }
 }
 
-int FilterRealesrgan::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVBufferRef *) {
+int FilterRealesrgan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {
     // Construct the model paths using std::filesystem
     std::filesystem::path model_param_path;
     std::filesystem::path model_bin_path;
@@ -93,7 +93,7 @@ int FilterRealesrgan::init(AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, AVB
     return 0;
 }
 
-int FilterRealesrgan::filter(AVFrame *in_frame, AVFrame **out_frame) {
+int FilterRealesrgan::filter(AVFrame* in_frame, AVFrame** out_frame) {
     int ret;
 
     // Convert the input frame to RGB24
@@ -125,11 +125,11 @@ int FilterRealesrgan::filter(AVFrame *in_frame, AVFrame **out_frame) {
 }
 
 void FilterRealesrgan::get_output_dimensions(
-    const ProcessorConfig &,
+    const ProcessorConfig&,
     int in_width,
     int in_height,
-    int &out_width,
-    int &out_height
+    int& out_width,
+    int& out_height
 ) const {
     out_width = in_width * scaling_factor_;
     out_height = in_height * scaling_factor_;

@@ -26,7 +26,7 @@ static spdlog::level::level_enum ffmpeg_level_to_spdlog(int av_level) {
     }
 }
 
-static void ffmpeg_log_callback(void *avcl, int level, const char *fmt, va_list vargs) {
+static void ffmpeg_log_callback(void* avcl, int level, const char* fmt, va_list vargs) {
     // Format the message the same way as the default callback
     char line[1024];
     int print_prefix = 1;
@@ -53,7 +53,7 @@ LoggerManager::LoggerManager() {
     spdlog::register_logger(logger_);
 }
 
-LoggerManager &LoggerManager::instance() {
+LoggerManager& LoggerManager::instance() {
     static LoggerManager instance;
     return instance;
 }
@@ -63,9 +63,9 @@ std::shared_ptr<spdlog::logger> LoggerManager::logger() {
 }
 
 bool LoggerManager::reconfigure_logger(
-    const std::string &logger_name,
-    const std::vector<spdlog::sink_ptr> &sinks,
-    const std::string &pattern
+    const std::string& logger_name,
+    const std::vector<spdlog::sink_ptr>& sinks,
+    const std::string& pattern
 ) {
     if (logger_name.empty() || sinks.empty()) {
         return false;
@@ -94,7 +94,7 @@ bool LoggerManager::reconfigure_logger(
     return true;
 }
 
-bool LoggerManager::set_log_level(const std::string &level_str) {
+bool LoggerManager::set_log_level(const std::string& level_str) {
     spdlog::level::level_enum log_level = spdlog::level::from_str(level_str);
     if (log_level == spdlog::level::off && level_str != "off") {
         // Invalid level_str

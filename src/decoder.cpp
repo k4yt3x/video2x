@@ -22,8 +22,8 @@ Decoder::~Decoder() {
     }
 }
 
-AVPixelFormat Decoder::get_hw_format(AVCodecContext *, const AVPixelFormat *pix_fmts) {
-    for (const AVPixelFormat *p = pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
+AVPixelFormat Decoder::get_hw_format(AVCodecContext*, const AVPixelFormat* pix_fmts) {
+    for (const AVPixelFormat* p = pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
         if (*p == hw_pix_fmt_) {
             return *p;
         }
@@ -34,8 +34,8 @@ AVPixelFormat Decoder::get_hw_format(AVCodecContext *, const AVPixelFormat *pix_
 
 int Decoder::init(
     AVHWDeviceType hw_type,
-    AVBufferRef *hw_ctx,
-    const std::filesystem::path &in_fpath
+    AVBufferRef* hw_ctx,
+    const std::filesystem::path& in_fpath
 ) {
     int ret;
 
@@ -59,10 +59,10 @@ int Decoder::init(
     }
 
     int stream_index = ret;
-    AVStream *video_stream = fmt_ctx_->streams[stream_index];
+    AVStream* video_stream = fmt_ctx_->streams[stream_index];
 
     // Find the decoder for the video stream
-    const AVCodec *decoder = avcodec_find_decoder(video_stream->codecpar->codec_id);
+    const AVCodec* decoder = avcodec_find_decoder(video_stream->codecpar->codec_id);
     if (!decoder) {
         logger()->error(
             "Failed to find decoder for codec ID {}",
@@ -96,7 +96,7 @@ int Decoder::init(
 
         // Automatically determine the hardware pixel format
         for (int i = 0;; i++) {
-            const AVCodecHWConfig *config = avcodec_get_hw_config(decoder, i);
+            const AVCodecHWConfig* config = avcodec_get_hw_config(decoder, i);
             if (config == nullptr) {
                 logger()->error(
                     "Decoder {} does not support device type {}.",
@@ -124,11 +124,11 @@ int Decoder::init(
     return 0;
 }
 
-AVFormatContext *Decoder::get_format_context() const {
+AVFormatContext* Decoder::get_format_context() const {
     return fmt_ctx_;
 }
 
-AVCodecContext *Decoder::get_codec_context() const {
+AVCodecContext* Decoder::get_codec_context() const {
     return dec_ctx_;
 }
 

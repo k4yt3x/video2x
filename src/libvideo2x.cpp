@@ -36,7 +36,7 @@ int VideoProcessor::process(
     int ret = 0;
 
     // Helper lambda to handle errors:
-    auto handle_error = [&](int error_code, const std::string &msg) {
+    auto handle_error = [&](int error_code, const std::string& msg) {
         // Format and log the error message
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         av_strerror(error_code, errbuf, sizeof(errbuf));
@@ -57,7 +57,7 @@ int VideoProcessor::process(
 
     // Initialize hardware device context
     if (hw_device_type_ != AV_HWDEVICE_TYPE_NONE) {
-        AVBufferRef *tmp_hw_ctx = nullptr;
+        AVBufferRef* tmp_hw_ctx = nullptr;
         ret = av_hwdevice_ctx_create(&tmp_hw_ctx, hw_device_type_, NULL, NULL, 0);
         if (ret < 0) {
             return handle_error(ret, "Error initializing hardware device context");
@@ -72,8 +72,8 @@ int VideoProcessor::process(
         return handle_error(ret, "Failed to initialize decoder");
     }
 
-    AVFormatContext *ifmt_ctx = decoder.get_format_context();
-    AVCodecContext *dec_ctx = decoder.get_codec_context();
+    AVFormatContext* ifmt_ctx = decoder.get_format_context();
+    AVCodecContext* dec_ctx = decoder.get_codec_context();
     int in_vstream_idx = decoder.get_video_stream_index();
 
     // Create and initialize the appropriate filter
@@ -140,19 +140,19 @@ int VideoProcessor::process(
 
 // Process frames using the selected filter.
 int VideoProcessor::process_frames(
-    decoder::Decoder &decoder,
-    encoder::Encoder &encoder,
-    std::unique_ptr<processors::Processor> &processor
+    decoder::Decoder& decoder,
+    encoder::Encoder& encoder,
+    std::unique_ptr<processors::Processor>& processor
 ) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
     // Get required objects
-    AVFormatContext *ifmt_ctx = decoder.get_format_context();
-    AVCodecContext *dec_ctx = decoder.get_codec_context();
+    AVFormatContext* ifmt_ctx = decoder.get_format_context();
+    AVCodecContext* dec_ctx = decoder.get_codec_context();
     int in_vstream_idx = decoder.get_video_stream_index();
-    AVFormatContext *ofmt_ctx = encoder.get_format_context();
-    int *stream_map = encoder.get_stream_map();
+    AVFormatContext* ofmt_ctx = encoder.get_format_context();
+    int* stream_map = encoder.get_stream_map();
 
     // Reference to the previous frame does not require allocation
     // It will be cloned from the current frame
@@ -236,7 +236,7 @@ int VideoProcessor::process_frames(
                 }
 
                 // Process the frame based on the selected processing mode
-                AVFrame *proc_frame = nullptr;
+                AVFrame* proc_frame = nullptr;
                 switch (processor->get_processing_mode()) {
                     case processors::ProcessingMode::Filter: {
                         ret = process_filtering(processor, encoder, frame.get(), proc_frame);
@@ -269,7 +269,7 @@ int VideoProcessor::process_frames(
     }
 
     // Flush the filter
-    std::vector<AVFrame *> raw_flushed_frames;
+    std::vector<AVFrame*> raw_flushed_frames;
     ret = processor->flush(raw_flushed_frames);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
@@ -279,12 +279,12 @@ int VideoProcessor::process_frames(
 
     // Wrap flushed frames in unique_ptrs
     std::vector<std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>> flushed_frames;
-    for (AVFrame *raw_frame : raw_flushed_frames) {
+    for (AVFrame* raw_frame : raw_flushed_frames) {
         flushed_frames.emplace_back(raw_frame, &avutils::av_frame_deleter);
     }
 
     // Encode and write all flushed frames
-    for (auto &flushed_frame : flushed_frames) {
+    for (auto& flushed_frame : flushed_frames) {
         ret = write_frame(flushed_frame.get(), encoder);
         if (ret < 0) {
             return ret;
@@ -303,7 +303,7 @@ int VideoProcessor::process_frames(
     return ret;
 }
 
-int VideoProcessor::write_frame(AVFrame *frame, encoder::Encoder &encoder) {
+int VideoProcessor::write_frame(AVFrame* frame, encoder::Encoder& encoder) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
@@ -318,17 +318,17 @@ int VideoProcessor::write_frame(AVFrame *frame, encoder::Encoder &encoder) {
 }
 
 int VideoProcessor::write_raw_packet(
-    AVPacket *packet,
-    AVFormatContext *ifmt_ctx,
-    AVFormatContext *ofmt_ctx,
-    int *stream_map
+    AVPacket* packet,
+    AVFormatContext* ifmt_ctx,
+    AVFormatContext* ofmt_ctx,
+    int* stream_map
 ) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
-    AVStream *in_stream = ifmt_ctx->streams[packet->stream_index];
+    AVStream* in_stream = ifmt_ctx->streams[packet->stream_index];
     int out_stream_idx = stream_map[packet->stream_index];
-    AVStream *out_stream = ofmt_ctx->streams[out_stream_idx];
+    AVStream* out_stream = ofmt_ctx->streams[out_stream_idx];
 
     av_packet_rescale_ts(packet, in_stream->time_base, out_stream->time_base);
     packet->stream_index = out_stream_idx;
@@ -342,16 +342,16 @@ int VideoProcessor::write_raw_packet(
 }
 
 int VideoProcessor::process_filtering(
-    std::unique_ptr<processors::Processor> &processor,
-    encoder::Encoder &encoder,
-    AVFrame *frame,
-    AVFrame *proc_frame
+    std::unique_ptr<processors::Processor>& processor,
+    encoder::Encoder& encoder,
+    AVFrame* frame,
+    AVFrame* proc_frame
 ) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
     // Cast the processor to a Filter
-    processors::Filter *filter = static_cast<processors::Filter *>(processor.get());
+    processors::Filter* filter = static_cast<processors::Filter*>(processor.get());
 
     // Process the frame using the filter
     ret = filter->filter(frame, &proc_frame);
@@ -370,18 +370,18 @@ int VideoProcessor::process_filtering(
 }
 
 int VideoProcessor::process_interpolation(
-    std::unique_ptr<processors::Processor> &processor,
-    encoder::Encoder &encoder,
-    std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)> &prev_frame,
-    AVFrame *frame,
-    AVFrame *proc_frame
+    std::unique_ptr<processors::Processor>& processor,
+    encoder::Encoder& encoder,
+    std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>& prev_frame,
+    AVFrame* frame,
+    AVFrame* proc_frame
 ) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
     // Cast the processor to an Interpolator
-    processors::Interpolator *interpolator =
-        static_cast<processors::Interpolator *>(processor.get());
+    processors::Interpolator* interpolator =
+        static_cast<processors::Interpolator*>(processor.get());
 
     // Calculate the time step for each frame
     float time_step = 1.0f / static_cast<float>(proc_cfg_.frm_rate_mul);
