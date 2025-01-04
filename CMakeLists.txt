@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(video2x VERSION 6.3.1 LANGUAGES CXX)
 
+include(CMakePackageConfigHelpers)
+include(ExternalProject)
+include(GNUInstallDirs)
+
 # The FindBoost module is removed in CMake 3.30
 if(POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
@@ -266,9 +270,6 @@ if(VIDEO2X_BUILD_CLI)
     list(APPEND VIDEO2X_LIBS Boost::program_options)
 endif()
 
-# Include ExternalProject module
-include(ExternalProject)
-
 # Add librealesrgan-ncnn-vulkan as an external project
 ExternalProject_Add(
     realesrgan
@@ -396,25 +397,20 @@ if(VIDEO2X_BUILD_CLI)
     target_link_libraries(video2x PRIVATE libvideo2x ${VIDEO2X_LIBS})
 endif()
 
-# Define the default installation directories
+# Determine the installation directories
 if(WIN32)
-    set(BIN_DESTINATION_DEFAULT ".")
-    set(INCLUDE_DESTINATION_DEFAULT "include/libvideo2x")
-    set(LIB_DESTINATION_DEFAULT ".")
-    set(MODEL_DESTINATION_DEFAULT ".")
+    set(INSTALL_BIN_DESTINATION ".")
+    set(INSTALL_INCLUDE_DESTINATION "include/libvideo2x")
+    set(INSTALL_LIB_DESTINATION ".")
+    set(INSTALL_MODEL_DESTINATION ".")
+    set(INSTALL_CMAKE_DESTINATION "cmake/Video2X")
 else()
-    set(BIN_DESTINATION_DEFAULT "bin")
-    set(INCLUDE_DESTINATION_DEFAULT "include/libvideo2x")
-    set(LIB_DESTINATION_DEFAULT "lib")
-    set(MODEL_DESTINATION_DEFAULT "share/video2x")
+    set(INSTALL_BIN_DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    set(INSTALL_INCLUDE_DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libvideo2x")
+    set(INSTALL_LIB_DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    set(INSTALL_MODEL_DESTINATION "${CMAKE_INSTALL_DATADIR}/video2x")
+    set(INSTALL_CMAKE_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Video2X")
 endif()
-
-# Set the installation directories
-set(INSTALL_BIN_DESTINATION ${BIN_DESTINATION_DEFAULT} CACHE STRING "")
-set(INSTALL_INCLUDE_DESTINATION ${INCLUDE_DESTINATION_DEFAULT} CACHE STRING "")
-set(INSTALL_LIB_DESTINATION ${LIB_DESTINATION_DEFAULT} CACHE STRING "")
-set(INSTALL_MODEL_DESTINATION ${MODEL_DESTINATION_DEFAULT} CACHE STRING "")
-set(INSTALL_CMAKE_DESTINATION "${LIB_DESTINATION_DEFAULT}/cmake/Video2X" CACHE PATH "")
 
 # Common installation rules for libvideo2x and models
 install(TARGETS libvideo2x
@@ -444,7 +440,6 @@ install(EXPORT Video2XTargets
 )
 
 # Generate the CMake package config file
-include(CMakePackageConfigHelpers)
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Video2XConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/Video2XConfig.cmake"
