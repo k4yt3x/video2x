@@ -111,7 +111,7 @@ Copyright of this clip belongs to 株式会社アニプレックス.
 ## ⚖️ License
 
 This project is licensed under [GNU AGPL version 3](https://www.gnu.org/licenses/agpl-3.0.txt).\
-Copyright (C) 2018-2024 K4YT3X and [contributors](https://github.com/k4yt3x/video2x/graphs/contributors).
+Copyright (C) 2018-2025 K4YT3X and [contributors](https://github.com/k4yt3x/video2x/graphs/contributors).
 
 ![AGPLv3](https://www.gnu.org/graphics/agplv3-155x51.png)
 
