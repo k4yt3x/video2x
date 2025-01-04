@@ -71,17 +71,17 @@ int init_libplacebo(
     if (av_opt_find(&priv_class_copy_ptr, "colorspace", NULL, 0, AV_OPT_SEARCH_FAKE_OBJ)) {
         args += ":colorspace=" + std::to_string(dec_ctx->colorspace);
     } else {
-        spdlog::warn("Option 'colorspace' is not supported by the buffer filter.");
+        logger()->warn("Option 'colorspace' is not supported by the buffer filter.");
     }
 
     // Check if the range option is supported
     if (av_opt_find(&priv_class_copy_ptr, "range", NULL, 0, AV_OPT_SEARCH_FAKE_OBJ)) {
         args += ":range=" + std::to_string(dec_ctx->color_range);
     } else {
-        spdlog::warn("Option 'range' is not supported by the buffer filter.");
+        logger()->warn("Option 'range' is not supported by the buffer filter.");
     }
 
-    spdlog::debug("Buffer source args: {}", args);
+    logger()->debug("Buffer source args: {}", args);
     ret = avfilter_graph_create_filter(buffersrc_ctx, buffersrc, "in", args.c_str(), NULL, graph);
     if (ret < 0) {
         logger()->error("Cannot create buffer source.");

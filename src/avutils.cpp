@@ -27,7 +27,7 @@ AVRational get_video_frame_rate(AVFormatContext* ifmt_ctx, int in_vstream_idx) {
         frame_rate = ifmt_ctx->streams[in_vstream_idx]->time_base;
     }
     if (frame_rate.num == 0 && frame_rate.den == 0) {
-        spdlog::warn("Unable to determine the video's frame rate");
+        logger()->warn("Unable to determine the video's frame rate");
     }
     return frame_rate;
 }
@@ -36,10 +36,10 @@ int64_t get_video_frame_count(AVFormatContext* ifmt_ctx, int in_vstream_idx) {
     // Use the 'nb_frames' field if it is available
     int64_t nb_frames = ifmt_ctx->streams[in_vstream_idx]->nb_frames;
     if (nb_frames != AV_NOPTS_VALUE && nb_frames > 0) {
-        spdlog::debug("Read total number of frames from 'nb_frames': {}", nb_frames);
+        logger()->debug("Read total number of frames from 'nb_frames': {}", nb_frames);
         return nb_frames;
     }
-    spdlog::warn("Estimating the total number of frames using duration * fps");
+    logger()->warn("Estimating the total number of frames using duration * fps");
 
     // Get the duration of the video
     double duration_secs = 0.0;
@@ -50,18 +50,18 @@ int64_t get_video_frame_count(AVFormatContext* ifmt_ctx, int in_vstream_idx) {
                         av_q2d(ifmt_ctx->streams[in_vstream_idx]->time_base);
     }
     if (duration_secs <= 0) {
-        spdlog::warn("Unable to determine the video's duration");
+        logger()->warn("Unable to determine the video's duration");
         return -1;
     }
-    spdlog::debug("Video duration: {}s", duration_secs);
+    logger()->debug("Video duration: {}s", duration_secs);
 
     // Calculate average FPS
     double fps = av_q2d(get_video_frame_rate(ifmt_ctx, in_vstream_idx));
     if (fps <= 0) {
-        spdlog::warn("Unable to estimate the video's average frame rate");
+        logger()->warn("Unable to estimate the video's average frame rate");
         return -1;
     }
-    spdlog::debug("Video average frame rate: {}", fps);
+    logger()->debug("Video average frame rate: {}", fps);
 
     // Estimate and return the total number of frames
     return static_cast<int64_t>(duration_secs * fps);
@@ -85,10 +85,11 @@ AVPixelFormat get_encoder_default_pix_fmt(const AVCodec* encoder, AVPixelFormat 
 
     if (supported_pix_fmts == nullptr) {
         if (target_pix_fmt == AV_PIX_FMT_NONE) {
-            spdlog::warn("Encoder supports all pixel formats; defaulting to yuv420p");
+            logger()->warn("Encoder supports all pixel formats; defaulting to yuv420p");
             return AV_PIX_FMT_YUV420P;
         } else {
-            spdlog::warn("Encoder supports all pixel formats; defaulting to the decoder's format");
+            logger()->warn("Encoder supports all pixel formats; defaulting to the decoder's format"
+            );
             return target_pix_fmt;
         }
     }
@@ -124,7 +125,7 @@ AVPixelFormat get_encoder_default_pix_fmt(const AVCodec* encoder, AVPixelFormat 
     }
 
     if (target_pix_fmt != AV_PIX_FMT_NONE && best_pix_fmt != target_pix_fmt) {
-        spdlog::warn(
+        logger()->warn(
             "Incompatible pixel format '%s' for encoder '%s'; auto-selecting format '%s'",
             av_get_pix_fmt_name(target_pix_fmt),
             encoder->name,

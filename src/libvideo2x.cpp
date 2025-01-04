@@ -179,14 +179,14 @@ int VideoProcessor::process_frames(
     }
 
     // Set the total number of frames in the VideoProcessingContext
-    spdlog::debug("Estimating the total number of frames to process");
+    logger()->debug("Estimating the total number of frames to process");
     total_frames_ = avutils::get_video_frame_count(ifmt_ctx, in_vstream_idx);
 
     if (total_frames_ <= 0) {
-        spdlog::warn("Unable to determine the total number of frames");
+        logger()->warn("Unable to determine the total number of frames");
         total_frames_ = 0;
     } else {
-        spdlog::debug("{} frames to process", total_frames_.load());
+        logger()->debug("{} frames to process", total_frames_.load());
     }
 
     // Set total frames for interpolation
@@ -199,7 +199,7 @@ int VideoProcessor::process_frames(
         ret = av_read_frame(ifmt_ctx, packet.get());
         if (ret < 0) {
             if (ret == AVERROR_EOF) {
-                spdlog::debug("Reached end of file");
+                logger()->debug("Reached end of file");
                 break;
             }
             av_strerror(ret, errbuf, sizeof(errbuf));
@@ -257,7 +257,7 @@ int VideoProcessor::process_frames(
                 }
                 av_frame_unref(frame.get());
                 frame_idx_++;
-                spdlog::debug("Processed frame {}/{}", frame_idx_.load(), total_frames_.load());
+                logger()->debug("Processed frame {}/{}", frame_idx_.load(), total_frames_.load());
             }
         } else if (enc_cfg_.copy_streams && stream_map[packet->stream_index] >= 0) {
             ret = write_raw_packet(packet.get(), ifmt_ctx, ofmt_ctx, stream_map);
@@ -392,7 +392,7 @@ int VideoProcessor::process_interpolation(
     if (proc_cfg_.scn_det_thresh < 100.0 && prev_frame.get() != nullptr) {
         float frame_diff = avutils::get_frame_diff(prev_frame.get(), frame);
         if (frame_diff > proc_cfg_.scn_det_thresh) {
-            spdlog::debug(
+            logger()->debug(
                 "Scene change detected ({:.2f}%), skipping frame {}", frame_diff, frame_idx_.load()
             );
             skip_frame = true;

@@ -126,7 +126,7 @@ int Encoder::init(
             logger()->error("Could not get the default pixel format for the encoder");
             return AVERROR(EINVAL);
         }
-        spdlog::debug("Auto-selected pixel format: {}", av_get_pix_fmt_name(enc_ctx_->pix_fmt));
+        logger()->debug("Auto-selected pixel format: {}", av_get_pix_fmt_name(enc_ctx_->pix_fmt));
     }
 
     if (frm_rate_mul > 0) {
@@ -153,13 +153,13 @@ int Encoder::init(
     for (const auto& [opt_name, opt_value] : enc_cfg.extra_opts) {
         std::string opt_name_str = fsutils::wstring_to_u8string(opt_name);
         std::string opt_value_str = fsutils::wstring_to_u8string(opt_value);
-        spdlog::debug("Setting encoder option '{}' to '{}'", opt_name_str, opt_value_str);
+        logger()->debug("Setting encoder option '{}' to '{}'", opt_name_str, opt_value_str);
 
         ret = av_opt_set(enc_ctx_->priv_data, opt_name_str.c_str(), opt_value_str.c_str(), 0);
         if (ret < 0) {
             char errbuf[AV_ERROR_MAX_STRING_SIZE];
             av_strerror(ret, errbuf, sizeof(errbuf));
-            spdlog::warn(
+            logger()->warn(
                 "Failed to set encoder option '{}' to '{}': {}", opt_name_str, opt_value_str, errbuf
             );
         }
@@ -214,7 +214,7 @@ int Encoder::init(
             if (in_codecpar->codec_type != AVMEDIA_TYPE_AUDIO &&
                 in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE) {
                 stream_map_[i] = -1;
-                spdlog::warn("Skipping unsupported stream type at index: {}", i);
+                logger()->warn("Skipping unsupported stream type at index: {}", i);
                 continue;
             }
 
@@ -237,7 +237,7 @@ int Encoder::init(
             out_stream->time_base = in_stream->time_base;
 
             // Map input stream index to output stream index
-            spdlog::debug("Stream mapping: {} (in) -> {} (out)", i, out_stream->index);
+            logger()->debug("Stream mapping: {} (in) -> {} (out)", i, out_stream->index);
             stream_map_[i] = out_stream->index;
         }
     }
