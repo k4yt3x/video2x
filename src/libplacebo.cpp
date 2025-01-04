@@ -1,6 +1,5 @@
 #include "libplacebo.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string>
 
@@ -31,7 +30,11 @@ int init_libplacebo(
     // Create the Vulkan hardware device context
     AVBufferRef* vk_hw_device_ctx = nullptr;
     ret = av_hwdevice_ctx_create(
-        &vk_hw_device_ctx, AV_HWDEVICE_TYPE_VULKAN, std::to_string(vk_device_index).c_str(), NULL, 0
+        &vk_hw_device_ctx,
+        AV_HWDEVICE_TYPE_VULKAN,
+        std::to_string(vk_device_index).c_str(),
+        nullptr,
+        0
     );
     if (ret < 0) {
         logger()->error("Failed to create Vulkan hardware device context for libplacebo.");
@@ -68,21 +71,22 @@ int init_libplacebo(
     AVClass* priv_class_copy_ptr = &priv_class_copy;
 
     // Check if the colorspace option is supported
-    if (av_opt_find(&priv_class_copy_ptr, "colorspace", NULL, 0, AV_OPT_SEARCH_FAKE_OBJ)) {
+    if (av_opt_find(&priv_class_copy_ptr, "colorspace", nullptr, 0, AV_OPT_SEARCH_FAKE_OBJ)) {
         args += ":colorspace=" + std::to_string(dec_ctx->colorspace);
     } else {
         logger()->warn("Option 'colorspace' is not supported by the buffer filter.");
     }
 
     // Check if the range option is supported
-    if (av_opt_find(&priv_class_copy_ptr, "range", NULL, 0, AV_OPT_SEARCH_FAKE_OBJ)) {
+    if (av_opt_find(&priv_class_copy_ptr, "range", nullptr, 0, AV_OPT_SEARCH_FAKE_OBJ)) {
         args += ":range=" + std::to_string(dec_ctx->color_range);
     } else {
         logger()->warn("Option 'range' is not supported by the buffer filter.");
     }
 
     logger()->debug("Buffer source args: {}", args);
-    ret = avfilter_graph_create_filter(buffersrc_ctx, buffersrc, "in", args.c_str(), NULL, graph);
+    ret =
+        avfilter_graph_create_filter(buffersrc_ctx, buffersrc, "in", args.c_str(), nullptr, graph);
     if (ret < 0) {
         logger()->error("Cannot create buffer source.");
         avfilter_graph_free(&graph);
@@ -114,7 +118,7 @@ int init_libplacebo(
 
     AVFilterContext* libplacebo_ctx;
     ret = avfilter_graph_create_filter(
-        &libplacebo_ctx, libplacebo_filter, "libplacebo", filter_args.c_str(), NULL, graph
+        &libplacebo_ctx, libplacebo_filter, "libplacebo", filter_args.c_str(), nullptr, graph
     );
     if (ret < 0) {
         logger()->error("Cannot create libplacebo filter.");
@@ -140,7 +144,7 @@ int init_libplacebo(
 
     // Create buffer sink
     const AVFilter* buffersink = avfilter_get_by_name("buffersink");
-    ret = avfilter_graph_create_filter(buffersink_ctx, buffersink, "out", NULL, NULL, graph);
+    ret = avfilter_graph_create_filter(buffersink_ctx, buffersink, "out", nullptr, nullptr, graph);
     if (ret < 0) {
         logger()->error("Cannot create buffer sink.");
         avfilter_graph_free(&graph);
@@ -156,7 +160,7 @@ int init_libplacebo(
     }
 
     // Configure the filter graph
-    ret = avfilter_graph_config(graph, NULL);
+    ret = avfilter_graph_config(graph, nullptr);
     if (ret < 0) {
         logger()->error("Error configuring the filter graph.");
         avfilter_graph_free(&graph);

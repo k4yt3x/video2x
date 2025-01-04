@@ -58,7 +58,7 @@ int VideoProcessor::process(
     // Initialize hardware device context
     if (hw_device_type_ != AV_HWDEVICE_TYPE_NONE) {
         AVBufferRef* tmp_hw_ctx = nullptr;
-        ret = av_hwdevice_ctx_create(&tmp_hw_ctx, hw_device_type_, NULL, NULL, 0);
+        ret = av_hwdevice_ctx_create(&tmp_hw_ctx, hw_device_type_, nullptr, nullptr, 0);
         if (ret < 0) {
             return handle_error(ret, "Error initializing hardware device context");
         }
