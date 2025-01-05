@@ -233,6 +233,12 @@ int Encoder::init(
             }
             out_stream->codecpar->codec_tag = 0;
 
+            // Copy language tag if available
+            AVDictionaryEntry * lang_entry = av_dict_get(in_stream->metadata, "language", nullptr, 0);
+            if(lang_entry) {
+                av_dict_set(&out_stream->metadata, lang_entry->key, lang_entry->value, 0);
+            }
+
             // Copy time base
             out_stream->time_base = in_stream->time_base;
 
