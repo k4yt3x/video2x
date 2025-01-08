@@ -1,57 +1,77 @@
-BINDIR := "build"
-CXX := "clang++"
-TEST_VIDEO := "data/standard-test.mp4"
-TEST_OUTPUT := "data/output.mp4"
+# Use PowerShell to run recipes on Windows
+set windows-shell := ['pwsh', '-Command']
 
+# Default build directory and C++ compiler
+bindir := "build"
+cxx_compiler := "clang++"
+
+# Test video and output paths
+test_video := "data/standard-test.mp4"
+test_output := "data/output.mp4"
+
+[unix]
+[group('build')]
 build:
-    cmake -G Ninja -S . -B {{BINDIR}} \
+    cmake -G Ninja -S . -B {{bindir}} \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -DCMAKE_CXX_COMPILER={{CXX}} \
+        -DCMAKE_CXX_COMPILER={{cxx_compiler}} \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX={{BINDIR}}/video2x-install \
+        -DCMAKE_INSTALL_PREFIX={{bindir}}/video2x-install \
         -DVIDEO2X_ENABLE_NATIVE=ON
-    cmake --build {{BINDIR}} --config Release --parallel --target install
-    cp {{BINDIR}}/compile_commands.json .
+    cmake --build {{bindir}} --config Release --parallel --target install
+    cp {{bindir}}/compile_commands.json .
 
-static:
-    cmake -G Ninja -S . -B {{BINDIR}} \
+[windows]
+[group('build')]
+build:
+    cmake -S . -B {{bindir}} \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -DCMAKE_CXX_COMPILER={{CXX}} \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX={{BINDIR}}/video2x-install \
-        -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_INSTALL_PREFIX={{bindir}}/video2x-install \
         -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
         -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
         -DVIDEO2X_USE_EXTERNAL_BOOST=OFF
-    cmake --build {{BINDIR}} --config Release --parallel --target install
-    cp {{BINDIR}}/compile_commands.json .
+    cmake --build {{bindir}} --config Release --parallel --target install
 
-debug:
-    cmake -G Ninja -S . -B {{BINDIR}} \
+[unix]
+[group('build')]
+static:
+    cmake -G Ninja -S . -B {{bindir}} \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -DCMAKE_CXX_COMPILER={{CXX}} \
-        -DCMAKE_BUILD_TYPE=Debug
-    cmake --build {{BINDIR}} --config Debug --parallel
-    cp {{BINDIR}}/compile_commands.json .
-
-windows:
-    cmake -S . -B {{BINDIR}} \
-        -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
-        -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
-        -DVIDEO2X_USE_EXTERNAL_BOOST=OFF \
+        -DCMAKE_CXX_COMPILER={{cxx_compiler}} \
+        -DBUILD_SHARED_LIBS=OFF \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX={{BINDIR}}/video2x-install
-    cmake --build {{BINDIR}} --config Release --parallel --target install
-
-windows-debug:
-    cmake -S . -B {{BINDIR}} \
+        -DCMAKE_INSTALL_PREFIX={{bindir}}/video2x-install \
         -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
         -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
-        -DVIDEO2X_USE_EXTERNAL_BOOST=OFF \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DCMAKE_INSTALL_PREFIX={{BINDIR}}/video2x-install
-    cmake --build {{BINDIR}} --config Debug --parallel
+        -DVIDEO2X_USE_EXTERNAL_BOOST=OFF
+    cmake --build {{bindir}} --config Release --parallel --target install
+    cp {{bindir}}/compile_commands.json .
 
+[unix]
+[group('build')]
+debug:
+    cmake -G Ninja -S . -B {{bindir}} \
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+        -DCMAKE_CXX_COMPILER={{cxx_compiler}} \
+        -DCMAKE_BUILD_TYPE=Debug
+    cmake --build {{bindir}} --config Debug --parallel
+    cp {{bindir}}/compile_commands.json .
+
+[windows]
+[group('build')]
+debug:
+    cmake -S . -B {{bindir}} \
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_INSTALL_PREFIX={{bindir}}/video2x-install \
+        -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
+        -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
+        -DVIDEO2X_USE_EXTERNAL_BOOST=OFF
+    cmake --build {{bindir}} --config Debug --parallel
+
+[unix]
+[group('build')]
 debian:
     apt-get update
     apt-get install -y --no-install-recommends \
@@ -69,7 +89,7 @@ debian:
         libboost-program-options-dev
     cmake -G Ninja -B /tmp/build -S . \
         -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
-        -DCMAKE_CXX_COMPILER={{CXX}} \
+        -DCMAKE_CXX_COMPILER={{cxx_compiler}} \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/tmp/install \
         -DINSTALL_BIN_DESTINATION=. \
@@ -78,6 +98,8 @@ debian:
         -DINSTALL_MODEL_DESTINATION=.
     cmake --build /tmp/build --config Release --target install --parallel
 
+[unix]
+[group('build')]
 ubuntu2404:
     apt-get update
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -103,6 +125,8 @@ ubuntu2404:
     cp packaging/debian/control.ubuntu2404 video2x-linux-ubuntu-amd64/DEBIAN/control
     dpkg-deb --build video2x-linux-ubuntu-amd64
 
+[unix]
+[group('build')]
 ubuntu2204:
     apt-get update
     DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
@@ -131,105 +155,136 @@ ubuntu2204:
     cp packaging/debian/control.ubuntu2204 video2x-linux-ubuntu-amd64/DEBIAN/control
     dpkg-deb --build video2x-linux-ubuntu-amd64
 
+[unix]
+[group('misc')]
 clean:
-    rm -vrf {{BINDIR}} data/output*.* heaptrack*.zst valgrind.log
+    rm -vrf {{bindir}} data/output*.* heaptrack*.zst valgrind.log
 
+[windows]
+[group('misc')]
+clean:
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue -Path build,data/output*.*
+
+[unix]
+[group('test')]
 test-realesrgan:
-    LD_LIBRARY_PATH={{BINDIR}} {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+    LD_LIBRARY_PATH={{bindir}} {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 
+[unix]
+[group('test')]
 test-realcugan:
-    LD_LIBRARY_PATH={{BINDIR}} {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+    LD_LIBRARY_PATH={{bindir}} {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p realcugan -s 4 -n 0 --realcugan-model models-se
 
+[unix]
+[group('test')]
 test-libplacebo:
-    LD_LIBRARY_PATH={{BINDIR}} {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+    LD_LIBRARY_PATH={{bindir}} {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p libplacebo -w 1920 -h 1080 --libplacebo-shader anime4k-v4-a
 
+[unix]
+[group('test')]
 test-rife:
-    LD_LIBRARY_PATH={{BINDIR}} {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+    LD_LIBRARY_PATH={{bindir}} {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p rife -m 4 --rife-model rife-v4.6
 
+[unix]
+[group('test')]
 memcheck-realesrgan:
-    LD_LIBRARY_PATH={{BINDIR}} valgrind \
+    LD_LIBRARY_PATH={{bindir}} valgrind \
         --tool=memcheck \
         --leak-check=full \
         --show-leak-kinds=all \
         --track-origins=yes \
         --show-reachable=yes \
         --verbose --log-file="valgrind.log" \
-        {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+        {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p realesrgan -s 2 --realesrgan-model realesr-animevideov3 \
         -e preset=veryfast -e crf=30
 
+[unix]
+[group('test')]
 memcheck-realcugan:
-    LD_LIBRARY_PATH={{BINDIR}} valgrind \
+    LD_LIBRARY_PATH={{bindir}} valgrind \
         --tool=memcheck \
         --leak-check=full \
         --show-leak-kinds=all \
         --track-origins=yes \
         --show-reachable=yes \
         --verbose --log-file="valgrind.log" \
-        {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+        {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p realcugan -s 2 -n 0 --realcugan-model models-se \
         -e preset=veryfast -e crf=30
 
+[unix]
+[group('test')]
 memcheck-libplacebo:
-    LD_LIBRARY_PATH={{BINDIR}} valgrind \
+    LD_LIBRARY_PATH={{bindir}} valgrind \
         --tool=memcheck \
         --leak-check=full \
         --show-leak-kinds=all \
         --track-origins=yes \
         --show-reachable=yes \
         --verbose --log-file="valgrind.log" \
-        {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+        {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p libplacebo -w 1920 -h 1080 --libplacebo-shader anime4k-v4-a \
         -e preset=veryfast -e crf=30
 
+[unix]
+[group('test')]
 memcheck-rife:
-    LD_LIBRARY_PATH={{BINDIR}} valgrind \
+    LD_LIBRARY_PATH={{bindir}} valgrind \
         --tool=memcheck \
         --leak-check=full \
         --show-leak-kinds=all \
         --track-origins=yes \
         --show-reachable=yes \
         --verbose --log-file="valgrind.log" \
-        {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+        {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p rife -m 4 --rife-model rife-v4.6 \
         -e preset=veryfast -e crf=30
 
+[unix]
+[group('test')]
 heaptrack-realesrgan:
-    LD_LIBRARY_PATH={{BINDIR}} HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
-        {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+    LD_LIBRARY_PATH={{bindir}} HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
+        {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p realesrgan -s 4 --realesrgan-model realesr-animevideov3 \
         -e preset=veryfast -e crf=30
 
+[unix]
+[group('test')]
 heaptrack-realcugan:
-    LD_LIBRARY_PATH={{BINDIR}} HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
-        {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+    LD_LIBRARY_PATH={{bindir}} HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
+        {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p realcugan -s 4 -n 0 --realcugan-model models-se \
         -e preset=veryfast -e crf=30
 
+[unix]
+[group('test')]
 heaptrack-libplacebo:
-    LD_LIBRARY_PATH={{BINDIR}} HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
-        {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+    LD_LIBRARY_PATH={{bindir}} HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
+        {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p libplacebo -w 1920 -h 1080 --libplacebo-shader anime4k-v4-a \
         -e preset=veryfast -e crf=30
 
+[unix]
+[group('test')]
 heaptrack-rife:
-    LD_LIBRARY_PATH={{BINDIR}} HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
-        {{BINDIR}}/video2x \
-        -i {{TEST_VIDEO}} -o {{TEST_OUTPUT}} \
+    LD_LIBRARY_PATH={{bindir}} HEAPTRACK_ENABLE_DEBUGINFOD=1 heaptrack \
+        {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
         -p rife -m 4 --rife-model rife-v4.6 \
         -e preset=veryfast -e crf=30
