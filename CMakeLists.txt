@@ -95,8 +95,8 @@ target_compile_features(libvideo2x PRIVATE cxx_std_17)
 
 # Set the shared library output name and disable C++ extensions
 set_target_properties(libvideo2x PROPERTIES
-    PREFIX lib
-    OUTPUT_NAME video2x
+    PREFIX ""
+    OUTPUT_NAME libvideo2x
     CXX_EXTENSIONS OFF
 )
 
