@@ -117,14 +117,16 @@ target_compile_definitions(libvideo2x PRIVATE LIBVIDEO2X_EXPORTS)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(libvideo2x PRIVATE $<$<CONFIG:Debug>:/Zi /Od /MDd>)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(libvideo2x PRIVATE -fPIC $<$<CONFIG:Debug>:-g -O0>)
+    target_compile_options(libvideo2x PRIVATE
+        $<$<NOT:$<PLATFORM_ID:Windows>>:-fPIC>
+        $<$<CONFIG:Debug>:-g -O0>
+    )
 endif()
 
 # FFmpeg
 if(WIN32)
-    target_include_directories(libvideo2x SYSTEM PRIVATE
-        "${PROJECT_SOURCE_DIR}/third_party/ffmpeg-shared/include"
-    )
+    set(ffmpeg_base_path "${PROJECT_SOURCE_DIR}/third_party/ffmpeg-shared")
+    target_include_directories(libvideo2x SYSTEM PRIVATE "${ffmpeg_base_path}/include")
     target_link_libraries(libvideo2x PRIVATE
         "${ffmpeg_base_path}/lib/avcodec.lib"
         "${ffmpeg_base_path}/lib/avfilter.lib"
@@ -163,25 +165,16 @@ endif()
 # ncnn
 if(VIDEO2X_USE_EXTERNAL_NCNN)
     find_package(ncnn REQUIRED)
-    target_link_libraries(libvideo2x PRIVATE ncnn)
 else()
     if(WIN32)
-        # On Windows, use the pre-built shared ncnn library
+        # Use the pre-built shared ncnn library on Windows
         set(ncnn_base_path "${PROJECT_SOURCE_DIR}/third_party/ncnn-shared/x64")
-        set(spirv_build_path
-            "${CMAKE_BINARY_DIR}/realesrgan-prefix/src/realesrgan-build/ncnn/glslang/SPIRV"
+        add_library(ncnn SHARED IMPORTED)
+        set_target_properties(ncnn PROPERTIES
+            IMPORTED_LOCATION "${ncnn_base_path}/bin/ncnn.dll"
+            IMPORTED_IMPLIB "${ncnn_base_path}/lib/ncnn.lib"
+            INTERFACE_INCLUDE_DIRECTORIES "${ncnn_base_path}/include/ncnn"
         )
-
-        # Link ncnn and SPIRV libraries
-        target_include_directories(libvideo2x SYSTEM PRIVATE "${ncnn_base_path}/include/ncnn")
-        target_link_libraries(libvideo2x PRIVATE "${ncnn_base_path}/lib/ncnn.lib")
-
-        # SPIRV needs to be linked explicitly
-        if(CMAKE_BUILD_TYPE STREQUAL Release)
-            target_link_libraries(libvideo2x PRIVATE "${spirv_build_path}/Release/SPIRV.lib")
-        else()
-            target_link_libraries(libvideo2x PRIVATE "${spirv_build_path}/Debug/SPIRVd.lib")
-        endif()
     else()
         option(NCNN_INSTALL_SDK "" ON)
         option(SKIP_GLSLANG_INSTALL "" OFF)
@@ -277,9 +270,9 @@ else()
         option(WITH_LAYER_softplus "" OFF)
 
         add_subdirectory(third_party/ncnn)
-        target_link_libraries(libvideo2x PRIVATE ncnn)
     endif()
 endif()
+target_link_libraries(libvideo2x PRIVATE ncnn)
 
 # spdlog
 if(VIDEO2X_USE_EXTERNAL_SPDLOG)
@@ -294,27 +287,25 @@ else()
     target_link_libraries(libvideo2x PRIVATE spdlog::spdlog_header_only)
 endif()
 
-# Real-ESRGAN, Real-CUGAN, and RIFE
+# Add Real-ESRGAN, Real-CUGAN, and RIFE
 option(USE_SYSTEM_NCNN "" ${VIDEO2X_USE_EXTERNAL_NCNN})
 add_subdirectory(third_party/librealesrgan_ncnn_vulkan/src)
 add_subdirectory(third_party/librealcugan_ncnn_vulkan/src)
 add_subdirectory(third_party/librife_ncnn_vulkan/src)
 
-# Determine the library suffix based on the platform
+# Prevent the min and max macros from causing error C2589 on Windows
 if(WIN32)
-    set(suffix ${CMAKE_STATIC_LIBRARY_SUFFIX})
-else()
-    set(suffix ${CMAKE_SHARED_LIBRARY_SUFFIX})
+    target_compile_definitions(librealesrgan-ncnn-vulkan PRIVATE -DNOMINMAX)
+    target_compile_definitions(librealcugan-ncnn-vulkan PRIVATE -DNOMINMAX)
+    target_compile_definitions(librife-ncnn-vulkan PRIVATE -DNOMINMAX)
 endif()
 
-# Link the shared library with the ncnn-Vulkan-based libraries
-set(ncnn_vulkan_libs)
-foreach(lib IN ITEMS realesrgan realcugan rife)
-    list(APPEND ncnn_vulkan_libs
-        "${CMAKE_BINARY_DIR}/third_party/lib${lib}_ncnn_vulkan/src/lib${lib}-ncnn-vulkan${suffix}"
-    )
-endforeach()
-target_link_libraries(libvideo2x PRIVATE ${ncnn_vulkan_libs})
+# Link the shared library to the ncnn-Vulkan libraries
+target_link_libraries(libvideo2x PRIVATE
+    librealesrgan-ncnn-vulkan
+    librealcugan-ncnn-vulkan
+    librife-ncnn-vulkan
+)
 
 # Determine the installation directories
 if(WIN32)
@@ -425,7 +416,7 @@ if(VIDEO2X_BUILD_CLI)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         target_compile_options(video2x PRIVATE $<$<CONFIG:Debug>:/Zi /Od /MDd>)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        target_compile_options(video2x PRIVATE -fPIC $<$<CONFIG:Debug>:-g -O0>)
+        target_compile_options(video2x PRIVATE $<$<CONFIG:Debug>:-g -O0>)
     endif()
 
     # FFmpeg
@@ -474,10 +465,8 @@ if(VIDEO2X_BUILD_CLI)
         )
 
         # Suppress the -Wsign-conversion warnings for Boost.Nowide
-        if (TARGET boost_nowide)
-            if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-                target_compile_options(boost_nowide PRIVATE -Wno-error=sign-conversion)
-            endif()
+        if (TARGET boost_nowide AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+            target_compile_options(boost_nowide PRIVATE -Wno-error=sign-conversion)
         endif()
     endif()
     target_link_libraries(video2x PRIVATE Boost::program_options)
