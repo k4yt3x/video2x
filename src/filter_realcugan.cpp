@@ -32,10 +32,7 @@ FilterRealcugan::FilterRealcugan(
       model_name_(std::move(model_name)) {}
 
 FilterRealcugan::~FilterRealcugan() {
-    if (realcugan_) {
-        delete realcugan_;
-        realcugan_ = nullptr;
-    }
+    delete realcugan_;
 }
 
 int FilterRealcugan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {

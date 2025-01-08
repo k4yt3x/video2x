@@ -29,10 +29,7 @@ InterpolatorRIFE::InterpolatorRIFE(
       model_name_(std::move(model_name)) {}
 
 InterpolatorRIFE::~InterpolatorRIFE() {
-    if (rife_) {
-        delete rife_;
-        rife_ = nullptr;
-    }
+    delete rife_;
 }
 
 int InterpolatorRIFE::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {

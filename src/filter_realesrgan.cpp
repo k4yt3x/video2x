@@ -26,10 +26,7 @@ FilterRealesrgan::FilterRealesrgan(
       model_name_(std::move(model_name)) {}
 
 FilterRealesrgan::~FilterRealesrgan() {
-    if (realesrgan_) {
-        delete realesrgan_;
-        realesrgan_ = nullptr;
-    }
+    delete realesrgan_;
 }
 
 int FilterRealesrgan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {
