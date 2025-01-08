@@ -5,3 +5,5 @@ You can download the installer for Video2X Qt6 from the [releases page](https://
 Download then double-click the installer to start the installation process. The installer will guide you through the installation process. You can choose the installation directory and whether to create a desktop shortcut during the installation.
 
 After the installation is complete, you can start Video2X Qt6 by double-clicking the desktop shortcut.
+
+In the case that double clicking on the shortcut does not run the software, simply open the terminal, redirect to the folder containing the `.exe` and execute it within the terminal.
