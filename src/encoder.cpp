@@ -225,7 +225,7 @@ int Encoder::init(
                 return AVERROR_UNKNOWN;
             }
 
-            // Copy codec parameters from input to output
+            // Copy codec parameters from the input stream to the output stream
             ret = avcodec_parameters_copy(out_stream->codecpar, in_codecpar);
             if (ret < 0) {
                 logger()->error("Failed to copy codec parameters");
@@ -233,10 +233,11 @@ int Encoder::init(
             }
             out_stream->codecpar->codec_tag = 0;
 
-            // Copy language tag if available
-            AVDictionaryEntry * lang_entry = av_dict_get(in_stream->metadata, "language", nullptr, 0);
-            if(lang_entry) {
-                av_dict_set(&out_stream->metadata, lang_entry->key, lang_entry->value, 0);
+            // Copy all metadata from the input stream to the output stream
+            AVDictionaryEntry* tag = nullptr;
+            while ((tag = av_dict_get(in_stream->metadata, "", tag, AV_DICT_IGNORE_SUFFIX)) !=
+                   nullptr) {
+                av_dict_set(&out_stream->metadata, tag->key, tag->value, 0);
             }
 
             // Copy time base

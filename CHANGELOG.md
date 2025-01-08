@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Multi-versioning to critical functions to enhance performance in generic architecture builds.
+- The feature to copy input streams' metadata to the output streams (#1282).
 
 ### Changed
 
