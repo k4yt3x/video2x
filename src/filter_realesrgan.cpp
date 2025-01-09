@@ -27,6 +27,7 @@ FilterRealesrgan::FilterRealesrgan(
 
 FilterRealesrgan::~FilterRealesrgan() {
     delete realesrgan_;
+    realesrgan_ = nullptr;
 }
 
 int FilterRealesrgan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {

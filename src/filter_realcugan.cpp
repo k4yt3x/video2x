@@ -33,6 +33,7 @@ FilterRealcugan::FilterRealcugan(
 
 FilterRealcugan::~FilterRealcugan() {
     delete realcugan_;
+    realcugan_ = nullptr;
 }
 
 int FilterRealcugan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {

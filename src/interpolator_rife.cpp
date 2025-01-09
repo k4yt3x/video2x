@@ -30,6 +30,7 @@ InterpolatorRIFE::InterpolatorRIFE(
 
 InterpolatorRIFE::~InterpolatorRIFE() {
     delete rife_;
+    rife_ = nullptr;
 }
 
 int InterpolatorRIFE::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {
