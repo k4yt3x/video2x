@@ -326,79 +326,60 @@ target_link_libraries(libvideo2x PRIVATE
     librife-ncnn-vulkan
 )
 
-# Determine the installation directories
-if(WIN32)
-    set(install_bin_destination .)
-    set(install_include_destination include/libvideo2x)
-    set(install_lib_destination .)
-    set(install_model_destination .)
-    set(install_cmake_destination cmake/Video2X)
-else()
-    set(install_bin_destination "${CMAKE_INSTALL_BINDIR}")
-    set(install_include_destination "${CMAKE_INSTALL_INCLUDEDIR}/libvideo2x")
-    set(install_lib_destination "${CMAKE_INSTALL_LIBDIR}")
-    set(install_model_destination "${CMAKE_INSTALL_DATADIR}/video2x")
-    set(install_cmake_destination "${CMAKE_INSTALL_LIBDIR}/cmake/Video2X")
-endif()
-
 # Common installation rules for libvideo2x and models
 install(TARGETS libvideo2x
     EXPORT Video2XTargets
-    RUNTIME DESTINATION "${install_bin_destination}"
-    LIBRARY DESTINATION "${install_lib_destination}"
-    ARCHIVE DESTINATION "${install_lib_destination}"
-    INCLUDES DESTINATION "${install_include_destination}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libvideo2x"
 )
 
 # Install the header files from the include directory
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/libvideo2x/"
-    DESTINATION "${install_include_destination}"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libvideo2x"
     FILES_MATCHING PATTERN "*.h"
 )
 
 # Install the generated version.h file
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/libvideo2x/version.h"
-    DESTINATION "${install_include_destination}"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libvideo2x"
 )
 
 # Export targets and create CMake package config
 install(EXPORT Video2XTargets
     FILE Video2XTargets.cmake
     NAMESPACE Video2X::
-    DESTINATION "${install_cmake_destination}"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Video2X"
 )
 
 # Generate the CMake package config file
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Video2XConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/Video2XConfig.cmake"
-    INSTALL_DESTINATION "${install_cmake_destination}"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Video2X"
 )
 
 # Install the CMake package config file
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/Video2XConfig.cmake"
-    DESTINATION "${install_cmake_destination}"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Video2X"
 )
 
 # Install model files
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${install_model_destination}")
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/models"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/video2x"
+)
 
 # Platform-specific installation rules
 if(WIN32)
     file(GLOB ffmpeg_dlls "${ffmpeg_base_path}/bin/*.dll")
-    install(FILES
-        ${ffmpeg_dlls}
-        "${ncnn_base_path}/bin/ncnn.dll"
-        ${ncnn_vulkan_libs}
-        DESTINATION "${install_bin_destination}"
-    )
-else()
-    install(FILES
-        ${ncnn_vulkan_libs}
-        DESTINATION "${install_lib_destination}"
-    )
+    install(FILES ${ffmpeg_dlls} DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+    if(NOT VIDEO2X_USE_EXTERNAL_BOOST)
+        install(FILES  "${ncnn_base_path}/bin/ncnn.dll" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    endif()
 endif()
 
 # Build the video2x CLI executable
@@ -491,7 +472,7 @@ if(VIDEO2X_BUILD_CLI)
     target_link_libraries(video2x PRIVATE Boost::program_options)
 
     # Install the video2x executable
-    install(TARGETS video2x RUNTIME DESTINATION "${install_bin_destination}")
+    install(TARGETS video2x RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
     # Install the Boost DLL
     if(WIN32 AND NOT VIDEO2X_USE_EXTERNAL_BOOST)
@@ -506,6 +487,6 @@ if(VIDEO2X_BUILD_CLI)
             set(boost_dll_path "${boost_base_path}/boost_program_options-vc143-mt-gd-x64-1_86.dll")
         endif()
 
-        install(FILES "${boost_dll_path}" DESTINATION "${install_bin_destination}")
+        install(FILES "${boost_dll_path}" DESTINATION "${CMAKE_INSTALL_BINDIR}")
     endif()
 endif()
