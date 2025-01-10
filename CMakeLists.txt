@@ -367,12 +367,14 @@ install(FILES
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Video2X"
 )
 
-# Install model files
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/models"
-    DESTINATION "${CMAKE_INSTALL_DATADIR}/video2x"
-)
+# Install the model files
+if(WIN32)
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_INSTALL_DATADIR}")
+else()
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_INSTALL_DATADIR}/video2x")
+endif()
 
-# Platform-specific installation rules
+# Install the FFmpeg and ncnn shared libraries
 if(WIN32)
     file(GLOB ffmpeg_dlls "${ffmpeg_base_path}/bin/*.dll")
     install(FILES ${ffmpeg_dlls} DESTINATION "${CMAKE_INSTALL_BINDIR}")
