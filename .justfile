@@ -156,6 +156,52 @@ ubuntu2204:
     dpkg-deb --build video2x-linux-ubuntu-amd64
 
 [unix]
+[group('build')]
+appimage:
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential cmake clang pkg-config ninja-build curl file fuse \
+        libavcodec-dev \
+        libavdevice-dev \
+        libavfilter-dev \
+        libavformat-dev \
+        libavutil-dev \
+        libswscale-dev \
+        libvulkan-dev \
+        glslang-tools \
+        libomp-dev \
+        libboost-program-options1.83-dev \
+        libboost-program-options1.83.0 \
+        libspdlog-dev
+    cmake -G Ninja -B build -S . \
+        -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
+        -DNCNN_BUILD_SHARED_LIBS=ON \
+        -DCMAKE_CXX_COMPILER=clang++ \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DNCNN_AVX512=OFF \
+        -DCMAKE_INSTALL_PREFIX=AppDir/usr
+    cmake --build build --config Release --target install --parallel
+    rm -rf AppDir/usr/share/video2x/models/rife/rife \
+        AppDir/usr/share/video2x/models/rife/rife-HD \
+        AppDir/usr/share/video2x/models/rife/rife-UHD \
+        AppDir/usr/share/video2x/models/rife/rife-anime \
+        AppDir/usr/share/video2x/models/rife/rife-v2 \
+        AppDir/usr/share/video2x/models/rife/rife-v2.3 \
+        AppDir/usr/share/video2x/models/rife/rife-v2.4 \
+        AppDir/usr/share/video2x/models/rife/rife-v3.0 \
+        AppDir/usr/share/video2x/models/rife/rife-v3.1
+    curl -Lo /usr/local/bin/linuxdeploy \
+        https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+    chmod +x /usr/local/bin/linuxdeploy
+    LD_LIBRARY_PATH=AppDir/usr/lib linuxdeploy \
+        --appdir AppDir \
+        --executable AppDir/usr/bin/video2x \
+        --exclude-library "libvulkan.so.1" \
+        --desktop-file packaging/appimage/video2x.desktop \
+        --icon-file packaging/appimage/video2x.png \
+        --output appimage
+
+[unix]
 [group('misc')]
 clean:
     rm -vrf {{bindir}} data/output*.* heaptrack*.zst valgrind.log

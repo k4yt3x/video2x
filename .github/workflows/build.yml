@@ -82,7 +82,7 @@ jobs:
         shell: pwsh
         run: |
           $ffmpegVersion = "7.1"
-          $ncnnVersion = "20240820"
+          $ncnnVersion = "20241226"
 
           git submodule update --init --recursive
 
@@ -122,3 +122,58 @@ jobs:
           image: video2x
           tags: latest
           pushImage: false
+
+  appimage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          git submodule update --init --recursive
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake clang pkg-config ninja-build curl file fuse \
+            libavcodec-dev \
+            libavdevice-dev \
+            libavfilter-dev \
+            libavformat-dev \
+            libavutil-dev \
+            libswscale-dev \
+            libvulkan-dev \
+            glslang-tools \
+            libomp-dev \
+            libboost-program-options1.83-dev \
+            libboost-program-options1.83.0 \
+            libspdlog-dev
+
+      - name: Build Video2X
+        run: |
+          cmake -G Ninja -B build -S . \
+            -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
+            -DNCNN_BUILD_SHARED_LIBS=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DNCNN_AVX512=OFF \
+            -DCMAKE_INSTALL_PREFIX=AppDir/usr
+          cmake --build build --config Release --target install --parallel
+
+      - name: Build AppImage
+        run: |
+          sudo curl -Lo /usr/local/bin/linuxdeploy \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          sudo chmod +x /usr/local/bin/linuxdeploy
+          LD_LIBRARY_PATH=AppDir/usr/lib linuxdeploy \
+            --appdir AppDir \
+            --executable AppDir/usr/bin/video2x \
+            --exclude-library "libvulkan.so.1" \
+            --desktop-file packaging/appimage/video2x.desktop \
+            --icon-file packaging/appimage/video2x.png \
+            --output appimage
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Video2X-x86_64.AppImage
+          path: Video2X-x86_64.AppImage

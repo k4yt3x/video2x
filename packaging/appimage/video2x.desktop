@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Video2X
+Comment=A machine learning-based video super resolution and frame interpolation framework
+TryExec=video2x
+Exec=video2x
+Icon=video2x
+Type=Application
+Terminal=true
+Categories=AudioVideo;Video;Qt
+
