@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <optional>
 #include <string>
 
 namespace video2x {
@@ -20,9 +21,9 @@ typedef std::wstring StringType;
 typedef std::string StringType;
 #endif
 
-bool filepath_is_readable(const std::filesystem::path& path);
+bool file_is_readable(const std::filesystem::path& path);
 
-std::filesystem::path find_resource_file(const std::filesystem::path& path);
+std::optional<std::filesystem::path> find_resource(const std::filesystem::path& resource);
 
 std::string path_to_u8string(const std::filesystem::path& path);
 

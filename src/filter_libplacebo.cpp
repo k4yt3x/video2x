@@ -42,20 +42,20 @@ FilterLibplacebo::~FilterLibplacebo() {
 
 int FilterLibplacebo::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {
     // Construct the shader path
-    std::filesystem::path shader_full_path;
-    if (fsutils::filepath_is_readable(shader_path_)) {
+    std::optional<std::filesystem::path> shader_full_path = std::nullopt;
+    if (fsutils::file_is_readable(shader_path_)) {
         // If the shader path is directly readable, use it
         shader_full_path = shader_path_;
     } else {
         // Construct the fallback path using std::filesystem
-        shader_full_path = fsutils::find_resource_file(
+        shader_full_path = fsutils::find_resource(
             std::filesystem::path(STR("models")) / STR("libplacebo") /
             (fsutils::path_to_string_type(shader_path_) + STR(".glsl"))
         );
     }
 
     // Check if the shader file exists
-    if (!std::filesystem::exists(shader_full_path)) {
+    if (!shader_full_path.has_value()) {
         logger()->error("libplacebo shader file not found: '{}'", shader_path_.u8string());
         return -1;
     }
@@ -73,7 +73,7 @@ int FilterLibplacebo::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
         width_,
         height_,
         vk_device_index_,
-        shader_full_path
+        shader_full_path.value()
     );
 
     // Set these resources to nullptr since they are already freed by `avfilter_graph_free`

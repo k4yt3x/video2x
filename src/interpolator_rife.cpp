@@ -35,17 +35,15 @@ InterpolatorRIFE::~InterpolatorRIFE() {
 
 int InterpolatorRIFE::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef*) {
     // Construct the model directory path using std::filesystem
-    std::filesystem::path model_param_dir;
-
-    // Find the model paths by model name if provided
-    model_param_dir = std::filesystem::path(STR("models")) / STR("rife") / model_name_;
+    std::filesystem::path model_dir =
+        std::filesystem::path(STR("models")) / STR("rife") / model_name_;
 
     // Get the full paths using a function that possibly modifies or validates the path
-    std::filesystem::path model_param_full_path = fsutils::find_resource_file(model_param_dir);
+    std::optional<std::filesystem::path> model_dir_full_path = fsutils::find_resource(model_dir);
 
     // Check if the model files exist
-    if (!std::filesystem::exists(model_param_full_path)) {
-        logger()->error("RIFE model param directory not found: {}", model_param_dir.u8string());
+    if (!model_dir_full_path.has_value()) {
+        logger()->error("RIFE model param directory not found: {}", model_dir.u8string());
         return -1;
     }
 
@@ -73,7 +71,7 @@ int InterpolatorRIFE::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
     out_pix_fmt_ = enc_ctx->pix_fmt;
 
     // Load the model
-    if (rife_->load(model_param_full_path) != 0) {
+    if (rife_->load(model_dir_full_path.value()) != 0) {
         logger()->error("Failed to load RIFE model");
         return -1;
     }

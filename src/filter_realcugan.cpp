@@ -66,20 +66,22 @@ int FilterRealcugan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBu
         std::filesystem::path(STR("models")) / STR("realcugan") / model_name_ / bin_file_name;
 
     // Get the full paths using a function that possibly modifies or validates the path
-    std::filesystem::path model_param_full_path = fsutils::find_resource_file(model_param_path);
-    std::filesystem::path model_bin_full_path = fsutils::find_resource_file(model_bin_path);
+    std::optional<std::filesystem::path> model_param_full_path =
+        fsutils::find_resource(model_param_path);
+    std::optional<std::filesystem::path> model_bin_full_path =
+        fsutils::find_resource(model_bin_path);
 
     // Check if the model files exist
-    if (!std::filesystem::exists(model_param_full_path)) {
-        logger()->error("RealCUGAN model param file not found: {}", model_param_path.u8string());
+    if (!model_param_full_path.has_value()) {
+        logger()->error("Real-CUGAN model param file not found: {}", model_param_path.u8string());
         return -1;
     }
-    if (!std::filesystem::exists(model_bin_full_path)) {
-        logger()->error("RealCUGAN model bin file not found: {}", model_bin_path.u8string());
+    if (!model_bin_full_path.has_value()) {
+        logger()->error("Real-CUGAN model bin file not found: {}", model_bin_path.u8string());
         return -1;
     }
 
-    // Create a new RealCUGAN instance
+    // Create a new Real-CUGAN instance
     realcugan_ = new RealCUGAN(gpuid_, tta_mode_, num_threads_);
 
     // Store the time bases
@@ -88,8 +90,8 @@ int FilterRealcugan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBu
     out_pix_fmt_ = enc_ctx->pix_fmt;
 
     // Load the model
-    if (realcugan_->load(model_param_full_path, model_bin_full_path) != 0) {
-        logger()->error("Failed to load RealCUGAN model");
+    if (realcugan_->load(model_param_full_path.value(), model_bin_full_path.value()) != 0) {
+        logger()->error("Failed to load Real-CUGAN model");
         return -1;
     }
 
@@ -176,7 +178,7 @@ int FilterRealcugan::filter(AVFrame* in_frame, AVFrame** out_frame) {
 
     ret = realcugan_->process(in_mat, out_mat);
     if (ret != 0) {
-        logger()->error("RealCUGAN processing failed");
+        logger()->error("Real-CUGAN processing failed");
         return ret;
     }
 

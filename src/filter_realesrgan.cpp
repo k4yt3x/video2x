@@ -45,20 +45,22 @@ int FilterRealesrgan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
     model_bin_path = std::filesystem::path(STR("models")) / STR("realesrgan") / bin_file_name;
 
     // Get the full paths using a function that possibly modifies or validates the path
-    std::filesystem::path model_param_full_path = fsutils::find_resource_file(model_param_path);
-    std::filesystem::path model_bin_full_path = fsutils::find_resource_file(model_bin_path);
+    std::optional<std::filesystem::path> model_param_full_path =
+        fsutils::find_resource(model_param_path);
+    std::optional<std::filesystem::path> model_bin_full_path =
+        fsutils::find_resource(model_bin_path);
 
     // Check if the model files exist
-    if (!std::filesystem::exists(model_param_full_path)) {
-        logger()->error("RealESRGAN model param file not found: {}", model_param_path.u8string());
+    if (!model_param_full_path.has_value()) {
+        logger()->error("Real-ESRGAN model param file not found: {}", model_param_path.u8string());
         return -1;
     }
-    if (!std::filesystem::exists(model_bin_full_path)) {
-        logger()->error("RealESRGAN model bin file not found: {}", model_bin_path.u8string());
+    if (!model_bin_full_path.has_value()) {
+        logger()->error("Real-ESRGAN model bin file not found: {}", model_bin_path.u8string());
         return -1;
     }
 
-    // Create a new RealESRGAN instance
+    // Create a new Real-ESRGAN instance
     realesrgan_ = new RealESRGAN(gpuid_, tta_mode_);
 
     // Store the time bases
@@ -67,12 +69,12 @@ int FilterRealesrgan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
     out_pix_fmt_ = enc_ctx->pix_fmt;
 
     // Load the model
-    if (realesrgan_->load(model_param_full_path, model_bin_full_path) != 0) {
-        logger()->error("Failed to load RealESRGAN model");
+    if (realesrgan_->load(model_param_full_path.value(), model_bin_full_path.value()) != 0) {
+        logger()->error("Failed to load Real-ESRGAN model");
         return -1;
     }
 
-    // Set RealESRGAN parameters
+    // Set Real-ESRGAN parameters
     realesrgan_->scale = scaling_factor_;
     realesrgan_->prepadding = 10;
 
@@ -108,7 +110,7 @@ int FilterRealesrgan::filter(AVFrame* in_frame, AVFrame** out_frame) {
 
     ret = realesrgan_->process(in_mat, out_mat);
     if (ret != 0) {
-        logger()->error("RealESRGAN processing failed");
+        logger()->error("Real-ESRGAN processing failed");
         return ret;
     }
 

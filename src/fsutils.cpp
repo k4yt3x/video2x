@@ -54,13 +54,13 @@ static std::filesystem::path get_executable_directory() {
 }
 #endif  // _WIN32
 
-bool filepath_is_readable(const std::filesystem::path& path) {
+bool file_is_readable(const std::filesystem::path& path) {
 #if _WIN32
     FILE* fp = _wfopen(path.c_str(), L"rb");
-#else   // _WIN32
+#else
     FILE* fp = fopen(path.c_str(), "rb");
-#endif  // _WIN32
-    if (!fp) {
+#endif
+    if (fp == nullptr) {
         return false;
     }
 
@@ -68,16 +68,40 @@ bool filepath_is_readable(const std::filesystem::path& path) {
     return true;
 }
 
-std::filesystem::path find_resource_file(const std::filesystem::path& path) {
-    if (filepath_is_readable(path)) {
-        return path;
+std::optional<std::filesystem::path> find_resource(const std::filesystem::path& resource) {
+    // Build a list of candidate directories
+    std::vector<std::filesystem::path> candidates;
+
+    // 1. The resource's path as provided
+    candidates.push_back(resource);
+
+#ifndef _WIN32
+    // 2. AppImage's mounted directory
+    if (const char* appdir = std::getenv("APPDIR")) {
+        candidates.push_back(
+            std::filesystem::path(appdir) / "usr" / "share" / "video2x" / resource
+        );
     }
 
-    if (filepath_is_readable(std::filesystem::path("/usr/share/video2x/") / path)) {
-        return std::filesystem::path("/usr/share/video2x/") / path;
+    // 3. The Linux standard local data directory
+    candidates.push_back(std::filesystem::path("/usr/local/share/video2x") / resource);
+
+    // 4. The Linux standard data directory
+    candidates.push_back(std::filesystem::path("/usr/share/video2x") / resource);
+#endif
+
+    // 5. The executable's parent directory
+    candidates.push_back(get_executable_directory() / resource);
+
+    // Iterate over the candidate directories and return the first readable file
+    for (const auto& candidate : candidates) {
+        if (file_is_readable(candidate) || std::filesystem::is_directory(candidate)) {
+            return candidate;
+        }
     }
 
-    return get_executable_directory() / path;
+    // Return nullopt if the resource was not found
+    return std::nullopt;
 }
 
 std::string path_to_u8string(const std::filesystem::path& path) {
@@ -119,11 +143,11 @@ std::string wstring_to_u8string(const std::wstring& wstr) {
     );
     return converted_str;
 }
-#else
+#else   // _WIN32
 std::string wstring_to_u8string(const std::string& str) {
     return str;
 }
-#endif
+#endif  // _WIN32
 
 fsutils::StringType path_to_string_type(const std::filesystem::path& path) {
 #if _WIN32
