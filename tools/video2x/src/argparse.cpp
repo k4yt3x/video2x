@@ -25,7 +25,7 @@
 namespace po = boost::program_options;
 
 #ifdef _WIN32
-std::string wstring_to_u8string(const std::wstring &wstr) {
+std::string wstring_to_u8string(const std::wstring& wstr) {
     if (wstr.empty()) {
         return std::string();
     }
@@ -46,7 +46,7 @@ std::string wstring_to_u8string(const std::wstring &wstr) {
     return converted_str;
 }
 #else
-std::string wstring_to_u8string(const std::string &str) {
+std::string wstring_to_u8string(const std::string& str) {
     return str;
 }
 #endif
@@ -54,13 +54,13 @@ std::string wstring_to_u8string(const std::string &str) {
 int parse_args(
     int argc,
 #ifdef _WIN32
-    wchar_t *argv[],
+    wchar_t* argv[],
 #else
-    char *argv[],
+    char* argv[],
 #endif
-    Arguments &arguments,
-    video2x::processors::ProcessorConfig &proc_cfg,
-    video2x::encoder::EncoderConfig &enc_cfg
+    Arguments& arguments,
+    video2x::processors::ProcessorConfig& proc_cfg,
+    video2x::encoder::EncoderConfig& enc_cfg
 ) {
     try {
         // clang-format off
@@ -310,7 +310,7 @@ int parse_args(
         enc_cfg.codec = AV_CODEC_ID_H264;
         if (vm.count("codec")) {
             video2x::fsutils::StringType codec_str = vm["codec"].as<video2x::fsutils::StringType>();
-            const AVCodec *codec =
+            const AVCodec* codec =
                 avcodec_find_encoder_by_name(wstring_to_u8string(codec_str).c_str());
             if (codec == nullptr) {
                 video2x::logger()->critical(
@@ -342,7 +342,7 @@ int parse_args(
 
         // Parse extra AVOptions
         if (vm.count("extra-encoder-option")) {
-            for (const auto &opt :
+            for (const auto& opt :
                  vm["extra-encoder-option"].as<std::vector<video2x::fsutils::StringType>>()) {
                 size_t eq_pos = opt.find('=');
                 if (eq_pos != video2x::fsutils::StringType::npos) {
@@ -467,10 +467,10 @@ int parse_args(
                 video2x::logger()->critical("Invalid processor type.");
                 return -1;
         }
-    } catch (const po::error &e) {
+    } catch (const po::error& e) {
         video2x::logger()->critical("Error parsing arguments: {}", e.what());
         return -1;
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
         video2x::logger()->critical(
             "Unexpected exception caught while parsing options: {}", e.what()
         );

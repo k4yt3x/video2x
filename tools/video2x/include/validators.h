@@ -6,7 +6,7 @@
 namespace po = boost::program_options;
 
 template <typename T>
-void validate_positive(const T &value, const std::string &option_name) {
+void validate_positive(const T& value, const std::string& option_name) {
     if (value < 0) {
         throw po::validation_error(
             po::validation_error::invalid_option_value,
@@ -17,7 +17,7 @@ void validate_positive(const T &value, const std::string &option_name) {
 }
 
 template <typename T>
-void validate_min(const T &value, const std::string &option_name, const T &min) {
+void validate_min(const T& value, const std::string& option_name, const T& min) {
     if (value < min) {
         throw po::validation_error(
             po::validation_error::invalid_option_value,
@@ -28,7 +28,7 @@ void validate_min(const T &value, const std::string &option_name, const T &min) 
 }
 
 template <typename T>
-void validate_max(const T &value, const std::string &option_name, const T &max) {
+void validate_max(const T& value, const std::string& option_name, const T& max) {
     if (value > max) {
         throw po::validation_error(
             po::validation_error::invalid_option_value,
@@ -39,7 +39,7 @@ void validate_max(const T &value, const std::string &option_name, const T &max) 
 }
 
 template <typename T>
-void validate_range(const T &value, const std::string &option_name, const T &min, const T &max) {
+void validate_range(const T& value, const std::string& option_name, const T& min, const T& max) {
     if (value < min || value > max) {
         throw po::validation_error(
             po::validation_error::invalid_option_value,
@@ -51,7 +51,7 @@ void validate_range(const T &value, const std::string &option_name, const T &min
 }
 
 template <typename T>
-void validate_greater_equal_one(const T &value, const std::string &option_name) {
+void validate_greater_equal_one(const T& value, const std::string& option_name) {
     if (value < 1) {
         throw po::validation_error(
             po::validation_error::invalid_option_value,
@@ -61,10 +61,10 @@ void validate_greater_equal_one(const T &value, const std::string &option_name) 
     }
 }
 
-void validate_anime4k_shader_name(const video2x::fsutils::StringType &shader_name);
+void validate_anime4k_shader_name(const video2x::fsutils::StringType& shader_name);
 
-void validate_realesrgan_model_name(const video2x::fsutils::StringType &model_name);
+void validate_realesrgan_model_name(const video2x::fsutils::StringType& model_name);
 
-void validate_realcugan_model_name(const video2x::fsutils::StringType &model_name);
+void validate_realcugan_model_name(const video2x::fsutils::StringType& model_name);
 
-void validate_rife_model_name(const video2x::fsutils::StringType &model_name);
+void validate_rife_model_name(const video2x::fsutils::StringType& model_name);

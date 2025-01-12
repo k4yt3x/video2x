@@ -5,7 +5,7 @@
 
 #include <libvideo2x/logger_manager.h>
 
-static int enumerate_vulkan_devices(VkInstance *instance, std::vector<VkPhysicalDevice> &devices) {
+static int enumerate_vulkan_devices(VkInstance* instance, std::vector<VkPhysicalDevice>& devices) {
     // Create a Vulkan instance
     VkInstanceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -96,7 +96,7 @@ int list_vulkan_devices() {
     return 0;
 }
 
-int get_vulkan_device_prop(uint32_t vk_device_index, VkPhysicalDeviceProperties *dev_props) {
+int get_vulkan_device_prop(uint32_t vk_device_index, VkPhysicalDeviceProperties* dev_props) {
     if (dev_props == nullptr) {
         video2x::logger()->error("Invalid device properties pointer.");
         return -1;

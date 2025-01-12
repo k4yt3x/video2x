@@ -2,7 +2,7 @@
 
 #include <unordered_set>
 
-void validate_anime4k_shader_name(const video2x::fsutils::StringType &shader_name) {
+void validate_anime4k_shader_name(const video2x::fsutils::StringType& shader_name) {
     static const std::unordered_set<video2x::fsutils::StringType> valid_anime4k_shaders = {
         STR("anime4k-v4-a"),
         STR("anime4k-v4-a+a"),
@@ -22,7 +22,7 @@ void validate_anime4k_shader_name(const video2x::fsutils::StringType &shader_nam
     }
 }
 
-void validate_realesrgan_model_name(const video2x::fsutils::StringType &model_name) {
+void validate_realesrgan_model_name(const video2x::fsutils::StringType& model_name) {
     static const std::unordered_set<video2x::fsutils::StringType> valid_realesrgan_models = {
         STR("realesrgan-plus"), STR("realesrgan-plus-anime"), STR("realesr-animevideov3")
     };
@@ -36,7 +36,7 @@ void validate_realesrgan_model_name(const video2x::fsutils::StringType &model_na
     }
 }
 
-void validate_realcugan_model_name(const video2x::fsutils::StringType &model_name) {
+void validate_realcugan_model_name(const video2x::fsutils::StringType& model_name) {
     static const std::unordered_set<video2x::fsutils::StringType> valid_realcugan_models = {
         STR("models-nose"), STR("models-pro"), STR("models-se")
     };
@@ -49,7 +49,7 @@ void validate_realcugan_model_name(const video2x::fsutils::StringType &model_nam
     }
 }
 
-void validate_rife_model_name(const video2x::fsutils::StringType &model_name) {
+void validate_rife_model_name(const video2x::fsutils::StringType& model_name) {
     static const std::unordered_set<video2x::fsutils::StringType> valid_rife_models = {
         STR("rife"),
         STR("rife-HD"),

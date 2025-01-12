@@ -16,11 +16,11 @@ struct Arguments {
 [[nodiscard]] int parse_args(
     int argc,
 #ifdef _WIN32
-    wchar_t *argv[],
+    wchar_t* argv[],
 #else
-    char *argv[],
+    char* argv[],
 #endif
-    Arguments &arguments,
-    video2x::processors::ProcessorConfig &proc_cfg,
-    video2x::encoder::EncoderConfig &enc_cfg
+    Arguments& arguments,
+    video2x::processors::ProcessorConfig& proc_cfg,
+    video2x::encoder::EncoderConfig& enc_cfg
 );

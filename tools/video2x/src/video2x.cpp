@@ -40,7 +40,7 @@ std::tuple<int, int, int> calculate_time_components(int time_elapsed) {
 }
 
 #ifdef _WIN32
-int wmain(int argc, wchar_t *argv[]) {
+int wmain(int argc, wchar_t* argv[]) {
     // Set console output code page to UTF-8
     SetConsoleOutputCP(CP_UTF8);
 
@@ -51,7 +51,7 @@ int wmain(int argc, wchar_t *argv[]) {
     console_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(console_handle, console_mode);
 #else
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 #endif
     // Initialize newline-safe logger with custom formatting pattern
     std::shared_ptr<newline_safe_sink> logger_sink = std::make_shared<newline_safe_sink>();
