@@ -1,9 +1,10 @@
 # Use PowerShell to run recipes on Windows
 set windows-shell := ['pwsh', '-Command']
 
-# Default build directory and C++ compiler
+# Default build directory, generator, and C++ compiler
 bindir := "build"
-cxx_compiler := "clang++"
+generator := "Ninja"
+cxx := "clang++"
 
 # Test video and output paths
 test_video := "data/standard-test.mp4"
@@ -12,14 +13,13 @@ test_output := "data/output.mp4"
 [unix]
 [group('build')]
 build:
-    cmake -G Ninja -S . -B {{bindir}} \
+    cmake -G '{{generator}}' -S . -B {{bindir}} \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -DCMAKE_CXX_COMPILER={{cxx_compiler}} \
+        -DCMAKE_CXX_COMPILER={{cxx}} \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX={{bindir}}/video2x-install \
         -DVIDEO2X_ENABLE_NATIVE=ON
     cmake --build {{bindir}} --config Release --parallel --target install
-    cp {{bindir}}/compile_commands.json .
 
 [windows]
 [group('build')]
@@ -40,9 +40,9 @@ build:
 [unix]
 [group('build')]
 static:
-    cmake -G Ninja -S . -B {{bindir}} \
+    cmake -G '{{generator}}' -S . -B {{bindir}} \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -DCMAKE_CXX_COMPILER={{cxx_compiler}} \
+        -DCMAKE_CXX_COMPILER={{cxx}} \
         -DBUILD_SHARED_LIBS=OFF \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX={{bindir}}/video2x-install \
@@ -50,17 +50,15 @@ static:
         -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
         -DVIDEO2X_USE_EXTERNAL_BOOST=OFF
     cmake --build {{bindir}} --config Release --parallel --target install
-    cp {{bindir}}/compile_commands.json .
 
 [unix]
 [group('build')]
 debug:
-    cmake -G Ninja -S . -B {{bindir}} \
+    cmake -G '{{generator}}' -S . -B {{bindir}} \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -DCMAKE_CXX_COMPILER={{cxx_compiler}} \
+        -DCMAKE_CXX_COMPILER={{cxx}} \
         -DCMAKE_BUILD_TYPE=Debug
     cmake --build {{bindir}} --config Debug --parallel
-    cp {{bindir}}/compile_commands.json .
 
 [windows]
 [group('build')]
@@ -91,9 +89,9 @@ debian:
         libomp-dev \
         libspdlog-dev \
         libboost-program-options-dev
-    cmake -G Ninja -B /tmp/build -S . \
+    cmake -G '{{generator}}' -B /tmp/build -S . \
         -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
-        -DCMAKE_CXX_COMPILER={{cxx_compiler}} \
+        -DCMAKE_CXX_COMPILER={{cxx}} \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/tmp/install \
         -DINSTALL_BIN_DESTINATION=. \
@@ -118,7 +116,7 @@ ubuntu2404:
         glslang-tools \
         libomp-dev \
         libboost-program-options-dev
-    cmake -G Ninja -B build -S . \
+    cmake -G '{{generator}}' -B build -S . \
         -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
         -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
         -DCMAKE_CXX_COMPILER=g++ \
@@ -148,7 +146,7 @@ ubuntu2204:
         glslang-tools \
         libomp-dev \
         libboost-program-options-dev
-    cmake -G Ninja -B build -S . \
+    cmake -G '{{generator}}' -B build -S . \
         -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
         -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
         -DCMAKE_CXX_COMPILER=g++ \
@@ -177,7 +175,7 @@ appimage:
         libboost-program-options1.83-dev \
         libboost-program-options1.83.0 \
         libspdlog-dev
-    cmake -G Ninja -B build -S . \
+    cmake -G '{{generator}}' -B build -S . \
         -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
         -DNCNN_BUILD_SHARED_LIBS=ON \
         -DCMAKE_CXX_COMPILER=clang++ \
