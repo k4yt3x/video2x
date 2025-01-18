@@ -65,7 +65,7 @@ class Encoder {
         int in_vstream_idx
     );
 
-    int write_frame(AVFrame* frame, int64_t frame_idx);
+    int write_frame(AVFrame* frame);
     int flush();
 
     AVCodecContext* get_encoder_context() const;

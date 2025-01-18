@@ -1,4 +1,5 @@
 #include "libvideo2x.h"
+#include <libavcodec/avcodec.h>
 
 extern "C" {
 #include <libavutil/avutil.h>
@@ -152,6 +153,7 @@ int VideoProcessor::process_frames(
     AVCodecContext* dec_ctx = decoder.get_codec_context();
     int in_vstream_idx = decoder.get_video_stream_index();
     AVFormatContext* ofmt_ctx = encoder.get_format_context();
+    AVCodecContext* enc_ctx = encoder.get_encoder_context();
     int* stream_map = encoder.get_stream_map();
 
     // Reference to the previous frame does not require allocation
@@ -235,6 +237,10 @@ int VideoProcessor::process_frames(
                     return ret;
                 }
 
+                // Calculate this frame's presentation timestamp (PTS)
+                frame->pts =
+                    av_rescale_q(frame_idx_, av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
+
                 // Process the frame based on the selected processing mode
                 AVFrame* proc_frame = nullptr;
                 switch (processor->get_processing_mode()) {
@@ -308,7 +314,7 @@ int VideoProcessor::write_frame(AVFrame* frame, encoder::Encoder& encoder) {
     int ret = 0;
 
     if (!benchmark_) {
-        ret = encoder.write_frame(frame, frame_idx_);
+        ret = encoder.write_frame(frame);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             logger()->critical("Error encoding/writing frame: {}", errbuf);

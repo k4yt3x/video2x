@@ -269,15 +269,12 @@ int Encoder::init(
 }
 
 [[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
-int Encoder::write_frame(AVFrame* frame, int64_t frame_idx) {
+int Encoder::write_frame(AVFrame* frame) {
     AVFrame* converted_frame = nullptr;
     int ret;
 
     // Let the encoder decide the frame type
     frame->pict_type = AV_PICTURE_TYPE_NONE;
-
-    // Calculate this frame's presentation timestamp (PTS)
-    frame->pts = av_rescale_q(frame_idx, av_inv_q(enc_ctx_->framerate), enc_ctx_->time_base);
 
     // Convert the frame to the encoder's pixel format if needed
     if (frame->format != enc_ctx_->pix_fmt) {
