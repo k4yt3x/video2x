@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improve the CMake optimization flags and option names.
 
+### Fixed
+
+- A bug that causes the wrong encoder to be selected.
+
 ## [6.3.1] - 2024-12-21
 
 ### Fixed

@@ -307,18 +307,15 @@ int parse_args(
         }
 
         // Parse codec to AVCodec
-        enc_cfg.codec = AV_CODEC_ID_H264;
+        enc_cfg.codec = "libx264";
         if (vm.count("codec")) {
-            video2x::fsutils::StringType codec_str = vm["codec"].as<video2x::fsutils::StringType>();
-            const AVCodec* codec =
-                avcodec_find_encoder_by_name(wstring_to_u8string(codec_str).c_str());
-            if (codec == nullptr) {
-                video2x::logger()->critical(
-                    "Codec '{}' not found.", wstring_to_u8string(codec_str)
-                );
+            std::string codec_str =
+                wstring_to_u8string(vm["codec"].as<video2x::fsutils::StringType>());
+            if (avcodec_find_encoder_by_name(codec_str.c_str()) == nullptr) {
+                video2x::logger()->critical("Invalid encoder '{}'.", codec_str);
                 return -1;
             }
-            enc_cfg.codec = codec->id;
+            enc_cfg.codec = codec_str;
         }
 
         // Parse copy streams flag
@@ -348,7 +345,9 @@ int parse_args(
                 if (eq_pos != video2x::fsutils::StringType::npos) {
                     video2x::fsutils::StringType key = opt.substr(0, eq_pos);
                     video2x::fsutils::StringType value = opt.substr(eq_pos + 1);
-                    enc_cfg.extra_opts.push_back(std::make_pair(key, value));
+                    enc_cfg.extra_opts.push_back(
+                        std::make_pair(wstring_to_u8string(key), wstring_to_u8string(value))
+                    );
                 } else {
                     video2x::logger()->critical(
                         "Invalid extra AVOption format: {}", wstring_to_u8string(opt)

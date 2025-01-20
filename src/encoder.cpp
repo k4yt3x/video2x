@@ -53,11 +53,9 @@ int Encoder::init(
     }
 
     // Find the encoder
-    const AVCodec* encoder = avcodec_find_encoder(enc_cfg.codec);
+    const AVCodec* encoder = avcodec_find_encoder_by_name(enc_cfg.codec.c_str());
     if (!encoder) {
-        logger()->error(
-            "Required video encoder not found for codec {}", avcodec_get_name(enc_cfg.codec)
-        );
+        logger()->error("Could not find encoder '{}'", enc_cfg.codec);
         return AVERROR_ENCODER_NOT_FOUND;
     }
 
@@ -151,8 +149,8 @@ int Encoder::init(
 
     // Set extra AVOptions
     for (const auto& [opt_name, opt_value] : enc_cfg.extra_opts) {
-        std::string opt_name_str = fsutils::wstring_to_u8string(opt_name);
-        std::string opt_value_str = fsutils::wstring_to_u8string(opt_value);
+        std::string opt_name_str = opt_name;
+        std::string opt_value_str = opt_value;
         logger()->debug("Setting encoder option '{}' to '{}'", opt_name_str, opt_value_str);
 
         ret = av_opt_set(enc_ctx_->priv_data, opt_name_str.c_str(), opt_value_str.c_str(), 0);

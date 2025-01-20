@@ -10,15 +10,13 @@ extern "C" {
 #include <libavutil/pixdesc.h>
 }
 
-#include "fsutils.h"
-
 namespace video2x {
 namespace encoder {
 
 // Encoder configurations
 struct EncoderConfig {
     // Non-AVCodecContext options
-    AVCodecID codec = AV_CODEC_ID_NONE;
+    std::string codec = "libx264";
     bool copy_streams = true;
 
     // Basic video options
@@ -45,7 +43,7 @@ struct EncoderConfig {
     int delay = -1;
 
     // Extra AVOptions
-    std::vector<std::pair<fsutils::StringType, fsutils::StringType>> extra_opts;
+    std::vector<std::pair<std::string, std::string>> extra_opts;
 };
 
 class Encoder {
