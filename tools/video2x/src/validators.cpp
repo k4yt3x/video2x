@@ -62,13 +62,16 @@ void validate_rife_model_name(const video2x::fsutils::StringType& model_name) {
         STR("rife-v3.1"),
         STR("rife-v4"),
         STR("rife-v4.6"),
+        STR("rife-v4.25"),
+        STR("rife-v4.25-lite"),
+        STR("rife-v4.26"),
     };
     if (valid_rife_models.count(model_name) == 0) {
         throw po::validation_error(
             po::validation_error::invalid_option_value,
             "rife-model",
             "RIFE model must be one of: rife, rife-HD, rife-UHD, rife-anime, rife-v2, rife-v2.3, "
-            "rife-v2.4, rife-v3.0, rife-v3.1, rife-v4, rife-v4.6"
+            "rife-v2.4, rife-v3.0, rife-v3.1, rife-v4, rife-v4.6, rife-v4.25, rife-v4.25-lite, rife-v4.26"
         );
     }
 }
