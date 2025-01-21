@@ -72,8 +72,16 @@ int InterpolatorRIFE::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
     }
 
     // Create a new RIFE instance
-    rife_ =
-        new RIFE(gpuid_, tta_mode_, tta_temporal_mode_, uhd_mode_, num_threads_, rife_v2, rife_v4, rife_padding);
+    rife_ = new RIFE(
+        gpuid_,
+        tta_mode_,
+        tta_temporal_mode_,
+        uhd_mode_,
+        num_threads_,
+        rife_v2,
+        rife_v4,
+        rife_padding
+    );
 
     // Store the time bases
     in_time_base_ = dec_ctx->time_base;
