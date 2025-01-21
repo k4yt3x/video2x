@@ -1,0 +1,391 @@
+7767517
+389 485
+Input                    in0                      0 1 in0
+Split                    splitncnn_input0         1 8 in0 in0_splitncnn_0 in0_splitncnn_1 in0_splitncnn_2 in0_splitncnn_3 in0_splitncnn_4 in0_splitncnn_5 in0_splitncnn_6 in0_splitncnn_7
+Input                    in1                      0 1 in1
+Split                    splitncnn_input1         1 7 in1 in1_splitncnn_0 in1_splitncnn_1 in1_splitncnn_2 in1_splitncnn_3 in1_splitncnn_4 in1_splitncnn_5 in1_splitncnn_6
+Input                    in2                      0 1 in2
+MemoryData               block0.convblock.0.beta  0 1 block0.convblock.0.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.1.beta  0 1 block0.convblock.1.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.2.beta  0 1 block0.convblock.2.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.3.beta  0 1 block0.convblock.3.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.4.beta  0 1 block0.convblock.4.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.5.beta  0 1 block0.convblock.5.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.6.beta  0 1 block0.convblock.6.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.7.beta  0 1 block0.convblock.7.beta 0=1 1=1 2=192
+MemoryData               block1.convblock.0.beta  0 1 block1.convblock.0.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.1.beta  0 1 block1.convblock.1.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.2.beta  0 1 block1.convblock.2.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.3.beta  0 1 block1.convblock.3.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.4.beta  0 1 block1.convblock.4.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.5.beta  0 1 block1.convblock.5.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.6.beta  0 1 block1.convblock.6.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.7.beta  0 1 block1.convblock.7.beta 0=1 1=1 2=128
+MemoryData               block2.convblock.0.beta  0 1 block2.convblock.0.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.1.beta  0 1 block2.convblock.1.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.2.beta  0 1 block2.convblock.2.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.3.beta  0 1 block2.convblock.3.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.4.beta  0 1 block2.convblock.4.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.5.beta  0 1 block2.convblock.5.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.6.beta  0 1 block2.convblock.6.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.7.beta  0 1 block2.convblock.7.beta 0=1 1=1 2=96
+MemoryData               block3.convblock.0.beta  0 1 block3.convblock.0.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.1.beta  0 1 block3.convblock.1.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.2.beta  0 1 block3.convblock.2.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.3.beta  0 1 block3.convblock.3.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.4.beta  0 1 block3.convblock.4.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.5.beta  0 1 block3.convblock.5.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.6.beta  0 1 block3.convblock.6.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.7.beta  0 1 block3.convblock.7.beta 0=1 1=1 2=64
+MemoryData               block4.convblock.0.beta  0 1 block4.convblock.0.beta 0=1 1=1 2=24
+MemoryData               block4.convblock.1.beta  0 1 block4.convblock.1.beta 0=1 1=1 2=24
+MemoryData               block4.convblock.2.beta  0 1 block4.convblock.2.beta 0=1 1=1 2=24
+MemoryData               block4.convblock.3.beta  0 1 block4.convblock.3.beta 0=1 1=1 2=24
+MemoryData               block4.convblock.4.beta  0 1 block4.convblock.4.beta 0=1 1=1 2=24
+MemoryData               block4.convblock.5.beta  0 1 block4.convblock.5.beta 0=1 1=1 2=24
+MemoryData               block4.convblock.6.beta  0 1 block4.convblock.6.beta 0=1 1=1 2=24
+MemoryData               block4.convblock.7.beta  0 1 block4.convblock.7.beta 0=1 1=1 2=24
+Crop                     Slice_4                  1 1 in0_splitncnn_7 165 -23309=1,0 -23310=1,1 -23311=1,0
+BinaryOp                 Mul_6                    1 1 165 167 0=2 1=1
+BinaryOp                 Add_8                    1 1 167 169 1=1 2=1.000000e+00
+BinaryOp                 Mul_9                    2 1 169 in2 170 0=2
+Split                    splitncnn_0              1 5 170 170_splitncnn_0 170_splitncnn_1 170_splitncnn_2 170_splitncnn_3 170_splitncnn_4
+Crop                     Slice_15                 1 1 in0_splitncnn_6 176 -23309=1,0 -23310=1,3 -23311=1,0
+Convolution              Conv_16                  1 1 176 178 0=16 1=3 3=2 4=1 5=1 6=432 9=2 -23310=1,2.000000e-01
+Convolution              Conv_18                  1 1 178 180 0=16 1=3 4=1 5=1 6=2304 9=2 -23310=1,2.000000e-01
+Convolution              Conv_20                  1 1 180 182 0=16 1=3 4=1 5=1 6=2304 9=2 -23310=1,2.000000e-01
+Deconvolution            ConvTranspose_22         1 1 182 183 0=4 1=4 3=2 4=1 5=1 6=1024
+Split                    splitncnn_1              1 5 183 183_splitncnn_0 183_splitncnn_1 183_splitncnn_2 183_splitncnn_3 183_splitncnn_4
+Crop                     Slice_27                 1 1 in1_splitncnn_6 188 -23309=1,0 -23310=1,3 -23311=1,0
+Convolution              Conv_28                  1 1 188 190 0=16 1=3 3=2 4=1 5=1 6=432 9=2 -23310=1,2.000000e-01
+Convolution              Conv_30                  1 1 190 192 0=16 1=3 4=1 5=1 6=2304 9=2 -23310=1,2.000000e-01
+Convolution              Conv_32                  1 1 192 194 0=16 1=3 4=1 5=1 6=2304 9=2 -23310=1,2.000000e-01
+Deconvolution            ConvTranspose_34         1 1 194 195 0=4 1=4 3=2 4=1 5=1 6=1024
+Split                    splitncnn_2              1 5 195 195_splitncnn_0 195_splitncnn_1 195_splitncnn_2 195_splitncnn_3 195_splitncnn_4
+Crop                     Slice_39                 1 1 in0_splitncnn_5 200 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     Slice_44                 1 1 in1_splitncnn_5 205 -23309=1,0 -23310=1,3 -23311=1,0
+Concat                   Concat_45                5 1 200 205 183_splitncnn_4 195_splitncnn_4 170_splitncnn_4 206
+Interp                   Resize_47                1 1 206 211 0=2 1=3.125000e-02 2=3.125000e-02
+Convolution              Conv_48                  1 1 211 213 0=96 1=3 3=2 4=1 5=1 6=12960 9=2 -23310=1,2.000000e-01
+Convolution              Conv_50                  1 1 213 215 0=192 1=3 3=2 4=1 5=1 6=165888 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_3              1 2 215 215_splitncnn_0 215_splitncnn_1
+Convolution              Conv_52                  1 1 215_splitncnn_1 216 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 Mul_53                   2 1 216 block0.convblock.0.beta 217 0=2
+BinaryOp                 Add_54                   2 1 217 215_splitncnn_0 218
+ReLU                     LeakyRelu_55             1 1 218 219 0=2.000000e-01
+Split                    splitncnn_4              1 2 219 219_splitncnn_0 219_splitncnn_1
+Convolution              Conv_56                  1 1 219_splitncnn_1 220 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 Mul_57                   2 1 220 block0.convblock.1.beta 221 0=2
+BinaryOp                 Add_58                   2 1 221 219_splitncnn_0 222
+ReLU                     LeakyRelu_59             1 1 222 223 0=2.000000e-01
+Split                    splitncnn_5              1 2 223 223_splitncnn_0 223_splitncnn_1
+Convolution              Conv_60                  1 1 223_splitncnn_1 224 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 Mul_61                   2 1 224 block0.convblock.2.beta 225 0=2
+BinaryOp                 Add_62                   2 1 225 223_splitncnn_0 226
+ReLU                     LeakyRelu_63             1 1 226 227 0=2.000000e-01
+Split                    splitncnn_6              1 2 227 227_splitncnn_0 227_splitncnn_1
+Convolution              Conv_64                  1 1 227_splitncnn_1 228 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 Mul_65                   2 1 228 block0.convblock.3.beta 229 0=2
+BinaryOp                 Add_66                   2 1 229 227_splitncnn_0 230
+ReLU                     LeakyRelu_67             1 1 230 231 0=2.000000e-01
+Split                    splitncnn_7              1 2 231 231_splitncnn_0 231_splitncnn_1
+Convolution              Conv_68                  1 1 231_splitncnn_1 232 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 Mul_69                   2 1 232 block0.convblock.4.beta 233 0=2
+BinaryOp                 Add_70                   2 1 233 231_splitncnn_0 234
+ReLU                     LeakyRelu_71             1 1 234 235 0=2.000000e-01
+Split                    splitncnn_8              1 2 235 235_splitncnn_0 235_splitncnn_1
+Convolution              Conv_72                  1 1 235_splitncnn_1 236 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 Mul_73                   2 1 236 block0.convblock.5.beta 237 0=2
+BinaryOp                 Add_74                   2 1 237 235_splitncnn_0 238
+ReLU                     LeakyRelu_75             1 1 238 239 0=2.000000e-01
+Split                    splitncnn_9              1 2 239 239_splitncnn_0 239_splitncnn_1
+Convolution              Conv_76                  1 1 239_splitncnn_1 240 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 Mul_77                   2 1 240 block0.convblock.6.beta 241 0=2
+BinaryOp                 Add_78                   2 1 241 239_splitncnn_0 242
+ReLU                     LeakyRelu_79             1 1 242 243 0=2.000000e-01
+Split                    splitncnn_10             1 2 243 243_splitncnn_0 243_splitncnn_1
+Convolution              Conv_80                  1 1 243_splitncnn_1 244 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 Mul_81                   2 1 244 block0.convblock.7.beta 245 0=2
+BinaryOp                 Add_82                   2 1 245 243_splitncnn_0 246
+ReLU                     LeakyRelu_83             1 1 246 247 0=2.000000e-01
+Deconvolution            ConvTranspose_84         1 1 247 248 0=52 1=4 3=2 4=1 5=1 6=159744
+PixelShuffle             DepthToSpace_85          1 1 248 249 0=2
+Interp                   Resize_87                1 1 249 254 0=2 1=3.200000e+01 2=3.200000e+01
+Split                    splitncnn_11             1 3 254 254_splitncnn_0 254_splitncnn_1 254_splitncnn_2
+Crop                     Slice_92                 1 1 254_splitncnn_2 259 -23309=1,0 -23310=1,4 -23311=1,0
+BinaryOp                 Mul_94                   1 1 259 261 0=2 1=1 2=3.200000e+01
+Split                    splitncnn_12             1 6 261 261_splitncnn_0 261_splitncnn_1 261_splitncnn_2 261_splitncnn_3 261_splitncnn_4 261_splitncnn_5
+Crop                     Slice_99                 1 1 254_splitncnn_1 266 -23309=1,4 -23310=1,5 -23311=1,0
+Crop                     Slice_104                1 1 254_splitncnn_0 271 -23309=1,5 -23310=1,2147483647 -23311=1,0
+Crop                     Slice_109                1 1 261_splitncnn_5 276 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                 warp_110                  2 1 in0_splitncnn_4 276 277 0=6
+Crop                     Slice_115                1 1 261_splitncnn_4 282 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                 warp_116                  2 1 in1_splitncnn_4 282 283 0=6
+Crop                     Slice_121                1 1 261_splitncnn_3 288 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                 warp_122                  2 1 183_splitncnn_3 288 289 0=6
+Crop                     Slice_127                1 1 261_splitncnn_2 294 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                 warp_128                  2 1 195_splitncnn_3 294 295 0=6
+Crop                     Slice_133                1 1 277 300 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     Slice_138                1 1 283 305 -23309=1,0 -23310=1,3 -23311=1,0
+Concat                   Concat_139               7 1 300 305 289 295 170_splitncnn_3 266 271 306
+Interp                   Resize_141               1 1 306 311 0=2 1=6.250000e-02 2=6.250000e-02
+Interp                   Resize_143               1 1 261_splitncnn_1 316 0=2 1=6.250000e-02 2=6.250000e-02
+BinaryOp                 Div_146                  1 1 316 321 0=3 1=1 2=1.600000e+01
+Concat                   Concat_147               2 1 311 321 322
+Convolution              Conv_148                 1 1 322 324 0=64 1=3 3=2 4=1 5=1 6=16128 9=2 -23310=1,2.000000e-01
+Convolution              Conv_150                 1 1 324 326 0=128 1=3 3=2 4=1 5=1 6=73728 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_13             1 2 326 326_splitncnn_0 326_splitncnn_1
+Convolution              Conv_152                 1 1 326_splitncnn_1 327 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 Mul_153                  2 1 327 block1.convblock.0.beta 328 0=2
+BinaryOp                 Add_154                  2 1 328 326_splitncnn_0 329
+ReLU                     LeakyRelu_155            1 1 329 330 0=2.000000e-01
+Split                    splitncnn_14             1 2 330 330_splitncnn_0 330_splitncnn_1
+Convolution              Conv_156                 1 1 330_splitncnn_1 331 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 Mul_157                  2 1 331 block1.convblock.1.beta 332 0=2
+BinaryOp                 Add_158                  2 1 332 330_splitncnn_0 333
+ReLU                     LeakyRelu_159            1 1 333 334 0=2.000000e-01
+Split                    splitncnn_15             1 2 334 334_splitncnn_0 334_splitncnn_1
+Convolution              Conv_160                 1 1 334_splitncnn_1 335 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 Mul_161                  2 1 335 block1.convblock.2.beta 336 0=2
+BinaryOp                 Add_162                  2 1 336 334_splitncnn_0 337
+ReLU                     LeakyRelu_163            1 1 337 338 0=2.000000e-01
+Split                    splitncnn_16             1 2 338 338_splitncnn_0 338_splitncnn_1
+Convolution              Conv_164                 1 1 338_splitncnn_1 339 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 Mul_165                  2 1 339 block1.convblock.3.beta 340 0=2
+BinaryOp                 Add_166                  2 1 340 338_splitncnn_0 341
+ReLU                     LeakyRelu_167            1 1 341 342 0=2.000000e-01
+Split                    splitncnn_17             1 2 342 342_splitncnn_0 342_splitncnn_1
+Convolution              Conv_168                 1 1 342_splitncnn_1 343 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 Mul_169                  2 1 343 block1.convblock.4.beta 344 0=2
+BinaryOp                 Add_170                  2 1 344 342_splitncnn_0 345
+ReLU                     LeakyRelu_171            1 1 345 346 0=2.000000e-01
+Split                    splitncnn_18             1 2 346 346_splitncnn_0 346_splitncnn_1
+Convolution              Conv_172                 1 1 346_splitncnn_1 347 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 Mul_173                  2 1 347 block1.convblock.5.beta 348 0=2
+BinaryOp                 Add_174                  2 1 348 346_splitncnn_0 349
+ReLU                     LeakyRelu_175            1 1 349 350 0=2.000000e-01
+Split                    splitncnn_19             1 2 350 350_splitncnn_0 350_splitncnn_1
+Convolution              Conv_176                 1 1 350_splitncnn_1 351 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 Mul_177                  2 1 351 block1.convblock.6.beta 352 0=2
+BinaryOp                 Add_178                  2 1 352 350_splitncnn_0 353
+ReLU                     LeakyRelu_179            1 1 353 354 0=2.000000e-01
+Split                    splitncnn_20             1 2 354 354_splitncnn_0 354_splitncnn_1
+Convolution              Conv_180                 1 1 354_splitncnn_1 355 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 Mul_181                  2 1 355 block1.convblock.7.beta 356 0=2
+BinaryOp                 Add_182                  2 1 356 354_splitncnn_0 357
+ReLU                     LeakyRelu_183            1 1 357 358 0=2.000000e-01
+Deconvolution            ConvTranspose_184        1 1 358 359 0=52 1=4 3=2 4=1 5=1 6=106496
+PixelShuffle             DepthToSpace_185         1 1 359 360 0=2
+Interp                   Resize_187               1 1 360 365 0=2 1=1.600000e+01 2=1.600000e+01
+Split                    splitncnn_21             1 3 365 365_splitncnn_0 365_splitncnn_1 365_splitncnn_2
+Crop                     Slice_192                1 1 365_splitncnn_2 370 -23309=1,0 -23310=1,4 -23311=1,0
+Crop                     Slice_199                1 1 365_splitncnn_1 377 -23309=1,4 -23310=1,5 -23311=1,0
+Crop                     Slice_204                1 1 365_splitncnn_0 382 -23309=1,5 -23310=1,2147483647 -23311=1,0
+Eltwise                  Add_205                  2 1 261_splitncnn_0 370 383 0=1 -23301=2,1.000000e+00,1.600000e+01
+Split                    splitncnn_22             1 6 383 383_splitncnn_0 383_splitncnn_1 383_splitncnn_2 383_splitncnn_3 383_splitncnn_4 383_splitncnn_5
+Crop                     Slice_210                1 1 383_splitncnn_5 388 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                 warp_211                  2 1 in0_splitncnn_3 388 389 0=6
+Crop                     Slice_216                1 1 383_splitncnn_4 394 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                 warp_217                  2 1 in1_splitncnn_3 394 395 0=6
+Crop                     Slice_222                1 1 383_splitncnn_3 400 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                 warp_223                  2 1 183_splitncnn_2 400 401 0=6
+Crop                     Slice_228                1 1 383_splitncnn_2 406 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                 warp_229                  2 1 195_splitncnn_2 406 407 0=6
+Crop                     Slice_234                1 1 389 412 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     Slice_239                1 1 395 417 -23309=1,0 -23310=1,3 -23311=1,0
+Concat                   Concat_240               7 1 412 417 401 407 170_splitncnn_2 377 382 418
+Interp                   Resize_242               1 1 418 423 0=2 1=1.250000e-01 2=1.250000e-01
+Interp                   Resize_244               1 1 383_splitncnn_1 428 0=2 1=1.250000e-01 2=1.250000e-01
+BinaryOp                 Div_247                  1 1 428 433 0=3 1=1 2=8.000000e+00
+Concat                   Concat_248               2 1 423 433 434
+Convolution              Conv_249                 1 1 434 436 0=48 1=3 3=2 4=1 5=1 6=12096 9=2 -23310=1,2.000000e-01
+Convolution              Conv_251                 1 1 436 438 0=96 1=3 3=2 4=1 5=1 6=41472 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_23             1 2 438 438_splitncnn_0 438_splitncnn_1
+Convolution              Conv_253                 1 1 438_splitncnn_1 439 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 Mul_254                  2 1 439 block2.convblock.0.beta 440 0=2
+BinaryOp                 Add_255                  2 1 440 438_splitncnn_0 441
+ReLU                     LeakyRelu_256            1 1 441 442 0=2.000000e-01
+Split                    splitncnn_24             1 2 442 442_splitncnn_0 442_splitncnn_1
+Convolution              Conv_257                 1 1 442_splitncnn_1 443 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 Mul_258                  2 1 443 block2.convblock.1.beta 444 0=2
+BinaryOp                 Add_259                  2 1 444 442_splitncnn_0 445
+ReLU                     LeakyRelu_260            1 1 445 446 0=2.000000e-01
+Split                    splitncnn_25             1 2 446 446_splitncnn_0 446_splitncnn_1
+Convolution              Conv_261                 1 1 446_splitncnn_1 447 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 Mul_262                  2 1 447 block2.convblock.2.beta 448 0=2
+BinaryOp                 Add_263                  2 1 448 446_splitncnn_0 449
+ReLU                     LeakyRelu_264            1 1 449 450 0=2.000000e-01
+Split                    splitncnn_26             1 2 450 450_splitncnn_0 450_splitncnn_1
+Convolution              Conv_265                 1 1 450_splitncnn_1 451 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 Mul_266                  2 1 451 block2.convblock.3.beta 452 0=2
+BinaryOp                 Add_267                  2 1 452 450_splitncnn_0 453
+ReLU                     LeakyRelu_268            1 1 453 454 0=2.000000e-01
+Split                    splitncnn_27             1 2 454 454_splitncnn_0 454_splitncnn_1
+Convolution              Conv_269                 1 1 454_splitncnn_1 455 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 Mul_270                  2 1 455 block2.convblock.4.beta 456 0=2
+BinaryOp                 Add_271                  2 1 456 454_splitncnn_0 457
+ReLU                     LeakyRelu_272            1 1 457 458 0=2.000000e-01
+Split                    splitncnn_28             1 2 458 458_splitncnn_0 458_splitncnn_1
+Convolution              Conv_273                 1 1 458_splitncnn_1 459 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 Mul_274                  2 1 459 block2.convblock.5.beta 460 0=2
+BinaryOp                 Add_275                  2 1 460 458_splitncnn_0 461
+ReLU                     LeakyRelu_276            1 1 461 462 0=2.000000e-01
+Split                    splitncnn_29             1 2 462 462_splitncnn_0 462_splitncnn_1
+Convolution              Conv_277                 1 1 462_splitncnn_1 463 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 Mul_278                  2 1 463 block2.convblock.6.beta 464 0=2
+BinaryOp                 Add_279                  2 1 464 462_splitncnn_0 465
+ReLU                     LeakyRelu_280            1 1 465 466 0=2.000000e-01
+Split                    splitncnn_30             1 2 466 466_splitncnn_0 466_splitncnn_1
+Convolution              Conv_281                 1 1 466_splitncnn_1 467 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 Mul_282                  2 1 467 block2.convblock.7.beta 468 0=2
+BinaryOp                 Add_283                  2 1 468 466_splitncnn_0 469
+ReLU                     LeakyRelu_284            1 1 469 470 0=2.000000e-01
+Deconvolution            ConvTranspose_285        1 1 470 471 0=52 1=4 3=2 4=1 5=1 6=79872
+PixelShuffle             DepthToSpace_286         1 1 471 472 0=2
+Interp                   Resize_288               1 1 472 477 0=2 1=8.000000e+00 2=8.000000e+00
+Split                    splitncnn_31             1 3 477 477_splitncnn_0 477_splitncnn_1 477_splitncnn_2
+Crop                     Slice_293                1 1 477_splitncnn_2 482 -23309=1,0 -23310=1,4 -23311=1,0
+Crop                     Slice_300                1 1 477_splitncnn_1 489 -23309=1,4 -23310=1,5 -23311=1,0
+Crop                     Slice_305                1 1 477_splitncnn_0 494 -23309=1,5 -23310=1,2147483647 -23311=1,0
+Eltwise                  Add_306                  2 1 383_splitncnn_0 482 495 0=1 -23301=2,1.000000e+00,8.000000e+00
+Split                    splitncnn_32             1 6 495 495_splitncnn_0 495_splitncnn_1 495_splitncnn_2 495_splitncnn_3 495_splitncnn_4 495_splitncnn_5
+Crop                     Slice_311                1 1 495_splitncnn_5 500 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                 warp_312                  2 1 in0_splitncnn_2 500 501 0=6
+Crop                     Slice_317                1 1 495_splitncnn_4 506 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                 warp_318                  2 1 in1_splitncnn_2 506 507 0=6
+Crop                     Slice_323                1 1 495_splitncnn_3 512 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                 warp_324                  2 1 183_splitncnn_1 512 513 0=6
+Crop                     Slice_329                1 1 495_splitncnn_2 518 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                 warp_330                  2 1 195_splitncnn_1 518 519 0=6
+Crop                     Slice_335                1 1 501 524 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     Slice_340                1 1 507 529 -23309=1,0 -23310=1,3 -23311=1,0
+Concat                   Concat_341               7 1 524 529 513 519 170_splitncnn_1 489 494 530
+Interp                   Resize_343               1 1 530 535 0=2 1=2.500000e-01 2=2.500000e-01
+Interp                   Resize_345               1 1 495_splitncnn_1 540 0=2 1=2.500000e-01 2=2.500000e-01
+BinaryOp                 Div_348                  1 1 540 545 0=3 1=1 2=4.000000e+00
+Concat                   Concat_349               2 1 535 545 546
+Convolution              Conv_350                 1 1 546 548 0=32 1=3 3=2 4=1 5=1 6=8064 9=2 -23310=1,2.000000e-01
+Convolution              Conv_352                 1 1 548 550 0=64 1=3 3=2 4=1 5=1 6=18432 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_33             1 2 550 550_splitncnn_0 550_splitncnn_1
+Convolution              Conv_354                 1 1 550_splitncnn_1 551 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 Mul_355                  2 1 551 block3.convblock.0.beta 552 0=2
+BinaryOp                 Add_356                  2 1 552 550_splitncnn_0 553
+ReLU                     LeakyRelu_357            1 1 553 554 0=2.000000e-01
+Split                    splitncnn_34             1 2 554 554_splitncnn_0 554_splitncnn_1
+Convolution              Conv_358                 1 1 554_splitncnn_1 555 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 Mul_359                  2 1 555 block3.convblock.1.beta 556 0=2
+BinaryOp                 Add_360                  2 1 556 554_splitncnn_0 557
+ReLU                     LeakyRelu_361            1 1 557 558 0=2.000000e-01
+Split                    splitncnn_35             1 2 558 558_splitncnn_0 558_splitncnn_1
+Convolution              Conv_362                 1 1 558_splitncnn_1 559 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 Mul_363                  2 1 559 block3.convblock.2.beta 560 0=2
+BinaryOp                 Add_364                  2 1 560 558_splitncnn_0 561
+ReLU                     LeakyRelu_365            1 1 561 562 0=2.000000e-01
+Split                    splitncnn_36             1 2 562 562_splitncnn_0 562_splitncnn_1
+Convolution              Conv_366                 1 1 562_splitncnn_1 563 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 Mul_367                  2 1 563 block3.convblock.3.beta 564 0=2
+BinaryOp                 Add_368                  2 1 564 562_splitncnn_0 565
+ReLU                     LeakyRelu_369            1 1 565 566 0=2.000000e-01
+Split                    splitncnn_37             1 2 566 566_splitncnn_0 566_splitncnn_1
+Convolution              Conv_370                 1 1 566_splitncnn_1 567 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 Mul_371                  2 1 567 block3.convblock.4.beta 568 0=2
+BinaryOp                 Add_372                  2 1 568 566_splitncnn_0 569
+ReLU                     LeakyRelu_373            1 1 569 570 0=2.000000e-01
+Split                    splitncnn_38             1 2 570 570_splitncnn_0 570_splitncnn_1
+Convolution              Conv_374                 1 1 570_splitncnn_1 571 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 Mul_375                  2 1 571 block3.convblock.5.beta 572 0=2
+BinaryOp                 Add_376                  2 1 572 570_splitncnn_0 573
+ReLU                     LeakyRelu_377            1 1 573 574 0=2.000000e-01
+Split                    splitncnn_39             1 2 574 574_splitncnn_0 574_splitncnn_1
+Convolution              Conv_378                 1 1 574_splitncnn_1 575 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 Mul_379                  2 1 575 block3.convblock.6.beta 576 0=2
+BinaryOp                 Add_380                  2 1 576 574_splitncnn_0 577
+ReLU                     LeakyRelu_381            1 1 577 578 0=2.000000e-01
+Split                    splitncnn_40             1 2 578 578_splitncnn_0 578_splitncnn_1
+Convolution              Conv_382                 1 1 578_splitncnn_1 579 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 Mul_383                  2 1 579 block3.convblock.7.beta 580 0=2
+BinaryOp                 Add_384                  2 1 580 578_splitncnn_0 581
+ReLU                     LeakyRelu_385            1 1 581 582 0=2.000000e-01
+Deconvolution            ConvTranspose_386        1 1 582 583 0=52 1=4 3=2 4=1 5=1 6=53248
+PixelShuffle             DepthToSpace_387         1 1 583 584 0=2
+Interp                   Resize_389               1 1 584 589 0=2 1=4.000000e+00 2=4.000000e+00
+Split                    splitncnn_41             1 3 589 589_splitncnn_0 589_splitncnn_1 589_splitncnn_2
+Crop                     Slice_394                1 1 589_splitncnn_2 594 -23309=1,0 -23310=1,4 -23311=1,0
+Crop                     Slice_401                1 1 589_splitncnn_1 601 -23309=1,4 -23310=1,5 -23311=1,0
+Crop                     Slice_406                1 1 589_splitncnn_0 606 -23309=1,5 -23310=1,2147483647 -23311=1,0
+Eltwise                  Add_407                  2 1 495_splitncnn_0 594 607 0=1 -23301=2,1.000000e+00,4.000000e+00
+Split                    splitncnn_42             1 6 607 607_splitncnn_0 607_splitncnn_1 607_splitncnn_2 607_splitncnn_3 607_splitncnn_4 607_splitncnn_5
+Crop                     Slice_412                1 1 607_splitncnn_5 612 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                 warp_413                  2 1 in0_splitncnn_1 612 613 0=6
+Crop                     Slice_418                1 1 607_splitncnn_4 618 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                 warp_419                  2 1 in1_splitncnn_1 618 619 0=6
+Crop                     Slice_424                1 1 607_splitncnn_3 624 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                 warp_425                  2 1 183_splitncnn_0 624 625 0=6
+Crop                     Slice_430                1 1 607_splitncnn_2 630 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                 warp_431                  2 1 195_splitncnn_0 630 631 0=6
+Crop                     Slice_436                1 1 613 636 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     Slice_441                1 1 619 641 -23309=1,0 -23310=1,3 -23311=1,0
+Concat                   Concat_442               7 1 636 641 625 631 170_splitncnn_0 601 606 642
+Interp                   Resize_444               1 1 642 647 0=2
+Interp                   Resize_446               1 1 607_splitncnn_1 652 0=2
+Concat                   Concat_450               2 1 647 652 658
+Convolution              Conv_451                 1 1 658 660 0=12 1=3 3=2 4=1 5=1 6=3024 9=2 -23310=1,2.000000e-01
+Convolution              Conv_453                 1 1 660 662 0=24 1=3 3=2 4=1 5=1 6=2592 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_43             1 2 662 662_splitncnn_0 662_splitncnn_1
+Convolution              Conv_455                 1 1 662_splitncnn_1 663 0=24 1=3 4=1 5=1 6=5184
+BinaryOp                 Mul_456                  2 1 663 block4.convblock.0.beta 664 0=2
+BinaryOp                 Add_457                  2 1 664 662_splitncnn_0 665
+ReLU                     LeakyRelu_458            1 1 665 666 0=2.000000e-01
+Split                    splitncnn_44             1 2 666 666_splitncnn_0 666_splitncnn_1
+Convolution              Conv_459                 1 1 666_splitncnn_1 667 0=24 1=3 4=1 5=1 6=5184
+BinaryOp                 Mul_460                  2 1 667 block4.convblock.1.beta 668 0=2
+BinaryOp                 Add_461                  2 1 668 666_splitncnn_0 669
+ReLU                     LeakyRelu_462            1 1 669 670 0=2.000000e-01
+Split                    splitncnn_45             1 2 670 670_splitncnn_0 670_splitncnn_1
+Convolution              Conv_463                 1 1 670_splitncnn_1 671 0=24 1=3 4=1 5=1 6=5184
+BinaryOp                 Mul_464                  2 1 671 block4.convblock.2.beta 672 0=2
+BinaryOp                 Add_465                  2 1 672 670_splitncnn_0 673
+ReLU                     LeakyRelu_466            1 1 673 674 0=2.000000e-01
+Split                    splitncnn_46             1 2 674 674_splitncnn_0 674_splitncnn_1
+Convolution              Conv_467                 1 1 674_splitncnn_1 675 0=24 1=3 4=1 5=1 6=5184
+BinaryOp                 Mul_468                  2 1 675 block4.convblock.3.beta 676 0=2
+BinaryOp                 Add_469                  2 1 676 674_splitncnn_0 677
+ReLU                     LeakyRelu_470            1 1 677 678 0=2.000000e-01
+Split                    splitncnn_47             1 2 678 678_splitncnn_0 678_splitncnn_1
+Convolution              Conv_471                 1 1 678_splitncnn_1 679 0=24 1=3 4=1 5=1 6=5184
+BinaryOp                 Mul_472                  2 1 679 block4.convblock.4.beta 680 0=2
+BinaryOp                 Add_473                  2 1 680 678_splitncnn_0 681
+ReLU                     LeakyRelu_474            1 1 681 682 0=2.000000e-01
+Split                    splitncnn_48             1 2 682 682_splitncnn_0 682_splitncnn_1
+Convolution              Conv_475                 1 1 682_splitncnn_1 683 0=24 1=3 4=1 5=1 6=5184
+BinaryOp                 Mul_476                  2 1 683 block4.convblock.5.beta 684 0=2
+BinaryOp                 Add_477                  2 1 684 682_splitncnn_0 685
+ReLU                     LeakyRelu_478            1 1 685 686 0=2.000000e-01
+Split                    splitncnn_49             1 2 686 686_splitncnn_0 686_splitncnn_1
+Convolution              Conv_479                 1 1 686_splitncnn_1 687 0=24 1=3 4=1 5=1 6=5184
+BinaryOp                 Mul_480                  2 1 687 block4.convblock.6.beta 688 0=2
+BinaryOp                 Add_481                  2 1 688 686_splitncnn_0 689
+ReLU                     LeakyRelu_482            1 1 689 690 0=2.000000e-01
+Split                    splitncnn_50             1 2 690 690_splitncnn_0 690_splitncnn_1
+Convolution              Conv_483                 1 1 690_splitncnn_1 691 0=24 1=3 4=1 5=1 6=5184
+BinaryOp                 Mul_484                  2 1 691 block4.convblock.7.beta 692 0=2
+BinaryOp                 Add_485                  2 1 692 690_splitncnn_0 693
+ReLU                     LeakyRelu_486            1 1 693 694 0=2.000000e-01
+Deconvolution            ConvTranspose_487        1 1 694 695 0=52 1=4 3=2 4=1 5=1 6=19968
+PixelShuffle             DepthToSpace_488         1 1 695 696 0=2
+Interp                   Resize_490               1 1 696 701 0=2
+Split                    splitncnn_51             1 2 701 701_splitncnn_0 701_splitncnn_1
+Crop                     Slice_495                1 1 701_splitncnn_1 706 -23309=1,0 -23310=1,4 -23311=1,0
+Crop                     Slice_502                1 1 701_splitncnn_0 713 -23309=1,4 -23310=1,5 -23311=1,0
+BinaryOp                 Add_503                  2 1 607_splitncnn_0 706 714
+Split                    splitncnn_52             1 2 714 714_splitncnn_0 714_splitncnn_1
+Crop                     Slice_508                1 1 714_splitncnn_1 719 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                 warp_509                  2 1 in0_splitncnn_0 719 720 0=6
+Crop                     Slice_514                1 1 714_splitncnn_0 725 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                 warp_515                  2 1 in1_splitncnn_0 725 726 0=6
+Sigmoid                  Sigmoid_516              1 1 713 727
+Split                    splitncnn_53             1 2 727 727_splitncnn_0 727_splitncnn_1
+BinaryOp                 Mul_517                  2 1 720 727_splitncnn_1 728 0=2
+BinaryOp                 Sub_519                  1 1 727_splitncnn_0 730 0=7 1=1 2=1.000000e+00
+BinaryOp                 Mul_520                  2 1 726 730 731 0=2
+BinaryOp                 Add_521                  2 1 728 731 out0

@@ -1,0 +1,392 @@
+7767517
+390 487
+Input                    in0                      0 1 in0
+Split                    splitncnn_input0         1 7 in0 in0_splitncnn_0 in0_splitncnn_1 in0_splitncnn_2 in0_splitncnn_3 in0_splitncnn_4 in0_splitncnn_5 in0_splitncnn_6
+Input                    in1                      0 1 in1
+Split                    splitncnn_input1         1 7 in1 in1_splitncnn_0 in1_splitncnn_1 in1_splitncnn_2 in1_splitncnn_3 in1_splitncnn_4 in1_splitncnn_5 in1_splitncnn_6
+Input                    in2                      0 1 in2
+MemoryData               block0.convblock.0.beta  0 1 block0.convblock.0.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.1.beta  0 1 block0.convblock.1.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.2.beta  0 1 block0.convblock.2.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.3.beta  0 1 block0.convblock.3.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.4.beta  0 1 block0.convblock.4.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.5.beta  0 1 block0.convblock.5.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.6.beta  0 1 block0.convblock.6.beta 0=1 1=1 2=192
+MemoryData               block0.convblock.7.beta  0 1 block0.convblock.7.beta 0=1 1=1 2=192
+MemoryData               block1.convblock.0.beta  0 1 block1.convblock.0.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.1.beta  0 1 block1.convblock.1.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.2.beta  0 1 block1.convblock.2.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.3.beta  0 1 block1.convblock.3.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.4.beta  0 1 block1.convblock.4.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.5.beta  0 1 block1.convblock.5.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.6.beta  0 1 block1.convblock.6.beta 0=1 1=1 2=128
+MemoryData               block1.convblock.7.beta  0 1 block1.convblock.7.beta 0=1 1=1 2=128
+MemoryData               block2.convblock.0.beta  0 1 block2.convblock.0.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.1.beta  0 1 block2.convblock.1.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.2.beta  0 1 block2.convblock.2.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.3.beta  0 1 block2.convblock.3.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.4.beta  0 1 block2.convblock.4.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.5.beta  0 1 block2.convblock.5.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.6.beta  0 1 block2.convblock.6.beta 0=1 1=1 2=96
+MemoryData               block2.convblock.7.beta  0 1 block2.convblock.7.beta 0=1 1=1 2=96
+MemoryData               block3.convblock.0.beta  0 1 block3.convblock.0.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.1.beta  0 1 block3.convblock.1.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.2.beta  0 1 block3.convblock.2.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.3.beta  0 1 block3.convblock.3.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.4.beta  0 1 block3.convblock.4.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.5.beta  0 1 block3.convblock.5.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.6.beta  0 1 block3.convblock.6.beta 0=1 1=1 2=64
+MemoryData               block3.convblock.7.beta  0 1 block3.convblock.7.beta 0=1 1=1 2=64
+MemoryData               block4.convblock.0.beta  0 1 block4.convblock.0.beta 0=1 1=1 2=32
+MemoryData               block4.convblock.1.beta  0 1 block4.convblock.1.beta 0=1 1=1 2=32
+MemoryData               block4.convblock.2.beta  0 1 block4.convblock.2.beta 0=1 1=1 2=32
+MemoryData               block4.convblock.3.beta  0 1 block4.convblock.3.beta 0=1 1=1 2=32
+MemoryData               block4.convblock.4.beta  0 1 block4.convblock.4.beta 0=1 1=1 2=32
+MemoryData               block4.convblock.5.beta  0 1 block4.convblock.5.beta 0=1 1=1 2=32
+MemoryData               block4.convblock.6.beta  0 1 block4.convblock.6.beta 0=1 1=1 2=32
+MemoryData               block4.convblock.7.beta  0 1 block4.convblock.7.beta 0=1 1=1 2=32
+Concat                   /Concat                  2 1 in0_splitncnn_6 in1_splitncnn_6 /Concat_output_0
+Crop                     /Slice                   1 1 /Concat_output_0 /Slice_output_0 -23309=1,0 -23310=1,1 -23311=1,0
+BinaryOp                 /Mul                     1 1 /Slice_output_0 /Mul_output_0 0=2 1=1
+BinaryOp                 /Add                     1 1 /Mul_output_0 /Add_output_0 1=1 2=1.000000e+00
+BinaryOp                 /Mul_1                   2 1 /Add_output_0 in2 /Mul_1_output_0 0=2
+Split                    splitncnn_0              1 5 /Mul_1_output_0 /Mul_1_output_0_splitncnn_0 /Mul_1_output_0_splitncnn_1 /Mul_1_output_0_splitncnn_2 /Mul_1_output_0_splitncnn_3 /Mul_1_output_0_splitncnn_4
+Crop                     /Slice_1                 1 1 in0_splitncnn_5 /Slice_1_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Split                    splitncnn_1              1 2 /Slice_1_output_0 /Slice_1_output_0_splitncnn_0 /Slice_1_output_0_splitncnn_1
+Convolution              /encode/cnn0/Conv        1 1 /Slice_1_output_0_splitncnn_1 /encode/relu/LeakyRelu_output_0 0=16 1=3 3=2 4=1 5=1 6=432 9=2 -23310=1,2.000000e-01
+Convolution              /encode/cnn1/Conv        1 1 /encode/relu/LeakyRelu_output_0 /encode/relu_1/LeakyRelu_output_0 0=16 1=3 4=1 5=1 6=2304 9=2 -23310=1,2.000000e-01
+Convolution              /encode/cnn2/Conv        1 1 /encode/relu_1/LeakyRelu_output_0 /encode/relu_2/LeakyRelu_output_0 0=16 1=3 4=1 5=1 6=2304 9=2 -23310=1,2.000000e-01
+Deconvolution            /encode/cnn3/ConvTranspose 1 1 /encode/relu_2/LeakyRelu_output_0 /encode/cnn3/ConvTranspose_output_0 0=4 1=4 3=2 4=1 5=1 6=1024
+Split                    splitncnn_2              1 5 /encode/cnn3/ConvTranspose_output_0 /encode/cnn3/ConvTranspose_output_0_splitncnn_0 /encode/cnn3/ConvTranspose_output_0_splitncnn_1 /encode/cnn3/ConvTranspose_output_0_splitncnn_2 /encode/cnn3/ConvTranspose_output_0_splitncnn_3 /encode/cnn3/ConvTranspose_output_0_splitncnn_4
+Crop                     /Slice_2                 1 1 in1_splitncnn_5 /Slice_2_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Split                    splitncnn_3              1 2 /Slice_2_output_0 /Slice_2_output_0_splitncnn_0 /Slice_2_output_0_splitncnn_1
+Convolution              /encode/cnn0_1/Conv      1 1 /Slice_2_output_0_splitncnn_1 /encode/relu_3/LeakyRelu_output_0 0=16 1=3 3=2 4=1 5=1 6=432 9=2 -23310=1,2.000000e-01
+Convolution              /encode/cnn1_1/Conv      1 1 /encode/relu_3/LeakyRelu_output_0 /encode/relu_4/LeakyRelu_output_0 0=16 1=3 4=1 5=1 6=2304 9=2 -23310=1,2.000000e-01
+Convolution              /encode/cnn2_1/Conv      1 1 /encode/relu_4/LeakyRelu_output_0 /encode/relu_5/LeakyRelu_output_0 0=16 1=3 4=1 5=1 6=2304 9=2 -23310=1,2.000000e-01
+Deconvolution            /encode/cnn3_1/ConvTranspose 1 1 /encode/relu_5/LeakyRelu_output_0 /encode/cnn3_1/ConvTranspose_output_0 0=4 1=4 3=2 4=1 5=1 6=1024
+Split                    splitncnn_4              1 5 /encode/cnn3_1/ConvTranspose_output_0 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_0 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_1 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_2 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_3 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_4
+Concat                   /Concat_1                5 1 /Slice_1_output_0_splitncnn_0 /Slice_2_output_0_splitncnn_0 /encode/cnn3/ConvTranspose_output_0_splitncnn_4 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_4 /Mul_1_output_0_splitncnn_4 /Concat_1_output_0
+Interp                   /block0/Resize           1 1 /Concat_1_output_0 /block0/Resize_output_0 0=2 1=6.250000e-02 2=6.250000e-02
+Convolution              /block0/conv0/conv0.0/conv0.0.0/Conv 1 1 /block0/Resize_output_0 /block0/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 0=96 1=3 3=2 4=1 5=1 6=12960 9=2 -23310=1,2.000000e-01
+Convolution              /block0/conv0/conv0.1/conv0.1.0/Conv 1 1 /block0/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 /block0/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 0=192 1=3 3=2 4=1 5=1 6=165888 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_5              1 2 /block0/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 /block0/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block0/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1
+Convolution              /block0/convblock/convblock.0/conv/Conv 1 1 /block0/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1 /block0/convblock/convblock.0/conv/Conv_output_0 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 /block0/convblock/convblock.0/Mul 2 1 /block0/convblock/convblock.0/conv/Conv_output_0 block0.convblock.0.beta /block0/convblock/convblock.0/Mul_output_0 0=2
+BinaryOp                 /block0/convblock/convblock.0/Add 2 1 /block0/convblock/convblock.0/Mul_output_0 /block0/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.0/Add_output_0
+ReLU                     /block0/convblock/convblock.0/relu/LeakyRelu 1 1 /block0/convblock/convblock.0/Add_output_0 /block0/convblock/convblock.0/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_6              1 2 /block0/convblock/convblock.0/relu/LeakyRelu_output_0 /block0/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block0/convblock/convblock.1/conv/Conv 1 1 /block0/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1 /block0/convblock/convblock.1/conv/Conv_output_0 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 /block0/convblock/convblock.1/Mul 2 1 /block0/convblock/convblock.1/conv/Conv_output_0 block0.convblock.1.beta /block0/convblock/convblock.1/Mul_output_0 0=2
+BinaryOp                 /block0/convblock/convblock.1/Add 2 1 /block0/convblock/convblock.1/Mul_output_0 /block0/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.1/Add_output_0
+ReLU                     /block0/convblock/convblock.1/relu/LeakyRelu 1 1 /block0/convblock/convblock.1/Add_output_0 /block0/convblock/convblock.1/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_7              1 2 /block0/convblock/convblock.1/relu/LeakyRelu_output_0 /block0/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block0/convblock/convblock.2/conv/Conv 1 1 /block0/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1 /block0/convblock/convblock.2/conv/Conv_output_0 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 /block0/convblock/convblock.2/Mul 2 1 /block0/convblock/convblock.2/conv/Conv_output_0 block0.convblock.2.beta /block0/convblock/convblock.2/Mul_output_0 0=2
+BinaryOp                 /block0/convblock/convblock.2/Add 2 1 /block0/convblock/convblock.2/Mul_output_0 /block0/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.2/Add_output_0
+ReLU                     /block0/convblock/convblock.2/relu/LeakyRelu 1 1 /block0/convblock/convblock.2/Add_output_0 /block0/convblock/convblock.2/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_8              1 2 /block0/convblock/convblock.2/relu/LeakyRelu_output_0 /block0/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block0/convblock/convblock.3/conv/Conv 1 1 /block0/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1 /block0/convblock/convblock.3/conv/Conv_output_0 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 /block0/convblock/convblock.3/Mul 2 1 /block0/convblock/convblock.3/conv/Conv_output_0 block0.convblock.3.beta /block0/convblock/convblock.3/Mul_output_0 0=2
+BinaryOp                 /block0/convblock/convblock.3/Add 2 1 /block0/convblock/convblock.3/Mul_output_0 /block0/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.3/Add_output_0
+ReLU                     /block0/convblock/convblock.3/relu/LeakyRelu 1 1 /block0/convblock/convblock.3/Add_output_0 /block0/convblock/convblock.3/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_9              1 2 /block0/convblock/convblock.3/relu/LeakyRelu_output_0 /block0/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block0/convblock/convblock.4/conv/Conv 1 1 /block0/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1 /block0/convblock/convblock.4/conv/Conv_output_0 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 /block0/convblock/convblock.4/Mul 2 1 /block0/convblock/convblock.4/conv/Conv_output_0 block0.convblock.4.beta /block0/convblock/convblock.4/Mul_output_0 0=2
+BinaryOp                 /block0/convblock/convblock.4/Add 2 1 /block0/convblock/convblock.4/Mul_output_0 /block0/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.4/Add_output_0
+ReLU                     /block0/convblock/convblock.4/relu/LeakyRelu 1 1 /block0/convblock/convblock.4/Add_output_0 /block0/convblock/convblock.4/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_10             1 2 /block0/convblock/convblock.4/relu/LeakyRelu_output_0 /block0/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block0/convblock/convblock.5/conv/Conv 1 1 /block0/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1 /block0/convblock/convblock.5/conv/Conv_output_0 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 /block0/convblock/convblock.5/Mul 2 1 /block0/convblock/convblock.5/conv/Conv_output_0 block0.convblock.5.beta /block0/convblock/convblock.5/Mul_output_0 0=2
+BinaryOp                 /block0/convblock/convblock.5/Add 2 1 /block0/convblock/convblock.5/Mul_output_0 /block0/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.5/Add_output_0
+ReLU                     /block0/convblock/convblock.5/relu/LeakyRelu 1 1 /block0/convblock/convblock.5/Add_output_0 /block0/convblock/convblock.5/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_11             1 2 /block0/convblock/convblock.5/relu/LeakyRelu_output_0 /block0/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block0/convblock/convblock.6/conv/Conv 1 1 /block0/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1 /block0/convblock/convblock.6/conv/Conv_output_0 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 /block0/convblock/convblock.6/Mul 2 1 /block0/convblock/convblock.6/conv/Conv_output_0 block0.convblock.6.beta /block0/convblock/convblock.6/Mul_output_0 0=2
+BinaryOp                 /block0/convblock/convblock.6/Add 2 1 /block0/convblock/convblock.6/Mul_output_0 /block0/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.6/Add_output_0
+ReLU                     /block0/convblock/convblock.6/relu/LeakyRelu 1 1 /block0/convblock/convblock.6/Add_output_0 /block0/convblock/convblock.6/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_12             1 2 /block0/convblock/convblock.6/relu/LeakyRelu_output_0 /block0/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block0/convblock/convblock.7/conv/Conv 1 1 /block0/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1 /block0/convblock/convblock.7/conv/Conv_output_0 0=192 1=3 4=1 5=1 6=331776
+BinaryOp                 /block0/convblock/convblock.7/Mul 2 1 /block0/convblock/convblock.7/conv/Conv_output_0 block0.convblock.7.beta /block0/convblock/convblock.7/Mul_output_0 0=2
+BinaryOp                 /block0/convblock/convblock.7/Add 2 1 /block0/convblock/convblock.7/Mul_output_0 /block0/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block0/convblock/convblock.7/Add_output_0
+ReLU                     /block0/convblock/convblock.7/relu/LeakyRelu 1 1 /block0/convblock/convblock.7/Add_output_0 /block0/convblock/convblock.7/relu/LeakyRelu_output_0 0=2.000000e-01
+Deconvolution            /block0/lastconv/lastconv.0/ConvTranspose 1 1 /block0/convblock/convblock.7/relu/LeakyRelu_output_0 /block0/lastconv/lastconv.0/ConvTranspose_output_0 0=52 1=4 3=2 4=1 5=1 6=159744
+PixelShuffle             /block0/lastconv/lastconv.1/DepthToSpace 1 1 /block0/lastconv/lastconv.0/ConvTranspose_output_0 /block0/lastconv/lastconv.1/DepthToSpace_output_0 0=2
+Interp                   /block0/Resize_1         1 1 /block0/lastconv/lastconv.1/DepthToSpace_output_0 /block0/Resize_1_output_0 0=2 1=1.600000e+01 2=1.600000e+01
+Split                    splitncnn_13             1 3 /block0/Resize_1_output_0 /block0/Resize_1_output_0_splitncnn_0 /block0/Resize_1_output_0_splitncnn_1 /block0/Resize_1_output_0_splitncnn_2
+Crop                     /block0/Slice            1 1 /block0/Resize_1_output_0_splitncnn_2 /block0/Slice_output_0 -23309=1,0 -23310=1,4 -23311=1,0
+BinaryOp                 /block0/Mul              1 1 /block0/Slice_output_0 /block0/Mul_output_0 0=2 1=1 2=1.600000e+01
+Split                    splitncnn_14             1 6 /block0/Mul_output_0 /block0/Mul_output_0_splitncnn_0 /block0/Mul_output_0_splitncnn_1 /block0/Mul_output_0_splitncnn_2 /block0/Mul_output_0_splitncnn_3 /block0/Mul_output_0_splitncnn_4 /block0/Mul_output_0_splitncnn_5
+Crop                     /block0/Slice_1          1 1 /block0/Resize_1_output_0_splitncnn_1 /block0/Slice_1_output_0 -23309=1,4 -23310=1,5 -23311=1,0
+Crop                     /block0/Slice_2          1 1 /block0/Resize_1_output_0_splitncnn_0 /block0/Slice_2_output_0 -23309=1,5 -23310=1,2147483647 -23311=1,0
+Crop                     /Slice_3                 1 1 /block0/Mul_output_0_splitncnn_5 /Slice_3_output_0 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                /warp                    2 1 in0_splitncnn_4 /Slice_3_output_0 /warp_output_0 0=6
+Crop                     /Slice_4                 1 1 /block0/Mul_output_0_splitncnn_4 /Slice_4_output_0 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                /warp_1                  2 1 in1_splitncnn_4 /Slice_4_output_0 /warp_1_output_0 0=6
+Crop                     /Slice_5                 1 1 /block0/Mul_output_0_splitncnn_3 /Slice_5_output_0 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                /warp_2                  2 1 /encode/cnn3/ConvTranspose_output_0_splitncnn_3 /Slice_5_output_0 /warp_2_output_0 0=6
+Crop                     /Slice_6                 1 1 /block0/Mul_output_0_splitncnn_2 /Slice_6_output_0 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                /warp_3                  2 1 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_3 /Slice_6_output_0 /warp_3_output_0 0=6
+Crop                     /Slice_7                 1 1 /warp_output_0 /Slice_7_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     /Slice_8                 1 1 /warp_1_output_0 /Slice_8_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Concat                   /Concat_2                7 1 /Slice_7_output_0 /Slice_8_output_0 /warp_2_output_0 /warp_3_output_0 /Mul_1_output_0_splitncnn_3 /block0/Slice_1_output_0 /block0/Slice_2_output_0 /Concat_2_output_0
+Interp                   /block1/Resize           1 1 /Concat_2_output_0 /block1/Resize_output_0 0=2 1=1.250000e-01 2=1.250000e-01
+Interp                   /block1/Resize_1         1 1 /block0/Mul_output_0_splitncnn_1 /block1/Resize_1_output_0 0=2 1=1.250000e-01 2=1.250000e-01
+BinaryOp                 /block1/Div              1 1 /block1/Resize_1_output_0 /block1/Div_output_0 0=3 1=1 2=8.000000e+00
+Concat                   /block1/Concat           2 1 /block1/Resize_output_0 /block1/Div_output_0 /block1/Concat_output_0
+Convolution              /block1/conv0/conv0.0/conv0.0.0/Conv 1 1 /block1/Concat_output_0 /block1/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 0=64 1=3 3=2 4=1 5=1 6=16128 9=2 -23310=1,2.000000e-01
+Convolution              /block1/conv0/conv0.1/conv0.1.0/Conv 1 1 /block1/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 /block1/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 0=128 1=3 3=2 4=1 5=1 6=73728 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_15             1 2 /block1/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 /block1/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block1/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1
+Convolution              /block1/convblock/convblock.0/conv/Conv 1 1 /block1/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1 /block1/convblock/convblock.0/conv/Conv_output_0 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 /block1/convblock/convblock.0/Mul 2 1 /block1/convblock/convblock.0/conv/Conv_output_0 block1.convblock.0.beta /block1/convblock/convblock.0/Mul_output_0 0=2
+BinaryOp                 /block1/convblock/convblock.0/Add 2 1 /block1/convblock/convblock.0/Mul_output_0 /block1/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.0/Add_output_0
+ReLU                     /block1/convblock/convblock.0/relu/LeakyRelu 1 1 /block1/convblock/convblock.0/Add_output_0 /block1/convblock/convblock.0/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_16             1 2 /block1/convblock/convblock.0/relu/LeakyRelu_output_0 /block1/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block1/convblock/convblock.1/conv/Conv 1 1 /block1/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1 /block1/convblock/convblock.1/conv/Conv_output_0 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 /block1/convblock/convblock.1/Mul 2 1 /block1/convblock/convblock.1/conv/Conv_output_0 block1.convblock.1.beta /block1/convblock/convblock.1/Mul_output_0 0=2
+BinaryOp                 /block1/convblock/convblock.1/Add 2 1 /block1/convblock/convblock.1/Mul_output_0 /block1/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.1/Add_output_0
+ReLU                     /block1/convblock/convblock.1/relu/LeakyRelu 1 1 /block1/convblock/convblock.1/Add_output_0 /block1/convblock/convblock.1/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_17             1 2 /block1/convblock/convblock.1/relu/LeakyRelu_output_0 /block1/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block1/convblock/convblock.2/conv/Conv 1 1 /block1/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1 /block1/convblock/convblock.2/conv/Conv_output_0 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 /block1/convblock/convblock.2/Mul 2 1 /block1/convblock/convblock.2/conv/Conv_output_0 block1.convblock.2.beta /block1/convblock/convblock.2/Mul_output_0 0=2
+BinaryOp                 /block1/convblock/convblock.2/Add 2 1 /block1/convblock/convblock.2/Mul_output_0 /block1/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.2/Add_output_0
+ReLU                     /block1/convblock/convblock.2/relu/LeakyRelu 1 1 /block1/convblock/convblock.2/Add_output_0 /block1/convblock/convblock.2/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_18             1 2 /block1/convblock/convblock.2/relu/LeakyRelu_output_0 /block1/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block1/convblock/convblock.3/conv/Conv 1 1 /block1/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1 /block1/convblock/convblock.3/conv/Conv_output_0 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 /block1/convblock/convblock.3/Mul 2 1 /block1/convblock/convblock.3/conv/Conv_output_0 block1.convblock.3.beta /block1/convblock/convblock.3/Mul_output_0 0=2
+BinaryOp                 /block1/convblock/convblock.3/Add 2 1 /block1/convblock/convblock.3/Mul_output_0 /block1/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.3/Add_output_0
+ReLU                     /block1/convblock/convblock.3/relu/LeakyRelu 1 1 /block1/convblock/convblock.3/Add_output_0 /block1/convblock/convblock.3/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_19             1 2 /block1/convblock/convblock.3/relu/LeakyRelu_output_0 /block1/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block1/convblock/convblock.4/conv/Conv 1 1 /block1/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1 /block1/convblock/convblock.4/conv/Conv_output_0 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 /block1/convblock/convblock.4/Mul 2 1 /block1/convblock/convblock.4/conv/Conv_output_0 block1.convblock.4.beta /block1/convblock/convblock.4/Mul_output_0 0=2
+BinaryOp                 /block1/convblock/convblock.4/Add 2 1 /block1/convblock/convblock.4/Mul_output_0 /block1/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.4/Add_output_0
+ReLU                     /block1/convblock/convblock.4/relu/LeakyRelu 1 1 /block1/convblock/convblock.4/Add_output_0 /block1/convblock/convblock.4/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_20             1 2 /block1/convblock/convblock.4/relu/LeakyRelu_output_0 /block1/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block1/convblock/convblock.5/conv/Conv 1 1 /block1/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1 /block1/convblock/convblock.5/conv/Conv_output_0 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 /block1/convblock/convblock.5/Mul 2 1 /block1/convblock/convblock.5/conv/Conv_output_0 block1.convblock.5.beta /block1/convblock/convblock.5/Mul_output_0 0=2
+BinaryOp                 /block1/convblock/convblock.5/Add 2 1 /block1/convblock/convblock.5/Mul_output_0 /block1/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.5/Add_output_0
+ReLU                     /block1/convblock/convblock.5/relu/LeakyRelu 1 1 /block1/convblock/convblock.5/Add_output_0 /block1/convblock/convblock.5/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_21             1 2 /block1/convblock/convblock.5/relu/LeakyRelu_output_0 /block1/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block1/convblock/convblock.6/conv/Conv 1 1 /block1/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1 /block1/convblock/convblock.6/conv/Conv_output_0 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 /block1/convblock/convblock.6/Mul 2 1 /block1/convblock/convblock.6/conv/Conv_output_0 block1.convblock.6.beta /block1/convblock/convblock.6/Mul_output_0 0=2
+BinaryOp                 /block1/convblock/convblock.6/Add 2 1 /block1/convblock/convblock.6/Mul_output_0 /block1/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.6/Add_output_0
+ReLU                     /block1/convblock/convblock.6/relu/LeakyRelu 1 1 /block1/convblock/convblock.6/Add_output_0 /block1/convblock/convblock.6/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_22             1 2 /block1/convblock/convblock.6/relu/LeakyRelu_output_0 /block1/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block1/convblock/convblock.7/conv/Conv 1 1 /block1/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1 /block1/convblock/convblock.7/conv/Conv_output_0 0=128 1=3 4=1 5=1 6=147456
+BinaryOp                 /block1/convblock/convblock.7/Mul 2 1 /block1/convblock/convblock.7/conv/Conv_output_0 block1.convblock.7.beta /block1/convblock/convblock.7/Mul_output_0 0=2
+BinaryOp                 /block1/convblock/convblock.7/Add 2 1 /block1/convblock/convblock.7/Mul_output_0 /block1/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block1/convblock/convblock.7/Add_output_0
+ReLU                     /block1/convblock/convblock.7/relu/LeakyRelu 1 1 /block1/convblock/convblock.7/Add_output_0 /block1/convblock/convblock.7/relu/LeakyRelu_output_0 0=2.000000e-01
+Deconvolution            /block1/lastconv/lastconv.0/ConvTranspose 1 1 /block1/convblock/convblock.7/relu/LeakyRelu_output_0 /block1/lastconv/lastconv.0/ConvTranspose_output_0 0=52 1=4 3=2 4=1 5=1 6=106496
+PixelShuffle             /block1/lastconv/lastconv.1/DepthToSpace 1 1 /block1/lastconv/lastconv.0/ConvTranspose_output_0 /block1/lastconv/lastconv.1/DepthToSpace_output_0 0=2
+Interp                   /block1/Resize_2         1 1 /block1/lastconv/lastconv.1/DepthToSpace_output_0 /block1/Resize_2_output_0 0=2 1=8.000000e+00 2=8.000000e+00
+Split                    splitncnn_23             1 3 /block1/Resize_2_output_0 /block1/Resize_2_output_0_splitncnn_0 /block1/Resize_2_output_0_splitncnn_1 /block1/Resize_2_output_0_splitncnn_2
+Crop                     /block1/Slice            1 1 /block1/Resize_2_output_0_splitncnn_2 /block1/Slice_output_0 -23309=1,0 -23310=1,4 -23311=1,0
+Crop                     /block1/Slice_1          1 1 /block1/Resize_2_output_0_splitncnn_1 /block1/Slice_1_output_0 -23309=1,4 -23310=1,5 -23311=1,0
+Crop                     /block1/Slice_2          1 1 /block1/Resize_2_output_0_splitncnn_0 /block1/Slice_2_output_0 -23309=1,5 -23310=1,2147483647 -23311=1,0
+Eltwise                  /Add_1                   2 1 /block0/Mul_output_0_splitncnn_0 /block1/Slice_output_0 /Add_1_output_0 0=1 -23301=2,1.000000e+00,8.000000e+00
+Split                    splitncnn_24             1 6 /Add_1_output_0 /Add_1_output_0_splitncnn_0 /Add_1_output_0_splitncnn_1 /Add_1_output_0_splitncnn_2 /Add_1_output_0_splitncnn_3 /Add_1_output_0_splitncnn_4 /Add_1_output_0_splitncnn_5
+Crop                     /Slice_9                 1 1 /Add_1_output_0_splitncnn_5 /Slice_9_output_0 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                /warp_4                  2 1 in0_splitncnn_3 /Slice_9_output_0 /warp_4_output_0 0=6
+Crop                     /Slice_10                1 1 /Add_1_output_0_splitncnn_4 /Slice_10_output_0 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                /warp_5                  2 1 in1_splitncnn_3 /Slice_10_output_0 /warp_5_output_0 0=6
+Crop                     /Slice_11                1 1 /Add_1_output_0_splitncnn_3 /Slice_11_output_0 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                /warp_6                  2 1 /encode/cnn3/ConvTranspose_output_0_splitncnn_2 /Slice_11_output_0 /warp_6_output_0 0=6
+Crop                     /Slice_12                1 1 /Add_1_output_0_splitncnn_2 /Slice_12_output_0 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                /warp_7                  2 1 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_2 /Slice_12_output_0 /warp_7_output_0 0=6
+Crop                     /Slice_13                1 1 /warp_4_output_0 /Slice_13_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     /Slice_14                1 1 /warp_5_output_0 /Slice_14_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Concat                   /Concat_3                7 1 /Slice_13_output_0 /Slice_14_output_0 /warp_6_output_0 /warp_7_output_0 /Mul_1_output_0_splitncnn_2 /block1/Slice_1_output_0 /block1/Slice_2_output_0 /Concat_3_output_0
+Interp                   /block2/Resize           1 1 /Concat_3_output_0 /block2/Resize_output_0 0=2 1=2.500000e-01 2=2.500000e-01
+Interp                   /block2/Resize_1         1 1 /Add_1_output_0_splitncnn_1 /block2/Resize_1_output_0 0=2 1=2.500000e-01 2=2.500000e-01
+BinaryOp                 /block2/Div              1 1 /block2/Resize_1_output_0 /block2/Div_output_0 0=3 1=1 2=4.000000e+00
+Concat                   /block2/Concat           2 1 /block2/Resize_output_0 /block2/Div_output_0 /block2/Concat_output_0
+Convolution              /block2/conv0/conv0.0/conv0.0.0/Conv 1 1 /block2/Concat_output_0 /block2/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 0=48 1=3 3=2 4=1 5=1 6=12096 9=2 -23310=1,2.000000e-01
+Convolution              /block2/conv0/conv0.1/conv0.1.0/Conv 1 1 /block2/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 /block2/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 0=96 1=3 3=2 4=1 5=1 6=41472 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_25             1 2 /block2/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 /block2/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block2/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1
+Convolution              /block2/convblock/convblock.0/conv/Conv 1 1 /block2/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1 /block2/convblock/convblock.0/conv/Conv_output_0 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 /block2/convblock/convblock.0/Mul 2 1 /block2/convblock/convblock.0/conv/Conv_output_0 block2.convblock.0.beta /block2/convblock/convblock.0/Mul_output_0 0=2
+BinaryOp                 /block2/convblock/convblock.0/Add 2 1 /block2/convblock/convblock.0/Mul_output_0 /block2/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.0/Add_output_0
+ReLU                     /block2/convblock/convblock.0/relu/LeakyRelu 1 1 /block2/convblock/convblock.0/Add_output_0 /block2/convblock/convblock.0/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_26             1 2 /block2/convblock/convblock.0/relu/LeakyRelu_output_0 /block2/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block2/convblock/convblock.1/conv/Conv 1 1 /block2/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1 /block2/convblock/convblock.1/conv/Conv_output_0 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 /block2/convblock/convblock.1/Mul 2 1 /block2/convblock/convblock.1/conv/Conv_output_0 block2.convblock.1.beta /block2/convblock/convblock.1/Mul_output_0 0=2
+BinaryOp                 /block2/convblock/convblock.1/Add 2 1 /block2/convblock/convblock.1/Mul_output_0 /block2/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.1/Add_output_0
+ReLU                     /block2/convblock/convblock.1/relu/LeakyRelu 1 1 /block2/convblock/convblock.1/Add_output_0 /block2/convblock/convblock.1/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_27             1 2 /block2/convblock/convblock.1/relu/LeakyRelu_output_0 /block2/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block2/convblock/convblock.2/conv/Conv 1 1 /block2/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1 /block2/convblock/convblock.2/conv/Conv_output_0 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 /block2/convblock/convblock.2/Mul 2 1 /block2/convblock/convblock.2/conv/Conv_output_0 block2.convblock.2.beta /block2/convblock/convblock.2/Mul_output_0 0=2
+BinaryOp                 /block2/convblock/convblock.2/Add 2 1 /block2/convblock/convblock.2/Mul_output_0 /block2/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.2/Add_output_0
+ReLU                     /block2/convblock/convblock.2/relu/LeakyRelu 1 1 /block2/convblock/convblock.2/Add_output_0 /block2/convblock/convblock.2/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_28             1 2 /block2/convblock/convblock.2/relu/LeakyRelu_output_0 /block2/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block2/convblock/convblock.3/conv/Conv 1 1 /block2/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1 /block2/convblock/convblock.3/conv/Conv_output_0 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 /block2/convblock/convblock.3/Mul 2 1 /block2/convblock/convblock.3/conv/Conv_output_0 block2.convblock.3.beta /block2/convblock/convblock.3/Mul_output_0 0=2
+BinaryOp                 /block2/convblock/convblock.3/Add 2 1 /block2/convblock/convblock.3/Mul_output_0 /block2/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.3/Add_output_0
+ReLU                     /block2/convblock/convblock.3/relu/LeakyRelu 1 1 /block2/convblock/convblock.3/Add_output_0 /block2/convblock/convblock.3/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_29             1 2 /block2/convblock/convblock.3/relu/LeakyRelu_output_0 /block2/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block2/convblock/convblock.4/conv/Conv 1 1 /block2/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1 /block2/convblock/convblock.4/conv/Conv_output_0 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 /block2/convblock/convblock.4/Mul 2 1 /block2/convblock/convblock.4/conv/Conv_output_0 block2.convblock.4.beta /block2/convblock/convblock.4/Mul_output_0 0=2
+BinaryOp                 /block2/convblock/convblock.4/Add 2 1 /block2/convblock/convblock.4/Mul_output_0 /block2/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.4/Add_output_0
+ReLU                     /block2/convblock/convblock.4/relu/LeakyRelu 1 1 /block2/convblock/convblock.4/Add_output_0 /block2/convblock/convblock.4/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_30             1 2 /block2/convblock/convblock.4/relu/LeakyRelu_output_0 /block2/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block2/convblock/convblock.5/conv/Conv 1 1 /block2/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1 /block2/convblock/convblock.5/conv/Conv_output_0 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 /block2/convblock/convblock.5/Mul 2 1 /block2/convblock/convblock.5/conv/Conv_output_0 block2.convblock.5.beta /block2/convblock/convblock.5/Mul_output_0 0=2
+BinaryOp                 /block2/convblock/convblock.5/Add 2 1 /block2/convblock/convblock.5/Mul_output_0 /block2/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.5/Add_output_0
+ReLU                     /block2/convblock/convblock.5/relu/LeakyRelu 1 1 /block2/convblock/convblock.5/Add_output_0 /block2/convblock/convblock.5/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_31             1 2 /block2/convblock/convblock.5/relu/LeakyRelu_output_0 /block2/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block2/convblock/convblock.6/conv/Conv 1 1 /block2/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1 /block2/convblock/convblock.6/conv/Conv_output_0 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 /block2/convblock/convblock.6/Mul 2 1 /block2/convblock/convblock.6/conv/Conv_output_0 block2.convblock.6.beta /block2/convblock/convblock.6/Mul_output_0 0=2
+BinaryOp                 /block2/convblock/convblock.6/Add 2 1 /block2/convblock/convblock.6/Mul_output_0 /block2/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.6/Add_output_0
+ReLU                     /block2/convblock/convblock.6/relu/LeakyRelu 1 1 /block2/convblock/convblock.6/Add_output_0 /block2/convblock/convblock.6/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_32             1 2 /block2/convblock/convblock.6/relu/LeakyRelu_output_0 /block2/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block2/convblock/convblock.7/conv/Conv 1 1 /block2/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1 /block2/convblock/convblock.7/conv/Conv_output_0 0=96 1=3 4=1 5=1 6=82944
+BinaryOp                 /block2/convblock/convblock.7/Mul 2 1 /block2/convblock/convblock.7/conv/Conv_output_0 block2.convblock.7.beta /block2/convblock/convblock.7/Mul_output_0 0=2
+BinaryOp                 /block2/convblock/convblock.7/Add 2 1 /block2/convblock/convblock.7/Mul_output_0 /block2/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block2/convblock/convblock.7/Add_output_0
+ReLU                     /block2/convblock/convblock.7/relu/LeakyRelu 1 1 /block2/convblock/convblock.7/Add_output_0 /block2/convblock/convblock.7/relu/LeakyRelu_output_0 0=2.000000e-01
+Deconvolution            /block2/lastconv/lastconv.0/ConvTranspose 1 1 /block2/convblock/convblock.7/relu/LeakyRelu_output_0 /block2/lastconv/lastconv.0/ConvTranspose_output_0 0=52 1=4 3=2 4=1 5=1 6=79872
+PixelShuffle             /block2/lastconv/lastconv.1/DepthToSpace 1 1 /block2/lastconv/lastconv.0/ConvTranspose_output_0 /block2/lastconv/lastconv.1/DepthToSpace_output_0 0=2
+Interp                   /block2/Resize_2         1 1 /block2/lastconv/lastconv.1/DepthToSpace_output_0 /block2/Resize_2_output_0 0=2 1=4.000000e+00 2=4.000000e+00
+Split                    splitncnn_33             1 3 /block2/Resize_2_output_0 /block2/Resize_2_output_0_splitncnn_0 /block2/Resize_2_output_0_splitncnn_1 /block2/Resize_2_output_0_splitncnn_2
+Crop                     /block2/Slice            1 1 /block2/Resize_2_output_0_splitncnn_2 /block2/Slice_output_0 -23309=1,0 -23310=1,4 -23311=1,0
+Crop                     /block2/Slice_1          1 1 /block2/Resize_2_output_0_splitncnn_1 /block2/Slice_1_output_0 -23309=1,4 -23310=1,5 -23311=1,0
+Crop                     /block2/Slice_2          1 1 /block2/Resize_2_output_0_splitncnn_0 /block2/Slice_2_output_0 -23309=1,5 -23310=1,2147483647 -23311=1,0
+Eltwise                  /Add_2                   2 1 /Add_1_output_0_splitncnn_0 /block2/Slice_output_0 /Add_2_output_0 0=1 -23301=2,1.000000e+00,4.000000e+00
+Split                    splitncnn_34             1 6 /Add_2_output_0 /Add_2_output_0_splitncnn_0 /Add_2_output_0_splitncnn_1 /Add_2_output_0_splitncnn_2 /Add_2_output_0_splitncnn_3 /Add_2_output_0_splitncnn_4 /Add_2_output_0_splitncnn_5
+Crop                     /Slice_15                1 1 /Add_2_output_0_splitncnn_5 /Slice_15_output_0 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                /warp_8                  2 1 in0_splitncnn_2 /Slice_15_output_0 /warp_8_output_0 0=6
+Crop                     /Slice_16                1 1 /Add_2_output_0_splitncnn_4 /Slice_16_output_0 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                /warp_9                  2 1 in1_splitncnn_2 /Slice_16_output_0 /warp_9_output_0 0=6
+Crop                     /Slice_17                1 1 /Add_2_output_0_splitncnn_3 /Slice_17_output_0 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                /warp_10                 2 1 /encode/cnn3/ConvTranspose_output_0_splitncnn_1 /Slice_17_output_0 /warp_10_output_0 0=6
+Crop                     /Slice_18                1 1 /Add_2_output_0_splitncnn_2 /Slice_18_output_0 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                /warp_11                 2 1 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_1 /Slice_18_output_0 /warp_11_output_0 0=6
+Crop                     /Slice_19                1 1 /warp_8_output_0 /Slice_19_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     /Slice_20                1 1 /warp_9_output_0 /Slice_20_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Concat                   /Concat_4                7 1 /Slice_19_output_0 /Slice_20_output_0 /warp_10_output_0 /warp_11_output_0 /Mul_1_output_0_splitncnn_1 /block2/Slice_1_output_0 /block2/Slice_2_output_0 /Concat_4_output_0
+Interp                   /block3/Resize           1 1 /Concat_4_output_0 /block3/Resize_output_0 0=2 1=5.000000e-01 2=5.000000e-01
+Interp                   /block3/Resize_1         1 1 /Add_2_output_0_splitncnn_1 /block3/Resize_1_output_0 0=2 1=5.000000e-01 2=5.000000e-01
+BinaryOp                 /block3/Div              1 1 /block3/Resize_1_output_0 /block3/Div_output_0 0=3 1=1 2=2.000000e+00
+Concat                   /block3/Concat           2 1 /block3/Resize_output_0 /block3/Div_output_0 /block3/Concat_output_0
+Convolution              /block3/conv0/conv0.0/conv0.0.0/Conv 1 1 /block3/Concat_output_0 /block3/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 0=32 1=3 3=2 4=1 5=1 6=8064 9=2 -23310=1,2.000000e-01
+Convolution              /block3/conv0/conv0.1/conv0.1.0/Conv 1 1 /block3/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 /block3/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 0=64 1=3 3=2 4=1 5=1 6=18432 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_35             1 2 /block3/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 /block3/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block3/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1
+Convolution              /block3/convblock/convblock.0/conv/Conv 1 1 /block3/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1 /block3/convblock/convblock.0/conv/Conv_output_0 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 /block3/convblock/convblock.0/Mul 2 1 /block3/convblock/convblock.0/conv/Conv_output_0 block3.convblock.0.beta /block3/convblock/convblock.0/Mul_output_0 0=2
+BinaryOp                 /block3/convblock/convblock.0/Add 2 1 /block3/convblock/convblock.0/Mul_output_0 /block3/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.0/Add_output_0
+ReLU                     /block3/convblock/convblock.0/relu/LeakyRelu 1 1 /block3/convblock/convblock.0/Add_output_0 /block3/convblock/convblock.0/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_36             1 2 /block3/convblock/convblock.0/relu/LeakyRelu_output_0 /block3/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block3/convblock/convblock.1/conv/Conv 1 1 /block3/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1 /block3/convblock/convblock.1/conv/Conv_output_0 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 /block3/convblock/convblock.1/Mul 2 1 /block3/convblock/convblock.1/conv/Conv_output_0 block3.convblock.1.beta /block3/convblock/convblock.1/Mul_output_0 0=2
+BinaryOp                 /block3/convblock/convblock.1/Add 2 1 /block3/convblock/convblock.1/Mul_output_0 /block3/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.1/Add_output_0
+ReLU                     /block3/convblock/convblock.1/relu/LeakyRelu 1 1 /block3/convblock/convblock.1/Add_output_0 /block3/convblock/convblock.1/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_37             1 2 /block3/convblock/convblock.1/relu/LeakyRelu_output_0 /block3/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block3/convblock/convblock.2/conv/Conv 1 1 /block3/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1 /block3/convblock/convblock.2/conv/Conv_output_0 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 /block3/convblock/convblock.2/Mul 2 1 /block3/convblock/convblock.2/conv/Conv_output_0 block3.convblock.2.beta /block3/convblock/convblock.2/Mul_output_0 0=2
+BinaryOp                 /block3/convblock/convblock.2/Add 2 1 /block3/convblock/convblock.2/Mul_output_0 /block3/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.2/Add_output_0
+ReLU                     /block3/convblock/convblock.2/relu/LeakyRelu 1 1 /block3/convblock/convblock.2/Add_output_0 /block3/convblock/convblock.2/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_38             1 2 /block3/convblock/convblock.2/relu/LeakyRelu_output_0 /block3/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block3/convblock/convblock.3/conv/Conv 1 1 /block3/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1 /block3/convblock/convblock.3/conv/Conv_output_0 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 /block3/convblock/convblock.3/Mul 2 1 /block3/convblock/convblock.3/conv/Conv_output_0 block3.convblock.3.beta /block3/convblock/convblock.3/Mul_output_0 0=2
+BinaryOp                 /block3/convblock/convblock.3/Add 2 1 /block3/convblock/convblock.3/Mul_output_0 /block3/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.3/Add_output_0
+ReLU                     /block3/convblock/convblock.3/relu/LeakyRelu 1 1 /block3/convblock/convblock.3/Add_output_0 /block3/convblock/convblock.3/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_39             1 2 /block3/convblock/convblock.3/relu/LeakyRelu_output_0 /block3/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block3/convblock/convblock.4/conv/Conv 1 1 /block3/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1 /block3/convblock/convblock.4/conv/Conv_output_0 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 /block3/convblock/convblock.4/Mul 2 1 /block3/convblock/convblock.4/conv/Conv_output_0 block3.convblock.4.beta /block3/convblock/convblock.4/Mul_output_0 0=2
+BinaryOp                 /block3/convblock/convblock.4/Add 2 1 /block3/convblock/convblock.4/Mul_output_0 /block3/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.4/Add_output_0
+ReLU                     /block3/convblock/convblock.4/relu/LeakyRelu 1 1 /block3/convblock/convblock.4/Add_output_0 /block3/convblock/convblock.4/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_40             1 2 /block3/convblock/convblock.4/relu/LeakyRelu_output_0 /block3/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block3/convblock/convblock.5/conv/Conv 1 1 /block3/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1 /block3/convblock/convblock.5/conv/Conv_output_0 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 /block3/convblock/convblock.5/Mul 2 1 /block3/convblock/convblock.5/conv/Conv_output_0 block3.convblock.5.beta /block3/convblock/convblock.5/Mul_output_0 0=2
+BinaryOp                 /block3/convblock/convblock.5/Add 2 1 /block3/convblock/convblock.5/Mul_output_0 /block3/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.5/Add_output_0
+ReLU                     /block3/convblock/convblock.5/relu/LeakyRelu 1 1 /block3/convblock/convblock.5/Add_output_0 /block3/convblock/convblock.5/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_41             1 2 /block3/convblock/convblock.5/relu/LeakyRelu_output_0 /block3/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block3/convblock/convblock.6/conv/Conv 1 1 /block3/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1 /block3/convblock/convblock.6/conv/Conv_output_0 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 /block3/convblock/convblock.6/Mul 2 1 /block3/convblock/convblock.6/conv/Conv_output_0 block3.convblock.6.beta /block3/convblock/convblock.6/Mul_output_0 0=2
+BinaryOp                 /block3/convblock/convblock.6/Add 2 1 /block3/convblock/convblock.6/Mul_output_0 /block3/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.6/Add_output_0
+ReLU                     /block3/convblock/convblock.6/relu/LeakyRelu 1 1 /block3/convblock/convblock.6/Add_output_0 /block3/convblock/convblock.6/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_42             1 2 /block3/convblock/convblock.6/relu/LeakyRelu_output_0 /block3/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block3/convblock/convblock.7/conv/Conv 1 1 /block3/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1 /block3/convblock/convblock.7/conv/Conv_output_0 0=64 1=3 4=1 5=1 6=36864
+BinaryOp                 /block3/convblock/convblock.7/Mul 2 1 /block3/convblock/convblock.7/conv/Conv_output_0 block3.convblock.7.beta /block3/convblock/convblock.7/Mul_output_0 0=2
+BinaryOp                 /block3/convblock/convblock.7/Add 2 1 /block3/convblock/convblock.7/Mul_output_0 /block3/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block3/convblock/convblock.7/Add_output_0
+ReLU                     /block3/convblock/convblock.7/relu/LeakyRelu 1 1 /block3/convblock/convblock.7/Add_output_0 /block3/convblock/convblock.7/relu/LeakyRelu_output_0 0=2.000000e-01
+Deconvolution            /block3/lastconv/lastconv.0/ConvTranspose 1 1 /block3/convblock/convblock.7/relu/LeakyRelu_output_0 /block3/lastconv/lastconv.0/ConvTranspose_output_0 0=52 1=4 3=2 4=1 5=1 6=53248
+PixelShuffle             /block3/lastconv/lastconv.1/DepthToSpace 1 1 /block3/lastconv/lastconv.0/ConvTranspose_output_0 /block3/lastconv/lastconv.1/DepthToSpace_output_0 0=2
+Interp                   /block3/Resize_2         1 1 /block3/lastconv/lastconv.1/DepthToSpace_output_0 /block3/Resize_2_output_0 0=2 1=2.000000e+00 2=2.000000e+00
+Split                    splitncnn_43             1 3 /block3/Resize_2_output_0 /block3/Resize_2_output_0_splitncnn_0 /block3/Resize_2_output_0_splitncnn_1 /block3/Resize_2_output_0_splitncnn_2
+Crop                     /block3/Slice            1 1 /block3/Resize_2_output_0_splitncnn_2 /block3/Slice_output_0 -23309=1,0 -23310=1,4 -23311=1,0
+Crop                     /block3/Slice_1          1 1 /block3/Resize_2_output_0_splitncnn_1 /block3/Slice_1_output_0 -23309=1,4 -23310=1,5 -23311=1,0
+Crop                     /block3/Slice_2          1 1 /block3/Resize_2_output_0_splitncnn_0 /block3/Slice_2_output_0 -23309=1,5 -23310=1,2147483647 -23311=1,0
+Eltwise                  /Add_3                   2 1 /Add_2_output_0_splitncnn_0 /block3/Slice_output_0 /Add_3_output_0 0=1 -23301=2,1.000000e+00,2.000000e+00
+Split                    splitncnn_44             1 6 /Add_3_output_0 /Add_3_output_0_splitncnn_0 /Add_3_output_0_splitncnn_1 /Add_3_output_0_splitncnn_2 /Add_3_output_0_splitncnn_3 /Add_3_output_0_splitncnn_4 /Add_3_output_0_splitncnn_5
+Crop                     /Slice_21                1 1 /Add_3_output_0_splitncnn_5 /Slice_21_output_0 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                /warp_12                 2 1 in0_splitncnn_1 /Slice_21_output_0 /warp_12_output_0 0=6
+Crop                     /Slice_22                1 1 /Add_3_output_0_splitncnn_4 /Slice_22_output_0 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                /warp_13                 2 1 in1_splitncnn_1 /Slice_22_output_0 /warp_13_output_0 0=6
+Crop                     /Slice_23                1 1 /Add_3_output_0_splitncnn_3 /Slice_23_output_0 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                /warp_14                 2 1 /encode/cnn3/ConvTranspose_output_0_splitncnn_0 /Slice_23_output_0 /warp_14_output_0 0=6
+Crop                     /Slice_24                1 1 /Add_3_output_0_splitncnn_2 /Slice_24_output_0 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                /warp_15                 2 1 /encode/cnn3_1/ConvTranspose_output_0_splitncnn_0 /Slice_24_output_0 /warp_15_output_0 0=6
+Crop                     /Slice_25                1 1 /warp_12_output_0 /Slice_25_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Crop                     /Slice_26                1 1 /warp_13_output_0 /Slice_26_output_0 -23309=1,0 -23310=1,3 -23311=1,0
+Concat                   /Concat_5                7 1 /Slice_25_output_0 /Slice_26_output_0 /warp_14_output_0 /warp_15_output_0 /Mul_1_output_0_splitncnn_0 /block3/Slice_1_output_0 /block3/Slice_2_output_0 /Concat_5_output_0
+Interp                   /block4/Resize           1 1 /Concat_5_output_0 /block4/Resize_output_0 0=2
+Interp                   /block4/Resize_1         1 1 /Add_3_output_0_splitncnn_1 /block4/Resize_1_output_0 0=2
+Concat                   /block4/Concat           2 1 /block4/Resize_output_0 /block4/Resize_1_output_0 /block4/Concat_output_0
+Convolution              /block4/conv0/conv0.0/conv0.0.0/Conv 1 1 /block4/Concat_output_0 /block4/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 0=16 1=3 3=2 4=1 5=1 6=4032 9=2 -23310=1,2.000000e-01
+Convolution              /block4/conv0/conv0.1/conv0.1.0/Conv 1 1 /block4/conv0/conv0.0/conv0.0.1/LeakyRelu_output_0 /block4/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 0=32 1=3 3=2 4=1 5=1 6=4608 9=2 -23310=1,2.000000e-01
+Split                    splitncnn_45             1 2 /block4/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0 /block4/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block4/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1
+Convolution              /block4/convblock/convblock.0/conv/Conv 1 1 /block4/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_1 /block4/convblock/convblock.0/conv/Conv_output_0 0=32 1=3 4=1 5=1 6=9216
+BinaryOp                 /block4/convblock/convblock.0/Mul 2 1 /block4/convblock/convblock.0/conv/Conv_output_0 block4.convblock.0.beta /block4/convblock/convblock.0/Mul_output_0 0=2
+BinaryOp                 /block4/convblock/convblock.0/Add 2 1 /block4/convblock/convblock.0/Mul_output_0 /block4/conv0/conv0.1/conv0.1.1/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.0/Add_output_0
+ReLU                     /block4/convblock/convblock.0/relu/LeakyRelu 1 1 /block4/convblock/convblock.0/Add_output_0 /block4/convblock/convblock.0/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_46             1 2 /block4/convblock/convblock.0/relu/LeakyRelu_output_0 /block4/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block4/convblock/convblock.1/conv/Conv 1 1 /block4/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_1 /block4/convblock/convblock.1/conv/Conv_output_0 0=32 1=3 4=1 5=1 6=9216
+BinaryOp                 /block4/convblock/convblock.1/Mul 2 1 /block4/convblock/convblock.1/conv/Conv_output_0 block4.convblock.1.beta /block4/convblock/convblock.1/Mul_output_0 0=2
+BinaryOp                 /block4/convblock/convblock.1/Add 2 1 /block4/convblock/convblock.1/Mul_output_0 /block4/convblock/convblock.0/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.1/Add_output_0
+ReLU                     /block4/convblock/convblock.1/relu/LeakyRelu 1 1 /block4/convblock/convblock.1/Add_output_0 /block4/convblock/convblock.1/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_47             1 2 /block4/convblock/convblock.1/relu/LeakyRelu_output_0 /block4/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block4/convblock/convblock.2/conv/Conv 1 1 /block4/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_1 /block4/convblock/convblock.2/conv/Conv_output_0 0=32 1=3 4=1 5=1 6=9216
+BinaryOp                 /block4/convblock/convblock.2/Mul 2 1 /block4/convblock/convblock.2/conv/Conv_output_0 block4.convblock.2.beta /block4/convblock/convblock.2/Mul_output_0 0=2
+BinaryOp                 /block4/convblock/convblock.2/Add 2 1 /block4/convblock/convblock.2/Mul_output_0 /block4/convblock/convblock.1/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.2/Add_output_0
+ReLU                     /block4/convblock/convblock.2/relu/LeakyRelu 1 1 /block4/convblock/convblock.2/Add_output_0 /block4/convblock/convblock.2/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_48             1 2 /block4/convblock/convblock.2/relu/LeakyRelu_output_0 /block4/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block4/convblock/convblock.3/conv/Conv 1 1 /block4/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_1 /block4/convblock/convblock.3/conv/Conv_output_0 0=32 1=3 4=1 5=1 6=9216
+BinaryOp                 /block4/convblock/convblock.3/Mul 2 1 /block4/convblock/convblock.3/conv/Conv_output_0 block4.convblock.3.beta /block4/convblock/convblock.3/Mul_output_0 0=2
+BinaryOp                 /block4/convblock/convblock.3/Add 2 1 /block4/convblock/convblock.3/Mul_output_0 /block4/convblock/convblock.2/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.3/Add_output_0
+ReLU                     /block4/convblock/convblock.3/relu/LeakyRelu 1 1 /block4/convblock/convblock.3/Add_output_0 /block4/convblock/convblock.3/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_49             1 2 /block4/convblock/convblock.3/relu/LeakyRelu_output_0 /block4/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block4/convblock/convblock.4/conv/Conv 1 1 /block4/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_1 /block4/convblock/convblock.4/conv/Conv_output_0 0=32 1=3 4=1 5=1 6=9216
+BinaryOp                 /block4/convblock/convblock.4/Mul 2 1 /block4/convblock/convblock.4/conv/Conv_output_0 block4.convblock.4.beta /block4/convblock/convblock.4/Mul_output_0 0=2
+BinaryOp                 /block4/convblock/convblock.4/Add 2 1 /block4/convblock/convblock.4/Mul_output_0 /block4/convblock/convblock.3/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.4/Add_output_0
+ReLU                     /block4/convblock/convblock.4/relu/LeakyRelu 1 1 /block4/convblock/convblock.4/Add_output_0 /block4/convblock/convblock.4/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_50             1 2 /block4/convblock/convblock.4/relu/LeakyRelu_output_0 /block4/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block4/convblock/convblock.5/conv/Conv 1 1 /block4/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_1 /block4/convblock/convblock.5/conv/Conv_output_0 0=32 1=3 4=1 5=1 6=9216
+BinaryOp                 /block4/convblock/convblock.5/Mul 2 1 /block4/convblock/convblock.5/conv/Conv_output_0 block4.convblock.5.beta /block4/convblock/convblock.5/Mul_output_0 0=2
+BinaryOp                 /block4/convblock/convblock.5/Add 2 1 /block4/convblock/convblock.5/Mul_output_0 /block4/convblock/convblock.4/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.5/Add_output_0
+ReLU                     /block4/convblock/convblock.5/relu/LeakyRelu 1 1 /block4/convblock/convblock.5/Add_output_0 /block4/convblock/convblock.5/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_51             1 2 /block4/convblock/convblock.5/relu/LeakyRelu_output_0 /block4/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block4/convblock/convblock.6/conv/Conv 1 1 /block4/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_1 /block4/convblock/convblock.6/conv/Conv_output_0 0=32 1=3 4=1 5=1 6=9216
+BinaryOp                 /block4/convblock/convblock.6/Mul 2 1 /block4/convblock/convblock.6/conv/Conv_output_0 block4.convblock.6.beta /block4/convblock/convblock.6/Mul_output_0 0=2
+BinaryOp                 /block4/convblock/convblock.6/Add 2 1 /block4/convblock/convblock.6/Mul_output_0 /block4/convblock/convblock.5/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.6/Add_output_0
+ReLU                     /block4/convblock/convblock.6/relu/LeakyRelu 1 1 /block4/convblock/convblock.6/Add_output_0 /block4/convblock/convblock.6/relu/LeakyRelu_output_0 0=2.000000e-01
+Split                    splitncnn_52             1 2 /block4/convblock/convblock.6/relu/LeakyRelu_output_0 /block4/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1
+Convolution              /block4/convblock/convblock.7/conv/Conv 1 1 /block4/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_1 /block4/convblock/convblock.7/conv/Conv_output_0 0=32 1=3 4=1 5=1 6=9216
+BinaryOp                 /block4/convblock/convblock.7/Mul 2 1 /block4/convblock/convblock.7/conv/Conv_output_0 block4.convblock.7.beta /block4/convblock/convblock.7/Mul_output_0 0=2
+BinaryOp                 /block4/convblock/convblock.7/Add 2 1 /block4/convblock/convblock.7/Mul_output_0 /block4/convblock/convblock.6/relu/LeakyRelu_output_0_splitncnn_0 /block4/convblock/convblock.7/Add_output_0
+ReLU                     /block4/convblock/convblock.7/relu/LeakyRelu 1 1 /block4/convblock/convblock.7/Add_output_0 /block4/convblock/convblock.7/relu/LeakyRelu_output_0 0=2.000000e-01
+Deconvolution            /block4/lastconv/lastconv.0/ConvTranspose 1 1 /block4/convblock/convblock.7/relu/LeakyRelu_output_0 /block4/lastconv/lastconv.0/ConvTranspose_output_0 0=52 1=4 3=2 4=1 5=1 6=26624
+PixelShuffle             /block4/lastconv/lastconv.1/DepthToSpace 1 1 /block4/lastconv/lastconv.0/ConvTranspose_output_0 /block4/lastconv/lastconv.1/DepthToSpace_output_0 0=2
+Interp                   /block4/Resize_2         1 1 /block4/lastconv/lastconv.1/DepthToSpace_output_0 /block4/Resize_2_output_0 0=2
+Split                    splitncnn_53             1 2 /block4/Resize_2_output_0 /block4/Resize_2_output_0_splitncnn_0 /block4/Resize_2_output_0_splitncnn_1
+Crop                     /block4/Slice            1 1 /block4/Resize_2_output_0_splitncnn_1 /block4/Slice_output_0 -23309=1,0 -23310=1,4 -23311=1,0
+Crop                     /block4/Slice_1          1 1 /block4/Resize_2_output_0_splitncnn_0 /block4/Slice_1_output_0 -23309=1,4 -23310=1,5 -23311=1,0
+BinaryOp                 /Add_4                   2 1 /Add_3_output_0_splitncnn_0 /block4/Slice_output_0 /Add_4_output_0
+Split                    splitncnn_54             1 2 /Add_4_output_0 /Add_4_output_0_splitncnn_0 /Add_4_output_0_splitncnn_1
+Crop                     /Slice_27                1 1 /Add_4_output_0_splitncnn_1 /Slice_27_output_0 -23309=1,0 -23310=1,2 -23311=1,0
+rife.Warp                /warp_16                 2 1 in0_splitncnn_0 /Slice_27_output_0 /warp_16_output_0 0=6
+Crop                     /Slice_28                1 1 /Add_4_output_0_splitncnn_0 /Slice_28_output_0 -23309=1,2 -23310=1,4 -23311=1,0
+rife.Warp                /warp_17                 2 1 in1_splitncnn_0 /Slice_28_output_0 /warp_17_output_0 0=6
+Sigmoid                  /Sigmoid                 1 1 /block4/Slice_1_output_0 /Sigmoid_output_0
+Split                    splitncnn_55             1 2 /Sigmoid_output_0 /Sigmoid_output_0_splitncnn_0 /Sigmoid_output_0_splitncnn_1
+BinaryOp                 /Mul_2                   2 1 /warp_16_output_0 /Sigmoid_output_0_splitncnn_1 /Mul_2_output_0 0=2
+BinaryOp                 /Sub                     1 1 /Sigmoid_output_0_splitncnn_0 /Sub_output_0 0=7 1=1 2=1.000000e+00
+BinaryOp                 /Mul_3                   2 1 /warp_17_output_0 /Sub_output_0 /Mul_3_output_0 0=2
+BinaryOp                 /Add_5                   2 1 /Mul_2_output_0 /Mul_3_output_0 out0

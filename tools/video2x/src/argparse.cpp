@@ -180,7 +180,8 @@ int parse_args(
             ("rife-model", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("rife-v4.6"), "rife-v4.6")->notifier(validate_rife_model_name),
                 "Name of the RIFE model to use (rife, rife-HD, rife-UHD, rife-anime, rife-v2, "
-                "rife-v2.3, rife-v2.4, rife-v3.0, rife-v3.1, rife-v4, rife-v4.6)")
+                "rife-v2.3, rife-v2.4, rife-v3.0, rife-v3.1, rife-v4, rife-v4.6, rife-v4.25, "
+                "rife-v4.25-lite, rife-v4.26)")
             ("rife-uhd", "Enable Ultra HD mode")
         ;
         // clang-format on

@@ -50,20 +50,38 @@ int InterpolatorRIFE::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
     // Automatically infer the RIFE model generation based on the model name
     bool rife_v2 = false;
     bool rife_v4 = false;
+    int rife_padding = 32;
     if (model_name_.find(STR("rife-v2")) != fsutils::StringType::npos) {
         rife_v2 = true;
     } else if (model_name_.find(STR("rife-v3")) != fsutils::StringType::npos) {
         rife_v2 = true;
     } else if (model_name_.find(STR("rife-v4")) != fsutils::StringType::npos) {
         rife_v4 = true;
+        if (model_name_.find(STR("rife-v4.25")) != fsutils::StringType::npos) {
+            rife_padding = 64;
+        }
+        if (model_name_.find(STR("rife-v4.25-lite")) != fsutils::StringType::npos) {
+            rife_padding = 128;
+        }
+        if (model_name_.find(STR("rife-v4.26")) != fsutils::StringType::npos) {
+            rife_padding = 64;
+        }
     } else if (model_name_.find(STR("rife")) == fsutils::StringType::npos) {
         logger()->critical("Failed to infer RIFE model generation from model name");
         return -1;
     }
 
     // Create a new RIFE instance
-    rife_ =
-        new RIFE(gpuid_, tta_mode_, tta_temporal_mode_, uhd_mode_, num_threads_, rife_v2, rife_v4);
+    rife_ = new RIFE(
+        gpuid_,
+        tta_mode_,
+        tta_temporal_mode_,
+        uhd_mode_,
+        num_threads_,
+        rife_v2,
+        rife_v4,
+        rife_padding
+    );
 
     // Store the time bases
     in_time_base_ = dec_ctx->time_base;
