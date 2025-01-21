@@ -314,7 +314,7 @@ int VideoProcessor::write_frame(AVFrame* frame, encoder::Encoder& encoder) {
     int ret = 0;
 
     if (!benchmark_) {
-        ret = encoder.write_frame(frame);
+        ret = encoder.write_frame(frame, frame_idx_);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             logger()->critical("Error encoding/writing frame: {}", errbuf);
