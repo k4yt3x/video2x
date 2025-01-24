@@ -76,9 +76,11 @@ int parse_args(
             ("list-devices,l", "List the available Vulkan devices (GPUs)")
 
             // General Processing Options
-            ("input,i", PO_STR_VALUE<video2x::fsutils::StringType>(), "Input video file path")
-            ("output,o", PO_STR_VALUE<video2x::fsutils::StringType>(), "Output video file path")
-            ("processor,p", PO_STR_VALUE<video2x::fsutils::StringType>(),
+            ("input,i", PO_STR_VALUE<video2x::fsutils::StringType>()->required(),
+                "Input video file path")
+            ("output,o", PO_STR_VALUE<video2x::fsutils::StringType>()->required(),
+                "Output video file path")
+            ("processor,p", PO_STR_VALUE<video2x::fsutils::StringType>()->required(),
                 "Processor to use (libplacebo, realesrgan, realcugan, rife)")
             ("hwaccel,a", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("none"), "none"), "Hardware acceleration method (decoding)")
@@ -201,7 +203,6 @@ int parse_args(
 #else
         po::store(po::command_line_parser(argc, argv).options(all_opts).run(), vm);
 #endif
-        po::notify(vm);
 
         if (vm.count("help") || argc == 1) {
             std::cout
@@ -235,6 +236,9 @@ int parse_args(
             }
             return 1;
         }
+
+        // Run all notify functions and validations
+        po::notify(vm);
 
         if (vm.count("log-level")) {
             if (!video2x::logger_manager::LoggerManager::instance().set_log_level(
