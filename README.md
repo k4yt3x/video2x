@@ -35,11 +35,11 @@ Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 
 </details>
 
-![6.3.0-screenshot](https://github.com/user-attachments/assets/c5442f84-5ffc-4476-915f-a0fc188a2cb3)
+![6.4.0-screenshot](https://github.com/user-attachments/assets/9b1cc8a7-2903-4d2c-80a2-8d81f007e45b)
 
 ## [🪟 Install on Windows](https://docs.video2x.org/installing/windows-qt6.html)
 
-**[Download the Latest Windows Installer Executable (6.3.1)](https://github.com/k4yt3x/video2x/releases/download/6.3.1/video2x-qt6-windows-amd64-installer.exe)**
+**[Download the Latest Windows Installer Executable (6.4.0)](https://github.com/k4yt3x/video2x/releases/download/6.4.0/video2x-qt6-windows-amd64-installer.exe)**
 
 You can download the latest Windows release on the [releases page](https://github.com/k4yt3x/video2x/releases/latest). For basic GUI usage, refer to the [documentation](https://docs.video2x.org/running/desktop.html). If you're unable to download directly from GitHub, try the [mirror site](https://files.k4yt3x.com/Projects/Video2X). The GUI currently supports the following languages:
 
@@ -48,10 +48,11 @@ You can download the latest Windows release on the [releases page](https://githu
 - 日本語（日本）
 - Português (Portugal)
 - Français (France)
+- Deutsch (Deutschland)
 
 ## [🐧 Install on Linux](https://docs.video2x.org/installing/linux.html)
 
-Video2X packages are available for the Linux distros listed below. If you'd like to build it from source code, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required dependencies and commands. If a package is not available for your distro and you prefer not to compile the program from source code, consider using the container image outlined in the next section.
+Video2X packages are available for the Linux distros listed below. A universal AppImage is also available for other distros. If you'd like to build it from source code, refer to the [PKGBUILD](packaging/arch/PKGBUILD) file for a general overview of the required dependencies and commands.
 
 - Arch Linux: AUR packages, maintained by [@K4YT3X](https://github.com/k4yt3x).
   - [aur/video2x](https://aur.archlinux.org/packages/video2x)
@@ -62,7 +63,7 @@ Video2X packages are available for the Linux distros listed below. If you'd like
   - [archlinuxcn/video2x](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x)
   - [archlinuxcn/video2x-git](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-git)
   - [archlinuxcn/video2x-qt6-git](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-qt6-git)
-- Ubuntu 24.04: `video2x-linux-ubuntu2404-amd64.deb` on the [releases page](https://github.com/k4yt3x/video2x/releases/latest).
+- Other distros: `Video2X-x86_64.AppImage` on the [releases page](https://github.com/k4yt3x/video2x/releases/latest).
 
 ## [📦 Container Image](https://docs.video2x.org/running/container.html)
 
