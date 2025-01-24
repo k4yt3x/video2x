@@ -5,21 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [6.4.0] - 2025-01-24
 
 ### Added
 
 - Multi-versioning to critical functions to enhance performance in generic architecture builds.
+- RIFE models v4.25 and v4.26 (#1304).
 - Support for processing videos without PTS information (#1278).
 - The feature to copy input streams' metadata to the output streams (#1282).
+- (Video2X Qt6) German translation (#1279).
+- (Video2X Qt6) Option to remove finished tasks from the queue.
+- (Video2X Qt6) Option to specify actions after processing is complete.
+- (Video2X Qt6) Support for adding and removing tasks during processing (#1281).
+- (Video2X Qt6) The feature to automatically set codec to PNG for images (#1204).
+- (Video2X Qt6) The preferences dialog.
 
 ### Changed
 
 - Improve the CMake optimization flags and option names.
+- (Video2X Qt6) Embed translation files in the executable to avoid missing resources (#1250).
+- (Video2X Qt6) Redesign the main window UI to improve usability.
 
 ### Fixed
 
 - A bug that causes the wrong encoder to be selected.
+- (Video2X Qt6) Incorrect font used for the Japanese translation (#1276).
 
 ## [6.3.1] - 2024-12-21
 

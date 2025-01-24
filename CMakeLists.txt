@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
-project(video2x VERSION 6.3.1 LANGUAGES CXX)
+project(video2x VERSION 6.4.0 LANGUAGES CXX)
 
 include(CMakePackageConfigHelpers)
 include(ExternalProject)
