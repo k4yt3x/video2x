@@ -132,7 +132,7 @@ int parse_args(
             ("height,h", po::value<int>(&proc_cfg.height)
                 ->notifier([](int v) { validate_greater_equal_one(v, "height"); }), "Output height")
             ("scaling-factor,s", po::value<int>(&proc_cfg.scaling_factor)
-                ->notifier([](int v) { validate_min(v, "scaling-factor", 2); }), "Scaling factor")
+                ->notifier([](int v) { validate_min(v, "scaling-factor", 1); }), "Scaling factor")
             ("noise-level,n", po::value<int>(&proc_cfg.noise_level)
                 ->notifier([](int v) { validate_min(v, "noise-level", 0); }), "Noise level")
         ;
@@ -387,7 +387,7 @@ int parse_args(
                     );
                     return -1;
                 }
-                if (proc_cfg.scaling_factor < 2 || proc_cfg.scaling_factor > 4) {
+                if (proc_cfg.scaling_factor < 1 || proc_cfg.scaling_factor > 4) {
                     video2x::logger()->critical(
                         "Scaling factor must be set to 2, 3, or 4 for RealESRGAN."
                     );
