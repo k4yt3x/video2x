@@ -78,8 +78,8 @@ int parse_args(
             // General Processing Options
             ("input,i", PO_STR_VALUE<video2x::fsutils::StringType>()->required(),
                 "Input video file path")
-            ("output,o", PO_STR_VALUE<video2x::fsutils::StringType>()->required(),
-                "Output video file path")
+            ("output,o", PO_STR_VALUE<video2x::fsutils::StringType>(),
+                "Output video file path (if not specified, the input file name will be used by default)")
             ("processor,p", PO_STR_VALUE<video2x::fsutils::StringType>()->required(),
                 "Processor to use (libplacebo, realesrgan, realcugan, rife)")
             ("hwaccel,a", PO_STR_VALUE<video2x::fsutils::StringType>()
@@ -268,9 +268,8 @@ int parse_args(
         if (vm.count("output")) {
             arguments.out_fname =
                 std::filesystem::path(vm["output"].as<video2x::fsutils::StringType>());
-        } else if (!arguments.benchmark) {
-            video2x::logger()->critical("Output file path is required.");
-            return -1;
+        } else {
+            arguments.out_fname = arguments.in_fname.filename();  // Extract file name only
         }
 
         // Parse processor type
