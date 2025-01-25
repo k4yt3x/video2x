@@ -12,6 +12,7 @@ Video2X packages are available for the Linux distros listed below. If you'd like
 - Chinese Mainland: archlinuxcn packages, maintained by [@Integral-Tech](https://github.com/Integral-Tech).
   - [archlinuxcn/video2x](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x)
   - [archlinuxcn/video2x-git](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-git)
+  - [archlinuxcn/video2x-qt6](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-qt6)
   - [archlinuxcn/video2x-qt6-git](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-qt6-git)
 
 ## Ubuntu
