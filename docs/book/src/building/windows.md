@@ -48,7 +48,7 @@ Rename-Item -Path "third_party/ncnn-$ncnnVersion-windows-vs2022-shared" -NewName
 ## 4. Build the Project
 
 ```bash
-cmake -S . -B build -DUSE_SYSTEM_NCNN=OFF -DUSE_SYSTEM_SPDLOG=OFF -DUSE_SYSTEM_BOOST=OFF `
+cmake -S . -B build -DVIDEO2X_USE_EXTERNAL_NCNN=OFF -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF -DVIDEO2X_USE_EXTERNAL_BOOST=OFF `
   -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/libvideo2x-shared
 cmake --build build --config Release --parallel --target install
 ```
