@@ -161,8 +161,7 @@ int parse_args(
             ("realesrgan-model", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("realesr-animevideov3"), "realesr-animevideov3")
                 ->notifier(validate_realesrgan_model_name),
-                "Name of the RealESRGAN model to use (realesr-animevideov3, realesrgan-plus-anime, "
-                "realesrgan-plus)")
+                "Name of the RealESRGAN model to use (must start with \"realesr\", case insensitive).")
         ;
 
         po::options_description realcugan_opts("RealCUGAN options");

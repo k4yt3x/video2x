@@ -23,15 +23,18 @@ void validate_anime4k_shader_name(const video2x::fsutils::StringType& shader_nam
 }
 
 void validate_realesrgan_model_name(const video2x::fsutils::StringType& model_name) {
-    static const std::unordered_set<video2x::fsutils::StringType> valid_realesrgan_models = {
-        STR("realesrgan-plus"), STR("realesrgan-plus-anime"), STR("realesr-animevideov3")
-    };
-    if (valid_realesrgan_models.count(model_name) == 0) {
+    // Convert the input model name to lowercase
+    video2x::fsutils::StringType lower_model_name = model_name;
+    std::transform(
+        lower_model_name.begin(), lower_model_name.end(), lower_model_name.begin(), ::tolower
+    );
+
+    // Check if the model name starts with "realesr" (case insensitive)
+    if (lower_model_name.find(STR("realesr")) != 0) {
         throw po::validation_error(
             po::validation_error::invalid_option_value,
             "realesrgan-model",
-            "realesrgan-model must be one of: realesr-animevideov3, realesrgan-plus-anime, "
-            "realesrgan-plus"
+            "realesrgan-model must start with 'realesr' (case insensitive)"
         );
     }
 }
