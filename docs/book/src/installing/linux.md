@@ -15,10 +15,6 @@ Video2X packages are available for the Linux distros listed below. If you'd like
   - [archlinuxcn/video2x-qt6](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-qt6)
   - [archlinuxcn/video2x-qt6-git](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-qt6-git)
 
-## Ubuntu
+## Other Distros
 
-Ubuntu users can download the `.deb` packages from the [releases page](https://github.com/k4yt3x/video2x/releases/latest). Install the package with the APT package manager:
-
-```bash
-sudo apt-get install ./video2x-linux-ubuntu2404-amd64.deb
-```
+Users of other distros can download and use the AppImage from the [releases page](https://github.com/k4yt3x/video2x/releases/latest).
