@@ -5,8 +5,8 @@ pkgdesc="A machine learning-based video super resolution and frame interpolation
 arch=('x86_64')
 url="https://github.com/k4yt3x/video2x"
 license=('AGPL-3.0-only')
-depends=('ffmpeg' 'ncnn' 'vulkan-driver' 'spdlog' 'boost-libs')
-makedepends=('git' 'cmake' 'clang' 'vulkan-headers' 'openmp' 'boost')
+depends=('ffmpeg' 'ncnn' 'openmp' 'vulkan-driver' 'spdlog' 'boost-libs')
+makedepends=('git' 'cmake' 'clang' 'vulkan-headers' 'boost')
 
 pkgver() {
     printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
