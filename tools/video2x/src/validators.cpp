@@ -24,7 +24,10 @@ void validate_anime4k_shader_name(const video2x::fsutils::StringType& shader_nam
 
 void validate_realesrgan_model_name(const video2x::fsutils::StringType& model_name) {
     static const std::unordered_set<video2x::fsutils::StringType> valid_realesrgan_models = {
-        STR("realesrgan-plus"), STR("realesrgan-plus-anime"), STR("realesr-animevideov3")
+        STR("realesrgan-plus"),
+        STR("realesrgan-plus-anime"),
+        STR("realesr-animevideov3"),
+        STR("realesr-generalv3"),
     };
     if (valid_realesrgan_models.count(model_name) == 0) {
         throw po::validation_error(

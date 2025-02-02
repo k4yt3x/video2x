@@ -156,23 +156,23 @@ int parse_args(
                 "anime4k-v4-b, anime4k-v4-b+b, anime4k-v4-c, anime4k-v4-c+a, anime4k-v4.1-gan)")
         ;
 
-        po::options_description realesrgan_opts("RealESRGAN options");
+        po::options_description realesrgan_opts("Real-ESRGAN options");
         realesrgan_opts.add_options()
             ("realesrgan-model", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("realesr-animevideov3"), "realesr-animevideov3")
                 ->notifier(validate_realesrgan_model_name),
-                "Name of the RealESRGAN model to use (realesr-animevideov3, realesrgan-plus-anime, "
-                "realesrgan-plus)")
+                "Name of the Real-ESRGAN model to use (realesr-animevideov3, "
+                "realesrgan-plus-anime, realesrgan-plus, realesr-generalv3)")
         ;
 
-        po::options_description realcugan_opts("RealCUGAN options");
+        po::options_description realcugan_opts("Real-CUGAN options");
         realcugan_opts.add_options()
             ("realcugan-model", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("models-se"), "models-se")
                 ->notifier(validate_realcugan_model_name),
-                "Name of the RealCUGAN model to use (models-nose, models-pro, models-se)")
+                "Name of the Real-CUGAN model to use (models-nose, models-pro, models-se)")
             ("realcugan-threads", po::value<int>()->default_value(1),
-                "Number of threads to use for RealCUGAN")
+                "Number of threads to use for Real-CUGAN")
             ("realcugan-syncgap", po::value<int>()->default_value(3),
                 "Sync gap mode; 0:no sync, 1: accurate sync: 2 = rough sync, 3: very rough sync")
         ;
@@ -212,7 +212,7 @@ int parse_args(
                 << "    video2x -i input.mp4 -o output.mp4 -w 3840 -h 2160 \\" << std::endl
                 << "      -p libplacebo --libplacebo-shader anime4k-v4-a+a" << std::endl
                 << std::endl
-                << "  Upscale a film by 4x using RealESRGAN with custom encoder options:"
+                << "  Upscale a film by 4x using Real-ESRGAN with custom encoder options:"
                 << std::endl
                 << "    video2x -i input.mkv -o output.mkv -s 4 \\" << std::endl
                 << "      -p realesrgan --realesrgan-model realesrgan-plus \\" << std::endl
@@ -385,14 +385,17 @@ int parse_args(
             }
             case video2x::processors::ProcessorType::RealESRGAN: {
                 if (!vm.count("realesrgan-model")) {
-                    video2x::logger()->critical("RealESRGAN model name must be set for RealESRGAN."
-                    );
+                    video2x::logger()->critical("The model name must be set for Real-ESRGAN.");
                     return -1;
                 }
                 if (proc_cfg.scaling_factor < 2 || proc_cfg.scaling_factor > 4) {
                     video2x::logger()->critical(
-                        "Scaling factor must be set to 2, 3, or 4 for RealESRGAN."
+                        "Scaling factor must be set to 2, 3, or 4 for Real-ESRGAN."
                     );
+                    return -1;
+                }
+                if (proc_cfg.noise_level < 0 || proc_cfg.noise_level > 1) {
+                    video2x::logger()->critical("Noise level must be 0 or 1 for Real-ESRGAN.");
                     return -1;
                 }
 
@@ -406,31 +409,31 @@ int parse_args(
             }
             case video2x::processors::ProcessorType::RealCUGAN: {
                 if (!vm.count("realcugan-model")) {
-                    video2x::logger()->critical("RealCUGAN model name must be set for RealCUGAN.");
+                    video2x::logger()->critical("The model name must be set for Real-CUGAN.");
                     return -1;
                 }
                 if (vm.count("realcugan-threads") && vm["realcugan-threads"].as<int>() < 1) {
                     video2x::logger()->critical(
-                        "Number of threads must be at least 1 for RealCUGAN."
+                        "Number of threads must be at least 1 for Real-CUGAN."
                     );
                     return -1;
                 }
                 if (vm.count("realcugan-syncgap") && (vm["realcugan-syncgap"].as<int>() < 0 ||
                                                       vm["realcugan-syncgap"].as<int>() > 3)) {
                     video2x::logger()->critical(
-                        "Sync gap mode must be set to 0, 1, 2, or 3 for RealCUGAN."
+                        "Sync gap mode must be set to 0, 1, 2, or 3 for Real-CUGAN."
                     );
                     return -1;
                 }
                 if (proc_cfg.scaling_factor < 2 || proc_cfg.scaling_factor > 4) {
                     video2x::logger()->critical(
-                        "Scaling factor must be set to 2, 3, or 4 for RealCUGAN."
+                        "Scaling factor must be set to 2, 3, or 4 for Real-CUGAN."
                     );
                     return -1;
                 }
                 if (proc_cfg.noise_level < -1 || proc_cfg.noise_level > 3) {
                     video2x::logger()->critical(
-                        "Noise level must be set to -1, 0, 1, 2, or 3 for RealCUGAN."
+                        "Noise level must be set to -1, 0, 1, 2, or 3 for Real-CUGAN."
                     );
                     return -1;
                 }
@@ -447,7 +450,7 @@ int parse_args(
             }
             case video2x::processors::ProcessorType::RIFE: {
                 if (!vm.count("rife-model")) {
-                    video2x::logger()->critical("RIFE model name must be set for RIFE.");
+                    video2x::logger()->critical("The model name must be set for RIFE.");
                     return -1;
                 }
                 if (proc_cfg.frm_rate_mul < 2) {

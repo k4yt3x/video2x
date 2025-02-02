@@ -91,6 +91,7 @@ void ProcessorFactory::init_default_processors(ProcessorFactory& factory) {
                 static_cast<int>(vk_device_index),
                 config.tta_mode,
                 proc_cfg.scaling_factor,
+                proc_cfg.noise_level,
                 config.model_name
             );
         }

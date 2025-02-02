@@ -17,12 +17,14 @@ FilterRealesrgan::FilterRealesrgan(
     int gpuid,
     bool tta_mode,
     int scaling_factor,
+    int noise_level,
     const fsutils::StringType model_name
 )
     : realesrgan_(nullptr),
       gpuid_(gpuid),
       tta_mode_(tta_mode),
       scaling_factor_(scaling_factor),
+      noise_level_(noise_level),
       model_name_(std::move(model_name)) {}
 
 FilterRealesrgan::~FilterRealesrgan() {
@@ -35,10 +37,16 @@ int FilterRealesrgan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
     std::filesystem::path model_param_path;
     std::filesystem::path model_bin_path;
 
-    fsutils::StringType param_file_name =
-        model_name_ + STR("-x") + fsutils::to_string_type(scaling_factor_) + STR(".param");
-    fsutils::StringType bin_file_name =
-        model_name_ + STR("-x") + fsutils::to_string_type(scaling_factor_) + STR(".bin");
+    fsutils::StringType param_file_name = model_name_;
+    fsutils::StringType bin_file_name = model_name_;
+
+    if (model_name_ == STR("realesr-generalv3") && noise_level_ > 0) {
+        param_file_name += STR("-wdn");
+        bin_file_name += STR("-wdn");
+    }
+
+    param_file_name += STR("-x") + fsutils::to_string_type(scaling_factor_) + STR(".param");
+    bin_file_name += STR("-x") + fsutils::to_string_type(scaling_factor_) + STR(".bin");
 
     // Find the model paths by model name if provided
     model_param_path = std::filesystem::path(STR("models")) / STR("realesrgan") / param_file_name;

@@ -18,6 +18,7 @@ class FilterRealesrgan : public Filter {
         int gpuid = 0,
         bool tta_mode = false,
         int scaling_factor = 4,
+        int noise_level = 0,
         const fsutils::StringType model_name = STR("realesr-animevideov3")
     );
 
@@ -47,6 +48,7 @@ class FilterRealesrgan : public Filter {
     int gpuid_;
     bool tta_mode_;
     int scaling_factor_;
+    int noise_level_;
     const fsutils::StringType model_name_;
     AVRational in_time_base_;
     AVRational out_time_base_;

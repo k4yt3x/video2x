@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Real-ESRGAN models `realesr-general-x4v3` and `realesr-general-wdn-x4v3` (#1319).
+
 ## [6.4.0] - 2025-01-24
 
 ### Added
 
 - Multi-versioning to critical functions to enhance performance in generic architecture builds.
-- RIFE models v4.25 and v4.26 (#1304).
+- RIFE models `v4.25` and `v4.26` (#1304).
 - Support for processing videos without PTS information (#1278).
 - The feature to copy input streams' metadata to the output streams (#1282).
 - (Video2X Qt6) German translation (#1279).
