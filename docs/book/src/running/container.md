@@ -17,7 +17,7 @@ This section documents how to upscale a video. Replace `$TAG` with an appropriat
 Make sure your host has the proper GPU and Vulkan libraries and drivers, then use the following command to launch the container:
 
 ```shell
-docker run --gpus all -it --rm -v $PWD/data:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -f realesrgan -r 4 -m realesr-animevideov3
+docker run --gpus all -it --rm -v $PWD/data:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 ```
 
 ### NVIDIA GPUs
@@ -33,19 +33,19 @@ In addition to installing the proper drivers on your host, `nvidia-docker2` (NVI
 Once all the prerequisites are installed, you can launch the container:
 
 ```shell
-docker run --gpus all -it --rm -v $PWD:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -f realesrgan -r 4 -m realesr-animevideov3
+docker run --gpus all -it --rm -v $PWD:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 ```
 
 Depending on the version of your nvidia-docker and some other mysterious factors, you can also try setting `no-cgroups = true` in `/etc/nvidia-container-runtime/config.toml` and adding the NVIDIA devices into the container if the command above doesn't work:
 
 ```shell
-docker run --gpus all --device=/dev/nvidia0 --device=/dev/nvidiactl --runtime nvidia -it --rm -v $PWD:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -f realesrgan -r 4 -m realesr-animevideov3
+docker run --gpus all --device=/dev/nvidia0 --device=/dev/nvidiactl --runtime nvidia -it --rm -v $PWD:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 ```
 
 If you are still getting a `vkEnumeratePhysicalDevices failed -3` error at this point, try adding the `--privileged` flag to give the container the same level of permissions as the host:
 
 ```shell
-docker run --gpus all --privileged -it --rm -v $PWD:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -f realesrgan -r 4 -m realesr-animevideov3
+docker run --gpus all --privileged -it --rm -v $PWD:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 ```
 
 ### Intel GPUs
@@ -53,5 +53,5 @@ docker run --gpus all --privileged -it --rm -v $PWD:/host ghcr.io/k4yt3x/video2x
 Similar to NVIDIA GPUs, you can add `--gpus all` or `--device /dev/dri` to pass the GPU into the container. Adding `--privileged` might help with the performance (thanks @NukeninDark).
 
 ```shell
-docker run --gpus all --privileged -it --rm -v $PWD:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -f realesrgan -r 4 -m realesr-animevideov3
+docker run --gpus all --privileged -it --rm -v $PWD:/host ghcr.io/k4yt3x/video2x:$TAG -i standard-test.mp4 -o output.mp4 -p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 ```
