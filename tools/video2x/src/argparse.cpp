@@ -394,7 +394,7 @@ int parse_args(
                     );
                     return -1;
                 }
-                if (proc_cfg.noise_level < 0 || proc_cfg.noise_level > 1) {
+                if (proc_cfg.noise_level < -1 || proc_cfg.noise_level > 1) {
                     video2x::logger()->critical("Noise level must be 0 or 1 for Real-ESRGAN.");
                     return -1;
                 }
