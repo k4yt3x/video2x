@@ -262,7 +262,7 @@ int VideoProcessor::process_frames(
                     return ret;
                 }
                 av_frame_unref(frame.get());
-                frame_idx_++;
+                frame_idx_.fetch_add(1);
                 logger()->debug("Processed frame {}/{}", frame_idx_.load(), total_frames_.load());
             }
         } else if (enc_cfg_.copy_streams && stream_map[packet->stream_index] >= 0) {
@@ -274,12 +274,12 @@ int VideoProcessor::process_frames(
         av_packet_unref(packet.get());
     }
 
-    // Flush the filter
+    // Flush the processor
     std::vector<AVFrame*> raw_flushed_frames;
     ret = processor->flush(raw_flushed_frames);
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        logger()->critical("Error flushing filter: {}", errbuf);
+        logger()->critical("Error flushing processor: {}", errbuf);
         return ret;
     }
 
@@ -295,7 +295,7 @@ int VideoProcessor::process_frames(
         if (ret < 0) {
             return ret;
         }
-        frame_idx_++;
+        frame_idx_.fetch_add(1);
     }
 
     // Flush the encoder
@@ -314,7 +314,7 @@ int VideoProcessor::write_frame(AVFrame* frame, encoder::Encoder& encoder) {
     int ret = 0;
 
     if (!benchmark_) {
-        ret = encoder.write_frame(frame, frame_idx_);
+        ret = encoder.write_frame(frame, frame_idx_.load());
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             logger()->critical("Error encoding/writing frame: {}", errbuf);
@@ -437,7 +437,7 @@ int VideoProcessor::process_interpolation(
             }
         }
 
-        frame_idx_++;
+        frame_idx_.fetch_add(1);
         current_time_step += time_step;
     }
 
