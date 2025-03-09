@@ -41,7 +41,7 @@ Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 
 **[Download the Latest Windows Installer Executable (6.4.0)](https://github.com/k4yt3x/video2x/releases/download/6.4.0/video2x-qt6-windows-amd64-installer.exe)**
 
-You can download the latest Windows release on the [releases page](https://github.com/k4yt3x/video2x/releases/latest). For basic GUI usage, refer to the [documentation](https://docs.video2x.org/running/desktop.html). If you're unable to download directly from GitHub, try the [mirror site](https://files.k4yt3x.com/Projects/Video2X). The GUI currently supports the following languages:
+You can download the latest Windows release on the [releases page](https://github.com/k4yt3x/video2x/releases/latest). For basic GUI usage, refer to the [documentation](https://docs.video2x.org/running/desktop.html). If you're unable to download directly from GitHub, try the [mirror site](https://files.k4yt3x.com). The GUI currently supports the following languages:
 
 - English (United States)
 - 简体中文（中国）
@@ -101,11 +101,11 @@ _Upscale demo: Spirited Away's movie trailer_
 
 The following clip can be used to test if your setup works properly. This is also the standard clip used for running performance benchmarks.
 
-- [Standard Test Clip (240P)](https://files.k4yt3x.com/Resources/Videos/standard-test.mp4) 4.54 MiB
-- [Real-CUGAN Upscaled Sample (1704P)](https://files.k4yt3x.com/Resources/Videos/standard-realcugan.mp4) 3.5 MiB
-- [Real-ESRGAN Upscaled Sample (1704P)](https://files.k4yt3x.com/Resources/Videos/standard-realesrgan.mp4) 3.1 MiB
-- [waifu2x Upscaled Sample (1080P)](https://files.k4yt3x.com/Resources/Videos/standard-waifu2x.mp4) 4.54 MiB
-- [Ground Truth (1080P)](https://files.k4yt3x.com/Resources/Videos/standard-original.mp4) 22.2 MiB
+- [Standard Test Clip (240P)](https://files.k4yt3x.com/resources/videos/standard-test.mp4) 4.54 MiB
+- [Real-CUGAN Upscaled Sample (1704P)](https://files.k4yt3x.com/resources/videos/standard-realcugan.mp4) 3.5 MiB
+- [Real-ESRGAN Upscaled Sample (1704P)](https://files.k4yt3x.com/resources/videos/standard-realesrgan.mp4) 3.1 MiB
+- [waifu2x Upscaled Sample (1080P)](https://files.k4yt3x.com/resources/videos/standard-waifu2x.mp4) 4.54 MiB
+- [Ground Truth (1080P)](https://files.k4yt3x.com/resources/videos/standard-original.mp4) 22.2 MiB
 
 The original clip came from the anime "さくら荘のペットな彼女."\
 Copyright of this clip belongs to 株式会社アニプレックス.
