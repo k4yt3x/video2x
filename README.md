@@ -27,15 +27,29 @@ Version 6.0.0 is a complete rewrite of this project in C/C++. It:
 - genuinely works this time, with much less hassle compared to the 5.0.0 beta;
 - is blazing fast, thanks to the new optimized pipeline and the efficiency of C/C++;
 - is cross-platform, available now for both Windows and Linux;
-- offers significantly better output quality with Anime4K v4, RealESRGAN, RealCUGAN, and RIFE;
+- offers significantly better output quality with Anime4K v4, Real-ESRGAN, Real-CUGAN, and RIFE;
 - supports two modes: filtering (upscaling) and frame interpolation;
 - supports Anime4K v4 and all custom MPV-compatible GLSL shaders;
-- supports RealESRGAN, RealCUGAN, and RIFE (all models) via ncnn and Vulkan;
+- supports Real-ESRGAN, Real-CUGAN, and RIFE (all models) via ncnn and Vulkan;
 - requires zero additional disk space during processing, just space for the final output.
 
 </details>
 
 ![6.4.0-screenshot](https://github.com/user-attachments/assets/9b1cc8a7-2903-4d2c-80a2-8d81f007e45b)
+
+## 🖥️ Hardware Requirements
+
+Your system must meet the minimum hardware requirements below to run Video2X.
+
+- **CPU**
+  - The precompiled binaries require CPUs with AVX2 support.
+  - **Intel**: Haswell (Q2 2013) or newer
+  - **AMD**: Excavator (Q2 2015) or newer
+- **GPU**
+  - The GPU must support Vulkan.
+  - **NVIDIA**: Kepler (GTX 600 series, Q2 2012) or newer
+  - **AMD**: GCN 1.0 (Radeon HD 7000 series, Q1 2012) or newer
+  - **Intel**: HD Graphics 4000 (Q2 2012) or newer
 
 ## [🪟 Install on Windows](https://docs.video2x.org/installing/windows-qt6.html)
 
