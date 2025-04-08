@@ -266,7 +266,9 @@ int Encoder::init(
     return 0;
 }
 
+#ifndef __clang__
 [[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
+#endif
 int Encoder::write_frame(AVFrame* frame, int64_t frame_idx) {
     AVFrame* converted_frame = nullptr;
     int ret;
@@ -338,7 +340,9 @@ int Encoder::write_frame(AVFrame* frame, int64_t frame_idx) {
     return 0;
 }
 
+#ifndef __clang__
 [[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
+#endif
 int Encoder::flush() {
     int ret;
     AVPacket* enc_pkt = av_packet_alloc();
