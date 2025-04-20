@@ -9,21 +9,21 @@ This page does not cover all the options available. For help with more options a
 Use the following command to upscale a video by 4x with RealESRGAN:
 
 ```bash
-video2x -i input.mp4 -o output.mp4 -f realesrgan -r 4 -m realesr-animevideov3
+video2x -i input.mp4 -o output.mp4 -p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 ```
 
 Use the following command to upscale a video to with libplacebo + Anime4Kv4 Mode A+A:
 
 ```bash
-video2x -i input.mp4 -o output.mp4 -f libplacebo -s anime4k-v4-a+a -w 3840 -h 2160
+video2x -i input.mp4 -o output.mp4 -w 3840 -h 2160 -p libplacebo --libplacebo-shader anime4k-v4-a+a
 ```
 
 ## Advanced
 
-It is possible to specify custom MPV-compatible GLSL shader files with the `--shader, -s` argument:
+It is possible to specify custom MPV-compatible GLSL shader files with the `--libplacebo-shader` argument:
 
 ```bash
-video2x -i input.mp4 -o output.mp4 -f libplacebo -s path/to/custom/shader.glsl -w 3840 -h 2160
+video2x -i input.mp4 -o output.mp4 -p libplacebo -w 3840 -h 2160 --libplacebo-shader path/to/custom/shader.glsl
 ```
 
 List the available GPUs with `--list-gpus, -l`:
@@ -39,13 +39,13 @@ $ video2x --list-gpus
 Select which GPU to use with the `--gpu, -g` argument:
 
 ```bash
-video2x -i input.mp4 -o output.mp4 -f realesrgan -r 4 -m realesr-animevideov3 -g 1
+video2x -i input.mp4 -o output.mp4 -p realesrgan -s 4 --realesrgan-model realesr-animevideov3 -g 1
 ```
 
 Specify arbitrary extra FFmpeg encoder options with the `--extra-encoder-options, -e` argument:
 
 ```bash
-video2x -i input.mkv -o output.mkv -f realesrgan -m realesrgan-plus -r 4 -c libx264rgb -e crf=17 -e preset=veryslow -e tune=film
+video2x -i input.mkv -o output.mkv -p realesrgan --realesrgan-model realesrgan-plus -s 4 -c libx264rgb -e crf=17 -e preset=veryslow -e tune=film
 ```
 
 ## Encoder Options
