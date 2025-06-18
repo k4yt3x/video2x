@@ -53,11 +53,11 @@ class LIBVIDEO2X_API VideoProcessor {
     [[nodiscard]] int process_frames(
         decoder::Decoder& decoder,
         encoder::Encoder& encoder,
-        std::unique_ptr<processors::Processor>& processor
+        std::vector<std::unique_ptr<processors::Processor>>& processor_instances
     );
 
     [[nodiscard]] int process_batch_filtering(
-        std::unique_ptr<processors::Processor>& processor,
+        std::vector<std::unique_ptr<processors::Processor>>& processor_instances,
         encoder::Encoder& encoder,
         std::vector<std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>>& batch_frames,
         std::vector<int64_t>& batched_pts
