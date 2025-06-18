@@ -17,6 +17,7 @@ extern "C" {
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/post.hpp>
 #include <future>
+#include <atomic>
 
 namespace video2x {
 
@@ -263,14 +264,14 @@ int VideoProcessor::process_frames(
                     return ret;
                 }
 
-                // Calculate this frame's presentation timestamp (PTS)
-                frame->pts =
-                    av_rescale_q(frame_idx_, av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
-
                 // Process the frame based on the selected processing mode
                 AVFrame* proc_frame = nullptr;
                 switch (processor_instances[0]->get_processing_mode()) {                    
                     case processors::ProcessingMode::Filter: {
+                        //logger()->info("Processing frame {} in filter mode", frame_idx_.load() + batch_frames.size());
+                        // Calculate this frame's presentation timestamp (PTS)
+                        frame->pts = av_rescale_q(frame_idx_ + batch_frames.size(), av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
+                        
                         // Clone decoded frame and add to batch
                         AVFrame* cloned = av_frame_clone(frame.get());
                         if (!cloned) { logger()->critical("Frame clone failed"); return AVERROR(ENOMEM);}
@@ -287,6 +288,9 @@ int VideoProcessor::process_frames(
                         break;
                     }
                     case processors::ProcessingMode::Interpolate: {
+                        // Calculate this frame's presentation timestamp (PTS)
+                        frame->pts = av_rescale_q(frame_idx_, av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
+
                         ret = process_interpolation(
                             processor_instances[0], encoder, prev_frame, frame.get(), proc_frame
                         );
@@ -379,32 +383,57 @@ int VideoProcessor::process_batch_filtering(
 
     std::vector<std::shared_ptr<std::promise<void>>> promises(batch_frames.size());
     std::vector<std::future<void>> futures;
+    std::atomic<size_t> next_to_write {0};
+    std::atomic<int> first_error {0}; 
     for (size_t i = 0; i < batch_frames.size(); ++i) {
         promises[i] = std::make_shared<std::promise<void>>();
         futures.push_back(promises[i]->get_future());
         boost::asio::post(pool, [&, i, promise = promises[i]] {
             AVFrame* filtered = nullptr;
             results[i] = static_cast<processors::Filter*>(processor_instances[i].get())->filter(batch_frames[i].get(), &filtered);
+
             if (results[i] == 0 && filtered) {
                 filtered->pts = batched_pts[i];
                 processed_frames[i].reset(filtered);
+            }
+            // New: Each thread now tries to write, but only in order.
+            while (true) {
+                // If we hit an earlier error, don't proceed to write
+                if (first_error.load() < 0)
+                    break;
+
+                if (next_to_write.load() == i) {
+                    if (results[i] < 0) {
+                        // This thread encountered an error -- record it
+                        first_error.store(results[i]);
+                        break;
+                    }
+                    if (processed_frames[i]) {
+                        int ret = write_frame(processed_frames[i].get(), encoder);
+                        if (ret < 0) {
+                            // Write error, record and quit
+                            first_error.store(ret);
+                            break;
+                        }
+                        frame_idx_.fetch_add(1);
+                    }
+                    // Increment so next thread may proceed
+                    next_to_write.fetch_add(1);
+                    logger()->info("Frame {} processed and written", batched_pts[i]);
+                    break;
+                } else {
+                    // Not this frame's turn yet
+                    std::this_thread::yield();
+                }
             }
             promise->set_value();
         });
     }
 
-    // Wait for filtering to finish
+    // Wait for all emissions (or early error bailout)
     for (auto& f : futures) f.get();
 
-    // Write out filtered frames in input order
-    for (size_t i = 0; i < processed_frames.size(); ++i) {
-        if (results[i] < 0) return results[i];
-        if (processed_frames[i]) {
-            int ret = write_frame(processed_frames[i].get(), encoder);
-            if (ret < 0) return ret;
-            frame_idx_.fetch_add(1);
-        }
-    }
+    if (first_error.load() < 0) return first_error.load();
     return 0;
 }
 
