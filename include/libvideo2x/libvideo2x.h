@@ -56,6 +56,13 @@ class LIBVIDEO2X_API VideoProcessor {
         std::unique_ptr<processors::Processor>& processor
     );
 
+    [[nodiscard]] int process_batch_filtering(
+        std::unique_ptr<processors::Processor>& processor,
+        encoder::Encoder& encoder,
+        std::vector<std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>>& batch_frames,
+        std::vector<int64_t>& batched_pts
+    );
+
     [[nodiscard]] int write_frame(AVFrame* frame, encoder::Encoder& encoder);
 
     [[nodiscard]] inline int write_raw_packet(

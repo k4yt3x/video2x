@@ -135,6 +135,8 @@ int parse_args(
                 ->notifier([](int v) { validate_min(v, "scaling-factor", 2); }), "Scaling factor")
             ("noise-level,n", po::value<int>(&proc_cfg.noise_level)
                 ->notifier([](int v) { validate_min(v, "noise-level", 0); }), "Noise level")
+            ("batch-size", po::value<int>(&proc_cfg.batch_size)
+                ->notifier([](int v) { validate_greater_equal_one(v, "batch-size"); }), "Batch size")
         ;
 
         po::options_description interp_opts("Frame interpolation options");
@@ -216,7 +218,8 @@ int parse_args(
                 << std::endl
                 << "    video2x -i input.mkv -o output.mkv -s 4 \\" << std::endl
                 << "      -p realesrgan --realesrgan-model realesrgan-plus \\" << std::endl
-                << "      -c libx264rgb -e crf=17 -e preset=veryslow -e tune=film" << std::endl
+                << "      -c libx264rgb -e crf=17 -e preset=veryslow -e tune=film \\" << std::endl
+                << "      --batch-size 2" << std::endl
                 << std::endl
                 << "  Frame-interpolate a video using RIFE to 4x the original frame rate:"
                 << std::endl
