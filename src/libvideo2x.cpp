@@ -14,6 +14,11 @@ extern "C" {
 #include "processor.h"
 #include "processor_factory.h"
 
+#include <boost/asio/thread_pool.hpp>
+#include <boost/asio/post.hpp>
+#include <future>
+#include <atomic>
+
 namespace video2x {
 
 VideoProcessor::VideoProcessor(
@@ -77,17 +82,24 @@ int VideoProcessor::process(
     AVCodecContext* dec_ctx = decoder.get_codec_context();
     int in_vstream_idx = decoder.get_video_stream_index();
 
-    // Create and initialize the appropriate filter
-    std::unique_ptr<processors::Processor> processor(
-        processors::ProcessorFactory::instance().create_processor(proc_cfg_, vk_device_idx_)
-    );
-    if (processor == nullptr) {
-        return handle_error(-1, "Failed to create filter instance");
+    // Create and initialize the appropriate filter (one per batch element)
+    std::vector<std::unique_ptr<processors::Processor>> processor_instances;
+    processor_instances.reserve(proc_cfg_.batch_size);
+    for (size_t i = 0; i < proc_cfg_.batch_size; ++i) {
+        processor_instances.emplace_back(
+            processors::ProcessorFactory::instance().create_processor(proc_cfg_, vk_device_idx_)
+        );
+        if (processor_instances[i] == nullptr) {
+            return handle_error(-1, "Failed to create filter instance");
+        }
+    }
+    if (processor_instances.empty()) {
+        return handle_error(-1, "No filter instances created");
     }
 
     // Initialize output dimensions based on filter configuration
     int output_width = 0, output_height = 0;
-    processor->get_output_dimensions(
+    processor_instances[0]->get_output_dimensions(
         proc_cfg_, dec_ctx->width, dec_ctx->height, output_width, output_height
     );
     if (output_width <= 0 || output_height <= 0) {
@@ -112,13 +124,16 @@ int VideoProcessor::process(
     }
 
     // Initialize the filter
-    ret = processor->init(dec_ctx, encoder.get_encoder_context(), hw_ctx.get());
-    if (ret < 0) {
-        return handle_error(ret, "Failed to initialize filter");
+    for (auto& processor : processor_instances) {
+        ret = processor->init(dec_ctx, encoder.get_encoder_context(), hw_ctx.get());
+        if (ret < 0) {
+            return handle_error(ret, "Failed to initialize filter");
+        }
     }
+    logger()->debug("Initialized {} filter instances", processor_instances.size());
 
     // Process frames using the encoder and decoder
-    ret = process_frames(decoder, encoder, processor);
+    ret = process_frames(decoder, encoder, processor_instances);
     if (ret < 0) {
         return handle_error(ret, "Error processing frames");
     }
@@ -143,7 +158,7 @@ int VideoProcessor::process(
 int VideoProcessor::process_frames(
     decoder::Decoder& decoder,
     encoder::Encoder& encoder,
-    std::unique_ptr<processors::Processor>& processor
+    std::vector<std::unique_ptr<processors::Processor>>& processor_instances
 ) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
@@ -191,12 +206,24 @@ int VideoProcessor::process_frames(
         logger()->debug("{} frames to process", total_frames_.load());
     }
 
-    // Set total frames for interpolation
-    if (processor->get_processing_mode() == processors::ProcessingMode::Interpolate) {
-        total_frames_.store(total_frames_.load() * proc_cfg_.frm_rate_mul);
+    // Mode specific initialization
+    switch (processor_instances[0]->get_processing_mode()) {                    
+        case processors::ProcessingMode::Filter: {
+            logger()->info("filtering using a batch size of {}", proc_cfg_.batch_size);
+            break;
+        }
+        case processors::ProcessingMode::Interpolate: {
+            // Set total frames for interpolation
+            total_frames_.store(total_frames_.load() * proc_cfg_.frm_rate_mul);
+            break;
+        }
     }
 
     // Read frames from the input file
+    std::vector<std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>> batch_frames;
+    std::vector<int64_t> batched_pts;
+    batch_frames.reserve(std::size_t(proc_cfg_.batch_size));
+    batched_pts.reserve(std::size_t(proc_cfg_.batch_size));
     while (state_.load() != VideoProcessorState::Aborted) {
         ret = av_read_frame(ifmt_ctx, packet.get());
         if (ret < 0) {
@@ -237,21 +264,37 @@ int VideoProcessor::process_frames(
                     return ret;
                 }
 
-                // Calculate this frame's presentation timestamp (PTS)
-                frame->pts =
-                    av_rescale_q(frame_idx_, av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
-
                 // Process the frame based on the selected processing mode
                 AVFrame* proc_frame = nullptr;
-                switch (processor->get_processing_mode()) {
+                switch (processor_instances[0]->get_processing_mode()) {                    
                     case processors::ProcessingMode::Filter: {
-                        ret = process_filtering(processor, encoder, frame.get(), proc_frame);
+                        //logger()->info("Processing frame {} in filter mode", frame_idx_.load() + batch_frames.size());
+                        // Calculate this frame's presentation timestamp (PTS)
+                        frame->pts = av_rescale_q(frame_idx_ + batch_frames.size(), av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
+                        
+                        // Clone decoded frame and add to batch
+                        AVFrame* cloned = av_frame_clone(frame.get());
+                        if (!cloned) { logger()->critical("Frame clone failed"); return AVERROR(ENOMEM);}
+                        batch_frames.emplace_back(cloned, &avutils::av_frame_deleter);
+                        batched_pts.push_back(frame->pts);
+                        av_frame_unref(frame.get());
+
+                        if (batch_frames.size() == proc_cfg_.batch_size) {
+                            ret = process_batch_filtering(processor_instances, encoder, batch_frames, batched_pts);
+                            if (ret < 0) return ret;
+                            batch_frames.clear();
+                            batched_pts.clear();
+                        }
                         break;
                     }
                     case processors::ProcessingMode::Interpolate: {
+                        // Calculate this frame's presentation timestamp (PTS)
+                        frame->pts = av_rescale_q(frame_idx_, av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
+
                         ret = process_interpolation(
-                            processor, encoder, prev_frame, frame.get(), proc_frame
+                            processor_instances[0], encoder, prev_frame, frame.get(), proc_frame
                         );
+                        frame_idx_.fetch_add(1);
                         break;
                     }
                     default:
@@ -262,7 +305,6 @@ int VideoProcessor::process_frames(
                     return ret;
                 }
                 av_frame_unref(frame.get());
-                frame_idx_.fetch_add(1);
                 logger()->debug("Processed frame {}/{}", frame_idx_.load(), total_frames_.load());
             }
         } else if (enc_cfg_.copy_streams && stream_map[packet->stream_index] >= 0) {
@@ -274,28 +316,39 @@ int VideoProcessor::process_frames(
         av_packet_unref(packet.get());
     }
 
+    // Flush batch processing for filtering mode
+    if (processor_instances[0]->get_processing_mode() == processors::ProcessingMode::Filter &&
+    !batch_frames.empty()) {
+        int filteringFlushRet = process_batch_filtering(processor_instances, encoder, batch_frames, batched_pts);
+        if (filteringFlushRet < 0) return filteringFlushRet;
+        batch_frames.clear();
+        batched_pts.clear();
+    }
+
     // Flush the processor
-    std::vector<AVFrame*> raw_flushed_frames;
-    ret = processor->flush(raw_flushed_frames);
-    if (ret < 0) {
-        av_strerror(ret, errbuf, sizeof(errbuf));
-        logger()->critical("Error flushing processor: {}", errbuf);
-        return ret;
-    }
-
-    // Wrap flushed frames in unique_ptrs
-    std::vector<std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>> flushed_frames;
-    for (AVFrame* raw_frame : raw_flushed_frames) {
-        flushed_frames.emplace_back(raw_frame, &avutils::av_frame_deleter);
-    }
-
-    // Encode and write all flushed frames
-    for (auto& flushed_frame : flushed_frames) {
-        ret = write_frame(flushed_frame.get(), encoder);
+    for (auto& processor : processor_instances) {
+        std::vector<AVFrame*> raw_flushed_frames;
+        ret = processor->flush(raw_flushed_frames);
         if (ret < 0) {
+            av_strerror(ret, errbuf, sizeof(errbuf));
+            logger()->critical("Error flushing processor: {}", errbuf);
             return ret;
         }
-        frame_idx_.fetch_add(1);
+    
+        // Wrap flushed frames in unique_ptrs
+        std::vector<std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>> flushed_frames;
+        for (AVFrame* raw_frame : raw_flushed_frames) {
+            flushed_frames.emplace_back(raw_frame, &avutils::av_frame_deleter);
+        }
+    
+        // Encode and write all flushed frames
+        for (auto& flushed_frame : flushed_frames) {
+            ret = write_frame(flushed_frame.get(), encoder);
+            if (ret < 0) {
+                return ret;
+            }
+            frame_idx_.fetch_add(1);
+        }
     }
 
     // Flush the encoder
@@ -307,6 +360,81 @@ int VideoProcessor::process_frames(
     }
 
     return ret;
+}
+
+// Helper: Parallel filtering, ordered emission
+int VideoProcessor::process_batch_filtering(
+    std::vector<std::unique_ptr<processors::Processor>>& processor_instances,
+    encoder::Encoder& encoder,
+    std::vector<std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>>& batch_frames,
+    std::vector<int64_t>& batched_pts
+) {
+    logger()->info("executing parallel batch of size {}", batch_frames.size());
+
+    using UPtrAVFrame = std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>;
+    std::vector<UPtrAVFrame> processed_frames;
+    processed_frames.reserve(batch_frames.size());
+    for (size_t i = 0; i < batch_frames.size(); ++i) {
+        processed_frames.emplace_back(nullptr, avutils::av_frame_deleter);
+    }
+    std::vector<int> results(batch_frames.size(), 0);
+
+    static boost::asio::thread_pool pool(std::thread::hardware_concurrency());
+
+    std::vector<std::shared_ptr<std::promise<void>>> promises(batch_frames.size());
+    std::vector<std::future<void>> futures;
+    std::atomic<size_t> next_to_write {0};
+    std::atomic<int> first_error {0}; 
+    for (size_t i = 0; i < batch_frames.size(); ++i) {
+        promises[i] = std::make_shared<std::promise<void>>();
+        futures.push_back(promises[i]->get_future());
+        boost::asio::post(pool, [&, i, promise = promises[i]] {
+            AVFrame* filtered = nullptr;
+            results[i] = static_cast<processors::Filter*>(processor_instances[i].get())->filter(batch_frames[i].get(), &filtered);
+
+            if (results[i] == 0 && filtered) {
+                filtered->pts = batched_pts[i];
+                processed_frames[i].reset(filtered);
+            }
+            // New: Each thread now tries to write, but only in order.
+            while (true) {
+                // If we hit an earlier error, don't proceed to write
+                if (first_error.load() < 0)
+                    break;
+
+                if (next_to_write.load() == i) {
+                    if (results[i] < 0) {
+                        // This thread encountered an error -- record it
+                        first_error.store(results[i]);
+                        break;
+                    }
+                    if (processed_frames[i]) {
+                        int ret = write_frame(processed_frames[i].get(), encoder);
+                        if (ret < 0) {
+                            // Write error, record and quit
+                            first_error.store(ret);
+                            break;
+                        }
+                        frame_idx_.fetch_add(1);
+                    }
+                    // Increment so next thread may proceed
+                    next_to_write.fetch_add(1);
+                    logger()->info("Frame {} processed and written", batched_pts[i]);
+                    break;
+                } else {
+                    // Not this frame's turn yet
+                    std::this_thread::yield();
+                }
+            }
+            promise->set_value();
+        });
+    }
+
+    // Wait for all emissions (or early error bailout)
+    for (auto& f : futures) f.get();
+
+    if (first_error.load() < 0) return first_error.load();
+    return 0;
 }
 
 int VideoProcessor::write_frame(AVFrame* frame, encoder::Encoder& encoder) {
@@ -347,6 +475,7 @@ int VideoProcessor::write_raw_packet(
     return ret;
 }
 
+/*
 int VideoProcessor::process_filtering(
     std::unique_ptr<processors::Processor>& processor,
     encoder::Encoder& encoder,
@@ -374,6 +503,7 @@ int VideoProcessor::process_filtering(
     }
     return ret;
 }
+*/
 
 int VideoProcessor::process_interpolation(
     std::unique_ptr<processors::Processor>& processor,

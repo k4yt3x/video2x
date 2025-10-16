@@ -60,6 +60,7 @@ struct ProcessorConfig {
     int noise_level = -1;
     int frm_rate_mul = 0;
     float scn_det_thresh = 0.0f;
+    int batch_size = 0;
     std::variant<LibplaceboConfig, RealESRGANConfig, RealCUGANConfig, RIFEConfig> config;
 };
 
