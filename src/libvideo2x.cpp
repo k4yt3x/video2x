@@ -1,5 +1,4 @@
 #include "libvideo2x.h"
-#include <libavcodec/avcodec.h>
 
 extern "C" {
 #include <libavutil/avutil.h>
@@ -238,8 +237,10 @@ int VideoProcessor::process_frames(
                 }
 
                 // Calculate this frame's presentation timestamp (PTS)
-                frame->pts =
-                    av_rescale_q(frame_idx_, av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
+                if (enc_cfg_.recalculate_pts) {
+                    frame->pts =
+                        av_rescale_q(frame_idx_, av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
+                }
 
                 // Process the frame based on the selected processing mode
                 AVFrame* proc_frame = nullptr;
@@ -265,7 +266,8 @@ int VideoProcessor::process_frames(
                 frame_idx_.fetch_add(1);
                 logger()->debug("Processed frame {}/{}", frame_idx_.load(), total_frames_.load());
             }
-        } else if (enc_cfg_.copy_streams && stream_map[packet->stream_index] >= 0) {
+        } else if ((enc_cfg_.copy_audio_streams || enc_cfg_.copy_subtitle_streams) &&
+                   stream_map[packet->stream_index] >= 0) {
             ret = write_raw_packet(packet.get(), ifmt_ctx, ofmt_ctx, stream_map);
             if (ret < 0) {
                 return ret;

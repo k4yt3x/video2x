@@ -1,7 +1,5 @@
 #include "filter_libplacebo.h"
 
-#include <cstdio>
-
 #include <spdlog/spdlog.h>
 
 #include "fsutils.h"

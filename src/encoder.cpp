@@ -6,10 +6,9 @@ extern "C" {
 #include <libavutil/opt.h>
 }
 
-#include "logger_manager.h"
-
 #include "avutils.h"
 #include "conversions.h"
+#include "logger_manager.h"
 
 namespace video2x {
 namespace encoder {
@@ -44,6 +43,9 @@ int Encoder::init(
     int in_vstream_idx
 ) {
     int ret;
+
+    // Copy the encoder configuration
+    enc_cfg_ = enc_cfg;
 
     // Allocate the output format context
     avformat_alloc_output_context2(&ofmt_ctx_, nullptr, nullptr, out_fpath.u8string().c_str());
@@ -188,8 +190,8 @@ int Encoder::init(
     out_vstream->r_frame_rate = enc_ctx_->framerate;
 
     // Copy other streams if necessary
-    if (enc_cfg.copy_streams) {
-        // Allocate the stream mape frame o
+    if (enc_cfg.copy_audio_streams || enc_cfg.copy_subtitle_streams) {
+        // Allocate the stream map
         stream_map_ =
             reinterpret_cast<int*>(av_malloc_array(ifmt_ctx->nb_streams, sizeof(*stream_map_)));
         if (!stream_map_) {
@@ -198,22 +200,37 @@ int Encoder::init(
         }
 
         // Map each input stream to an output stream
-        for (int i = 0; i < static_cast<int>(ifmt_ctx->nb_streams); i++) {
-            AVStream* in_stream = ifmt_ctx->streams[i];
+        for (int stream_index = 0; stream_index < static_cast<int>(ifmt_ctx->nb_streams);
+             stream_index++) {
+            AVStream* in_stream = ifmt_ctx->streams[stream_index];
             AVCodecParameters* in_codecpar = in_stream->codecpar;
 
             // Skip the input video stream as it's already processed
-            if (i == in_vstream_idx) {
-                stream_map_[i] = out_vstream_idx_;
+            if (stream_index == in_vstream_idx) {
+                stream_map_[stream_index] = out_vstream_idx_;
                 continue;
             }
 
-            // Map only audio and subtitle streams (skip other types)
-            if (in_codecpar->codec_type != AVMEDIA_TYPE_AUDIO &&
-                in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE) {
-                stream_map_[i] = -1;
-                logger()->warn("Skipping unsupported stream type at index: {}", i);
-                continue;
+            // Determine if the current stream should be skipped
+            switch (in_codecpar->codec_type) {
+                case AVMEDIA_TYPE_AUDIO:
+                    if (!enc_cfg.copy_audio_streams) {
+                        stream_map_[stream_index] = -1;
+                        continue;
+                    }
+                    logger()->debug("Copying audio stream at index: {}", stream_index);
+                    break;
+                case AVMEDIA_TYPE_SUBTITLE:
+                    if (!enc_cfg.copy_subtitle_streams) {
+                        stream_map_[stream_index] = -1;
+                        continue;
+                    }
+                    logger()->debug("Copying subtitle stream at index: {}", stream_index);
+                    break;
+                default:
+                    stream_map_[stream_index] = -1;
+                    logger()->warn("Skipping unsupported stream type at index: {}", stream_index);
+                    continue;
             }
 
             // Create corresponding output stream for audio and subtitle streams
@@ -242,8 +259,8 @@ int Encoder::init(
             out_stream->time_base = in_stream->time_base;
 
             // Map input stream index to output stream index
-            logger()->debug("Stream mapping: {} (in) -> {} (out)", i, out_stream->index);
-            stream_map_[i] = out_stream->index;
+            logger()->debug("Stream mapping: {} (in) -> {} (out)", stream_index, out_stream->index);
+            stream_map_[stream_index] = out_stream->index;
         }
     }
 
@@ -275,7 +292,9 @@ int Encoder::write_frame(AVFrame* frame, int64_t frame_idx) {
     frame->pict_type = AV_PICTURE_TYPE_NONE;
 
     // Calculate this frame's presentation timestamp (PTS)
-    frame->pts = av_rescale_q(frame_idx, av_inv_q(enc_ctx_->framerate), enc_ctx_->time_base);
+    if (enc_cfg_.recalculate_pts) {
+        frame->pts = av_rescale_q(frame_idx, av_inv_q(enc_ctx_->framerate), enc_ctx_->time_base);
+    }
 
     // Convert the frame to the encoder's pixel format if needed
     if (frame->format != enc_ctx_->pix_fmt) {
