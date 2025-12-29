@@ -82,9 +82,9 @@ jobs:
           submodules: recursive
 
       - name: Install Vulkan SDK
-        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        uses: humbletim/setup-vulkan-sdk@v1.2.1
         with:
-          vulkan-query-version: 1.3.204.0
+          vulkan-query-version: 1.4.304.1
           vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang, SPIRV-Tools, SPIRV-Headers
           vulkan-use-cache: true
 

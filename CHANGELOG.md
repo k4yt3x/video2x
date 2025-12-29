@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Option to recalculate the PTS.
 - Real-ESRGAN models `realesr-general-x4v3` and `realesr-general-wdn-x4v3` (#1319).
 - Installation manual for Gentoo Linux (both cli and qt6).
+- (Video2X Qt6) Korean translation.
+- Separate audio and subtitle stream copying options.
 
 ## [6.4.0] - 2025-01-24
 

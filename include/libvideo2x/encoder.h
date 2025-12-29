@@ -17,7 +17,9 @@ namespace encoder {
 struct EncoderConfig {
     // Non-AVCodecContext options
     std::string codec = "libx264";
-    bool copy_streams = true;
+    bool recalculate_pts = true;
+    bool copy_audio_streams = true;
+    bool copy_subtitle_streams = true;
 
     // Basic video options
     AVPixelFormat pix_fmt = AV_PIX_FMT_NONE;
@@ -72,6 +74,7 @@ class Encoder {
     int get_output_video_stream_index() const;
 
    private:
+    EncoderConfig enc_cfg_;
     AVFormatContext* ofmt_ctx_;
     AVCodecContext* enc_ctx_;
     int out_vstream_idx_;

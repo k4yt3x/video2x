@@ -95,7 +95,9 @@ int parse_args(
         encoder_opts.add_options()
             ("codec,c", PO_STR_VALUE<video2x::fsutils::StringType>()
                 ->default_value(STR("libx264"), "libx264"), "Output codec")
-            ("no-copy-streams", "Do not copy audio and subtitle streams")
+            ("no-recalculate-pts", "Do not recalculate presentation timestamps")
+            ("no-copy-audio-streams", "Do not copy audio streams")
+            ("no-copy-subtitle-streams", "Do not copy subtitle streams")
             ("pix-fmt", PO_STR_VALUE<video2x::fsutils::StringType>(), "Output pixel format")
             ("bit-rate", po::value<int64_t>(&enc_cfg.bit_rate)->default_value(0),
                 "Bitrate in bits per second")
@@ -134,7 +136,7 @@ int parse_args(
             ("scaling-factor,s", po::value<int>(&proc_cfg.scaling_factor)
                 ->notifier([](int v) { validate_min(v, "scaling-factor", 2); }), "Scaling factor")
             ("noise-level,n", po::value<int>(&proc_cfg.noise_level)
-                ->notifier([](int v) { validate_min(v, "noise-level", 0); }), "Noise level")
+                ->notifier([](int v) { validate_min(v, "noise-level", -1); }), "Noise level")
         ;
 
         po::options_description interp_opts("Frame interpolation options");
@@ -323,8 +325,10 @@ int parse_args(
             enc_cfg.codec = codec_str;
         }
 
-        // Parse copy streams flag
-        enc_cfg.copy_streams = vm.count("no-copy-streams") == 0;
+        // Parse copy streams options
+        enc_cfg.recalculate_pts = vm.count("no-recalculate-pts") == 0;
+        enc_cfg.copy_audio_streams = vm.count("no-copy-audio-streams") == 0;
+        enc_cfg.copy_subtitle_streams = vm.count("no-copy-subtitle-streams") == 0;
 
         // Parse pixel format to AVPixelFormat
         enc_cfg.pix_fmt = AV_PIX_FMT_NONE;
