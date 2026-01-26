@@ -31,7 +31,7 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -63,7 +63,7 @@ jobs:
           dpkg-deb --build build/video2x-linux-ubuntu-2404-amd64
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: video2x-linux-ubuntu-2404-amd64
           path: build/video2x-linux-ubuntu-2404-amd64.deb
@@ -77,7 +77,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -117,7 +117,7 @@ jobs:
           Compress-Archive -Path build/video2x_install/* -DestinationPath build/video2x-windows-amd64.zip
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: video2x-windows-amd64
           path: build/video2x-windows-amd64.zip
@@ -129,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push the Docker image
@@ -153,7 +153,7 @@ jobs:
     #   upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       # - name: Download artifacts
-      #   uses: actions/download-artifact@v4
+      #   uses: actions/download-artifact@v7
 
       - name: Create release
         id: create_release
