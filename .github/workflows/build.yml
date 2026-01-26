@@ -114,7 +114,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: mr-smithers-excellent/docker-build-push@v5
+      - uses: mr-smithers-excellent/docker-build-push@v6
         name: Build the Docker image
         with:
           registry: ghcr.io
