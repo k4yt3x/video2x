@@ -39,9 +39,40 @@ int Decoder::init(
 ) {
     int ret;
 
-    // Open the input file
-    if ((ret = avformat_open_input(&fmt_ctx_, in_fpath.u8string().c_str(), nullptr, nullptr)) < 0) {
-        logger()->error("Could not open input file '{}'", in_fpath.u8string());
+    // Validate and sanitize the input file path to prevent directory traversal attacks
+    std::string input_path_str = in_fpath.u8string();
+    
+    // First, check for directory traversal patterns in the raw input
+    if (input_path_str.find("..") != std::string::npos) {
+        logger()->error("Input path contains directory traversal sequences: '{}'", input_path_str);
+        return AVERROR(EINVAL);
+    }
+
+    std::filesystem::path canonical_path;
+    try {
+        // Check if file exists
+        if (!std::filesystem::exists(in_fpath)) {
+            logger()->error("Input file does not exist: '{}'", input_path_str);
+            return AVERROR(ENOENT);
+        }
+
+        // Check if it's a regular file (not a directory or special file)
+        if (!std::filesystem::is_regular_file(in_fpath)) {
+            logger()->error("Input path is not a regular file: '{}'", input_path_str);
+            return AVERROR(EINVAL);
+        }
+
+        // Canonicalize the path to resolve any symlinks and normalize the path
+        canonical_path = std::filesystem::canonical(in_fpath);
+        
+    } catch (const std::filesystem::filesystem_error& e) {
+        logger()->error("Filesystem error validating input path '{}': {}", input_path_str, e.what());
+        return AVERROR(EINVAL);
+    }
+
+    // Open the input file with the validated canonical path
+    if ((ret = avformat_open_input(&fmt_ctx_, canonical_path.u8string().c_str(), nullptr, nullptr)) < 0) {
+        logger()->error("Could not open input file '{}'", canonical_path.u8string());
         return ret;
     }
 
