@@ -78,6 +78,9 @@ Video2X packages are available for the Linux distros listed below. A universal A
   - [archlinuxcn/video2x-git](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-git)
   - [archlinuxcn/video2x-qt6](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-qt6)
   - [archlinuxcn/video2x-qt6-git](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-qt6-git)
+- Gentoo Linux: gentooplusplus repository, mailtained by [@Eugeniusz-Gienek](https://github.com/Eugeniusz-Gienek).
+  - video2x: `emerge -av media-video/video2x::gentooplusplus`
+  - video2x-qt6: `emerge -av media-video/video2x-x11::gentooplusplus`
 - Other distros: `Video2X-x86_64.AppImage` on the [releases page](https://github.com/k4yt3x/video2x/releases/latest).
 
 ## [📦 Container Image](https://docs.video2x.org/running/container.html)
