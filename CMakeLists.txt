@@ -15,6 +15,18 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# Apple
+if(APPLE)
+    set(CMAKE_PREFIX_PATH "/usr/local/opt/")
+    find_library(OpenMP_omp_LIBRARY omp HINTS "/usr/local/opt/libomp/lib")
+
+    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -I/usr/local/include")
+    set(OpenMP_C_LIB_NAMES "omp")
+
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I/usr/local/include")
+    set(OpenMP_CXX_LIB_NAMES "omp")
+endif()
+
 # Build options
 option(BUILD_SHARED_LIBS "Build libvideo2x as a shared library" ON)
 option(VIDEO2X_BUILD_CLI "Build the video2x command line interface executable" ON)
@@ -41,7 +53,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
         add_link_options(/LTCG /OPT:REF /OPT:ICF)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(-O3 -ffunction-sections -fdata-sections)
-        add_link_options(-Wl,-s -flto -Wl,--gc-sections)
+        if(APPLE)
+            add_link_options(-dead_strip)
+        else()
+            add_link_options(-Wl,-s -flto -Wl,--gc-sections)
+        endif()
     endif()
 endif()
 
