@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <filesystem>
 
+#include <libavutil/pixdesc.h>
 #include <spdlog/spdlog.h>
 
 #include "conversions.h"
@@ -88,6 +89,8 @@ int InterpolatorRIFE::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
     out_time_base_ = enc_ctx->time_base;
     out_pix_fmt_ = enc_ctx->pix_fmt;
 
+    capture_color_properties(dec_ctx);
+
     // Load the model
     if (rife_->load(model_dir_full_path.value()) != 0) {
         logger()->error("Failed to load RIFE model");
@@ -105,13 +108,15 @@ int InterpolatorRIFE::interpolate(
 ) {
     int ret;
 
-    ncnn::Mat in_mat1 = conversions::avframe_to_ncnn_mat(prev_frame);
+    AVFrame color_hint = make_color_hint();
+
+    ncnn::Mat in_mat1 = conversions::avframe_to_ncnn_mat(prev_frame, &color_hint);
     if (in_mat1.empty()) {
         logger()->error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
     }
 
-    ncnn::Mat in_mat2 = conversions::avframe_to_ncnn_mat(in_frame);
+    ncnn::Mat in_mat2 = conversions::avframe_to_ncnn_mat(in_frame, &color_hint);
     if (in_mat2.empty()) {
         logger()->error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
@@ -127,7 +132,7 @@ int InterpolatorRIFE::interpolate(
     }
 
     // Convert ncnn::Mat to AVFrame
-    *out_frame = conversions::ncnn_mat_to_avframe(out_mat, out_pix_fmt_);
+    *out_frame = conversions::ncnn_mat_to_avframe(out_mat, out_pix_fmt_, &color_hint);
     if (*out_frame == nullptr) {
         logger()->error("Failed to convert ncnn::Mat to AVFrame");
         return AVERROR(ENOMEM);

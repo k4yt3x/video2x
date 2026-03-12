@@ -443,10 +443,24 @@ int VideoProcessor::process_interpolation(
         current_time_step += time_step;
     }
 
-    // Write the original frame
-    ret = write_frame(frame, encoder);
+    // Normalize before writing so original and interpolated frames are processed identically
+    AVFrame* normalized_frame = nullptr;
+    ret = interpolator->normalize(frame, &normalized_frame);
+    if (ret < 0 || normalized_frame == nullptr) {
+        logger()->critical("Error normalizing original frame");
+        return ret < 0 ? ret : AVERROR_UNKNOWN;
+    }
+    auto normalized_frame_ptr = std::unique_ptr<AVFrame, decltype(&avutils::av_frame_deleter)>(
+        normalized_frame, &avutils::av_frame_deleter
+    );
+    ret = write_frame(normalized_frame_ptr.get(), encoder);
+    if (ret < 0) {
+        return ret;
+    }
 
-    // Update the previous frame with the current frame
+    // Use the original decoded frame, not normalized: both RIFE inputs must go through
+    // the same single pixel-format conversion or prev_frame gets an extra round-trip.
+    // Clone because the decoder unrefs and overwrites frame on the next iteration.
     prev_frame.reset(av_frame_clone(frame));
     return ret;
 }

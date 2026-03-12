@@ -83,6 +83,7 @@ add_library(libvideo2x
     src/filter_realcugan.cpp
     src/filter_realesrgan.cpp
     src/fsutils.cpp
+    src/interpolator.cpp
     src/interpolator_rife.cpp
     src/libplacebo.cpp
     src/libvideo2x.cpp

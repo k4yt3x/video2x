@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <filesystem>
 
+#include <libavutil/pixdesc.h>
 #include <spdlog/spdlog.h>
 
 #include "conversions.h"
@@ -76,6 +77,8 @@ int FilterRealesrgan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
     out_time_base_ = enc_ctx->time_base;
     out_pix_fmt_ = enc_ctx->pix_fmt;
 
+    capture_color_properties(dec_ctx);
+
     // Load the model
     if (realesrgan_->load(model_param_full_path.value(), model_bin_full_path.value()) != 0) {
         logger()->error("Failed to load Real-ESRGAN model");
@@ -104,8 +107,11 @@ int FilterRealesrgan::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVB
 int FilterRealesrgan::filter(AVFrame* in_frame, AVFrame** out_frame) {
     int ret;
 
-    // Convert the input frame to RGB24
-    ncnn::Mat in_mat = conversions::avframe_to_ncnn_mat(in_frame);
+    AVFrame color_hint = make_color_hint();
+
+    // Convert the input frame to ncnn::Mat (via BGR24); color space metadata is
+    // applied to ensure an accurate pixel-format conversion
+    ncnn::Mat in_mat = conversions::avframe_to_ncnn_mat(in_frame, &color_hint);
     if (in_mat.empty()) {
         logger()->error("Failed to convert AVFrame to ncnn::Mat");
         return -1;
@@ -123,7 +129,7 @@ int FilterRealesrgan::filter(AVFrame* in_frame, AVFrame** out_frame) {
     }
 
     // Convert ncnn::Mat to AVFrame
-    *out_frame = conversions::ncnn_mat_to_avframe(out_mat, out_pix_fmt_);
+    *out_frame = conversions::ncnn_mat_to_avframe(out_mat, out_pix_fmt_, &color_hint);
     if (*out_frame == nullptr) {
         logger()->error("Failed to convert ncnn::Mat to AVFrame");
         return AVERROR(ENOMEM);

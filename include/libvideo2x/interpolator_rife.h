@@ -30,8 +30,12 @@ class InterpolatorRIFE : public Interpolator {
     int init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBufferRef* hw_ctx) override;
 
     // Processes an input frame and returns the processed frame
-    int interpolate(AVFrame* prev_frame, AVFrame* in_frame, AVFrame** out_frame, float time_step)
-        override;
+    int interpolate(
+        AVFrame* prev_frame,
+        AVFrame* in_frame,
+        AVFrame** out_frame,
+        float time_step
+    ) override;
 
     // Returns the interpolator's type
     ProcessorType get_processor_type() const override { return ProcessorType::RIFE; }
@@ -53,9 +57,6 @@ class InterpolatorRIFE : public Interpolator {
     bool uhd_mode_;
     int num_threads_;
     const fsutils::StringType model_name_;
-    AVRational in_time_base_;
-    AVRational out_time_base_;
-    AVPixelFormat out_pix_fmt_;
 };
 
 }  // namespace processors
