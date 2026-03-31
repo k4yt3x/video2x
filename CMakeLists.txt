@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(video2x VERSION 6.4.0 LANGUAGES CXX)
 
+cmake_policy(SET CMP0074 NEW)
+find_package(OpenMP COMPONENTS CXX REQUIRED)
+
 include(CMakePackageConfigHelpers)
 include(ExternalProject)
 include(GNUInstallDirs)
@@ -41,7 +44,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
         add_link_options(/LTCG /OPT:REF /OPT:ICF)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(-O3 -ffunction-sections -fdata-sections)
-        add_link_options(-Wl,-s -flto -Wl,--gc-sections)
+        if(APPLE)
+            add_link_options(-flto -L/opt/homebrew/lib)
+        else()
+            add_link_options(-Wl,-s -flto -Wl,--gc-sections)
+        endif()
     endif()
 endif()
 

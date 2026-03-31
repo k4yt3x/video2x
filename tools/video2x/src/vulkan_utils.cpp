@@ -9,6 +9,12 @@ static int enumerate_vulkan_devices(VkInstance* instance, std::vector<VkPhysical
     // Create a Vulkan instance
     VkInstanceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+
+    std::vector<const char*> instance_extensions;
+    instance_extensions.push_back("VK_KHR_portability_enumeration");
+    create_info.enabledExtensionCount = static_cast<uint32_t>(instance_extensions.size());
+    create_info.ppEnabledExtensionNames = instance_extensions.data();
 
     VkResult result = vkCreateInstance(&create_info, nullptr, instance);
     if (result != VK_SUCCESS) {
