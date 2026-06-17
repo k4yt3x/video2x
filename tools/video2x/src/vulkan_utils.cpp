@@ -10,6 +10,19 @@ static int enumerate_vulkan_devices(VkInstance* instance, std::vector<VkPhysical
     VkInstanceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 
+#ifdef __APPLE__
+    // On macOS the only Vulkan implementation is MoltenVK, which the loader
+    // exposes as a "portability" driver. The loader enumerates portability
+    // devices only if the instance opts in via VK_KHR_portability_enumeration
+    // and sets the matching create flag.
+    const std::vector<const char*> instance_extensions = {
+        VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
+    };
+    create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+    create_info.enabledExtensionCount = static_cast<uint32_t>(instance_extensions.size());
+    create_info.ppEnabledExtensionNames = instance_extensions.data();
+#endif
+
     VkResult result = vkCreateInstance(&create_info, nullptr, instance);
     if (result != VK_SUCCESS) {
         video2x::logger()->error("Failed to create Vulkan instance.");

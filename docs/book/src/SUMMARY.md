@@ -8,6 +8,7 @@
   - [Windows](building/windows.md)
   - [Windows (Qt6)](building/windows-qt6.md)
   - [Linux](building/linux.md)
+  - [macOS](building/macos.md)
 
 # Installing
 

@@ -3,6 +3,9 @@
 #if _WIN32
 #include <Windows.h>
 #include <cwchar>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#include <vector>
 #else
 #include <unistd.h>
 #include <cstring>
@@ -39,6 +42,24 @@ static std::filesystem::path get_executable_directory() {
     // Create a std::filesystem::path from the filepath and return its parent path
     std::filesystem::path execpath(filepath.data());
     return execpath.parent_path();
+}
+#elif defined(__APPLE__)   // _WIN32
+static std::filesystem::path get_executable_directory() {
+    // macOS has no /proc; query the executable path from dyld.
+    uint32_t size = 0;
+    _NSGetExecutablePath(nullptr, &size);
+    std::vector<char> buffer(size + 1, '\0');
+    if (_NSGetExecutablePath(buffer.data(), &size) != 0) {
+        logger()->error("Failed to determine the executable path on macOS.");
+        return std::filesystem::path();
+    }
+
+    std::error_code ec;
+    std::filesystem::path filepath = std::filesystem::canonical(buffer.data(), ec);
+    if (ec) {
+        return std::filesystem::path(buffer.data()).parent_path();
+    }
+    return filepath.parent_path();
 }
 #else   // _WIN32
 static std::filesystem::path get_executable_directory() {
