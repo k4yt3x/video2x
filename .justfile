@@ -37,6 +37,32 @@ build:
         -DVIDEO2X_USE_EXTERNAL_BOOST=OFF
     cmake --build {{bindir}} --config Release --parallel --target install
 
+[macos]
+[group('build')]
+macos:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # Install build + runtime dependencies. MoltenVK provides the Vulkan
+    # implementation on top of Metal; ncnn is built from the submodule with
+    # Vulkan enabled (so the AI models are GPU-accelerated).
+    # A broken third-party tap shouldn't abort the build; keep update non-fatal.
+    brew update || true
+    HOMEBREW_NO_AUTO_UPDATE=1 brew install cmake ninja pkgconf ffmpeg boost \
+        molten-vk vulkan-headers vulkan-loader glslang libomp
+    BREW_PREFIX="$(brew --prefix)"
+    cmake -G '{{generator}}' -S . -B {{bindir}} \
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+        -DCMAKE_CXX_COMPILER={{cxx}} \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX={{bindir}}/video2x-install \
+        -DVIDEO2X_USE_EXTERNAL_NCNN=OFF \
+        -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
+        -DCMAKE_PREFIX_PATH="$BREW_PREFIX" \
+        -DOpenMP_ROOT="$(brew --prefix libomp)" \
+        -DVulkan_INCLUDE_DIR="$(brew --prefix vulkan-headers)/include" \
+        -DVulkan_LIBRARY="$(brew --prefix vulkan-loader)/lib/libvulkan.dylib"
+    cmake --build {{bindir}} --config Release --parallel --target install
+
 [unix]
 [group('build')]
 static:
@@ -212,6 +238,13 @@ clean:
 [group('misc')]
 clean:
     Remove-Item -Recurse -Force -ErrorAction SilentlyContinue -Path build,data/output*.*
+
+[macos]
+[group('test')]
+test-realesrgan-macos:
+    DYLD_LIBRARY_PATH={{bindir}} {{bindir}}/video2x \
+        -i {{test_video}} -o {{test_output}} \
+        -p realesrgan -s 4 --realesrgan-model realesr-animevideov3
 
 [unix]
 [group('test')]

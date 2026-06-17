@@ -10,6 +10,11 @@ if(POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif()
 
+# Honor <Package>_ROOT hints (used to point at Homebrew's libomp on macOS)
+if(POLICY CMP0074)
+    cmake_policy(SET CMP0074 NEW)
+endif()
+
 # Set the default build type to Release if not specified
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -41,7 +46,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
         add_link_options(/LTCG /OPT:REF /OPT:ICF)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(-O3 -ffunction-sections -fdata-sections)
-        add_link_options(-Wl,-s -flto -Wl,--gc-sections)
+        if(APPLE)
+            # Apple's ld64 does not understand the GNU ld flags `-s` and
+            # `--gc-sections`; use the Mach-O equivalents instead.
+            add_link_options(-flto -Wl,-dead_strip)
+        else()
+            add_link_options(-Wl,-s -flto -Wl,--gc-sections)
+        endif()
     endif()
 endif()
 
@@ -50,7 +61,13 @@ if(VIDEO2X_ENABLE_NATIVE)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         add_compile_options(/arch:NATIVE)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        add_compile_options(-march=native)
+        if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|amd64")
+            add_compile_options(-march=native)
+        elseif(NOT APPLE)
+            # e.g. arm64 Linux; `-march=native` is unreliable on AArch64.
+            add_compile_options(-mcpu=native)
+        endif()
+        # On Apple Silicon the toolchain already targets the host CPU.
     endif()
 elseif(VIDEO2X_ENABLE_X86_64_V4)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -148,7 +165,7 @@ else()
     # Apply include directories and libraries directly to the target
     target_include_directories(libvideo2x SYSTEM PRIVATE
         ${libavcodec_INCLUDE_DIRS}
-        ${libavfilter_LIBRARIES}
+        ${libavfilter_INCLUDE_DIRS}
         ${libavformat_INCLUDE_DIRS}
         ${libavutil_INCLUDE_DIRS}
         ${libswscale_INCLUDE_DIRS}
@@ -159,6 +176,17 @@ else()
         ${libavformat_LIBRARIES}
         ${libavutil_LIBRARIES}
         ${libswscale_LIBRARIES}
+    )
+
+    # pkg-config reports the library search paths separately; pass them so the
+    # linker can find FFmpeg when it lives outside the default prefix (e.g.
+    # Homebrew on macOS). Without this the link fails with -lavcodec not found.
+    target_link_directories(libvideo2x PRIVATE
+        ${libavcodec_LIBRARY_DIRS}
+        ${libavfilter_LIBRARY_DIRS}
+        ${libavformat_LIBRARY_DIRS}
+        ${libavutil_LIBRARY_DIRS}
+        ${libswscale_LIBRARY_DIRS}
     )
 endif()
 
@@ -294,6 +322,15 @@ else()
 endif()
 target_link_libraries(libvideo2x PRIVATE ncnn)
 
+# Apple Clang does not auto-link the OpenMP runtime that ncnn relies on, so
+# link Homebrew's libomp explicitly. Pass -DOpenMP_ROOT=$(brew --prefix libomp).
+if(APPLE)
+    find_package(OpenMP COMPONENTS CXX)
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries(libvideo2x PRIVATE OpenMP::OpenMP_CXX)
+    endif()
+endif()
+
 # spdlog
 if(VIDEO2X_USE_EXTERNAL_SPDLOG)
     find_package(spdlog REQUIRED)
@@ -333,7 +370,7 @@ install(TARGETS libvideo2x
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/libvideo2x"
+    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
 # Install the header files from the include directory
@@ -439,6 +476,10 @@ if(VIDEO2X_BUILD_CLI)
             ${libavutil_INCLUDE_DIRS}
         )
         target_link_libraries(video2x PRIVATE ${libavcodec_LIBRARIES} ${libavutil_LIBRARIES})
+        target_link_directories(video2x PRIVATE
+            ${libavcodec_LIBRARY_DIRS}
+            ${libavutil_LIBRARY_DIRS}
+        )
     endif()
 
     # spdlog

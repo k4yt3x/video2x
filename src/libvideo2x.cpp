@@ -1,4 +1,5 @@
 #include "libvideo2x.h"
+#include "multiversion.h"
 
 extern "C" {
 #include <libavutil/avutil.h>
@@ -28,7 +29,7 @@ VideoProcessor::VideoProcessor(
       hw_device_type_(hw_device_type),
       benchmark_(benchmark) {}
 
-[[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
+VIDEO2X_TARGET_CLONES
 int VideoProcessor::process(
     const std::filesystem::path in_fname,
     const std::filesystem::path out_fname

@@ -1,4 +1,5 @@
 #include "conversions.h"
+#include "multiversion.h"
 
 #include <cstddef>
 #include <cstdio>
@@ -11,7 +12,7 @@ namespace video2x {
 namespace conversions {
 
 // Convert AVFrame format
-[[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
+VIDEO2X_TARGET_CLONES
 AVFrame* convert_avframe_pix_fmt(AVFrame* src_frame, AVPixelFormat pix_fmt) {
     AVFrame* dst_frame = av_frame_alloc();
     if (dst_frame == nullptr) {
@@ -68,7 +69,7 @@ AVFrame* convert_avframe_pix_fmt(AVFrame* src_frame, AVPixelFormat pix_fmt) {
 }
 
 // Convert AVFrame to ncnn::Mat by copying the data
-[[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
+VIDEO2X_TARGET_CLONES
 ncnn::Mat avframe_to_ncnn_mat(AVFrame* frame) {
     AVFrame* converted_frame = nullptr;
 
@@ -108,7 +109,7 @@ ncnn::Mat avframe_to_ncnn_mat(AVFrame* frame) {
 }
 
 // Convert ncnn::Mat to AVFrame with a specified pixel format (this part is unchanged)
-[[gnu::target_clones("arch=x86-64-v4", "arch=x86-64-v3", "default")]]
+VIDEO2X_TARGET_CLONES
 AVFrame* ncnn_mat_to_avframe(const ncnn::Mat& mat, AVPixelFormat pix_fmt) {
     int ret;
 

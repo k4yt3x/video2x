@@ -122,6 +122,47 @@ jobs:
           name: video2x-windows-amd64
           path: build/video2x-windows-amd64.zip
 
+  macos:
+    name: Build macOS (Apple Silicon) release
+    needs:
+      - setup
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          git submodule update --init --recursive
+          brew update || true
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install ninja pkgconf ffmpeg boost \
+            molten-vk vulkan-headers vulkan-loader glslang libomp
+
+      - name: Build Video2X
+        run: |
+          cmake -G Ninja -B build -S . \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DVIDEO2X_USE_EXTERNAL_NCNN=OFF -DVIDEO2X_USE_EXTERNAL_SPDLOG=OFF \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix)" \
+            -DOpenMP_ROOT="$(brew --prefix libomp)" \
+            -DVulkan_INCLUDE_DIR="$(brew --prefix vulkan-headers)/include" \
+            -DVulkan_LIBRARY="$(brew --prefix vulkan-loader)/lib/libvulkan.dylib" \
+            -DCMAKE_INSTALL_PREFIX=build/video2x-macos-arm64
+          cmake --build build --config Release --target install --parallel
+
+      - name: Compress artifacts
+        run: |
+          cd build && zip -r video2x-macos-arm64.zip video2x-macos-arm64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: video2x-macos-arm64
+          path: build/video2x-macos-arm64.zip
+
   container:
     name: Build and upload container
     needs:
