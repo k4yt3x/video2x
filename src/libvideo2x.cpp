@@ -12,6 +12,7 @@ extern "C" {
 #include "logger_manager.h"
 #include "processor.h"
 #include "processor_factory.h"
+#include "resume_session.h"
 
 namespace video2x {
 
@@ -33,7 +34,49 @@ int VideoProcessor::process(
     const std::filesystem::path in_fname,
     const std::filesystem::path out_fname
 ) {
+    return process_internal(in_fname, out_fname, nullptr);
+}
+
+int VideoProcessor::process_resumable(
+    const std::filesystem::path in_fname,
+    const std::filesystem::path out_fname,
+    const std::filesystem::path resume_artifact
+) {
+    std::filesystem::path artifact = resume_artifact;
+    if (artifact.empty()) {
+        artifact = out_fname;
+        artifact += resume::ARTIFACT_EXTENSION;
+    }
+    resume::Session session(
+        artifact, in_fname, out_fname, proc_cfg_, enc_cfg_, vk_device_idx_, hw_device_type_
+    );
+    int ret = process_internal(in_fname, session.temporary_output_path(), &session);
+    if (ret < 0) {
+        return ret;
+    }
+    std::string error;
+    ret = session.publish_output(session.temporary_output_path(), error);
+    if (ret < 0) {
+        logger()->critical("Failed to publish final output: {}", error);
+        state_.store(VideoProcessorState::Failed);
+        return ret;
+    }
+    state_.store(VideoProcessorState::Completed);
+    return 0;
+}
+
+int VideoProcessor::process_internal(
+    const std::filesystem::path& in_fname,
+    const std::filesystem::path& out_fname,
+    resume::Session* resume_session
+) {
     int ret = 0;
+    frame_idx_.store(0);
+    recovered_frames_.store(0);
+    total_frames_.store(0);
+    encoded_frame_idx_ = 0;
+    source_frame_idx_ = 0;
+    resume_session_ = resume_session;
 
     // Helper lambda to handle errors:
     auto handle_error = [&](int error_code, const std::string& msg) {
@@ -75,6 +118,18 @@ int VideoProcessor::process(
     AVFormatContext* ifmt_ctx = decoder.get_format_context();
     AVCodecContext* dec_ctx = decoder.get_codec_context();
     int in_vstream_idx = decoder.get_video_stream_index();
+
+    if (resume_session_ != nullptr) {
+        std::string error;
+        ret = resume_session_->initialize(ifmt_ctx, dec_ctx, in_vstream_idx, error);
+        if (ret < 0) {
+            logger()->critical("Failed to initialize resume workspace: {}", error);
+            state_.store(VideoProcessorState::Failed);
+            return ret;
+        }
+        frame_idx_.store(resume_session_->completed_output_frames());
+        recovered_frames_.store(resume_session_->completed_output_frames());
+    }
 
     // Create and initialize the appropriate filter
     std::unique_ptr<processors::Processor> processor(
@@ -119,6 +174,9 @@ int VideoProcessor::process(
     // Process frames using the encoder and decoder
     ret = process_frames(decoder, encoder, processor);
     if (ret < 0) {
+        if (ret == AVERROR_EXIT && state_.load() == VideoProcessorState::Aborted) {
+            return ret;
+        }
         return handle_error(ret, "Error processing frames");
     }
 
@@ -134,7 +192,9 @@ int VideoProcessor::process(
     }
 
     // Processing has completed successfully
-    state_.store(VideoProcessorState::Completed);
+    if (resume_session_ == nullptr) {
+        state_.store(VideoProcessorState::Completed);
+    }
     return 0;
 }
 
@@ -154,6 +214,14 @@ int VideoProcessor::process_frames(
     AVFormatContext* ofmt_ctx = encoder.get_format_context();
     AVCodecContext* enc_ctx = encoder.get_encoder_context();
     int* stream_map = encoder.get_stream_map();
+    bool processed_new_source = false;
+
+    auto clear_checkpoint_frames = [&]() {
+        for (AVFrame* checkpoint_frame : checkpoint_frames_) {
+            av_frame_free(&checkpoint_frame);
+        }
+        checkpoint_frames_.clear();
+    };
 
     // Reference to the previous frame does not require allocation
     // It will be cloned from the current frame
@@ -192,8 +260,99 @@ int VideoProcessor::process_frames(
 
     // Set total frames for interpolation
     if (processor->get_processing_mode() == processors::ProcessingMode::Interpolate) {
-        total_frames_.store(total_frames_.load() * proc_cfg_.frm_rate_mul);
+        int64_t source_frames = total_frames_.load();
+        total_frames_.store(
+            source_frames > 0
+                ? source_frames + (source_frames - 1) * (proc_cfg_.frm_rate_mul - 1)
+                : 0
+        );
     }
+    if (frame_idx_.load() > total_frames_.load()) {
+        total_frames_.store(frame_idx_.load());
+    }
+
+    auto process_decoded_frame = [&]() -> int {
+        if (enc_cfg_.recalculate_pts) {
+            frame->pts = av_rescale_q(
+                encoded_frame_idx_, av_inv_q(enc_ctx->framerate), enc_ctx->time_base
+            );
+        }
+
+        if (resume_session_ != nullptr &&
+            source_frame_idx_ < resume_session_->completed_source_frames()) {
+            std::vector<AVFrame*> recovered_frames;
+            std::string error;
+            int frame_ret =
+                resume_session_->load_unit(source_frame_idx_, recovered_frames, error);
+            if (frame_ret < 0) {
+                logger()->critical("Failed to load checkpoint: {}", error);
+                return frame_ret;
+            }
+            const size_t expected_frames =
+                processor->get_processing_mode() == processors::ProcessingMode::Interpolate
+                    ? static_cast<size_t>(source_frame_idx_ == 0 ? 1 : proc_cfg_.frm_rate_mul)
+                    : 1;
+            if (recovered_frames.size() != expected_frames) {
+                for (AVFrame* recovered_frame : recovered_frames) {
+                    av_frame_free(&recovered_frame);
+                }
+                logger()->critical("Checkpoint processing unit has an invalid frame count");
+                return AVERROR_INVALIDDATA;
+            }
+            for (AVFrame* recovered_frame : recovered_frames) {
+                frame_ret = write_frame(recovered_frame, encoder, true);
+                av_frame_free(&recovered_frame);
+                if (frame_ret < 0) return frame_ret;
+            }
+            if (processor->get_processing_mode() == processors::ProcessingMode::Interpolate) {
+                prev_frame.reset(av_frame_clone(frame.get()));
+                if (prev_frame == nullptr) return AVERROR(ENOMEM);
+            }
+        } else {
+            processed_new_source = true;
+            clear_checkpoint_frames();
+
+            AVFrame* proc_frame = nullptr;
+            int frame_ret = 0;
+            switch (processor->get_processing_mode()) {
+                case processors::ProcessingMode::Filter:
+                    frame_ret = process_filtering(processor, encoder, frame.get(), proc_frame);
+                    break;
+                case processors::ProcessingMode::Interpolate:
+                    frame_ret = process_interpolation(
+                        processor, encoder, prev_frame, frame.get(), proc_frame
+                    );
+                    break;
+                default:
+                    logger()->critical("Unknown processing mode");
+                    return AVERROR(EINVAL);
+            }
+            if (frame_ret < 0 && frame_ret != AVERROR(EAGAIN)) {
+                clear_checkpoint_frames();
+                return frame_ret;
+            }
+            if (resume_session_ != nullptr) {
+                std::string error;
+                frame_ret =
+                    resume_session_->store_unit(source_frame_idx_, checkpoint_frames_, error);
+                if (frame_ret >= 0) {
+                    frame_ret = resume_session_->checkpoint(
+                        source_frame_idx_ + 1, frame_idx_.load(), false, error
+                    );
+                }
+                clear_checkpoint_frames();
+                if (frame_ret < 0) {
+                    logger()->critical("Failed to publish checkpoint: {}", error);
+                    return frame_ret;
+                }
+            }
+        }
+
+        ++source_frame_idx_;
+        av_frame_unref(frame.get());
+        logger()->debug("Processed frame {}/{}", frame_idx_.load(), total_frames_.load());
+        return 0;
+    };
 
     // Read frames from the input file
     while (state_.load() != VideoProcessorState::Aborted) {
@@ -201,6 +360,27 @@ int VideoProcessor::process_frames(
         if (ret < 0) {
             if (ret == AVERROR_EOF) {
                 logger()->debug("Reached end of file");
+                ret = avcodec_send_packet(dec_ctx, nullptr);
+                if (ret < 0 && ret != AVERROR_EOF) {
+                    av_strerror(ret, errbuf, sizeof(errbuf));
+                    logger()->critical("Error flushing decoder: {}", errbuf);
+                    return ret;
+                }
+                while (state_.load() != VideoProcessorState::Aborted) {
+                    if (state_.load() == VideoProcessorState::Paused) {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                        continue;
+                    }
+                    ret = avcodec_receive_frame(dec_ctx, frame.get());
+                    if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN)) break;
+                    if (ret < 0) {
+                        av_strerror(ret, errbuf, sizeof(errbuf));
+                        logger()->critical("Error flushing decoded video frame: {}", errbuf);
+                        return ret;
+                    }
+                    ret = process_decoded_frame();
+                    if (ret < 0) return ret;
+                }
                 break;
             }
             av_strerror(ret, errbuf, sizeof(errbuf));
@@ -236,35 +416,8 @@ int VideoProcessor::process_frames(
                     return ret;
                 }
 
-                // Calculate this frame's presentation timestamp (PTS)
-                if (enc_cfg_.recalculate_pts) {
-                    frame->pts =
-                        av_rescale_q(frame_idx_, av_inv_q(enc_ctx->framerate), enc_ctx->time_base);
-                }
-
-                // Process the frame based on the selected processing mode
-                AVFrame* proc_frame = nullptr;
-                switch (processor->get_processing_mode()) {
-                    case processors::ProcessingMode::Filter: {
-                        ret = process_filtering(processor, encoder, frame.get(), proc_frame);
-                        break;
-                    }
-                    case processors::ProcessingMode::Interpolate: {
-                        ret = process_interpolation(
-                            processor, encoder, prev_frame, frame.get(), proc_frame
-                        );
-                        break;
-                    }
-                    default:
-                        logger()->critical("Unknown processing mode");
-                        return -1;
-                }
-                if (ret < 0 && ret != AVERROR(EAGAIN)) {
-                    return ret;
-                }
-                av_frame_unref(frame.get());
-                frame_idx_.fetch_add(1);
-                logger()->debug("Processed frame {}/{}", frame_idx_.load(), total_frames_.load());
+                ret = process_decoded_frame();
+                if (ret < 0) return ret;
             }
         } else if ((enc_cfg_.copy_audio_streams || enc_cfg_.copy_subtitle_streams) &&
                    stream_map[packet->stream_index] >= 0) {
@@ -276,12 +429,40 @@ int VideoProcessor::process_frames(
         av_packet_unref(packet.get());
     }
 
-    // Flush the processor
+    if (state_.load() == VideoProcessorState::Aborted) {
+        if (resume_session_ != nullptr) {
+            std::string error;
+            ret = resume_session_->checkpoint(
+                source_frame_idx_, frame_idx_.load(), true, error
+            );
+            if (ret < 0) {
+                logger()->critical("Failed to publish cancellation checkpoint: {}", error);
+                return ret;
+            }
+        }
+        return AVERROR_EXIT;
+    }
+    if (resume_session_ != nullptr) {
+        resume_session_->set_total_source_frames(source_frame_idx_);
+    }
+
+    // Flush the processor or replay its previously committed tail.
     std::vector<AVFrame*> raw_flushed_frames;
-    ret = processor->flush(raw_flushed_frames);
+    std::string resume_error;
+    if (resume_session_ != nullptr && !processed_new_source &&
+        resume_session_->completed_source_frames() > 0) {
+        ret = resume_session_->load_tail(raw_flushed_frames, resume_error);
+    } else {
+        clear_checkpoint_frames();
+        ret = processor->flush(raw_flushed_frames);
+    }
     if (ret < 0) {
         av_strerror(ret, errbuf, sizeof(errbuf));
-        logger()->critical("Error flushing processor: {}", errbuf);
+        logger()->critical(
+            "Error flushing processor: {}{}",
+            errbuf,
+            resume_error.empty() ? "" : " (" + resume_error + ")"
+        );
         return ret;
     }
 
@@ -293,11 +474,31 @@ int VideoProcessor::process_frames(
 
     // Encode and write all flushed frames
     for (auto& flushed_frame : flushed_frames) {
-        ret = write_frame(flushed_frame.get(), encoder);
+        ret = write_frame(
+            flushed_frame.get(),
+            encoder,
+            resume_session_ != nullptr && !processed_new_source
+        );
         if (ret < 0) {
+            clear_checkpoint_frames();
             return ret;
         }
-        frame_idx_.fetch_add(1);
+    }
+
+    if (resume_session_ != nullptr) {
+        if (processed_new_source) {
+            ret = resume_session_->store_tail(checkpoint_frames_, resume_error);
+        }
+        if (ret >= 0) {
+            ret = resume_session_->checkpoint(
+                source_frame_idx_, frame_idx_.load(), true, resume_error
+            );
+        }
+        clear_checkpoint_frames();
+        if (ret < 0) {
+            logger()->critical("Failed to publish final checkpoint: {}", resume_error);
+            return ret;
+        }
     }
 
     // Flush the encoder
@@ -311,15 +512,32 @@ int VideoProcessor::process_frames(
     return ret;
 }
 
-int VideoProcessor::write_frame(AVFrame* frame, encoder::Encoder& encoder) {
+int VideoProcessor::write_frame(AVFrame* frame, encoder::Encoder& encoder, bool recovered) {
     char errbuf[AV_ERROR_MAX_STRING_SIZE];
     int ret = 0;
 
+    if (resume_session_ != nullptr && !recovered) {
+        AVFrame* checkpoint_frame = av_frame_clone(frame);
+        if (checkpoint_frame == nullptr) {
+            return AVERROR(ENOMEM);
+        }
+        checkpoint_frames_.push_back(checkpoint_frame);
+    }
+
     if (!benchmark_) {
-        ret = encoder.write_frame(frame, frame_idx_.load());
+        ret = encoder.write_frame(frame, encoded_frame_idx_);
         if (ret < 0) {
             av_strerror(ret, errbuf, sizeof(errbuf));
             logger()->critical("Error encoding/writing frame: {}", errbuf);
+        }
+    }
+    if (ret >= 0) {
+        ++encoded_frame_idx_;
+        if (!recovered) {
+            int64_t processed = frame_idx_.fetch_add(1) + 1;
+            if (processed > total_frames_.load()) {
+                total_frames_.store(processed);
+            }
         }
     }
     return ret;
@@ -439,7 +657,6 @@ int VideoProcessor::process_interpolation(
             }
         }
 
-        frame_idx_.fetch_add(1);
         current_time_step += time_step;
     }
 

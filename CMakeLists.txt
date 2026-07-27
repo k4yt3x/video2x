@@ -88,6 +88,7 @@ add_library(libvideo2x
     src/libvideo2x.cpp
     src/logger_manager.cpp
     src/processor_factory.cpp
+    src/resume.cpp
 )
 
 # Set the C++ standard to C++17

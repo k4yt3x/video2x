@@ -3,6 +3,7 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -14,8 +15,12 @@ extern "C" {
 #include "encoder.h"
 #include "libvideo2x_export.h"
 #include "processor.h"
+#include "resume.h"
 
 namespace video2x {
+namespace resume {
+class Session;
+}
 
 enum class VideoProcessorState {
     Idle,
@@ -41,22 +46,36 @@ class LIBVIDEO2X_API VideoProcessor {
     [[nodiscard]] int
     process(const std::filesystem::path in_fname, const std::filesystem::path out_fname);
 
+    [[nodiscard]] int process_resumable(
+        const std::filesystem::path in_fname,
+        const std::filesystem::path out_fname,
+        const std::filesystem::path resume_artifact = {}
+    );
+
     void pause() { state_.store(VideoProcessorState::Paused); }
     void resume() { state_.store(VideoProcessorState::Running); }
     void abort() { state_.store(VideoProcessorState::Aborted); }
 
     VideoProcessorState get_state() const { return state_.load(); }
     int64_t get_processed_frames() const { return frame_idx_.load(); }
+    int64_t get_recovered_frames() const { return recovered_frames_.load(); }
     int64_t get_total_frames() const { return total_frames_.load(); }
 
    private:
+    [[nodiscard]] int process_internal(
+        const std::filesystem::path& in_fname,
+        const std::filesystem::path& out_fname,
+        resume::Session* resume_session
+    );
+
     [[nodiscard]] int process_frames(
         decoder::Decoder& decoder,
         encoder::Encoder& encoder,
         std::unique_ptr<processors::Processor>& processor
     );
 
-    [[nodiscard]] int write_frame(AVFrame* frame, encoder::Encoder& encoder);
+    [[nodiscard]] int
+    write_frame(AVFrame* frame, encoder::Encoder& encoder, bool recovered = false);
 
     [[nodiscard]] inline int write_raw_packet(
         AVPacket* packet,
@@ -88,7 +107,12 @@ class LIBVIDEO2X_API VideoProcessor {
 
     std::atomic<VideoProcessorState> state_ = VideoProcessorState::Idle;
     std::atomic<int64_t> frame_idx_ = 0;
+    std::atomic<int64_t> recovered_frames_ = 0;
     std::atomic<int64_t> total_frames_ = 0;
+    int64_t encoded_frame_idx_ = 0;
+    int64_t source_frame_idx_ = 0;
+    resume::Session* resume_session_ = nullptr;
+    std::vector<AVFrame*> checkpoint_frames_;
 };
 
 }  // namespace video2x
