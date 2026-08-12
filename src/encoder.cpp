@@ -189,6 +189,14 @@ int Encoder::init(
     out_vstream->avg_frame_rate = enc_ctx_->framerate;
     out_vstream->r_frame_rate = enc_ctx_->framerate;
 
+    // Apple players (QuickTime, Photos) only recognize HEVC in MP4/MOV when the
+    // sample entry is tagged 'hvc1'; the mux default 'hev1' renders unplayable.
+    if (enc_ctx_->codec_id == AV_CODEC_ID_HEVC && ofmt_ctx_->oformat->name != nullptr &&
+        (std::strcmp(ofmt_ctx_->oformat->name, "mp4") == 0 ||
+         std::strcmp(ofmt_ctx_->oformat->name, "mov") == 0)) {
+        out_vstream->codecpar->codec_tag = MKTAG('h', 'v', 'c', '1');
+    }
+
     // Copy other streams if necessary
     if (enc_cfg.copy_audio_streams || enc_cfg.copy_subtitle_streams) {
         // Allocate the stream map
