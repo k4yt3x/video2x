@@ -3,6 +3,8 @@
 #if _WIN32
 #include <Windows.h>
 #include <cwchar>
+#elif __APPLE__
+#include <mach-o/dyld.h>
 #else
 #include <unistd.h>
 #include <cstring>
@@ -40,7 +42,25 @@ static std::filesystem::path get_executable_directory() {
     std::filesystem::path execpath(filepath.data());
     return execpath.parent_path();
 }
-#else   // _WIN32
+#elif __APPLE__
+static std::filesystem::path get_executable_directory() {
+    uint32_t size = 0;
+    _NSGetExecutablePath(nullptr, &size);
+    std::vector<char> filepath(size);
+
+    if (_NSGetExecutablePath(filepath.data(), &size) != 0) {
+        logger()->error("Error getting executable path on macOS");
+        return std::filesystem::path();
+    }
+
+    std::error_code ec;
+    std::filesystem::path execpath = std::filesystem::weakly_canonical(filepath.data(), ec);
+    if (ec) {
+        execpath = filepath.data();
+    }
+    return execpath.parent_path();
+}
+#else  // Linux
 static std::filesystem::path get_executable_directory() {
     std::error_code ec;
     std::filesystem::path filepath = std::filesystem::read_symlink("/proc/self/exe", ec);
@@ -52,7 +72,7 @@ static std::filesystem::path get_executable_directory() {
 
     return filepath.parent_path();
 }
-#endif  // _WIN32
+#endif
 
 bool file_is_readable(const std::filesystem::path& path) {
 #if _WIN32
@@ -91,7 +111,13 @@ std::optional<std::filesystem::path> find_resource(const std::filesystem::path& 
 #endif
 
     // 5. The executable's parent directory
-    candidates.push_back(get_executable_directory() / resource);
+    const std::filesystem::path executable_directory = get_executable_directory();
+    candidates.push_back(executable_directory / resource);
+
+#ifdef __APPLE__
+    // 6. Resources in a relocatable macOS installation: bin/../share/video2x
+    candidates.push_back(executable_directory / ".." / "share" / "video2x" / resource);
+#endif
 
     // Iterate over the candidate directories and return the first readable file
     for (const auto& candidate : candidates) {
