@@ -80,6 +80,20 @@ Video2X packages are available for the Linux distros listed below. A universal A
   - [archlinuxcn/video2x-qt6-git](https://github.com/archlinuxcn/repo/tree/master/archlinuxcn/video2x-qt6-git)
 - Other distros: `Video2X-x86_64.AppImage` on the [releases page](https://github.com/k4yt3x/video2x/releases/latest).
 
+## 🍎 Build the CLI on macOS
+
+The native macOS CLI uses MoltenVK to run Vulkan compute workloads on Metal. Install the
+build and runtime dependencies with Homebrew, then run the included build script:
+
+```sh
+brew install cmake ninja pkgconf ffmpeg boost vulkan-headers vulkan-loader molten-vk
+./scripts/build-macos.sh
+./dist/macos-$(uname -m)/bin/video2x --list-devices
+```
+
+The executable and its models are installed under `dist/macos-$(uname -m)`. Keep the
+`bin`, `lib`, and `share` directories together when moving the installation.
+
 ## [📦 Container Image](https://docs.video2x.org/running/container.html)
 
 Video2X [container images](https://github.com/k4yt3x/video2x/pkgs/container/video2x) are available on the GitHub Container Registry for easy deployment on Linux and macOS. If you already have Docker/Podman installed, only one command is needed to start upscaling a video. For more information on how to use Video2X's Docker image, please refer to the [documentation](https://docs.video2x.org/running/container.html).

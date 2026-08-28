@@ -1,14 +1,45 @@
 #include "vulkan_utils.h"
 
 #include <iostream>
+#include <string_view>
 #include <vector>
 
 #include <libvideo2x/logger_manager.h>
 
 static int enumerate_vulkan_devices(VkInstance* instance, std::vector<VkPhysicalDevice>& devices) {
     // Create a Vulkan instance
+    VkApplicationInfo application_info{};
+    application_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    application_info.pApplicationName = "Video2X";
+    application_info.applicationVersion = VK_MAKE_VERSION(6, 4, 0);
+    application_info.pEngineName = "Video2X";
+    application_info.engineVersion = VK_MAKE_VERSION(6, 4, 0);
+    application_info.apiVersion = VK_API_VERSION_1_0;
+
     VkInstanceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    create_info.pApplicationInfo = &application_info;
+
+    // MoltenVK is a portability implementation and Vulkan's loader hides it
+    // unless the portability enumeration extension is explicitly enabled.
+    std::vector<const char*> enabled_extensions;
+    uint32_t extension_count = 0;
+    if (vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr) == VK_SUCCESS) {
+        std::vector<VkExtensionProperties> extensions(extension_count);
+        if (vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data()) ==
+            VK_SUCCESS) {
+            for (const VkExtensionProperties& extension : extensions) {
+                if (std::string_view(extension.extensionName) ==
+                    VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) {
+                    enabled_extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+                    create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+                    break;
+                }
+            }
+        }
+    }
+    create_info.enabledExtensionCount = static_cast<uint32_t>(enabled_extensions.size());
+    create_info.ppEnabledExtensionNames = enabled_extensions.data();
 
     VkResult result = vkCreateInstance(&create_info, nullptr, instance);
     if (result != VK_SUCCESS) {

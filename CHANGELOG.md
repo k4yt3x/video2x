@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Native macOS CLI builds with MoltenVK support and relocatable model discovery.
 - Option to recalculate the PTS.
 - Real-ESRGAN models `realesr-general-x4v3` and `realesr-general-wdn-x4v3` (#1319).
 - (Video2X Qt6) Korean translation.

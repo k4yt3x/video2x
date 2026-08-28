@@ -39,6 +39,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         add_compile_options(/Ox /Ot /GL /DNDEBUG)
         add_link_options(/LTCG /OPT:REF /OPT:ICF)
+    elseif(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        add_compile_options(-O3 -ffunction-sections -fdata-sections)
+        add_link_options(-flto -Wl,-dead_strip)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(-O3 -ffunction-sections -fdata-sections)
         add_link_options(-Wl,-s -flto -Wl,--gc-sections)
@@ -148,10 +151,17 @@ else()
     # Apply include directories and libraries directly to the target
     target_include_directories(libvideo2x SYSTEM PRIVATE
         ${libavcodec_INCLUDE_DIRS}
-        ${libavfilter_LIBRARIES}
+        ${libavfilter_INCLUDE_DIRS}
         ${libavformat_INCLUDE_DIRS}
         ${libavutil_INCLUDE_DIRS}
         ${libswscale_INCLUDE_DIRS}
+    )
+    target_link_directories(libvideo2x PRIVATE
+        ${libavcodec_LIBRARY_DIRS}
+        ${libavfilter_LIBRARY_DIRS}
+        ${libavformat_LIBRARY_DIRS}
+        ${libavutil_LIBRARY_DIRS}
+        ${libswscale_LIBRARY_DIRS}
     )
     target_link_libraries(libvideo2x PRIVATE
         ${libavcodec_LIBRARIES}
@@ -163,6 +173,12 @@ else()
 endif()
 
 # ncnn
+if(APPLE)
+    # ncnn's simplevk backend needs the loader explicitly on Apple platforms.
+    find_package(Vulkan REQUIRED)
+    set(Vulkan_LIBRARY Vulkan::Vulkan)
+endif()
+
 if(VIDEO2X_USE_EXTERNAL_NCNN)
     find_package(ncnn REQUIRED)
 else()
@@ -437,6 +453,10 @@ if(VIDEO2X_BUILD_CLI)
         target_include_directories(video2x SYSTEM PRIVATE
             ${libavcodec_INCLUDE_DIRS}
             ${libavutil_INCLUDE_DIRS}
+        )
+        target_link_directories(video2x PRIVATE
+            ${libavcodec_LIBRARY_DIRS}
+            ${libavutil_LIBRARY_DIRS}
         )
         target_link_libraries(video2x PRIVATE ${libavcodec_LIBRARIES} ${libavutil_LIBRARIES})
     endif()
