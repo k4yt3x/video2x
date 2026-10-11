@@ -18,6 +18,28 @@ Use the following command to upscale a video to with libplacebo + Anime4Kv4 Mode
 video2x -i input.mp4 -o output.mp4 -w 3840 -h 2160 -p libplacebo --libplacebo-shader anime4k-v4-a+a
 ```
 
+## Output Resolution
+
+How the output resolution is set depends on the processor:
+
+- **Real-ESRGAN and Real-CUGAN** upscale by a fixed integer factor set with `--scaling-factor, -s`, which must be 2, 3, or 4. The output is always the input size multiplied by this factor, since each model is trained for a specific scale. The `--width, -w` and `--height, -h` arguments are ignored by these processors.
+- **libplacebo** scales to any output size, which must be set with the `--width, -w` and `--height, -h` arguments.
+
+For example, Real-ESRGAN with `-s 2` upscales a 1920x1080 video to 3840x2160. There is no way to make it output 2560x1440 (QHD) directly. To get a resolution that is not an integer multiple of the input, either:
+
+- Use libplacebo with the desired output size:
+
+  ```bash
+  video2x -i input.mp4 -o output.mp4 -w 2560 -h 1440 -p libplacebo --libplacebo-shader anime4k-v4-a+a
+  ```
+
+- Or upscale with Real-ESRGAN or Real-CUGAN using the smallest factor that reaches the target size, then downscale the result with FFmpeg:
+
+  ```bash
+  video2x -i input.mp4 -o upscaled.mp4 -p realesrgan -s 2 --realesrgan-model realesr-animevideov3
+  ffmpeg -i upscaled.mp4 -vf scale=2560:1440:flags=lanczos -c:a copy output.mp4
+  ```
+
 ## Advanced
 
 It is possible to specify custom MPV-compatible GLSL shader files with the `--libplacebo-shader` argument:
