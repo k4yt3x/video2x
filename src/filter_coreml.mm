@@ -30,16 +30,28 @@ int FilterCoreML::init(AVCodecContext* dec_ctx, AVCodecContext* enc_ctx, AVBuffe
     out_time_base_ = enc_ctx->time_base;
     out_pix_fmt_ = enc_ctx->pix_fmt;
 
+    // Prefer a fixed-shape model matching the video's resolution; it is much faster
+    std::filesystem::path pkg = model_path_;
+    std::error_code ec;
+    std::filesystem::path fixed = model_path_;
+    fixed.replace_filename(
+        model_path_.stem().string() + "-" + std::to_string(dec_ctx->width) + "x" +
+        std::to_string(dec_ctx->height) + ".mlpackage"
+    );
+    if (std::filesystem::exists(fixed, ec)) {
+        pkg = fixed;
+    }
+    logger()->info("Core ML model: {}", pkg.filename().string());
+
     NSError* err = nil;
-    NSURL* url = [NSURL fileURLWithPath:@(model_path_.c_str())];
+    NSURL* url = [NSURL fileURLWithPath:@(pkg.c_str())];
 
     // Core ML can only load compiled models; compile once and cache next to the package
-    std::filesystem::path compiled = model_path_;
+    std::filesystem::path compiled = pkg;
     compiled.replace_extension(".mlmodelc");
-    std::error_code ec;
     if (std::filesystem::exists(compiled, ec) &&
         std::filesystem::last_write_time(compiled, ec) >=
-            std::filesystem::last_write_time(model_path_, ec)) {
+            std::filesystem::last_write_time(pkg, ec)) {
         url = [NSURL fileURLWithPath:@(compiled.c_str())];
     } else {
         logger()->info("Compiling Core ML model (first run only)");

@@ -2,9 +2,11 @@
 """Convert a Real-ESRGAN SRVGGNetCompact (realesr-animevideov3) .pth to Core ML.
 
     pip install "torch==2.7.0" coremltools numpy   # Python 3.10-3.12
-    python tools/coreml/convert_realesrgan.py realesr-animevideov3.pth
+    python tools/coreml/convert_realesrgan.py realesr-animevideov3.pth [--size 1280x720 ...]
 
 Weights: https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-animevideov3.pth
+Emits a flexible-shape model plus a faster fixed-shape model for each --size (input resolution);
+video2x uses the fixed-shape one when the video matches exactly.
 The output is picked up by video2x automatically on macOS (falls back to ncnn if missing).
 """
 import argparse
@@ -39,27 +41,35 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("weights", type=Path)
     ap.add_argument("-o", "--output-dir", type=Path, default=Path(__file__).parents[2] / "models" / "realesrgan")
+    ap.add_argument("--size", nargs="*", default=["640x360", "854x480", "1280x720", "1920x1080"],
+                    help="input resolutions to export fixed-shape models for (WxH)")
     args = ap.parse_args()
 
     net = SRVGGNetCompact().eval()
     net.load_state_dict(torch.load(args.weights, map_location="cpu", weights_only=True)["params"])
 
-    # ponytail: flexible shapes run ~1.5x slower than a fixed shape; export per-resolution if that matters
-    h, w = 360, 640
-    shape = ct.Shape(shape=(1, 3, ct.RangeDim(16, 2160, default=h), ct.RangeDim(16, 3840, default=w)))
-    model = ct.convert(
-        torch.jit.trace(net, torch.rand(1, 3, h, w)),
-        inputs=[ct.ImageType(name="x", shape=shape, scale=1 / 255, color_layout=ct.colorlayout.RGB)],
-        outputs=[ct.ImageType(name="y", color_layout=ct.colorlayout.RGB)],
-        convert_to="mlprogram",
-        compute_precision=ct.precision.FLOAT16,
-        compute_units=ct.ComputeUnit.CPU_AND_GPU,
-        minimum_deployment_target=ct.target.macOS13,
-    )
-    out = args.output_dir / "realesr-animevideov3-x4.mlpackage"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    model.save(str(out))
-    print(out)
+    def convert(shape, name):
+        h, w = 360, 640
+        model = ct.convert(
+            torch.jit.trace(net, torch.rand(1, 3, h, w)),
+            inputs=[ct.ImageType(name="x", shape=shape, scale=1 / 255, color_layout=ct.colorlayout.RGB)],
+            outputs=[ct.ImageType(name="y", color_layout=ct.colorlayout.RGB)],
+            convert_to="mlprogram",
+            compute_precision=ct.precision.FLOAT16,
+            compute_units=ct.ComputeUnit.CPU_AND_GPU,
+            minimum_deployment_target=ct.target.macOS13,
+        )
+        out = args.output_dir / f"{name}.mlpackage"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        model.save(str(out))
+        print(out)
+
+    base = "realesr-animevideov3-x4"
+    # Flexible shapes run ~1.5x slower than fixed ones, so they are only the fallback
+    convert(ct.Shape(shape=(1, 3, ct.RangeDim(16, 2160, default=360), ct.RangeDim(16, 3840, default=640))), base)
+    for size in args.size:
+        w, h = map(int, size.split("x"))
+        convert(ct.Shape(shape=(1, 3, h, w)), f"{base}-{w}x{h}")
 
 
 if __name__ == "__main__":
