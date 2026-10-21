@@ -3,6 +3,9 @@
 #include <spdlog/spdlog.h>
 #include <utility>
 
+#ifdef VIDEO2X_HAVE_COREML
+#include "filter_coreml.h"
+#endif
 #include "filter_libplacebo.h"
 #include "filter_realcugan.h"
 #include "filter_realesrgan.h"
@@ -87,6 +90,21 @@ void ProcessorFactory::init_default_processors(ProcessorFactory& factory) {
                 logger()->critical("Model name must be provided for the RealESRGAN filter");
                 return nullptr;
             }
+#ifdef VIDEO2X_HAVE_COREML
+            // Prefer a converted Core ML model when one exists (see tools/coreml)
+            if (!config.tta_mode && proc_cfg.noise_level <= 0 &&
+                !std::getenv("VIDEO2X_NO_COREML")) {
+                auto ml_model = fsutils::find_resource(
+                    std::filesystem::path("models") / "realesrgan" /
+                    (config.model_name + STR("-x") +
+                     fsutils::to_string_type(proc_cfg.scaling_factor) + STR(".mlpackage"))
+                );
+                if (ml_model.has_value()) {
+                    logger()->info("Using Core ML backend: {}", ml_model->u8string());
+                    return std::make_unique<FilterCoreML>(proc_cfg.scaling_factor, *ml_model);
+                }
+            }
+#endif
             return std::make_unique<FilterRealesrgan>(
                 static_cast<int>(vk_device_index),
                 config.tta_mode,

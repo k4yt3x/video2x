@@ -27,6 +27,12 @@ option(VIDEO2X_ENABLE_NATIVE "Enable optimizations for the native architecture" 
 option(VIDEO2X_ENABLE_X86_64_V4 "Enable x86-64-v4 (AVX-512) optimizations" OFF)
 option(VIDEO2X_ENABLE_X86_64_V3 "Enable x86-64-v3 (AVX2) optimizations" OFF)
 
+# Core ML backend for Real-ESRGAN on macOS
+if(APPLE)
+    enable_language(OBJCXX)
+    set(CMAKE_OBJCXX_STANDARD 17)
+endif()
+
 # Enable extra compiler warnings
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/W4 /permissive-)
@@ -96,6 +102,13 @@ add_library(libvideo2x
 
 # Set the C++ standard to C++17
 target_compile_features(libvideo2x PRIVATE cxx_std_17)
+
+if(APPLE)
+    target_sources(libvideo2x PRIVATE src/filter_coreml.mm)
+    set_source_files_properties(src/filter_coreml.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc;-DFMT_EXCEPTIONS=0")
+    target_compile_definitions(libvideo2x PRIVATE VIDEO2X_HAVE_COREML)
+    target_link_libraries(libvideo2x PRIVATE "-framework CoreML" "-framework CoreVideo" "-framework Foundation")
+endif()
 
 # Set the shared library output name and disable C++ extensions
 set_target_properties(libvideo2x PROPERTIES
