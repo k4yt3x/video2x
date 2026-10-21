@@ -1,5 +1,10 @@
 #include "fsutils.h"
 
+#ifdef __APPLE__
+#include <limits.h>
+#include <mach-o/dyld.h>
+#endif
+
 #if _WIN32
 #include <Windows.h>
 #include <cwchar>
@@ -42,6 +47,15 @@ static std::filesystem::path get_executable_directory() {
 }
 #else   // _WIN32
 static std::filesystem::path get_executable_directory() {
+#ifdef __APPLE__
+    char buf[PATH_MAX];
+    uint32_t size = sizeof(buf);
+    if (_NSGetExecutablePath(buf, &size) != 0) {
+        logger()->error("Error getting executable path");
+        return std::filesystem::path();
+    }
+    return std::filesystem::weakly_canonical(buf).parent_path();
+#else
     std::error_code ec;
     std::filesystem::path filepath = std::filesystem::read_symlink("/proc/self/exe", ec);
 
@@ -51,6 +65,7 @@ static std::filesystem::path get_executable_directory() {
     }
 
     return filepath.parent_path();
+#endif
 }
 #endif  // _WIN32
 

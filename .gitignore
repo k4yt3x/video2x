@@ -75,3 +75,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
+
+# Generated Core ML models (see tools/coreml)
+models/realesrgan/*.mlpackage
+models/realesrgan/*.mlmodelc
