@@ -39,6 +39,18 @@ std::tuple<int, int, int> calculate_time_components(int time_elapsed) {
     return {hours_elapsed, minutes_elapsed, seconds_elapsed};
 }
 
+// Releases the GPU resources on every exit path of main(), while the process is still healthy.
+//
+// Left to ncnn's own static teardown, this runs during DLL unload at process exit and crashes with an
+// access violation - after the summary has already been printed, so the run looks successful and the
+// exit code says otherwise. See video2x::release_gpu_resources().
+//
+// It is declared before the VideoProcessor in main(), so it is destroyed after it: the processor's
+// Vulkan buffers must be gone before the instance they came from is.
+struct GpuResourceGuard {
+    ~GpuResourceGuard() { video2x::release_gpu_resources(); }
+};
+
 #ifdef _WIN32
 int wmain(int argc, wchar_t* argv[]) {
     // Set console output code page to UTF-8
@@ -53,6 +65,9 @@ int wmain(int argc, wchar_t* argv[]) {
 #else
 int main(int argc, char** argv) {
 #endif
+    // First local in the function, so it is destroyed last - after the VideoProcessor below.
+    GpuResourceGuard gpu_resource_guard;
+
     // Initialize newline-safe logger with custom formatting pattern
     std::shared_ptr<newline_safe_sink> logger_sink = std::make_shared<newline_safe_sink>();
     std::vector<spdlog::sink_ptr> sinks = {logger_sink};

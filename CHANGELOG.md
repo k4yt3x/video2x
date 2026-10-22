@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix an NCNN/Vulkan access violation during CLI shutdown by explicitly releasing GPU resources before process exit.
 - Null pointer dereference in Real-ESRGAN, Real-CUGAN, and RIFE processors when frame conversion fails.
 - Vulkan hardware device context leak on error paths in libplacebo filter initialization.
 - Incorrect spdlog format string using printf-style specifiers instead of fmt-style placeholders.
