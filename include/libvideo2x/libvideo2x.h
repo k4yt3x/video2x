@@ -17,6 +17,20 @@ extern "C" {
 
 namespace video2x {
 
+/// Releases the GPU resources held by the ncnn backend.
+///
+/// Call this once from the application, before it exits. Leaving the teardown to ncnn's own static
+/// destructor crashes the process on Windows, where ncnn is linked as a shared library: the teardown
+/// then runs while the loader is already unloading DLLs. See the implementation in src/libvideo2x.cpp
+/// for the full explanation.
+///
+/// Safe to call when no GPU resources were ever allocated - the libplacebo path, `--help`, a failed
+/// argument parse - and safe to call more than once.
+///
+/// Must NOT be called while a VideoProcessor is still processing: it destroys the Vulkan instance the
+/// processor's buffers were allocated from.
+LIBVIDEO2X_API void release_gpu_resources();
+
 enum class VideoProcessorState {
     Idle,
     Running,

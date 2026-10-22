@@ -4,6 +4,7 @@ extern "C" {
 #include <libavutil/avutil.h>
 }
 
+#include <gpu.h>
 #include <spdlog/spdlog.h>
 
 #include "avutils.h"
@@ -14,6 +15,40 @@ extern "C" {
 #include "processor_factory.h"
 
 namespace video2x {
+
+void release_gpu_resources() {
+    // ncnn creates its Vulkan instance lazily, on first use, and never tears it down on request. It
+    // only does so from a static destructor (__ncnn_vulkan_instance_holder) plus an atexit() handler
+    // that create_gpu_instance() registers inside ncnn itself.
+    //
+    // On Windows that is too late. ncnn is linked as a SHARED library here - see CMakeLists.txt,
+    // "Use the pre-built shared ncnn library on Windows" - so both of those run while the loader is
+    // already unloading DLLs at process exit. Calling into another DLL at that point is documented as
+    // unsafe, and the teardown does exactly that: vkDeviceWaitIdle(), vkDestroyInstance() and
+    // glslang::FinalizeProcess() all reach into code that may already be gone.
+    //
+    // The result is an access violation AFTER main() has returned. video2x prints "Video processed
+    // successfully", writes its complete processing summary, and only then dies with a segfault - so
+    // a successful run and a failed one are indistinguishable by exit code, and every script driving
+    // video2x has to ignore the exit code and inspect the output file instead. Windows Error
+    // Reporting does not even log the crash, because it happens inside the loader teardown, which is
+    // why it is so easy to mistake for a fluke of the environment.
+    //
+    // ncnn's author is aware of the hazard. gpu.cpp carries this comment next to the atexit() call:
+    //
+    //     // the global __ncnn_vulkan_instance_holder destructor will call destroy_gpu_instance() on
+    //     // exit
+    //     // atexit() seems to be helpful for calling it earlier    --- nihui
+    //
+    // and his own reference tools (rife-ncnn-vulkan, realesrgan-ncnn-vulkan) call
+    // destroy_gpu_instance() explicitly from main() rather than relying on that teardown.
+    //
+    // So do the same: destroy the instance here, while every DLL is still loaded and the process is
+    // healthy. destroy_gpu_instance() returns immediately when no instance was ever created, so this
+    // is a no-op for the libplacebo path, and ncnn's own atexit handler and static destructor still
+    // run afterwards without doing any harm.
+    ncnn::destroy_gpu_instance();
+}
 
 VideoProcessor::VideoProcessor(
     const processors::ProcessorConfig proc_cfg,
