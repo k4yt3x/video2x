@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Incorrect spdlog format string using printf-style specifiers instead of fmt-style placeholders.
 - Division by zero in CLI progress display within the first second of processing.
 - `unhook_ffmpeg_logging` disabling all FFmpeg logging instead of restoring the default callback.
+- Missing frames at the end of the output caused by the decoder not being drained at the end of the input (#1318).
 
 ## [6.4.0] - 2025-01-24
 

@@ -197,20 +197,22 @@ int VideoProcessor::process_frames(
 
     // Read frames from the input file
     while (state_.load() != VideoProcessorState::Aborted) {
+        bool eof = false;
         ret = av_read_frame(ifmt_ctx, packet.get());
         if (ret < 0) {
-            if (ret == AVERROR_EOF) {
-                logger()->debug("Reached end of file");
-                break;
+            if (ret != AVERROR_EOF) {
+                av_strerror(ret, errbuf, sizeof(errbuf));
+                logger()->critical("Error reading packet: {}", errbuf);
+                return ret;
             }
-            av_strerror(ret, errbuf, sizeof(errbuf));
-            logger()->critical("Error reading packet: {}", errbuf);
-            return ret;
+            logger()->debug("Reached end of file");
+            eof = true;
         }
 
-        if (packet->stream_index == in_vstream_idx) {
+        if (eof || packet->stream_index == in_vstream_idx) {
             // Send the packet to the decoder for decoding
-            ret = avcodec_send_packet(dec_ctx, packet.get());
+            // At EOF, send a null packet to drain the frames still buffered in the decoder
+            ret = avcodec_send_packet(dec_ctx, eof ? nullptr : packet.get());
             if (ret < 0) {
                 av_strerror(ret, errbuf, sizeof(errbuf));
                 logger()->critical("Error sending packet to decoder: {}", errbuf);
@@ -227,8 +229,8 @@ int VideoProcessor::process_frames(
 
                 // Receive the decoded frame from the decoder
                 ret = avcodec_receive_frame(dec_ctx, frame.get());
-                if (ret == AVERROR(EAGAIN)) {
-                    // No more frames from this packet
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                    // No more frames from this packet, or the decoder is fully drained
                     break;
                 } else if (ret < 0) {
                     av_strerror(ret, errbuf, sizeof(errbuf));
@@ -274,6 +276,10 @@ int VideoProcessor::process_frames(
             }
         }
         av_packet_unref(packet.get());
+
+        if (eof) {
+            break;
+        }
     }
 
     // Flush the processor
