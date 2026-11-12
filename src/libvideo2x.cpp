@@ -192,7 +192,9 @@ int VideoProcessor::process_frames(
 
     // Set total frames for interpolation
     if (processor->get_processing_mode() == processors::ProcessingMode::Interpolate) {
-        total_frames_.store(total_frames_.load() * proc_cfg_.frm_rate_mul);
+        total_frames_.store(
+            static_cast<int64_t>(static_cast<double>(total_frames_.load()) * proc_cfg_.frm_rate_mul)
+        );
     }
 
     // Read frames from the input file
@@ -263,7 +265,11 @@ int VideoProcessor::process_frames(
                     return ret;
                 }
                 av_frame_unref(frame.get());
-                frame_idx_.fetch_add(1);
+
+                // The interpolator advances frame_idx_ itself, once per frame written
+                if (processor->get_processing_mode() == processors::ProcessingMode::Filter) {
+                    frame_idx_.fetch_add(1);
+                }
                 logger()->debug("Processed frame {}/{}", frame_idx_.load(), total_frames_.load());
             }
         } else if ((enc_cfg_.copy_audio_streams || enc_cfg_.copy_subtitle_streams) &&
@@ -391,9 +397,17 @@ int VideoProcessor::process_interpolation(
     processors::Interpolator* interpolator =
         static_cast<processors::Interpolator*>(processor.get());
 
-    // Calculate the time step for each frame
-    float time_step = 1.0f / static_cast<float>(proc_cfg_.frm_rate_mul);
-    float current_time_step = time_step;
+    // Express the multiplier as an exact ratio (e.g., 2.5 -> 5/2) so that output frame
+    // positions are computed with integer arithmetic and never drift
+    const AVRational mul = av_d2q(proc_cfg_.frm_rate_mul, 1000);
+    const int64_t mul_num = mul.num;
+    const int64_t mul_den = mul.den;
+
+    // Output frame k sits at input position k * den / num. This call covers the output
+    // frames in the interval (in_idx - 1, in_idx], or only position 0 for the first frame.
+    const int64_t in_idx = in_frame_idx_++;
+    const int64_t first_out_idx = in_idx == 0 ? 0 : (in_idx - 1) * mul_num / mul_den + 1;
+    const int64_t last_out_idx = in_idx * mul_num / mul_den;
 
     // Check if a scene change is detected
     bool skip_frame = false;
@@ -407,17 +421,25 @@ int VideoProcessor::process_interpolation(
         }
     }
 
-    // Write the interpolated frames
-    for (int i = 0; i < proc_cfg_.frm_rate_mul - 1; i++) {
-        // Skip interpolation if this is the first frame
-        if (prev_frame == nullptr) {
-            break;
+    for (int64_t out_idx = first_out_idx; out_idx <= last_out_idx; out_idx++) {
+        // Position of this output frame between the previous and the current input frame,
+        // as num_offset / mul_num in the range (0, 1]
+        const int64_t num_offset = out_idx * mul_den - (in_idx - 1) * mul_num;
+
+        // The output frame lands exactly on the current input frame: write it as-is
+        if (prev_frame == nullptr || num_offset == mul_num) {
+            ret = write_frame(frame, encoder);
+            if (ret < 0) {
+                return ret;
+            }
+            frame_idx_.fetch_add(1);
+            continue;
         }
 
         // Get the interpolated frame from the interpolator
         if (!skip_frame) {
-            ret =
-                interpolator->interpolate(prev_frame.get(), frame, &proc_frame, current_time_step);
+            const float time_step = static_cast<float>(num_offset) / static_cast<float>(mul_num);
+            ret = interpolator->interpolate(prev_frame.get(), frame, &proc_frame, time_step);
         } else {
             ret = 0;
             proc_frame = av_frame_clone(prev_frame.get());
@@ -440,11 +462,7 @@ int VideoProcessor::process_interpolation(
         }
 
         frame_idx_.fetch_add(1);
-        current_time_step += time_step;
     }
-
-    // Write the original frame
-    ret = write_frame(frame, encoder);
 
     // Update the previous frame with the current frame
     prev_frame.reset(av_frame_clone(frame));

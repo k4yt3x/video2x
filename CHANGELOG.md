@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option to recalculate the PTS.
 - Real-ESRGAN models `realesr-general-x4v3` and `realesr-general-wdn-x4v3` (#1319).
 - (Video2X Qt6) Korean translation.
+- Fractional frame rate multipliers for frame interpolation (e.g., `-m 2.5` for 24 to 60 fps).
 
 ### Changed
 
@@ -24,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Incorrect spdlog format string using printf-style specifiers instead of fmt-style placeholders.
 - Division by zero in CLI progress display within the first second of processing.
 - `unhook_ffmpeg_logging` disabling all FFmpeg logging instead of restoring the default callback.
+- Windows install step failing with newer MSVC toolsets because of a hardcoded Boost DLL name.
+- Container image build failing on package file conflicts during a partial upgrade.
 
 ## [6.4.0] - 2025-01-24
 

@@ -89,6 +89,9 @@ class LIBVIDEO2X_API VideoProcessor {
     std::atomic<VideoProcessorState> state_ = VideoProcessorState::Idle;
     std::atomic<int64_t> frame_idx_ = 0;
     std::atomic<int64_t> total_frames_ = 0;
+
+    // Number of input frames consumed by the interpolator
+    int64_t in_frame_idx_ = 0;
 };
 
 }  // namespace video2x

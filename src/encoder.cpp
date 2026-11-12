@@ -39,7 +39,7 @@ int Encoder::init(
     EncoderConfig& enc_cfg,
     int width,
     int height,
-    int frm_rate_mul,
+    float frm_rate_mul,
     int in_vstream_idx
 ) {
     int ret;
@@ -131,7 +131,7 @@ int Encoder::init(
 
     if (frm_rate_mul > 0) {
         AVRational in_frame_rate = avutils::get_video_frame_rate(ifmt_ctx, in_vstream_idx);
-        enc_ctx_->framerate = {in_frame_rate.num * frm_rate_mul, in_frame_rate.den};
+        enc_ctx_->framerate = av_mul_q(in_frame_rate, av_d2q(frm_rate_mul, 1000));
         enc_ctx_->time_base = av_inv_q(enc_ctx_->framerate);
     } else {
         // Set the output video's time base

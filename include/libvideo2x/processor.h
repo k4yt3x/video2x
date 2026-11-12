@@ -58,7 +58,7 @@ struct ProcessorConfig {
     int height = 0;
     int scaling_factor = 0;
     int noise_level = -1;
-    int frm_rate_mul = 0;
+    float frm_rate_mul = 0.0f;
     float scn_det_thresh = 0.0f;
     std::variant<LibplaceboConfig, RealESRGANConfig, RealCUGANConfig, RIFEConfig> config;
 };
