@@ -61,7 +61,7 @@ class Encoder {
         EncoderConfig& enc_cfg,
         int width,
         int height,
-        int frm_rate_mul,
+        float frm_rate_mul,
         int in_vstream_idx
     );
 

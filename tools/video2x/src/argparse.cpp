@@ -141,9 +141,9 @@ int parse_args(
 
         po::options_description interp_opts("Frame interpolation options");
         interp_opts.add_options()
-            ("frame-rate-mul,m", po::value<int>(&proc_cfg.frm_rate_mul)
-                ->notifier([](int v) { validate_min(v, "frame-rate-mul", 2); }),
-                "Frame rate multiplier")
+            ("frame-rate-mul,m", po::value<float>(&proc_cfg.frm_rate_mul)
+                ->notifier([](float v) { validate_min(v, "frame-rate-mul", 1.0f); }),
+                "Frame rate multiplier; may be fractional (e.g., 2.5 turns 24 fps into 60 fps)")
             ("scene-thresh,t", po::value<float>(&proc_cfg.scn_det_thresh)->default_value(100.0f)
                 ->notifier([](float v) { validate_range<float>(v, "scene-thresh", 0.0, 100.0); }),
                 "Scene detection threshold (20 means 20% diff between frames is a scene change)")
@@ -458,9 +458,9 @@ int parse_args(
                     video2x::logger()->critical("The model name must be set for RIFE.");
                     return -1;
                 }
-                if (proc_cfg.frm_rate_mul < 2) {
+                if (proc_cfg.frm_rate_mul <= 1.0f) {
                     video2x::logger()->critical(
-                        "Frame rate multiplier must be set to at least 2 for RIFE."
+                        "Frame rate multiplier must be set to greater than 1 for RIFE."
                     );
                     return -1;
                 }
